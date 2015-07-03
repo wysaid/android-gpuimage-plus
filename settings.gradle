@@ -1,0 +1,2 @@
+include ':GPUImage_Android'
+include ':app'
