@@ -7,7 +7,6 @@
 */
 
 #include "cgeMultipleEffects.h"
-#include "cgeMultipleEffectsDataset.h"
 #include "cgeDataParsingEngine.h"
 #include <cmath>
 #include <cctype>
@@ -147,12 +146,6 @@ namespace CGE
 		return texture;
 	}
 
-	bool CGEMutipleEffectFilter::initWithEffectID(int index)
-	{
-		const char* effectData = CGEEffectsDataSet::cgeGetEffectStringByID(index);
-		return initWithEffectString(effectData);		
-	}
-
 	bool CGEMutipleEffectFilter::initCustomize()
 	{
 		return m_mixFilter.init();
@@ -210,10 +203,6 @@ namespace CGE
 			else if(strcmp(buffer, "pixblend") == 0)
 			{
 				CGEDataParsingEngine::pixblendParser(ptr, this);
-			}
-			else if(strcmp(buffer, "special") == 0)
-			{
-				CGEDataParsingEngine::specialParser(ptr, this);
 			}
 			else if(strcmp(buffer, "krblend") == 0)
 			{

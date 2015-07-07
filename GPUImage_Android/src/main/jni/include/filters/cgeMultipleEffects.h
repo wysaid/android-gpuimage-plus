@@ -48,11 +48,10 @@ namespace CGE
 
 		void setLoadFunction(CGEBufferLoadFun fLoad, void* loadParam, CGEBufferUnloadFun fUnload, void* unloadParam);
 
-		bool initWithEffectID(int index);
 		bool initWithEffectString(const char* pstr);
-		bool initCustomize(); //特殊用法， 自由组合
+		bool initCustomize();
 
-		void setIntensity(float value); //设置混合程度
+		void setIntensity(float value);
 		bool isEmpty() { return m_vecFilters.empty(); }
 		void clearFilters();
 
