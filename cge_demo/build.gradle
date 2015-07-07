@@ -1,23 +1,16 @@
-apply plugin: 'com.android.library'
+apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
 
     defaultConfig {
+        applicationId "org.wysaid.cge_demo"
         minSdkVersion 15
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
-        ndk {
-            moduleName "CGE"
-
-    cFlags "-DANDROID_NDK -DDEBUG -D_CGE_ONLY_FILTERS_ -D_CGE_STATIC_ASSERT_ -DCGE_TEXTURE_PREMULTIPLIED=1 -DCGE_LOG_TAG=\\\"libCGE\\\" -I${project.buildDir}/../src/main/jni/include -I${project.buildDir}/../src/main/jni/include/filters"
-
-    ldLibs "EGL", "GLESv2", "log"
-    stl "gnustl_shared"
-}
-}
+    }
     buildTypes {
         release {
             minifyEnabled false
