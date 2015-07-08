@@ -17,7 +17,6 @@ namespace CGE
 
 	bool ShaderObject::init(GLenum shaderType)
 	{
-//		CGE_LOG_INFO("Init %s \n", (shaderType == GL_VERTEX_SHADER) ? "VertexShader" : "FragmentShader");
 		m_shaderType = shaderType;
 		if(m_shaderID == 0)
 			m_shaderID = glCreateShader(m_shaderType);
@@ -28,15 +27,12 @@ namespace CGE
 	{
 		if(m_shaderID == 0) return;
 		glDeleteShader(m_shaderID);
-//		CGE_LOG_INFO("%s Shader release\n", m_shaderType == GL_VERTEX_SHADER ? "Vertex" : "Fragment");
 		m_shaderID = 0;
 		m_shaderType = GL_FALSE;
 	}
 
 	bool ShaderObject::loadShaderSourceFromString(const char* shaderString)
 	{
-		//	LOG_INFO("Shader String: \n%s\n", shaderString);
-
 		if(m_shaderID == 0)
 		{
 			m_shaderID = glCreateShader(m_shaderType);
@@ -304,7 +300,6 @@ namespace CGE
 		{
 			glDetachShader(m_programID, attachedShaders[i]);
 		}
-//		cgeCheckGLError("Detach Shaders in useProgram");
 		glDeleteProgram(m_programID);
 	}
 
@@ -346,9 +341,6 @@ namespace CGE
 		cgeCheckGLError("Attach Shaders in useProgram");
 		glLinkProgram(m_programID);
 		glGetProgramiv(m_programID, GL_LINK_STATUS, &programStatus);
-
-// 		glDetachShader(m_programID, m_vertObj.shaderID());
-// 		glDetachShader(m_programID, m_fragObj.shaderID());
 
 		if(shouldClear)
 		{

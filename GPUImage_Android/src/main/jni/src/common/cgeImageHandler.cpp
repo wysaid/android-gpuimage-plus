@@ -9,160 +9,6 @@
 #include "cgeImageHandler.h"
 #include <assert.h> //xcode cannot find <cassert> sometime
 
-#ifdef _CGE_FILTER_SHOW_LOGO_
-
-#include "cgeMat.h"
-
-static const unsigned char s_logoBuffer[] = 
-{
-#include "cgeLogo.txt"
-};
-
-static const int s_logoWidth = 150; //rgba
-static const int s_logoHeight = 21;
-static const int s_logoSize = sizeof(s_logoBuffer);
-
-static CGEConstString s_vshLogo = CGE_SHADER_STRING
-(
-attribute vec2 aPosition; 
-varying vec2 vTextureCoord;
-uniform mat4 mvp;
-uniform vec2 logoTranslation;
-uniform vec2 logoflip;
-uniform vec2 logoSize;
-uniform vec2 canvasflip;
-
-void main()
-{
-	vTextureCoord = (aPosition.xy * logoflip + 1.0) / 2.0;
-	gl_Position = mvp * vec4(aPosition * logoSize + logoTranslation, 0.0, 1.0);
-	gl_Position.xy *= canvasflip;
-});
-
-static CGEConstString s_fshLogo = CGE_SHADER_STRING_PRECISION_M
-(
-varying vec2 vTextureCoord;
-uniform sampler2D sTexture;
-uniform float alpha;
-
-void main()
-{
-	gl_FragColor = texture2D(sTexture, vTextureCoord) * alpha;
-});
-
-//此处特殊用法， 仅给所有滤镜加上水印
-class CGELogoSprite
-{
-public:
-	CGELogoSprite() : m_texture() {	}
-	~CGELogoSprite()
-	{
-
-	}
-
-	bool init()
-	{
-		m_viewSize.set(0, 0);
-		m_program.bindAttribLocation("aPosition", 0);
-		if(!m_program.initWithShaderStrings(s_vshLogo, s_fshLogo))
-		{
-			CGE_LOG_ERROR("CGELogoSprite - program init failed!\n");
-			return false;
-		}
-		m_program.bind();
-		m_matrixLocation = m_program.uniformLocation("mvp");
-		m_textureLocation = m_program.uniformLocation("sTexture");
-		GLuint texID = CGE::cgeGenTextureWithBuffer(s_logoBuffer, s_logoWidth, s_logoHeight, GL_RGBA, GL_UNSIGNED_BYTE);
-		if(texID == 0)
-			return false;
-		m_texture = CGE::SharedTexture(texID, s_logoWidth, s_logoHeight);
-		m_matrixProj = CGE::Mat4::makeOrtho(0, s_logoWidth, 0, s_logoHeight, -1e6f, 1e6f);
-		glUniformMatrix4fv(m_matrixLocation, 1, false, m_matrixProj[0]);
-		m_program.sendUniformf("alpha", 1.0f);
-		m_program.sendUniformf("logoSize", s_logoWidth, s_logoHeight);
-		setSpriteFlip(1.0f, 1.0f);
-		setCanvasFlip(1.0f, -1.0f);
-		return true;
-	}
-
-	void render(const CGE::CGESizei& viewSize, const GLfloat* posVertices)
-	{
-		m_program.bind();
-		//static const CGE::CGESizei sz(1920, 1080); //使用固定大小比例
-		if(viewSize != m_viewSize)
-		//if(m_viewSize != sz)
-		{
-			m_viewSize = viewSize;
-			m_matrixProj = CGE::Mat4::makeOrtho(0, m_viewSize.width, 0, m_viewSize.height, -1e6f, 1e6f);
-			glUniformMatrix4fv(m_matrixLocation, 1, false, m_matrixProj[0]);
-			moveTo(m_viewSize.width - m_texture.width - 10, m_viewSize.height - m_texture.height - 10);
-		}
-
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, posVertices);
-		m_texture.bindToIndex(0);
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	}
-
-	void moveTo(float x, float y)
-	{
-		m_program.bind();
-		m_program.sendUniformf("logoTranslation", x, y);
-	}
-
-	void setSpriteFlip(float x, float y)
-	{
-		m_program.bind();
-		m_program.sendUniformf("logoflip", x, y);
-	}
-
-	void setCanvasFlip(float x, float y)
-	{
-		m_program.bind();
-		m_program.sendUniformf("canvasflip", x, y);
-	}
-
-	static bool s_logoInitFailed;
-
-private:
-	
-	CGE::SharedTexture m_texture;
-	CGE::Mat4 m_matrixProj;
-	CGE::ProgramObject m_program;
-	GLuint m_matrixLocation, m_textureLocation;
-	CGE::CGESizei m_viewSize;
-};
-
-bool CGELogoSprite::s_logoInitFailed = false;
-
-#define CGE_DRAW_LOGO(sprite, size, vertices, flip)  \
-if(!CGELogoSprite::s_logoInitFailed) \
-{\
-	if(sprite == NULL)\
-	{\
-		sprite = new CGELogoSprite;\
-		if(!sprite->init())\
-		{\
-			CGELogoSprite::s_logoInitFailed = true;\
-			delete sprite;\
-			sprite = NULL;\
-		}\
-	}\
-	if(sprite != NULL)\
-	{\
-		glEnable(GL_BLEND);\
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);\
-		sprite->setCanvasFlip(1.0f, flip ? -1.0f : 1.0f);\
-		sprite->render(size, vertices);\
-	}\
-}
-
-#else
-
-#define CGE_DRAW_LOGO(...)
-
-#endif
-
 namespace CGE
 {
 	CGEImageHandlerInterface::CGEImageHandlerInterface() : m_srcTexture(0), m_dstFrameBuffer(0)
@@ -257,9 +103,6 @@ namespace CGE
 	//////////////////////////////////////////////////////////////////////////
 
 	CGEImageHandler::CGEImageHandler() : m_bRevertEnabled(false)
-#ifdef _CGE_FILTER_SHOW_LOGO_
-		, m_logoSprite(NULL)
-#endif 
 #ifdef _CGE_USE_ES_API_3_0_
 		,m_pixelPackBuffer(0), m_pixelPackBufferSize(0)
 #endif
@@ -437,7 +280,6 @@ namespace CGE
 		}
 		cgeEnableGlobalGLContext();
 		setAsTarget();
-		CGE_DRAW_LOGO(m_logoSprite, m_dstImageSize, getPosVertices(), false);
 		glFinish();
 		if(channelFmt != GL_RGBA)
 			glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -828,8 +670,6 @@ namespace CGE
 		m_renderProgram->sendUniformi(CGEImageFilterInterface::paramInputImageName, CGE_TEXTURE_INPUT_IMAGE_INDEX);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 		cgeCheckGLError("glDrawArrays");
-
-		CGE_DRAW_LOGO(m_logoSprite, m_dstImageSize, getPosVertices(), true);
 	}
 
 	bool CGEVideoHandler::initRenderProgram()

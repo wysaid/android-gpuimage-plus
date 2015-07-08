@@ -183,21 +183,6 @@ namespace CGE
 		delete m_uniformParam;
 	}
 
-// 	bool CGEImageFilterInterface::initVertexShaderFromString(const char* vsh)
-// 	{
-// 		return m_program.initVertexShaderSourceFromString(vsh);
-// 	}
-// 
-// 	bool CGEImageFilterInterface::initFragmentShaderFromString(const char* fsh)
-// 	{
-// 		return m_program.initFragmentShaderSourceFromString(fsh);
-// 	}
-// 
-// 	bool CGEImageFilterInterface::finishLoadShaders()
-// 	{
-// 		return m_program.link();
-// 	}
-
 	//////////////////////////////////////////////////////////////////////////
 	bool CGEImageFilterInterface::initShadersFromString(const char* vsh, const char* fsh)
 	{

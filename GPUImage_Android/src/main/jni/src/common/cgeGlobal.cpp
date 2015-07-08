@@ -205,30 +205,6 @@ namespace CGE
 		glGetIntegerv(GL_DEPTH_BITS, iParam);
 		CGE_LOG_INFO("Depth Bits: %d\n", iParam[0]);
 
-// 		glGetIntegerv(GL_SHADER_COMPILER, iParam);
-// 		if(!iParam[0])
-// 		{
-// 			CGE_LOG_ERROR("GL Shader compiler is disabled, the application may not work!\n");
-// 		}
-
-		//Shader precision
-// 		GLint precision;
-// 		const GLenum shaderTypes[] = { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER };
-// 		const char* shaderTypeName[] = { "Vertex Shader", "Fragment Shader" };
-// 
-// 		const GLenum precisionTypes[] = { GL_LOW_FLOAT, GL_MEDIUM_FLOAT, GL_HIGH_FLOAT, GL_LOW_INT, GL_MEDIUM_INT, GL_HIGH_INT };
-// 		const char* precisionTypeName[] = { "low float", "medium float", "high float", "low int", "medium int", "high int" };
-// 
-// 		for(int i = 0; i != sizeof(shaderTypes) / sizeof(*shaderTypes); ++i)
-// 		{
-// 			for(int j = 0; j != sizeof(precisionTypes) / sizeof(*precisionTypes); ++j)
-// 			{
-// 				glGetShaderPrecisionFormat(shaderTypes[i], precisionTypes[j], iParam, &precision);
-// 				CGE_LOG_INFO("%s -- %s: [%d, %d], %d\n", shaderTypeName[i], precisionTypeName[j], iParam[0], iParam[1], precision);
-// 				cgeCheckGLError("glGetShaderPrecisionFormat");
-// 			}
-// 		}
-
 		cgeCheckGLError("cgePrintGLInfo");
 		CGE_LOG_INFO("\n===== Information end =====\n\n");
 	}

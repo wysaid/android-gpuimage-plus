@@ -13,8 +13,6 @@
 #include "CGEImageFilter.h"
 #include "cgeGlobal.h"
 
-class CGELogoSprite;
-
 namespace CGE
 {
 	class CGEImageFilterInterfaceAbstract;
@@ -130,11 +128,6 @@ namespace CGE
 
 		bool m_bRevertEnabled;
 		std::vector<CGEImageFilterInterfaceAbstract*> m_vecFilters;
-
-#ifdef _CGE_FILTER_SHOW_LOGO_
-	protected:
-		CGELogoSprite* m_logoSprite;
-#endif
 
 #ifdef _CGE_USE_ES_API_3_0_
 		GLuint m_pixelPackBuffer;
