@@ -1,1 +1,1 @@
-include ':GPUImage_Android', ':cge_demo'
+include ':library', ':cgedemo'
