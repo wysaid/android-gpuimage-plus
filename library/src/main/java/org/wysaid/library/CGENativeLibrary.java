@@ -1,10 +1,13 @@
-package org.wysaid.library;
-
 /**
  * Created by wysaid on 15/7/8.
  * Mail: admin@wysaid.org
  * blog: wysaid.org
  */
+
+package org.wysaid.library;
+
+import android.graphics.Bitmap;
+
 public class CGENativeLibrary {
 
     static {
@@ -22,10 +25,13 @@ public class CGENativeLibrary {
         cgeContextRelease();
     }
 
-    ////////////////////////////////////
+    public static native void filterImage_MultipleEffects(Bitmap src, Bitmap dst, String str);
 
+    ////////////////////////////////////
 
     private static native boolean cgeContextInit();
     private static native void cgeContextRelease();
+
+
 
 }

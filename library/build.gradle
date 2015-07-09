@@ -15,7 +15,7 @@ android {
             cFlags "-std=c++11 -DANDROID_NDK -DDEBUG -D_CGE_ONLY_FILTERS_ -D_CGE_STATIC_ASSERT_ -DCGE_TEXTURE_PREMULTIPLIED=1 -DCGE_LOG_TAG=\\\"libCGE\\\" -I${project.buildDir}/../src/main/jni/include -I${project.buildDir}/../src/main/jni/include/filters"
             stl "gnustl_shared"
             abiFilters "armeabi-v7a"
-            ldLibs "log", "android", "EGL", "GLESv2"
+            ldLibs "log", "android", "EGL", "GLESv2", "jnigraphics"
         }
 
     }
