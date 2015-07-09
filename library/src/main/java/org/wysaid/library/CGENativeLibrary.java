@@ -14,13 +14,13 @@ public class CGENativeLibrary {
 
     //全局初始化接口， 调用后将初始化并在Native层创建一个OpenGL的Context以供后面使用
     public static boolean globalInit() {
-//        return cgeContextInit();
-        return false;
+        return cgeContextInit();
+//        return false;
     }
 
     //全局释放接口， 调用后将清除已创建的Context
     public static void globalRelease() {
-//        cgeContextRelease();
+        cgeContextRelease();
     }
 
     ////////////////////////////////////
