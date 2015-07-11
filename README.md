@@ -6,6 +6,6 @@ GPU accelerated filters for Android based on OpenGL.
 
 ## Screen Shots ##
 
-<img alt="CGE" src="https://raw.githubusercontent.com/wysaid/android-GPUImage-plus/master/screenshots/0.jpg">
-<img alt="CGE" src="https://raw.githubusercontent.com/wysaid/android-GPUImage-plus/master/screenshots/1.jpg">
-<img alt="CGE" src="https://raw.githubusercontent.com/wysaid/android-GPUImage-plus/master/screenshots/2.jpg">
+<img alt="CGE_Android" src="https://raw.githubusercontent.com/wysaid/android-GPUImage-plus/master/screenshots/0.jpg">
+<img alt="CGE_Android" src="https://raw.githubusercontent.com/wysaid/android-GPUImage-plus/master/screenshots/1.jpg">
+<img alt="CGE_Android" src="https://raw.githubusercontent.com/wysaid/android-GPUImage-plus/master/screenshots/2.jpg">
