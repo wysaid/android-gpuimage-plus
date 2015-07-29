@@ -25,7 +25,7 @@ public class CGENativeLibrary {
         cgeContextRelease();
     }
 
-    // 多冲特效滤镜， 提供配置文件内容直接进行， 返回想通大笑的bitmap。
+    // 多重特效滤镜， 提供配置文件内容直接进行， 返回相同大小的bitmap。
     // intensity 表示滤镜强度 [0, 1]
     // (未实现)
     public static native Bitmap filterImage_MultipleEffects(Bitmap bmp, String config, float intensity);
