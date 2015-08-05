@@ -17,6 +17,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".FilterDemoActivity"
+            android:label="@string/title_activity_filter_demo" >
+        </activity>
+        <activity
+            android:name=".CameraDemoActivity"
+            android:label="@string/title_activity_camera_demo" >
+        </activity>
     </application>
 
 </manifest>

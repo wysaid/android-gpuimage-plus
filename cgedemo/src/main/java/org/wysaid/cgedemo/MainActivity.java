@@ -33,7 +33,6 @@ public class MainActivity extends ActionBarActivity {
             "@curve R(0, 0)(149, 145)(255, 255)G(0, 0)(149, 145)(255, 255)B(0, 0)(149, 145)(255, 255) @pixblend colordodge 0.937 0.482 0.835 1 20",//421
             "@curve G(0, 0)(101, 127)(255, 255) @pixblend colordodge 0.937 0.482 0.835 1 20"   ,//422
             "@curve B(0, 0)(70, 87)(140, 191)(255, 255) @pixblend pinlight 0.247 0.49 0.894 1 20"   ,//423
-            "@curve R(0, 0)(53, 28)(172, 203)(255, 255) @blend softlight e424_t.jpg 20"   ,//424
             "@adjust saturation 0.7 @pixblend screen 0.8112 0.243 1 1 40"   ,//425
             "@adjust saturation 0.7 @pixblend screen 1 0.243 0.69 1 30"   ,//426
 
@@ -46,7 +45,6 @@ public class MainActivity extends ActionBarActivity {
             "@curve R(0, 0)(149, 145)(255, 255)G(0, 0)(149, 145)(255, 255)B(0, 0)(149, 145)(255, 255) @pixblend colordodge 0.937 0.482 0.835 1 20",//421
             "@curve G(0, 0)(101, 127)(255, 255) @pixblend colordodge 0.937 0.482 0.835 1 20"   ,//422
             "@curve B(0, 0)(70, 87)(140, 191)(255, 255) @pixblend pinlight 0.247 0.49 0.894 1 20"   ,//423
-            "@curve R(0, 0)(53, 28)(172, 203)(255, 255) @blend softlight e424_t.jpg 20"   ,//424
             "@adjust saturation 0.7 @pixblend screen 0.8112 0.243 1 1 40"   ,//425
             "@adjust saturation 0.7 @pixblend screen 1 0.243 0.69 1 30"   ,//426
 
@@ -66,7 +64,6 @@ public class MainActivity extends ActionBarActivity {
             "@adjust hsv -0.7 0.5 -0.7 -0.7 0 0 @pixblend ol 0.2941 0.55292 0.06665 1 25",//19
             "@adjust hsv -0.8 0 -0.8 -0.8 0.5 -0.8 @pixblend ol 0.78036 0.70978 0.09018 1 28",//20
 
-            "@special 21",//21
             "@adjust hsv -0.4 -0.64 -1.0 -0.4 -0.88 -0.88 @curve R(0, 0)(119, 160)(255, 255)G(0, 0)(83, 65)(163, 170)(255, 255)B(0, 0)(147, 131)(255, 255)",//22
             "@adjust hsv -0.5 -0.5 -0.5 -0.5 -0.5 -0.5 @curve R(0, 0)(129, 148)(255, 255)G(0, 0)(92, 77)(175, 189)(255, 255)B(0, 0)(163, 144)(255, 255)",//23
             "@adjust hsv 0.3 -0.5 -0.3 0 0.35 -0.2 @curve R(0, 0)(111, 163)(255, 255)G(0, 0)(72, 56)(155, 190)(255, 255)B(0, 0)(103, 70)(212, 244)(255, 255)",//24
