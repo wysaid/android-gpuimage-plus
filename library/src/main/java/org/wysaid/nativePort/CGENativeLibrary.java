@@ -4,15 +4,14 @@
  * blog: wysaid.org
  */
 
-package org.wysaid.library;
+package org.wysaid.nativePort;
 
 import android.graphics.Bitmap;
 
 public class CGENativeLibrary {
 
     static {
-        System.loadLibrary("gnustl_shared");
-        System.loadLibrary("CGE");
+        NativeLibraryLoader.load();
     }
 
     //全局初始化接口， 调用后将初始化并在Native层创建一个OpenGL的Context以供后面使用

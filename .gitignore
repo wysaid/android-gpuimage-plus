@@ -7,3 +7,5 @@
 /captures
 target/
 tmp
+objs/
+armeabi*/
