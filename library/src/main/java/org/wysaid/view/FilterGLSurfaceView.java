@@ -30,9 +30,6 @@ import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.nativePort.CGEFrameRecorder;
 import org.wysaid.nativePort.CGENativeLibrary;
 
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -46,23 +43,10 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     public int viewWidth;
     public int viewHeight;
 
-    private int mRecordWidth = 640;
-    private int mRecordHeight = 480;
-
     private SurfaceTexture mSurfaceTexture;
     private int mTextureID;
 
     private CGEFrameRecorder mFrameRecorder;
-
-    private boolean mShouldRecord = false;
-
-    public synchronized boolean isRecording() {
-        return mShouldRecord;
-    }
-
-    private int[] mRecordStateLock = new int[0];
-
-    private Context mContext;
 
     public class ClearColor {
         public float r, g, b, a;
@@ -78,6 +62,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     private boolean mIsUsingMask = false;
     private float mMaskAspectRatio = 1.0f;
+    private float[] mTransformMatrix = new float[16];
 
     private long mTimeCount = 0;
     private long mFramesCount = 0;
@@ -85,8 +70,6 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     private int mPreviewTextureWidth = 640;
     private int mPreviewTextureHeight = 640;
-
-    private FrameBufferObject mFrameBuffer = null;
 
     private boolean mIsCameraBack = true;
 
@@ -124,8 +107,8 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                         mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
                         mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
                     } else {
-                        mFrameRecorder.setSrcRotation(-(float) (Math.PI / 2.0));
-                        mFrameRecorder.setRenderFlipScale(-1.0f, -1.0f);
+                        mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
+                        mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
                     }
 
                     if (mIsUsingMask) {
@@ -211,7 +194,6 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 //        setZOrderMediaOverlay(true);
 
         clearColor = new ClearColor();
-        mContext = context;
     }
 
     @Override
@@ -247,6 +229,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         }
 
         mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
+        mFrameRecorder.setSrcFlipScale(1.0f, -1.0f);
         mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
     }
 
@@ -339,7 +322,9 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         if(mSurfaceTexture == null || !cameraInstance().isPreviewing())
             return;
 
-        mFrameRecorder.update(mTextureID);
+        mSurfaceTexture.getTransformMatrix(mTransformMatrix);
+
+        mFrameRecorder.update(mTextureID, mTransformMatrix);
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
@@ -429,7 +414,6 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     @Override
     public void onPause() {
         Log.i(LOG_TAG, "surfaceview onPause in...");
-        mShouldRecord = false;
         cameraInstance().stopCamera();
         super.onPause();
         Log.i(LOG_TAG, "surfaceview onPause out...");

@@ -28,8 +28,8 @@ public class CGEFrameRecorder {
     }
 
     //Will effect the framebuffer
-    public void update(int externalTexture) {
-        nativeUpdate(mNativeAddress, externalTexture);
+    public void update(int externalTexture, float[] transformMatrix) {
+        nativeUpdate(mNativeAddress, externalTexture, transformMatrix);
     }
 
     //Won't effect the framebuffer
@@ -140,7 +140,7 @@ public class CGEFrameRecorder {
 
     private native ByteBuffer nativeCreate();
     private native boolean nativeInit(ByteBuffer holder, int srcWidth, int srcHeight, int dstWidth, int dstHeight);
-    private native void nativeUpdate(ByteBuffer holder, int externalTexture);
+    private native void nativeUpdate(ByteBuffer holder, int externalTexture, float[] transformMatrix);
 
     private native void nativeRender(ByteBuffer holder, int x, int y, int width, int height);
 

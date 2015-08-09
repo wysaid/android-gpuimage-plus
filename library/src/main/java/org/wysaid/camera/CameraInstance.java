@@ -210,7 +210,7 @@ public class CameraInstance {
 
         for(Camera.Size sz : prevSizes) {
             Log.i(LOG_TAG, String.format("Supported preview size: %d x %d", sz.width, sz.height));
-            if(prevSz == null || (sz.width >= 720 && sz.height >= 720)) {
+            if(prevSz == null || (sz.width >= 640 && sz.height >= 640)) {
                 prevSz = sz;
             }
         }
