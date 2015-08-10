@@ -103,13 +103,13 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                     cameraInstance().stopCamera();
 
                     int facing = mIsCameraBack ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
-                    if (mIsCameraBack) {
+//                    if (mIsCameraBack) {
+//                        mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
+//                        mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
+//                    } else {
                         mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
                         mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
-                    } else {
-                        mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
-                        mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
-                    }
+//                    }
 
                     if (mIsUsingMask) {
                         mFrameRecorder.setMaskTextureRatio(mMaskAspectRatio);
