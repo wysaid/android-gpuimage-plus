@@ -11,7 +11,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -25,8 +24,6 @@ import android.view.SurfaceHolder;
 
 import org.wysaid.camera.CameraInstance;
 import org.wysaid.myUtils.Common;
-import org.wysaid.myUtils.FrameBufferObject;
-import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.nativePort.CGEFrameRecorder;
 import org.wysaid.nativePort.CGENativeLibrary;
 
@@ -350,17 +347,13 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         }
     }
 
-    public interface TakePhotoCallback {
-        void takePhotoOK(Bitmap bmp);
-
+    public interface TakePictureCallback {
+        void takePictureOK(Bitmap bmp);
     }
-    public synchronized void takePicture(final TakePhotoCallback photoCallback, Camera.ShutterCallback shutterCallback, final String config, final float intensity) {
+
+    public synchronized void takePicture(final TakePictureCallback photoCallback, Camera.ShutterCallback shutterCallback, final String config, final float intensity) {
 
         assert photoCallback != null : "photoCallback must not be null!!";
-
-//        Camera.Parameters param = cameraInstance().getParams();
-//        param.setRotation(90);
-//        cameraInstance().setParams(param);
 
         //TODO 需要对超过最大纹理单元尺寸的图片进行优化（缩小）
         final int width = cameraInstance().pictureWidth();
@@ -372,7 +365,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                     @Override
                     public void onPictureTaken(final byte[] data, Camera camera) {
 
-                        //默认数据格式已经设置为 RGB565
+                        //默认数据格式已经设置为 JPEG
                         Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
                         Bitmap bmp2 = Bitmap.createBitmap(height, width, Bitmap.Config.ARGB_8888);
 
@@ -396,12 +389,11 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                             CGENativeLibrary.filterImage_MultipleEffectsWriteBack(bmp2, config, intensity);
                         }
 
-                        photoCallback.takePhotoOK(bmp2);
+                        photoCallback.takePictureOK(bmp2);
 
                         cameraInstance().getCameraDevice().startPreview();
                     }
                 });
-
     }
 
     @Override

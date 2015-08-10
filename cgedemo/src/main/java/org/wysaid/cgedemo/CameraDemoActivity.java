@@ -136,9 +136,9 @@ public class CameraDemoActivity extends ActionBarActivity {
                         mGLSurfaceView.post(new Runnable() {
                             @Override
                             public void run() {
-                                mGLSurfaceView.takePicture(new FilterGLSurfaceView.TakePhotoCallback() {
+                                mGLSurfaceView.takePicture(new FilterGLSurfaceView.TakePictureCallback() {
                                     @Override
-                                    public void takePhotoOK(Bitmap bmp) {
+                                    public void takePictureOK(Bitmap bmp) {
                                         if(bmp != null) {
                                             ImageUtil.saveBitmap(bmp);
                                             bmp.recycle();
