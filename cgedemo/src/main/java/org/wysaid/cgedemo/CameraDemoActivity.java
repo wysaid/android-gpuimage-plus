@@ -21,6 +21,10 @@ import org.wysaid.view.FilterGLSurfaceView;
 public class CameraDemoActivity extends ActionBarActivity {
 
     private static final String effectConfigs[] = {
+            "#unpack @blur lerp 1 1",
+            "#unpack @style sketch 0.7",
+            "@style min",
+            "@style max",
             "@curve R(0, 0)(71, 74)(164, 165)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20"   ,//415
             "@curve G(0, 0)(144, 166)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20"   ,//416
             "@curve B(0, 0)(68, 72)(149, 184)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20"   ,//417
