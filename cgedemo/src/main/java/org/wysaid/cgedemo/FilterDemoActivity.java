@@ -5,12 +5,14 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import org.wysaid.myUtils.Common;
 import org.wysaid.nativePort.CGENativeLibrary;
 
 public class FilterDemoActivity extends ActionBarActivity {
@@ -19,6 +21,10 @@ public class FilterDemoActivity extends ActionBarActivity {
     private ImageView _imageView;
 
     private static String[] effectConfig = {
+            "#unpack @blur lerp 0.5",
+            "#unpack @style sketch 0.7",
+            "@style min",
+            "@style max",
             "@beautify bilateral 100 3.9 4 ",
             "@beautify bilateral 100 3.5 2 @adjust saturation 0 @adjust level 0.1 0.8 0.57 ",
             "@beautify bilateral 100 3.5 2 @adjust saturation 0 @style edge 1 1 @curve RGB(0, 255)(255, 0) @adjust level 0.37 0.56 0.55 ",
@@ -140,6 +146,7 @@ public class FilterDemoActivity extends ActionBarActivity {
         }
     };
 
+    @Override
     public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         switch (requestCode)
         {
@@ -179,35 +186,19 @@ public class FilterDemoActivity extends ActionBarActivity {
                     _imageView.setImageBitmap(bmp);
                 }
             });
-
-//            new Thread(
-//                new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                        _imageView.post(new Runnable() {
-//                            @Override
-//                            public void run() {
-//
-//                            }
-//                        });
-//                    }
-//                }
-//
-//            ).start();
         }
     };
 
     @Override
     public void onDestroy() {
+        Log.i(Common.LOG_TAG, "Filter Demo onDestroy...");
         super.onDestroy();
-        System.exit(0);
     }
 
     @Override
     public void onPause() {
+        Log.i(Common.LOG_TAG, "Filter Demo onPause...");
         super.onPause();
-        System.exit(0);
     }
 
     @Override
