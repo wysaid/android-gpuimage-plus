@@ -1,7 +1,9 @@
 package org.wysaid.cgedemo;
 
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -15,6 +17,9 @@ import android.widget.LinearLayout;
 import org.wysaid.myUtils.Common;
 import org.wysaid.nativePort.CGENativeLibrary;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public class FilterDemoActivity extends ActionBarActivity {
 
     private Bitmap _bitmap;
@@ -23,6 +28,9 @@ public class FilterDemoActivity extends ActionBarActivity {
     private static String[] effectConfig = {
             "#unpack @blur lerp 0.5",
             "#unpack @style sketch 0.7",
+            "#unpack @blend ol hehe.jpg 100",
+            "#unpack @blend add hehe.jpg 100",
+            "#unpack @blend sr hehe.jpg 100",
             "@style min",
             "@style max",
             "@beautify bilateral 100 3.9 4 ",
@@ -129,11 +137,12 @@ public class FilterDemoActivity extends ActionBarActivity {
         Button btn = (Button)findViewById(R.id.galleryBtn);
         btn.setOnClickListener(galleryBtnClickListener);
 
-        CGENativeLibrary.globalInit();
+//        CGENativeLibrary.globalInit();
 
         _imageView = (ImageView) findViewById(R.id.mainImageView);
         BitmapDrawable a = (BitmapDrawable)_imageView.getDrawable();
         _bitmap = a.getBitmap();
+
     }
 
     android.view.View.OnClickListener galleryBtnClickListener = new android.view.View.OnClickListener(){

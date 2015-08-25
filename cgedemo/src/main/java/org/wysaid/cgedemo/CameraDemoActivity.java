@@ -15,14 +15,18 @@ import android.widget.SeekBar;
 
 import org.wysaid.camera.CameraInstance;
 import org.wysaid.myUtils.ImageUtil;
+import org.wysaid.nativePort.CGEFrameRecorder;
 import org.wysaid.view.FilterGLSurfaceView;
 
 
 public class CameraDemoActivity extends ActionBarActivity {
 
     private static final String effectConfigs[] = {
-            "#unpack @blur lerp 1 1",
+            "#unpack @blur lerp 0.5",
             "#unpack @style sketch 0.7",
+            "#unpack @krblend ol hehe.jpg 100",
+            "#unpack @blend add hehe.jpg 100",
+            "#unpack @blend sr hehe.jpg 100",
             "@style min",
             "@style max",
             "@curve R(0, 0)(71, 74)(164, 165)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20"   ,//415
@@ -102,6 +106,7 @@ public class CameraDemoActivity extends ActionBarActivity {
     String mCurrentConfig;
 
     private Button mTakePicBtn;
+    private Button mTakeShotBtn;
     private FilterGLSurfaceView mGLSurfaceView;
     private SeekBar mSeekBar;
 
@@ -128,33 +133,47 @@ public class CameraDemoActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_demo);
 
-        mTakePicBtn = (Button)findViewById(R.id.takeShotBtn);
+        mTakePicBtn = (Button)findViewById(R.id.takePicBtn);
+        mTakeShotBtn = (Button)findViewById(R.id.takeShotBtn);
         mGLSurfaceView = (FilterGLSurfaceView)findViewById(R.id.myGLSurfaceView);
         mSeekBar = (SeekBar)findViewById(R.id.seekBar);
 
-        mTakePicBtn.setOnClickListener(
-                new View.OnClickListener() {
+        mTakePicBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(LOG_TAG, "Taking Picture...");
+
+                mGLSurfaceView.takePicture(new FilterGLSurfaceView.TakePictureCallback() {
                     @Override
-                    public void onClick(View v) {
-                        Log.i(LOG_TAG, "Taking Picture...");
-                        mGLSurfaceView.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mGLSurfaceView.takePicture(new FilterGLSurfaceView.TakePictureCallback() {
-                                    @Override
-                                    public void takePictureOK(Bitmap bmp) {
-                                        if(bmp != null) {
-                                            ImageUtil.saveBitmap(bmp);
-                                            bmp.recycle();
-                                        }
-                                        else
-                                            Log.e(LOG_TAG, "Take picture failed!");
-                                    }
-                                }, null, mCurrentConfig, 1.0f);
-                            }
-                        });
+                    public void takePictureOK(Bitmap bmp) {
+                        if (bmp != null) {
+                            ImageUtil.saveBitmap(bmp);
+                            bmp.recycle();
+                        } else
+                            Log.e(LOG_TAG, "Take picture failed!");
                     }
-                });
+                }, null, mCurrentConfig, 1.0f, true);
+            }
+        });
+
+        mTakeShotBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Log.i(LOG_TAG, "Taking Shot...");
+
+                mGLSurfaceView.takeShot(new FilterGLSurfaceView.TakePictureCallback() {
+                    @Override
+                    public void takePictureOK(Bitmap bmp) {
+                        if (bmp != null) {
+                            ImageUtil.saveBitmap(bmp);
+                            bmp.recycle();
+                        } else
+                            Log.e(LOG_TAG, "Take Shot failed!");
+                    }
+                }, false);
+            }
+        });
 
         LinearLayout layout = (LinearLayout) findViewById(R.id.menuLinearLayout);
 
@@ -198,7 +217,14 @@ public class CameraDemoActivity extends ActionBarActivity {
                         mBmp = BitmapFactory.decodeResource(getResources(), R.drawable.mask1);
                     }
                     if (mBmp != null)
-                        mGLSurfaceView.setMaskBitmap(mBmp, false);
+                        mGLSurfaceView.setMaskBitmap(mBmp, false, new FilterGLSurfaceView.SetMaskBitmapCallback() {
+                            @Override
+                            public void setMaskOK(CGEFrameRecorder recorder) {
+                                //使mask上下翻转
+                                if(mGLSurfaceView.isUsingMask())
+                                    recorder.setMaskFlipScale(1.0f, -1.0f);
+                            }
+                        });
                 } else {
                     mGLSurfaceView.setMaskBitmap(null, false);
                 }

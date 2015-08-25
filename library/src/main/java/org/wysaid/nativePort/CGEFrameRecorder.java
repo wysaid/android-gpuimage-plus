@@ -38,6 +38,10 @@ public class CGEFrameRecorder {
         nativeRender(mNativeAddress, x, y, width, height);
     }
 
+    public void drawCache() {
+        nativeDrawCache(mNativeAddress);
+    }
+
     public void renderResult() {
         nativeRenderResult(mNativeAddress);
     }
@@ -70,6 +74,17 @@ public class CGEFrameRecorder {
     public void setFilterWidthConfig(final String config) {
         nativeSetFilterWidthConfig(mNativeAddress, config);
     }
+
+    //set the mask rotation (radian)
+    public void setMaskRotation(float rot) {
+        nativeSetMaskRotation(mNativeAddress, rot);
+    }
+
+    //set the mask flipscale
+    public void setMaskFlipScale(float x, float y) {
+        nativeSetMaskFlipScale(mNativeAddress, x, y);
+    }
+
 
     //set the intensity of the filter
     public void setFilterIntensity(float value) {
@@ -143,6 +158,7 @@ public class CGEFrameRecorder {
     private native void nativeUpdate(ByteBuffer holder, int externalTexture, float[] transformMatrix);
 
     private native void nativeRender(ByteBuffer holder, int x, int y, int width, int height);
+    private native void nativeDrawCache(ByteBuffer holder);
 
     private native void nativeRenderResult(ByteBuffer holder);
     private native void nativeRenderResultWithMask(ByteBuffer holder);
@@ -153,6 +169,8 @@ public class CGEFrameRecorder {
     private native void nativeSetRenderFlipScale(ByteBuffer holder, float x, float y);
     private native void nativeSetFilterWidthConfig(ByteBuffer holder, String config);
     private native void nativeSetFilterIntensity(ByteBuffer holder, float value);
+    private native void nativeSetMaskRotation(ByteBuffer holder, float value);
+    private native void nativeSetMaskFlipScale(ByteBuffer holder, float x, float y);
 
     private native void nativeSrcResize(ByteBuffer holder, int width, int height);
 

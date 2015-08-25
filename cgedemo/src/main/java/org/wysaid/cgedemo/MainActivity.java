@@ -2,6 +2,9 @@ package org.wysaid.cgedemo;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,12 +12,49 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.GridLayout;
+import android.widget.LinearLayout;
+
+import org.wysaid.myUtils.Common;
+import org.wysaid.nativePort.CGENativeLibrary;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 
 public class MainActivity extends ActionBarActivity {
 
     public static final String LOG_TAG = "wysaid";
+
+    CGENativeLibrary.LoadImageCallback loadImageCallback = new CGENativeLibrary.LoadImageCallback() {
+
+        //注意， 这里回传的name不包含任何路径名， 仅为具体的图片文件名如 1.jpg
+        @Override
+        public Bitmap loadImage(String name, Object arg) {
+
+            Log.i(Common.LOG_TAG, "正在加载图片: " + name);
+            AssetManager am = getAssets();
+            InputStream is;
+            try {
+                is = am.open(name);
+            } catch (IOException e) {
+                Log.e(Common.LOG_TAG, "Can not open file " + name);
+                return null;
+            }
+
+            Bitmap bmp = BitmapFactory.decodeStream(is);
+            return bmp;
+        }
+
+        @Override
+        public void loadImageOK(Bitmap bmp, Object arg) {
+            Log.i(Common.LOG_TAG, "加载图片完毕， 可以自行选择 recycle or cache");
+
+            //loadImage结束之后可以马上recycle
+            //唯一不需要马上recycle的应用场景为 多个不同的滤镜都使用到相同的bitmap
+            //那么可以选择缓存起来。
+            bmp.recycle();
+        }
+    };
 
     public static class DemoClassDescription {
         String activityName;
@@ -35,7 +75,7 @@ public class MainActivity extends ActionBarActivity {
             new DemoClassDescription("CameraDemoActivity", "cameraDemo")
     };
 
-    private GridLayout mLayout;
+    private LinearLayout mLayout;
 
     public class MyButton extends Button implements View.OnClickListener {
         private DemoClassDescription mDemo;
@@ -69,7 +109,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mLayout = (GridLayout)findViewById(R.id.gridLayout);
+        mLayout = (LinearLayout)findViewById(R.id.buttonLayout);
 
         for(DemoClassDescription demo : mDemos) {
             MyButton btn = new MyButton(this);
@@ -77,6 +117,8 @@ public class MainActivity extends ActionBarActivity {
             mLayout.addView(btn);
         }
 
+        //第二个参数根据自身需要设置， 将作为 loadImage 第二个参数回传
+        CGENativeLibrary.setLoadImageCallback(loadImageCallback, null);
     }
 
 //    @Override

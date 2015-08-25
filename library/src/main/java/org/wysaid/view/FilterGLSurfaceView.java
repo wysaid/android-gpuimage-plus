@@ -24,8 +24,11 @@ import android.view.SurfaceHolder;
 
 import org.wysaid.camera.CameraInstance;
 import org.wysaid.myUtils.Common;
+import org.wysaid.myUtils.FrameBufferObject;
 import org.wysaid.nativePort.CGEFrameRecorder;
 import org.wysaid.nativePort.CGENativeLibrary;
+
+import java.nio.IntBuffer;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -36,6 +39,8 @@ import javax.microedition.khronos.opengles.GL10;
 public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
 
     public static final String LOG_TAG = Common.LOG_TAG;
+
+    public int maxTextureSize = 0;
 
     public int viewWidth;
     public int viewHeight;
@@ -58,8 +63,16 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     private DrawViewport mDrawViewport;
 
     private boolean mIsUsingMask = false;
+
+    public boolean isUsingMask() {
+        return mIsUsingMask;
+    }
+
     private float mMaskAspectRatio = 1.0f;
     private float[] mTransformMatrix = new float[16];
+
+    //是否使用后置摄像头
+    private boolean mIsCameraBackForward = true;
 
     private long mTimeCount = 0;
     private long mFramesCount = 0;
@@ -87,6 +100,20 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     private CameraInstance cameraInstance() {
         return CameraInstance.getInstance();
+    }
+
+    //在oncreate*之前设置有效
+    public void presetCameraForward(boolean isBackForward) {
+        mIsCameraBackForward = isBackForward;
+    }
+
+    //注意， 录制的尺寸将影响preview的尺寸
+    //这里的width和height表示竖屏尺寸
+    //在oncreate*之前设置有效
+    public void presetRecordingSize(int width, int height) {
+        mPreviewTextureWidth = width;
+        mPreviewTextureHeight = height;
+        cameraInstance().setPreferPreviewSize(width, height);
     }
 
     public synchronized void switchCamera() {
@@ -145,7 +172,17 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         });
     }
 
+    public interface SetMaskBitmapCallback {
+        void setMaskOK(CGEFrameRecorder recorder);
+    }
+
     public synchronized void setMaskBitmap(final Bitmap bmp, final boolean shouldRecycle) {
+        setMaskBitmap(bmp, shouldRecycle, null);
+    }
+
+    //注意， 当传入的bmp为null时， SetMaskBitmapCallback 不会执行.
+    public synchronized void setMaskBitmap(final Bitmap bmp, final boolean shouldRecycle, final SetMaskBitmapCallback callback) {
+
         queueEvent(new Runnable() {
             @Override
             public void run() {
@@ -157,24 +194,47 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                     return ;
                 }
 
-                int texID[] = {0};
-                GLES20.glGenTextures(1, texID, 0);
-                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texID[0]);
-                GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bmp, 0);
-                GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-                GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
-                GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-                GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+                int texID = Common.genNormalTextureID(bmp, GLES20.GL_NEAREST, GLES20.GL_CLAMP_TO_EDGE);
 
-                mFrameRecorder.setMaskTexture(texID[0], bmp.getWidth() / (float) bmp.getHeight());
+                mFrameRecorder.setMaskTexture(texID, bmp.getWidth() / (float) bmp.getHeight());
                 mIsUsingMask = true;
                 mMaskAspectRatio = bmp.getWidth() / (float)bmp.getHeight();
 
+                if(callback != null) {
+                    callback.setMaskOK(mFrameRecorder);
+                }
+
                 if(shouldRecycle)
                     bmp.recycle();
+
                 calcViewport();
             }
         });
+    }
+
+    public interface OnCreateCallback {
+        void createOK();
+    }
+
+    private OnCreateCallback mOnCreateCallback;
+
+    //定制一些初始化操作
+    public void setOnCreateCallback(final OnCreateCallback callback) {
+
+        assert callback != null : "无意义操作!";
+
+        if(mFrameRecorder == null) {
+            mOnCreateCallback = callback;
+        }
+        else {
+            // 已经创建完毕， 直接执行
+            queueEvent(new Runnable() {
+                @Override
+                public void run() {
+                    callback.createOK();
+                }
+            });
+        }
     }
 
     public FilterGLSurfaceView(Context context, AttributeSet attrs) {
@@ -186,8 +246,8 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         getHolder().setFormat(PixelFormat.RGBA_8888);
         setRenderer(this);
         setRenderMode(RENDERMODE_WHEN_DIRTY);
-//        setRenderMode(RENDERMODE_CONTINUOUSLY);
-//        setZOrderOnTop(true);
+        setRenderMode(RENDERMODE_CONTINUOUSLY);
+        setZOrderOnTop(true);
 //        setZOrderMediaOverlay(true);
 
         clearColor = new ClearColor();
@@ -200,6 +260,11 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glDisable(GLES20.GL_STENCIL_TEST);
 //        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+
+        int texSize[] = new int[1];
+
+        GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, texSize, 0);
+        maxTextureSize = texSize[0];
 
         mTextureID = genSurfaceTextureID();
         mSurfaceTexture = new SurfaceTexture(mTextureID);
@@ -305,6 +370,11 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
             mPreviewTextureHeight = cameraInstance().previewWidth();
             mFrameRecorder.srcResize(mPreviewTextureWidth, mPreviewTextureHeight);
         }
+
+        if(mOnCreateCallback != null) {
+            mOnCreateCallback.createOK();
+            mOnCreateCallback = null;
+        }
     }
 
     @Override
@@ -351,49 +421,136 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         void takePictureOK(Bitmap bmp);
     }
 
-    public synchronized void takePicture(final TakePictureCallback photoCallback, Camera.ShutterCallback shutterCallback, final String config, final float intensity) {
+    public synchronized void takeShot(final TakePictureCallback callback) {
+        takeShot(callback, true);
+    }
+
+    public synchronized void takeShot(final TakePictureCallback callback, final boolean noMask) {
+        assert callback != null : "callback must not be null!";
+
+        if(mFrameRecorder == null) {
+            Log.e(LOG_TAG, "Recorder not initialized!");
+            callback.takePictureOK(null);
+            return;
+        }
+
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+
+                FrameBufferObject frameBufferObject = new FrameBufferObject();
+                int bufferTexID;
+                IntBuffer buffer;
+                Bitmap bmp;
+
+                if (noMask || !mIsUsingMask) {
+
+                    bufferTexID = Common.genBlankTextureID(mPreviewTextureWidth, mPreviewTextureHeight);
+                    frameBufferObject.bindTexture(bufferTexID);
+                    GLES20.glViewport(0, 0, mPreviewTextureWidth, mPreviewTextureHeight);
+                    mFrameRecorder.drawCache();
+                    buffer = IntBuffer.allocate(mPreviewTextureWidth * mPreviewTextureHeight);
+                    GLES20.glReadPixels(0, 0, mPreviewTextureWidth, mPreviewTextureHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, buffer);
+                    bmp = Bitmap.createBitmap(mPreviewTextureWidth, mPreviewTextureHeight, Bitmap.Config.ARGB_8888);
+                    bmp.copyPixelsFromBuffer(buffer);
+
+                } else {
+
+                    bufferTexID = Common.genBlankTextureID(mDrawViewport.width, mDrawViewport.height);
+                    frameBufferObject.bindTexture(bufferTexID);
+
+                    int w = Math.min(mDrawViewport.width, viewWidth);
+                    int h = Math.min(mDrawViewport.height, viewHeight);
+
+                    mFrameRecorder.setRenderFlipScale(1.0f, 1.0f);
+                    mFrameRecorder.setMaskTextureRatio(mMaskAspectRatio);
+                    mFrameRecorder.render(0, 0, w, h);
+                    mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
+                    mFrameRecorder.setMaskTextureRatio(mMaskAspectRatio);
+
+                    Log.i(LOG_TAG, String.format("w: %d, h: %d", w, h));
+                    buffer = IntBuffer.allocate(w * h);
+                    GLES20.glReadPixels(0, 0, w, h, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, buffer);
+                    bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                    bmp.copyPixelsFromBuffer(buffer);
+                }
+
+                frameBufferObject.release();
+                GLES20.glDeleteTextures(1, new int[]{bufferTexID}, 0);
+
+                callback.takePictureOK(bmp);
+            }
+        });
+
+    }
+
+    //isBigger 为true 表示当宽高不满足时，取最近的较大值.
+    // 若为 false 则取较小的
+    public void setPictureSize(int width, int height, boolean isBigger) {
+        //默认会旋转90度.
+        cameraInstance().setPictureSize(height, width, isBigger);
+    }
+
+    public synchronized void takePicture(final TakePictureCallback photoCallback, Camera.ShutterCallback shutterCallback, final String config, final float intensity, final boolean isFrontMirror) {
 
         assert photoCallback != null : "photoCallback must not be null!!";
 
-        //TODO 需要对超过最大纹理单元尺寸的图片进行优化（缩小）
-        final int width = cameraInstance().pictureWidth();
-        final int height = cameraInstance().pictureHeight();
+        cameraInstance().getCameraDevice().takePicture(shutterCallback, null, new Camera.PictureCallback() {
+            @Override
+            public void onPictureTaken(final byte[] data, Camera camera) {
 
-        cameraInstance().getCameraDevice().takePicture(shutterCallback, null,
-                new Camera.PictureCallback() {
+                //默认数据格式已经设置为 JPEG
+                Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
 
-                    @Override
-                    public void onPictureTaken(final byte[] data, Camera camera) {
+                int width = bmp.getWidth(), height = bmp.getHeight();
 
-                        //默认数据格式已经设置为 JPEG
-                        Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-                        Bitmap bmp2 = Bitmap.createBitmap(height, width, Bitmap.Config.ARGB_8888);
+                if(width > maxTextureSize || height > maxTextureSize) {
+                    float scaling = Math.max(width / (float) maxTextureSize, height / (float) maxTextureSize);
+                    Log.i(LOG_TAG, String.format("目标尺寸(%d x %d)超过当前设备OpenGL 能够处理的最大范围(%d x %d)， 现在将图片压缩至合理大小!", width, height, maxTextureSize, maxTextureSize));
 
-                        Canvas canvas = new Canvas(bmp2);
+                    bmp = Bitmap.createScaledBitmap(bmp, (int)(width / scaling), (int)(height / scaling), false);
 
-                        if(cameraInstance().getFacing() == Camera.CameraInfo.CAMERA_FACING_BACK) {
-                            Matrix mat = new Matrix();
-                            int halfLen = Math.min(width, height) / 2;
-                            mat.setRotate(90, halfLen, halfLen);
-                            canvas.drawBitmap(bmp, mat, null);
-                        } else {
-                            Matrix mat = new Matrix();
-                            int halfLen = Math.max(width, height) / 2;
-                            mat.setRotate(-90, halfLen, halfLen);
-                            canvas.drawBitmap(bmp, mat, null);
-                        }
+                    width = bmp.getWidth();
+                    height = bmp.getHeight();
+                }
 
-                        bmp.recycle();
+                Bitmap bmp2 = Bitmap.createBitmap(height, width, Bitmap.Config.ARGB_8888);
 
-                        if(config != null) {
-                            CGENativeLibrary.filterImage_MultipleEffectsWriteBack(bmp2, config, intensity);
-                        }
+                Canvas canvas = new Canvas(bmp2);
 
-                        photoCallback.takePictureOK(bmp2);
+                if (cameraInstance().getFacing() == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                    Matrix mat = new Matrix();
+                    int halfLen = Math.min(width, height) / 2;
+                    mat.setRotate(90, halfLen, halfLen);
+                    canvas.drawBitmap(bmp, mat, null);
+                } else {
+                    Matrix mat = new Matrix();
 
-                        cameraInstance().getCameraDevice().startPreview();
+                    if (isFrontMirror) {
+                        mat.postTranslate(-width / 2, -height / 2);
+                        mat.postScale(-1.0f, 1.0f);
+                        mat.postTranslate(width / 2, height / 2);
+                        int halfLen = Math.min(width, height) / 2;
+                        mat.postRotate(90, halfLen, halfLen);
+                    } else {
+                        int halfLen = Math.max(width, height) / 2;
+                        mat.postRotate(-90, halfLen, halfLen);
                     }
-                });
+
+                    canvas.drawBitmap(bmp, mat, null);
+                }
+
+                bmp.recycle();
+
+                if (config != null) {
+                    CGENativeLibrary.filterImage_MultipleEffectsWriteBack(bmp2, config, intensity);
+                }
+
+                photoCallback.takePictureOK(bmp2);
+
+                cameraInstance().getCameraDevice().startPreview();
+            }
+        });
     }
 
     @Override
@@ -411,11 +568,29 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         Log.i(LOG_TAG, "surfaceview onPause out...");
     }
 
+    private long mTimeCount2 = 0;
+    private long mFramesCount2 = 0;
+    private long mLastTimestamp2 = 0;
+
     @Override
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
 //        Log.i(LOG_TAG, "onFrameAvailable...");
 
-        requestRender();
+//        requestRender();
+
+        if(mLastTimestamp2 == 0)
+            mLastTimestamp2 = System.currentTimeMillis();
+
+        long currentTimestamp = System.currentTimeMillis();
+
+        ++mFramesCount2;
+        mTimeCount2 += currentTimestamp - mLastTimestamp2;
+        mLastTimestamp2 = currentTimestamp;
+        if(mTimeCount2 >= 1e3) {
+            Log.i(LOG_TAG, String.format("相机每秒采样率: %d", mFramesCount2));
+            mTimeCount2 -= 1e3;
+            mFramesCount2 = 0;
+        }
     }
 
     private int genSurfaceTextureID() {

@@ -39,6 +39,9 @@ public class CameraInstance {
     private int mPictureWidth;
     private int mPictureHeight;
 
+    private int mPreferPreviewWidth;
+    private int mPreferPreviewHeight;
+
     private int mFacing = 0;
 
     private CameraInstance() {}
@@ -56,6 +59,11 @@ public class CameraInstance {
     public int previewHeight() { return mPreviewHeight; }
     public int pictureWidth() { return mPictureWidth; }
     public int pictureHeight() { return mPictureHeight; }
+
+    public void setPreferPreviewSize(int w, int h) {
+        mPreferPreviewHeight = w;
+        mPreferPreviewWidth = h;
+    }
 
     public interface CameraOpenCallback {
         void cameraReady();
@@ -131,8 +139,8 @@ public class CameraInstance {
     public void startPreview(SurfaceTexture texture) {
         Log.i(LOG_TAG, "Camera startPreview...");
         if(mIsPreviewing) {
-            Log.i(LOG_TAG, "Err: camera is previewing...");
-            stopPreview();
+            Log.e(LOG_TAG, "Err: camera is previewing...");
+//            stopPreview();
             return ;
         }
 
@@ -169,6 +177,22 @@ public class CameraInstance {
         return mCameraDevice;
     }
 
+    //保证从大到小排列
+    private Comparator<Camera.Size> comparatorBigger = new Comparator<Camera.Size>() {
+        @Override
+        public int compare(Camera.Size lhs, Camera.Size rhs) {
+            return rhs.width - lhs.width;
+        }
+    };
+
+    //保证从小到大排列
+    private Comparator<Camera.Size> comparatorSmaller= new Comparator<Camera.Size>() {
+        @Override
+        public int compare(Camera.Size lhs, Camera.Size rhs) {
+            return lhs.width - rhs.width;
+        }
+    };
+
     public void initCamera(int previewRate) {
         if(mCameraDevice == null) {
             Log.e(LOG_TAG, "initCamera: Camera is not opened!");
@@ -182,19 +206,12 @@ public class CameraInstance {
             Log.i(LOG_TAG, String.format("Picture Format: %x", fmt));
         }
 
-        Comparator<Camera.Size> comparator = new Comparator<Camera.Size>() {
-            @Override
-            public int compare(Camera.Size lhs, Camera.Size rhs) {
-                return rhs.width - lhs.width;
-            }
-        };
-
         mParams.setPictureFormat(PixelFormat.JPEG);
 
         List<Camera.Size> picSizes = mParams.getSupportedPictureSizes();
         Camera.Size picSz = null;
 
-        Collections.sort(picSizes, comparator);
+        Collections.sort(picSizes, comparatorBigger);
 
         for(Camera.Size sz : picSizes) {
             Log.i(LOG_TAG, String.format("Supported picture size: %d x %d", sz.width, sz.height));
@@ -206,12 +223,23 @@ public class CameraInstance {
         List<Camera.Size> prevSizes = mParams.getSupportedPreviewSizes();
         Camera.Size prevSz = null;
 
-        Collections.sort(prevSizes, comparator);
+        Collections.sort(prevSizes, comparatorBigger);
 
         for(Camera.Size sz : prevSizes) {
             Log.i(LOG_TAG, String.format("Supported preview size: %d x %d", sz.width, sz.height));
-            if(prevSz == null || (sz.width >= 640 && sz.height >= 640)) {
+            if(prevSz == null || (sz.width >= mPreferPreviewWidth && sz.height >= mPreferPreviewHeight)) {
                 prevSz = sz;
+            }
+        }
+
+        List<Integer> frameRates = mParams.getSupportedPreviewFrameRates();
+
+        int fpsMax = 0;
+
+        for(Integer n : frameRates) {
+            Log.i(LOG_TAG, String.format("Supported frame rate: " + n));
+            if(fpsMax < n) {
+                fpsMax = n;
             }
         }
 
@@ -219,10 +247,11 @@ public class CameraInstance {
         mParams.setPictureSize(picSz.width, picSz.height);
 
         List<String> focusModes = mParams.getSupportedFocusModes();
-        if(focusModes.contains("continuous-video")){
+        if(focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)){
             mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
         }
 
+        previewRate = fpsMax;
         mParams.setPreviewFrameRate(previewRate); //设置相机预览帧率
 //        mParams.setPreviewFpsRange(20, 60);
 
@@ -246,5 +275,38 @@ public class CameraInstance {
 
         Log.i(LOG_TAG, String.format("Camera Picture Size: %d x %d", szPic.width, szPic.height));
         Log.i(LOG_TAG, String.format("Camera Preview Size: %d x %d", szPrev.width, szPrev.height));
+    }
+
+    public void setPictureSize(int width, int height, boolean isBigger) {
+        mParams = mCameraDevice.getParameters();
+
+        List<Camera.Size> picSizes = mParams.getSupportedPictureSizes();
+        Camera.Size picSz = null;
+
+        if(isBigger) {
+            Collections.sort(picSizes, comparatorBigger);
+            for(Camera.Size sz : picSizes) {
+                if(picSz == null || (sz.width >= width && sz.height >= height)) {
+                    picSz = sz;
+                }
+            }
+        } else {
+            Collections.sort(picSizes, comparatorSmaller);
+            for(Camera.Size sz : picSizes) {
+                if(picSz == null || (sz.width <= width && sz.height <= height)) {
+                    picSz = sz;
+                }
+            }
+        }
+
+        mPictureWidth = picSz.width;
+        mPictureHeight= picSz.height;
+
+        try {
+            mParams.setPictureSize(mPictureWidth, mPictureHeight);
+            mCameraDevice.setParameters(mParams);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

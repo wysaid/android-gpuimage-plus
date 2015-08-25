@@ -36,8 +36,14 @@
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
-                android:id="@+id/takeShotBtn"
+                android:id="@+id/takePicBtn"
                 android:text="拍照"/>
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/takeShotBtn"
+                android:text="截屏"/>
 
             <Button
                 android:layout_width="100dp"
