@@ -240,6 +240,10 @@ public class CameraDemoActivity extends ActionBarActivity {
                 mGLSurfaceView.switchCamera();
             }
         });
+
+        mGLSurfaceView.presetRecordingSize(600, 800);
+        mGLSurfaceView.setZOrderOnTop(false);
+        mGLSurfaceView.setZOrderMediaOverlay(true);
     }
 
     private View.OnClickListener mFilterSwitchListener = new View.OnClickListener() {
