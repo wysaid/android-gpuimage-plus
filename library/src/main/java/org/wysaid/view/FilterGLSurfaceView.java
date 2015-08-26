@@ -389,6 +389,8 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         if(mSurfaceTexture == null || !cameraInstance().isPreviewing())
             return;
 
+        mSurfaceTexture.updateTexImage();
+
         mSurfaceTexture.getTransformMatrix(mTransformMatrix);
 
         mFrameRecorder.update(mTextureID, mTransformMatrix);
@@ -397,8 +399,6 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
         mFrameRecorder.render(mDrawViewport.x, mDrawViewport.y, mDrawViewport.width, mDrawViewport.height);
-
-        mSurfaceTexture.updateTexImage();
 
 //        Log.i(LOG_TAG, "onDrawFrame...");
         if(mLastTimestamp == 0)
@@ -453,6 +453,8 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                     GLES20.glReadPixels(0, 0, mPreviewTextureWidth, mPreviewTextureHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, buffer);
                     bmp = Bitmap.createBitmap(mPreviewTextureWidth, mPreviewTextureHeight, Bitmap.Config.ARGB_8888);
                     bmp.copyPixelsFromBuffer(buffer);
+
+                    Log.i(LOG_TAG, String.format("take shot without mask - w: %d, h: %d", mPreviewTextureWidth, mPreviewTextureHeight));
 
                 } else {
 
