@@ -17,7 +17,7 @@ public class FrameBufferObject {
     }
 
     public void release() {
-        GLES20.glDeleteBuffers(1, new int[]{mFramebufferID}, 0);
+        GLES20.glDeleteFramebuffers(1, new int[]{mFramebufferID}, 0);
     }
 
     public void bind() {
