@@ -16,12 +16,23 @@
             android:id="@+id/myGLSurfaceView"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-    </FrameLayout>
 
-    <SeekBar
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:id="@+id/seekBar"/>
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_alignParentTop="true"
+            android:id="@+id/seekBar"
+            android:layout_gravity="center_horizontal|top" />
+
+        <ImageView
+            android:layout_width="100px"
+            android:layout_height="120px"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="150dp"
+            android:id="@+id/imagePreview"
+            android:background="@drawable/bgview"
+            android:layout_gravity="right|center_vertical" />
+    </FrameLayout>
 
     <HorizontalScrollView
         android:layout_width="match_parent"
@@ -48,8 +59,32 @@
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
+                android:id="@+id/thunbnailBtn"
+                android:text="启动预览"/>
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/pauseBtn"
+                android:text="暂停"/>
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/resumeBtn"
+                android:text="继续"/>
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
                 android:id="@+id/switchCameraBtn"
                 android:text="切换前后"/>
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/flashBtn"
+                android:text="切换闪光灯"/>
 
             <Button
                 android:layout_width="100dp"

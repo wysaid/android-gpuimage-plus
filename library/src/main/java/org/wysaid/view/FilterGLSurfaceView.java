@@ -7,6 +7,7 @@ package org.wysaid.view;
 
 import android.content.Context;
 
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -14,10 +15,8 @@ import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.GLUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -45,10 +44,27 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     public int viewWidth;
     public int viewHeight;
 
+    private int mRecordWidth = 640;
+    private int mRecordHeight = 480;
+
     private SurfaceTexture mSurfaceTexture;
     private int mTextureID;
 
     private CGEFrameRecorder mFrameRecorder;
+
+    public CGEFrameRecorder getRecorder() {
+        return mFrameRecorder;
+    }
+    private Context mContext;
+
+    public int maxPreviewWidth = 1280;
+    public int maxPreviewHeight = 1280;
+
+    //将对preview进行缩放。 使用默认值即可， 最好不要修改
+    void setMaxPreviewSize(int w, int h) {
+        maxPreviewWidth = w;
+        maxPreviewHeight = h;
+    }
 
     public class ClearColor {
         public float r, g, b, a;
@@ -74,14 +90,9 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     //是否使用后置摄像头
     private boolean mIsCameraBackForward = true;
 
-    private long mTimeCount = 0;
-    private long mFramesCount = 0;
-    private long mLastTimestamp = 0;
-
-    private int mPreviewTextureWidth = 640;
-    private int mPreviewTextureHeight = 640;
-
-    private boolean mIsCameraBack = true;
+    public boolean isCameraBackForward() {
+        return mIsCameraBackForward;
+    }
 
     public void setClearColor(float r, float g, float b, float a) {
         clearColor.r = r;
@@ -111,13 +122,19 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     //这里的width和height表示竖屏尺寸
     //在oncreate*之前设置有效
     public void presetRecordingSize(int width, int height) {
-        mPreviewTextureWidth = width;
-        mPreviewTextureHeight = height;
+        if(width > maxPreviewWidth || height > maxPreviewHeight) {
+            float scaling = Math.min(maxPreviewWidth / (float)width, maxPreviewHeight / (float)height);
+            width = (int)(width * scaling);
+            height = (int)(height * scaling);
+        }
+
+        mRecordWidth = width;
+        mRecordHeight = height;
         cameraInstance().setPreferPreviewSize(width, height);
     }
 
     public synchronized void switchCamera() {
-        mIsCameraBack = !mIsCameraBack;
+        mIsCameraBackForward = !mIsCameraBackForward;
 
         if(mFrameRecorder != null) {
             queueEvent(new Runnable() {
@@ -126,14 +143,9 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
                     cameraInstance().stopCamera();
 
-                    int facing = mIsCameraBack ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
-//                    if (mIsCameraBack) {
-//                        mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
-//                        mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
-//                    } else {
+                    int facing = mIsCameraBackForward ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
                         mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
                         mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
-//                    }
 
                     if (mIsUsingMask) {
                         mFrameRecorder.setMaskTextureRatio(mMaskAspectRatio);
@@ -149,15 +161,54 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                             }
                         }
                     }, facing);
+
+                    requestRender();
                 }
             });
         }
+    }
+
+    // 参数为
+    //    Camera.Parameters.FLASH_MODE_AUTO;
+    //    Camera.Parameters.FLASH_MODE_OFF;
+    //    Camera.Parameters.FLASH_MODE_ON;
+    //    Camera.Parameters.FLASH_MODE_RED_EYE
+    //    Camera.Parameters.FLASH_MODE_TORCH 等
+    public synchronized boolean setFlashLightMode(String mode) {
+
+        if(!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
+            Log.e(LOG_TAG, "当前设备不支持闪光灯!");
+            return false;
+        }
+
+        if(!mIsCameraBackForward) {
+            return false;
+        }
+
+        Camera.Parameters parameters = cameraInstance().getParams();
+
+        try {
+
+            if(!parameters.getSupportedFlashModes().contains(mode)) {
+                Log.e(LOG_TAG, "Invalid Flash Light Mode!!!");
+                return false;
+            }
+
+            parameters.setFlashMode(mode);
+            cameraInstance().setParams(parameters);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "修改闪光灯状态失败, 请检查是否正在使用前置摄像头?");
+            return false;
+        }
+
+        return true;
     }
 
     public synchronized void setFilterWithConfig(final String config) {
         queueEvent(new Runnable() {
             @Override
             public void run() {
+                assert mFrameRecorder != null && config != null : "Recorder & Config must not be null!";
                 mFrameRecorder.setFilterWidthConfig(config);
             }
         });
@@ -167,6 +218,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         queueEvent(new Runnable() {
             @Override
             public void run() {
+                assert mFrameRecorder != null : "Recorder must not be null!";
                 mFrameRecorder.setFilterIntensity(intensity);
             }
         });
@@ -246,11 +298,11 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         getHolder().setFormat(PixelFormat.RGBA_8888);
         setRenderer(this);
         setRenderMode(RENDERMODE_WHEN_DIRTY);
-        setRenderMode(RENDERMODE_CONTINUOUSLY);
         setZOrderOnTop(true);
 //        setZOrderMediaOverlay(true);
 
         clearColor = new ClearColor();
+        mContext = context;
     }
 
     @Override
@@ -266,33 +318,37 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, texSize, 0);
         maxTextureSize = texSize[0];
 
-        mTextureID = genSurfaceTextureID();
+        mTextureID = Common.genSurfaceTextureID();
         mSurfaceTexture = new SurfaceTexture(mTextureID);
         mSurfaceTexture.setOnFrameAvailableListener(this);
 
-        requestRender();
-
-        //打开相机并不是异步操作
-        if(!cameraInstance().isCameraOpened()) {
-
-            cameraInstance().tryOpenCamera(new CameraInstance.CameraOpenCallback() {
-                @Override
-                public void cameraReady() {
-                    Log.i(LOG_TAG, "tryOpenCamera OK...");
-                }
-            });
-        }
-
         mFrameRecorder = new CGEFrameRecorder();
-        mPreviewTextureWidth = cameraInstance().previewHeight();
-        mPreviewTextureHeight = cameraInstance().previewWidth();
-        if(!mFrameRecorder.init(mPreviewTextureWidth, mPreviewTextureHeight, mPreviewTextureWidth, mPreviewTextureHeight)) {
+        if(!mFrameRecorder.init(mRecordWidth, mRecordHeight, mRecordWidth, mRecordHeight)) {
             Log.e(LOG_TAG, "Frame Recorder init failed!");
         }
 
         mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
         mFrameRecorder.setSrcFlipScale(1.0f, -1.0f);
         mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
+
+        requestRender();
+
+        if(!cameraInstance().isCameraOpened()) {
+
+            int facing = mIsCameraBackForward ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
+
+            cameraInstance().tryOpenCamera(new CameraInstance.CameraOpenCallback() {
+                @Override
+                public void cameraReady() {
+                    Log.i(LOG_TAG, "tryOpenCamera OK...");
+                }
+            }, facing);
+        }
+
+        if(mOnCreateCallback != null) {
+            mOnCreateCallback.createOK();
+//            mOnCreateCallback = null;
+        }
     }
 
     private void calcViewport() {
@@ -301,7 +357,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         if(mIsUsingMask) {
             scaling = mMaskAspectRatio;
         } else {
-            scaling = mPreviewTextureWidth / (float)mPreviewTextureHeight;
+            scaling = mRecordWidth / (float)mRecordHeight;
         }
 
         float viewRatio = viewWidth / (float)viewHeight;
@@ -323,6 +379,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         mDrawViewport.height = h;
         mDrawViewport.x = (viewWidth - mDrawViewport.width) / 2;
         mDrawViewport.y = (viewHeight - mDrawViewport.height) / 2;
+        Log.i(LOG_TAG, String.format("View port: %d, %d, %d, %d", mDrawViewport.x, mDrawViewport.y, mDrawViewport.width, mDrawViewport.height));
     }
 
     public interface ReleaseOKCallback {
@@ -366,14 +423,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         if(!cameraInstance().isPreviewing()) {
             cameraInstance().startPreview(mSurfaceTexture);
-            mPreviewTextureWidth = cameraInstance().previewHeight();
-            mPreviewTextureHeight = cameraInstance().previewWidth();
-            mFrameRecorder.srcResize(mPreviewTextureWidth, mPreviewTextureHeight);
-        }
-
-        if(mOnCreateCallback != null) {
-            mOnCreateCallback.createOK();
-            mOnCreateCallback = null;
+            mFrameRecorder.srcResize(cameraInstance().previewHeight(), cameraInstance().previewWidth());
         }
     }
 
@@ -383,24 +433,92 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         cameraInstance().stopCamera();
     }
 
+    private long mTimeCount = 0;
+    private long mFramesCount = 0;
+    private long mLastTimestamp = 0;
+
+    public synchronized void stopPreview() {
+
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                cameraInstance().stopPreview();
+            }
+        });
+    }
+
+    public synchronized void resumePreview() {
+
+        if(!cameraInstance().isCameraOpened()) {
+
+            int facing = mIsCameraBackForward ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
+
+            cameraInstance().tryOpenCamera(new CameraInstance.CameraOpenCallback() {
+                @Override
+                public void cameraReady() {
+                    Log.i(LOG_TAG, "tryOpenCamera OK...");
+                }
+            }, facing);
+        }
+
+        if(!cameraInstance().isPreviewing()) {
+            cameraInstance().startPreview(mSurfaceTexture);
+            mFrameRecorder.srcResize(cameraInstance().previewHeight(), cameraInstance().previewWidth());
+        }
+
+        requestRender();
+    }
+
     @Override
     public void onDrawFrame(GL10 gl) {
 
-        if(mSurfaceTexture == null || !cameraInstance().isPreviewing())
+        if(mSurfaceTexture == null || !cameraInstance().isPreviewing()) {
+            //防止双缓冲情况下最后几帧抖动
+            if(mFrameRecorder != null) {
+                GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+                GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+                mFrameRecorder.render(mDrawViewport.x, mDrawViewport.y, mDrawViewport.width, mDrawViewport.height);
+            }
+
             return;
+        }
 
         mSurfaceTexture.updateTexImage();
 
         mSurfaceTexture.getTransformMatrix(mTransformMatrix);
-
         mFrameRecorder.update(mTextureID, mTransformMatrix);
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+
+        synchronized (mThunbnailLock) {
+            if(mTakeThunbnailCallback != null) {
+
+                GLES20.glViewport(0, 0, mThunbnailWidth, mThunbnailHeight);
+                mFrameRecorder.drawCache();
+
+                mThunbnailBuffer.position(0);
+                GLES20.glReadPixels(0, 0, mThunbnailWidth, mThunbnailHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, mThunbnailBuffer);
+
+                synchronized (mThunbnailBmp) {
+                    mThunbnailBmp.copyPixelsFromBuffer(mThunbnailBuffer);
+                }
+
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        synchronized (mThunbnailLock) {
+                            if(mTakeThunbnailCallback != null)
+                                mTakeThunbnailCallback.takeThunbnailOK(mThunbnailBmp);
+                        }
+                    }
+                });
+            }
+        }
+
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
         mFrameRecorder.render(mDrawViewport.x, mDrawViewport.y, mDrawViewport.width, mDrawViewport.height);
 
-//        Log.i(LOG_TAG, "onDrawFrame...");
         if(mLastTimestamp == 0)
             mLastTimestamp = System.currentTimeMillis();
 
@@ -409,15 +527,104 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         ++mFramesCount;
         mTimeCount += currentTimestamp - mLastTimestamp;
         mLastTimestamp = currentTimestamp;
-        if(mTimeCount >= 1e3)
-        {
-            Log.i(LOG_TAG, String.format("TimeCount: %d, Fps: %d", mTimeCount, mFramesCount));
+        if(mTimeCount >= 1e3) {
+            Log.i(LOG_TAG, String.format("每秒重绘帧率: %d", mFramesCount));
             mTimeCount -= 1e3;
             mFramesCount = 0;
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.i(LOG_TAG, "onResume...");
+//        int facing = mIsCameraBackForward ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
+//        cameraInstance().tryOpenCamera(null, facing);
+    }
+
+    @Override
+    public void onPause() {
+        Log.i(LOG_TAG, "surfaceview onPause in...");
+
+        cameraInstance().stopCamera();
+        super.onPause();
+        Log.i(LOG_TAG, "surfaceview onPause out...");
+    }
+
+    private long mTimeCount2 = 0;
+    private long mFramesCount2 = 0;
+    private long mLastTimestamp2 = 0;
+
+    @Override
+    public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+//        Log.i(LOG_TAG, "onFrameAvailable...");
+
+        requestRender();
+
+        if(mLastTimestamp2 == 0)
+            mLastTimestamp2 = System.currentTimeMillis();
+
+        long currentTimestamp = System.currentTimeMillis();
+
+        ++mFramesCount2;
+        mTimeCount2 += currentTimestamp - mLastTimestamp2;
+        mLastTimestamp2 = currentTimestamp;
+        if(mTimeCount2 >= 1e3) {
+            Log.i(LOG_TAG, String.format("相机每秒采样率: %d", mFramesCount2));
+            mTimeCount2 -= 1e3;
+            mFramesCount2 = 0;
+        }
+    }
+
+    public interface TakeThunbnailCallback {
+        void takeThunbnailOK(Bitmap bmp);
+    }
+
+    private Bitmap mThunbnailBmp;
+    private TakeThunbnailCallback mTakeThunbnailCallback;
+    private int[] mThunbnailLock = new int[0];
+    private int mThunbnailWidth, mThunbnailHeight;
+    private IntBuffer mThunbnailBuffer;
+
+    public boolean isTakingThunbnail() {
+        boolean status;
+        synchronized (mThunbnailLock) {
+            status = mTakeThunbnailCallback != null;
+        }
+        return status;
+    }
+
+    public void startThunbnailCliping(Bitmap cache, TakeThunbnailCallback callback) {
+        synchronized (mThunbnailLock) {
+            mTakeThunbnailCallback = callback;
+            mThunbnailBmp = cache;
+            mThunbnailWidth = cache.getWidth();
+            mThunbnailHeight = cache.getHeight();
+            mThunbnailBuffer = IntBuffer.allocate(mThunbnailWidth * mThunbnailHeight);
+        }
+    }
+
+    public void startThunbnailCliping(int width, int height, TakeThunbnailCallback callback) {
+        synchronized (mThunbnailLock) {
+            mTakeThunbnailCallback = callback;
+            mThunbnailBmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            mThunbnailWidth = width;
+            mThunbnailHeight = height;
+            mThunbnailBuffer = IntBuffer.allocate(width * height);
+        }
+    }
+
+    public void stopThunbnailCliping() {
+        synchronized (mThunbnailLock) {
+            mTakeThunbnailCallback = null;
+            mThunbnailBmp.recycle();
+            mThunbnailBmp = null;
+            mThunbnailBuffer = null;
+        }
+    }
+
     public interface TakePictureCallback {
+        //传入的bmp可以由接收者recycle
         void takePictureOK(Bitmap bmp);
     }
 
@@ -443,18 +650,17 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 IntBuffer buffer;
                 Bitmap bmp;
 
-                if (noMask || !mIsUsingMask) {
+                if(noMask || !mIsUsingMask) {
 
-                    bufferTexID = Common.genBlankTextureID(mPreviewTextureWidth, mPreviewTextureHeight);
+                    bufferTexID = Common.genBlankTextureID(mRecordWidth, mRecordHeight);
                     frameBufferObject.bindTexture(bufferTexID);
-                    GLES20.glViewport(0, 0, mPreviewTextureWidth, mPreviewTextureHeight);
+                    GLES20.glViewport(0, 0, mRecordWidth, mRecordHeight);
                     mFrameRecorder.drawCache();
-                    buffer = IntBuffer.allocate(mPreviewTextureWidth * mPreviewTextureHeight);
-                    GLES20.glReadPixels(0, 0, mPreviewTextureWidth, mPreviewTextureHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, buffer);
-                    bmp = Bitmap.createBitmap(mPreviewTextureWidth, mPreviewTextureHeight, Bitmap.Config.ARGB_8888);
+                    buffer = IntBuffer.allocate(mRecordWidth * mRecordHeight);
+                    GLES20.glReadPixels(0, 0, mRecordWidth, mRecordHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, buffer);
+                    bmp = Bitmap.createBitmap(mRecordWidth, mRecordHeight, Bitmap.Config.ARGB_8888);
                     bmp.copyPixelsFromBuffer(buffer);
-
-                    Log.i(LOG_TAG, String.format("take shot without mask - w: %d, h: %d", mPreviewTextureWidth, mPreviewTextureHeight));
+                    Log.i(LOG_TAG, String.format("w: %d, h: %d", mRecordWidth, mRecordHeight));
 
                 } else {
 
@@ -553,60 +759,5 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 cameraInstance().getCameraDevice().startPreview();
             }
         });
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.i(LOG_TAG, "onResume...");
-        cameraInstance().tryOpenCamera(null);
-    }
-
-    @Override
-    public void onPause() {
-        Log.i(LOG_TAG, "surfaceview onPause in...");
-        cameraInstance().stopCamera();
-        super.onPause();
-        Log.i(LOG_TAG, "surfaceview onPause out...");
-    }
-
-    private long mTimeCount2 = 0;
-    private long mFramesCount2 = 0;
-    private long mLastTimestamp2 = 0;
-
-    @Override
-    public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-//        Log.i(LOG_TAG, "onFrameAvailable...");
-
-//        requestRender();
-
-        if(mLastTimestamp2 == 0)
-            mLastTimestamp2 = System.currentTimeMillis();
-
-        long currentTimestamp = System.currentTimeMillis();
-
-        ++mFramesCount2;
-        mTimeCount2 += currentTimestamp - mLastTimestamp2;
-        mLastTimestamp2 = currentTimestamp;
-        if(mTimeCount2 >= 1e3) {
-            Log.i(LOG_TAG, String.format("相机每秒采样率: %d", mFramesCount2));
-            mTimeCount2 -= 1e3;
-            mFramesCount2 = 0;
-        }
-    }
-
-    private int genSurfaceTextureID() {
-        int[] texID = new int[1];
-        GLES20.glGenTextures(1, texID, 0);
-        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, texID[0]);
-        GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-                GLES20.GL_TEXTURE_MIN_FILTER,GLES20.GL_LINEAR);
-        GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-                GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-                GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-                GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
-        return texID[0];
     }
 }

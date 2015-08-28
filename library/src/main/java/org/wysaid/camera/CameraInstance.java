@@ -39,8 +39,8 @@ public class CameraInstance {
     private int mPictureWidth;
     private int mPictureHeight;
 
-    private int mPreferPreviewWidth;
-    private int mPreferPreviewHeight;
+    private int mPreferPreviewWidth = 640;
+    private int mPreferPreviewHeight = 640;
 
     private int mFacing = 0;
 

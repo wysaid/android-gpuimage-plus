@@ -1,22 +1,31 @@
 package org.wysaid.cgedemo;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.hardware.Camera;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
 import org.wysaid.camera.CameraInstance;
+import org.wysaid.myUtils.Common;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.nativePort.CGEFrameRecorder;
+import org.wysaid.nativePort.CGENativeLibrary;
 import org.wysaid.view.FilterGLSurfaceView;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 
 public class CameraDemoActivity extends ActionBarActivity {
@@ -24,7 +33,7 @@ public class CameraDemoActivity extends ActionBarActivity {
     private static final String effectConfigs[] = {
             "#unpack @blur lerp 0.5",
             "#unpack @style sketch 0.7",
-            "#unpack @krblend ol hehe.jpg 100",
+            "#unpack @blend ol hehe.jpg 100",
             "#unpack @blend add hehe.jpg 100",
             "#unpack @blend sr hehe.jpg 100",
             "@style min",
@@ -107,8 +116,10 @@ public class CameraDemoActivity extends ActionBarActivity {
 
     private Button mTakePicBtn;
     private Button mTakeShotBtn;
+
     private FilterGLSurfaceView mGLSurfaceView;
     private SeekBar mSeekBar;
+    private ImageView mThunbnailView;
 
     public final static String LOG_TAG = FilterGLSurfaceView.LOG_TAG;
 
@@ -117,6 +128,37 @@ public class CameraDemoActivity extends ActionBarActivity {
         return mCurrentInstance;
     }
 
+
+    CGENativeLibrary.LoadImageCallback loadImageCallback = new CGENativeLibrary.LoadImageCallback() {
+
+        //注意， 这里回传的name不包含任何路径名， 仅为具体的图片文件名如 1.jpg
+        @Override
+        public Bitmap loadImage(String name, Object arg) {
+
+            Log.i(Common.LOG_TAG, "正在加载图片: " + name);
+            AssetManager am = getAssets();
+            InputStream is;
+            try {
+                is = am.open(name);
+            } catch (IOException e) {
+                Log.e(Common.LOG_TAG, "Can not open file " + name);
+                return null;
+            }
+
+            Bitmap bmp = BitmapFactory.decodeStream(is);
+            return bmp;
+        }
+
+        @Override
+        public void loadImageOK(Bitmap bmp, Object arg) {
+            Log.i(Common.LOG_TAG, "加载图片完毕， 可以自行选择 recycle or cache");
+
+            //loadImage结束之后可以马上recycle
+            //唯一不需要马上recycle的应用场景为 多个不同的滤镜都使用到相同的bitmap
+            //那么可以选择缓存起来。
+            bmp.recycle();
+        }
+    };
 
     public class MyButtons extends Button {
 
@@ -136,7 +178,9 @@ public class CameraDemoActivity extends ActionBarActivity {
         mTakePicBtn = (Button)findViewById(R.id.takePicBtn);
         mTakeShotBtn = (Button)findViewById(R.id.takeShotBtn);
         mGLSurfaceView = (FilterGLSurfaceView)findViewById(R.id.myGLSurfaceView);
+        mGLSurfaceView.presetCameraForward(false);
         mSeekBar = (SeekBar)findViewById(R.id.seekBar);
+        mThunbnailView = (ImageView)findViewById(R.id.imagePreview);
 
         mTakePicBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -241,9 +285,73 @@ public class CameraDemoActivity extends ActionBarActivity {
             }
         });
 
-        mGLSurfaceView.presetRecordingSize(600, 800);
+        //第二个参数根据自身需要设置， 将作为 loadImage 第二个参数回传
+        CGENativeLibrary.setLoadImageCallback(loadImageCallback, null);
+
+        Button flashBtn = (Button) findViewById(R.id.flashBtn);
+        flashBtn.setOnClickListener(new View.OnClickListener() {
+            int flashIndex = 0;
+            String[] flashModes = {
+                    Camera.Parameters.FLASH_MODE_AUTO,
+                    Camera.Parameters.FLASH_MODE_ON,
+                    Camera.Parameters.FLASH_MODE_OFF,
+                    Camera.Parameters.FLASH_MODE_TORCH,
+                    Camera.Parameters.FLASH_MODE_RED_EYE,
+            };
+
+            @Override
+            public void onClick(View v) {
+                mGLSurfaceView.setFlashLightMode(flashModes[flashIndex]);
+                ++flashIndex;
+                flashIndex %= flashModes.length;
+            }
+        });
+
+        mGLSurfaceView.presetRecordingSize(480, 640);
         mGLSurfaceView.setZOrderOnTop(false);
         mGLSurfaceView.setZOrderMediaOverlay(true);
+
+        Button pauseBtn = (Button)findViewById(R.id.pauseBtn);
+        Button resumeBtn = (Button)findViewById(R.id.resumeBtn);
+
+        pauseBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mGLSurfaceView.stopPreview();
+            }
+        });
+
+        resumeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mGLSurfaceView.resumePreview();
+            }
+        });
+
+        Button thunbnailBtn = (Button)findViewById(R.id.thunbnailBtn);
+
+        thunbnailBtn.setOnClickListener(new View.OnClickListener() {
+            boolean showThunbnailWindow = false;
+
+            @Override
+            public void onClick(View v) {
+                showThunbnailWindow = !showThunbnailWindow;
+                if (showThunbnailWindow) {
+                    mGLSurfaceView.startThunbnailCliping(100, 120, new FilterGLSurfaceView.TakeThunbnailCallback() {
+                        @Override
+                        public void takeThunbnailOK(Bitmap bmp) {
+                            mThunbnailView.setImageBitmap(bmp);
+                            mThunbnailView.setVisibility(View.VISIBLE);
+                        }
+                    });
+                } else {
+                    mGLSurfaceView.stopThunbnailCliping();
+                    mThunbnailView.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
+        mThunbnailView.setVisibility(View.INVISIBLE);
     }
 
     private View.OnClickListener mFilterSwitchListener = new View.OnClickListener() {
@@ -265,7 +373,6 @@ public class CameraDemoActivity extends ActionBarActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-//        mGLSurfaceView.
     }
 
     @Override
@@ -273,12 +380,7 @@ public class CameraDemoActivity extends ActionBarActivity {
         super.onPause();
         CameraInstance.getInstance().stopCamera();
         Log.i(LOG_TAG, "activity onPause...");
-        mGLSurfaceView.queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                mGLSurfaceView.release(null);
-            }
-        });
+        mGLSurfaceView.release(null);
         mGLSurfaceView.onPause();
     }
 

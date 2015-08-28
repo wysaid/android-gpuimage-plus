@@ -42,14 +42,6 @@ public class CGEFrameRecorder {
         nativeDrawCache(mNativeAddress);
     }
 
-    public void renderResult() {
-        nativeRenderResult(mNativeAddress);
-    }
-
-    public void renderResultWithMask() {
-        nativeRenderResultWithMask(mNativeAddress);
-    }
-
     //set the rotation of the camera texture
     public void setSrcRotation(float rad) {
         nativeSetSrcRotation(mNativeAddress, rad);
@@ -159,9 +151,6 @@ public class CGEFrameRecorder {
 
     private native void nativeRender(ByteBuffer holder, int x, int y, int width, int height);
     private native void nativeDrawCache(ByteBuffer holder);
-
-    private native void nativeRenderResult(ByteBuffer holder);
-    private native void nativeRenderResultWithMask(ByteBuffer holder);
 
     private native void nativeSetSrcRotation(ByteBuffer holder, float rad);
     private native void nativeSetSrcFlipScale(ByteBuffer holder, float x, float y);
