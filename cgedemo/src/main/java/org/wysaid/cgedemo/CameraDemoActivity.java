@@ -33,7 +33,7 @@ public class CameraDemoActivity extends ActionBarActivity {
     private static final String effectConfigs[] = {
             "#unpack @blur lerp 0.5",
             "#unpack @style sketch 0.7",
-            "#unpack @blend ol hehe.jpg 100",
+            "#unpack @krblend ol hehe.jpg 100",
             "#unpack @blend add hehe.jpg 100",
             "#unpack @blend sr hehe.jpg 100",
             "@style min",
