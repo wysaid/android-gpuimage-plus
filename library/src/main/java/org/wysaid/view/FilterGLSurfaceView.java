@@ -113,14 +113,14 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         return CameraInstance.getInstance();
     }
 
-    //在oncreate*之前设置有效
+    //在onSurfaceCreated之前设置有效
     public void presetCameraForward(boolean isBackForward) {
         mIsCameraBackForward = isBackForward;
     }
 
     //注意， 录制的尺寸将影响preview的尺寸
     //这里的width和height表示竖屏尺寸
-    //在oncreate*之前设置有效
+    //在onSurfaceCreated之前设置有效
     public void presetRecordingSize(int width, int height) {
         if(width > maxPreviewWidth || height > maxPreviewHeight) {
             float scaling = Math.min(maxPreviewWidth / (float)width, maxPreviewHeight / (float)height);

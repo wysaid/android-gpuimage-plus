@@ -72,7 +72,8 @@ public class MainActivity extends ActionBarActivity {
 
     private static final DemoClassDescription mDemos[] = new DemoClassDescription[]{
             new DemoClassDescription("FilterDemoActivity", "filterDemo"),
-            new DemoClassDescription("CameraDemoActivity", "cameraDemo")
+            new DemoClassDescription("CameraDemoActivity", "cameraDemo"),
+            new DemoClassDescription("VideoPlayerActivity", "playerDemo")
     };
 
     private LinearLayout mLayout;
