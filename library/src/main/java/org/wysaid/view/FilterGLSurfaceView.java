@@ -44,8 +44,8 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     public int viewWidth;
     public int viewHeight;
 
-    private int mRecordWidth = 640;
-    private int mRecordHeight = 480;
+    private int mRecordWidth = 480;
+    private int mRecordHeight = 640;
 
     private SurfaceTexture mSurfaceTexture;
     private int mTextureID;
@@ -72,11 +72,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     public ClearColor clearColor;
 
-    class DrawViewport {
-        int x, y, width, height;
-    }
-
-    private DrawViewport mDrawViewport;
+    private TextureRenderer.Viewport mDrawViewport;
 
     private boolean mIsUsingMask = false;
 
@@ -214,7 +210,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         });
     }
 
-    public synchronized void setFilterIntensity(final float intensity) {
+    public void setFilterIntensity(final float intensity) {
         queueEvent(new Runnable() {
             @Override
             public void run() {
@@ -228,38 +224,82 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         void setMaskOK(CGEFrameRecorder recorder);
     }
 
-    public synchronized void setMaskBitmap(final Bitmap bmp, final boolean shouldRecycle) {
+    public void setMaskBitmap(final Bitmap bmp, final boolean shouldRecycle) {
         setMaskBitmap(bmp, shouldRecycle, null);
     }
 
     //注意， 当传入的bmp为null时， SetMaskBitmapCallback 不会执行.
-    public synchronized void setMaskBitmap(final Bitmap bmp, final boolean shouldRecycle, final SetMaskBitmapCallback callback) {
+    public void setMaskBitmap(final Bitmap bmp, final boolean shouldRecycle, final SetMaskBitmapCallback callback) {
 
         queueEvent(new Runnable() {
             @Override
             public void run() {
 
-                if(bmp == null) {
+                if (bmp == null) {
                     mFrameRecorder.setMaskTexture(0, 1.0f);
                     mIsUsingMask = false;
                     calcViewport();
-                    return ;
+                    return;
                 }
 
                 int texID = Common.genNormalTextureID(bmp, GLES20.GL_NEAREST, GLES20.GL_CLAMP_TO_EDGE);
 
                 mFrameRecorder.setMaskTexture(texID, bmp.getWidth() / (float) bmp.getHeight());
                 mIsUsingMask = true;
-                mMaskAspectRatio = bmp.getWidth() / (float)bmp.getHeight();
+                mMaskAspectRatio = bmp.getWidth() / (float) bmp.getHeight();
 
-                if(callback != null) {
+                if (callback != null) {
                     callback.setMaskOK(mFrameRecorder);
+                }
+
+                if (shouldRecycle)
+                    bmp.recycle();
+
+                calcViewport();
+            }
+        });
+    }
+
+    public interface SetBackgroundImageCallback {
+        void setBackgroundImageOK();
+    }
+
+    TextureRendererDrawOrigin mBackgroundRenderer;
+    int mBackgroundTexture;
+
+    public void setBackgroundImage(final Bitmap bmp, final boolean shouldRecycle, final SetBackgroundImageCallback callback) {
+
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                if(bmp == null) {
+                    if(mBackgroundRenderer != null)
+                        mBackgroundRenderer.release();
+                    mBackgroundRenderer = null;
+                    if(mBackgroundTexture != 0)
+                        GLES20.glDeleteTextures(1, new int[] {mBackgroundTexture}, 0);
+                    mBackgroundTexture = 0;
+                    if(callback != null)
+                        callback.setBackgroundImageOK();
+                    return;
+                }
+
+                if(mBackgroundTexture != 0) {
+                    GLES20.glDeleteTextures(1, new int[]{mBackgroundTexture}, 0);
+                }
+
+                mBackgroundTexture = Common.genNormalTextureID(bmp, GLES20.GL_NEAREST, GLES20.GL_CLAMP_TO_EDGE);
+
+                if(mBackgroundRenderer == null) {
+                    mBackgroundRenderer = TextureRendererDrawOrigin.create(false);
+                    mBackgroundRenderer.setFlipscale(1.0f, -1.0f);
                 }
 
                 if(shouldRecycle)
                     bmp.recycle();
 
-                calcViewport();
+                if(callback != null)
+                    callback.setBackgroundImageOK();
             }
         });
     }
@@ -311,7 +351,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glDisable(GLES20.GL_STENCIL_TEST);
-//        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
         int texSize[] = new int[1];
 
@@ -347,7 +387,6 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         if(mOnCreateCallback != null) {
             mOnCreateCallback.createOK();
-//            mOnCreateCallback = null;
         }
     }
 
@@ -373,7 +412,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
             w = (int)(viewHeight * scaling);
         }
 
-        mDrawViewport = new DrawViewport();
+        mDrawViewport = new TextureRenderer.Viewport();
 
         mDrawViewport.width = w;
         mDrawViewport.height = h;
@@ -394,12 +433,22 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 queueEvent(new Runnable() {
                     @Override
                     public void run() {
+
                         mFrameRecorder.release();
                         mFrameRecorder = null;
                         GLES20.glDeleteTextures(1, new int[]{mTextureID}, 0);
                         mTextureID = 0;
                         mSurfaceTexture.release();
                         mSurfaceTexture = null;
+                        if(mBackgroundRenderer != null) {
+                            mBackgroundRenderer.release();
+                            mBackgroundRenderer = null;
+                        }
+                        if(mBackgroundTexture != 0) {
+                            GLES20.glDeleteTextures(1, new int[]{mBackgroundTexture}, 0);
+                            mBackgroundTexture = 0;
+                        }
+
                         Log.i(LOG_TAG, "glsurfaceview release...");
                         if(callback != null)
                             callback.releaseOK();
@@ -437,7 +486,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     private long mFramesCount = 0;
     private long mLastTimestamp = 0;
 
-    public synchronized void stopPreview() {
+    public void stopPreview() {
 
         queueEvent(new Runnable() {
             @Override
@@ -499,9 +548,8 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 mThunbnailBuffer.position(0);
                 GLES20.glReadPixels(0, 0, mThunbnailWidth, mThunbnailHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, mThunbnailBuffer);
 
-                synchronized (mThunbnailBmp) {
-                    mThunbnailBmp.copyPixelsFromBuffer(mThunbnailBuffer);
-                }
+                mThunbnailBmp.copyPixelsFromBuffer(mThunbnailBuffer);
+
 
                 post(new Runnable() {
                     @Override
@@ -516,8 +564,13 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         }
 
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-
+        if(mBackgroundRenderer != null) {
+            GLES20.glViewport(0, 0, viewWidth, viewHeight);
+            mBackgroundRenderer.renderTexture(mBackgroundTexture, null);
+        }
+        GLES20.glEnable(GLES20.GL_BLEND);
         mFrameRecorder.render(mDrawViewport.x, mDrawViewport.y, mDrawViewport.width, mDrawViewport.height);
+        GLES20.glDisable(GLES20.GL_BLEND);
 
         if(mLastTimestamp == 0)
             mLastTimestamp = System.currentTimeMillis();
@@ -582,7 +635,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     private Bitmap mThunbnailBmp;
     private TakeThunbnailCallback mTakeThunbnailCallback;
-    private int[] mThunbnailLock = new int[0];
+    private final int[] mThunbnailLock = new int[0];
     private int mThunbnailWidth, mThunbnailHeight;
     private IntBuffer mThunbnailBuffer;
 
@@ -628,7 +681,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         void takePictureOK(Bitmap bmp);
     }
 
-    public synchronized void takeShot(final TakePictureCallback callback) {
+    public void takeShot(final TakePictureCallback callback) {
         takeShot(callback, true);
     }
 

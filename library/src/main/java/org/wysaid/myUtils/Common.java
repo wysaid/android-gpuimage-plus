@@ -78,4 +78,8 @@ public class Common {
         _texParamHelper(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_LINEAR, GLES20.GL_CLAMP_TO_EDGE);
         return texID[0];
     }
+
+    public static void deleteTextureID(int texID) {
+        GLES20.glDeleteTextures(1, new int[]{texID}, 0);
+    }
 }

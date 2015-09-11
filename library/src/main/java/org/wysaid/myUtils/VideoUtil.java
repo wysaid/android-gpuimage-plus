@@ -2,14 +2,10 @@ package org.wysaid.myUtils;
 
 import android.app.Activity;
 import android.content.ContentValues;
-import android.content.Context;
 import android.hardware.Camera;
 import android.os.Build;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.view.Surface;
 
-import java.io.File;
 import java.util.Comparator;
 import java.util.List;
 
@@ -122,10 +118,9 @@ public class VideoUtil {
     public static List<Camera.Size> getResolutionList(Camera camera)
     {
         Camera.Parameters parameters = camera.getParameters();
-        List<Camera.Size> previewSizes = parameters.getSupportedPreviewSizes();
 
 
-        return previewSizes;
+        return parameters.getSupportedPreviewSizes();
     }
 
 //    public static RecorderParameters getRecorderParameter(int currentResolution)

@@ -1,5 +1,6 @@
 package org.wysaid.myUtils;
 
+import android.annotation.SuppressLint;
 import android.opengl.GLES20;
 import android.util.Log;
 
@@ -40,6 +41,7 @@ public class ProgramObject {
         return init(vsh, fsh, 0);
     }
 
+    @SuppressLint("Assert")
     public boolean init(final String vsh, final String fsh, int programID) {
         if(programID == 0)
             programID = GLES20.glCreateProgram();
@@ -165,6 +167,7 @@ public class ProgramObject {
             init(shaderCode, shaderType);
         }
 
+        @SuppressLint("Assert")
         public boolean init(final String shaderCode, final int shaderType) {
             mShaderType = shaderType;
             mShaderID = loadShader(shaderType, shaderCode);

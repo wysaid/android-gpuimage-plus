@@ -39,7 +39,10 @@ public class TextureRendererMask extends TextureRendererDrawOrigin {
             "void main()\n" +
             "{\n" +
             "   gl_FragColor = texture2D(inputImageTexture, texCoord);\n" +
-            "   gl_FragColor *= texture2D(maskTexture, maskCoord).a;\n" +
+            "   vec4 maskColor = texture2D(maskTexture, maskCoord);\n" +
+            //不预乘
+//            "   maskColor.rgb *= maskColor.a;\n" +
+            "   gl_FragColor *= maskColor;\n" +
             "}";
 
     protected static final String MASK_ROTATION_NAME = "maskRotation";

@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.opengl.GLES20;
@@ -17,7 +16,6 @@ import android.util.Log;
 import android.view.Surface;
 
 import org.wysaid.myUtils.Common;
-import org.wysaid.myUtils.FrameBufferObject;
 import org.wysaid.texUtils.TextureRenderer;
 import org.wysaid.texUtils.TextureRendererDrawOrigin;
 import org.wysaid.texUtils.TextureRendererMask;
@@ -48,7 +46,15 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
     private float mDrawerFlipScaleY = 1.0f;
 
     private int mViewWidth = 640;
-    private int mViewheight = 480;
+    private int mViewHeight = 480;
+
+    public int getViewWidth() {
+        return mViewWidth;
+    }
+
+    public int getViewheight() {
+        return mViewHeight;
+    }
 
     private int mVideoWidth = 640;
     private int mVideoHeight = 480;
@@ -103,17 +109,13 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
                 if(bmp == null) {
                     Log.i(LOG_TAG, "Cancel Mask Bitmap!");
+
                     setMaskTexture(0, 1.0f);
-                    mIsUsingMask = false;
-                    if(mDrawer == null || (mDrawer instanceof TextureRendererMask)) {
-                        mDrawer.release();
-                        mDrawer = TextureRendererDrawOrigin.create(true);
-                    }
-                    calcViewport();
 
                     if(callback != null) {
                         callback.unsetMaskOK(mDrawer);
                     }
+
                     return ;
                 }
 
@@ -135,24 +137,34 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
                 }
                 if(shouldRecycle)
                     bmp.recycle();
-                calcViewport();
+
             }
         });
     }
 
     public synchronized void setMaskTexture(int texID, float aspectRatio) {
         Log.i(LOG_TAG, "setMaskTexture... ");
-        mIsUsingMask = true;
 
-        if(!(mDrawer instanceof  TextureRendererMask)) {
-            mDrawer.release();
-            TextureRendererMask drawer = TextureRendererMask.create(true);
-            assert drawer != null : "Drawer Create Failed!";
-            drawer.setMaskTexture(texID);
-            mDrawer = drawer;
+        if(texID == 0) {
+            if(mDrawer instanceof TextureRendererMask) {
+                mDrawer.release();
+                mDrawer = TextureRendererDrawOrigin.create(true);
+            }
+            mIsUsingMask = false;
+        }
+        else {
+            if(!(mDrawer instanceof  TextureRendererMask)) {
+                mDrawer.release();
+                TextureRendererMask drawer = TextureRendererMask.create(true);
+                assert drawer != null : "Drawer Create Failed!";
+                drawer.setMaskTexture(texID);
+                mDrawer = drawer;
+            }
+            mIsUsingMask = true;
         }
 
-        setMaskAspectRatio(aspectRatio);
+        mMaskAspectRatio = aspectRatio;
+        calcViewport();
     }
 
     public synchronized MediaPlayer getPlayer() {
@@ -215,6 +227,9 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         if(mDrawer == null) {
             Log.e(LOG_TAG, "Create Drawer Failed!");
         }
+        if(mOnCreateCallback != null) {
+            mOnCreateCallback.createOK();
+        }
     }
 
     @Override
@@ -222,12 +237,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
         mViewWidth = width;
-        mViewheight = height;
-
-        if(mOnCreateCallback != null) {
-            mOnCreateCallback.createOK();
-            mOnCreateCallback = null;
-        }
+        mViewHeight = height;
 
         calcViewport();
     }
@@ -243,13 +253,12 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
                 public void run() {
                     Log.i(LOG_TAG, "Video player view release run...");
 
-                    synchronized (mPlayer) {
-                        if(mPlayer != null) {
-                            mPlayer.setSurface(null);
-                            mPlayer.stop();
-                            mPlayer.release();
-                            mPlayer = null;
-                        }
+                    if(mPlayer != null) {
+
+                        mPlayer.setSurface(null);
+                        mPlayer.stop();
+                        mPlayer.release();
+                        mPlayer = null;
                     }
 
                     if(mDrawer != null) {
@@ -267,6 +276,8 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
                         mVideoTextureID = 0;
                     }
 
+                    mIsUsingMask = false;
+
                     Log.i(LOG_TAG, "Video player view release OK");
                 }
             });
@@ -276,15 +287,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
     @Override
     public void onPause() {
         Log.i(LOG_TAG, "surfaceview onPause ...");
-        //MediaPlayer无需在OpenGL线程释放， 优先解决避免 BufferQueue Abandoned Problem.
-//        synchronized (mPlayer) {
-//            if(mPlayer != null) {
-//                mPlayer.setSurface(null);
-//                mPlayer.stop();
-//                mPlayer.release();
-//                mPlayer = null;
-//            }
-//        }
+
         super.onPause();
     }
 
@@ -293,7 +296,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-        GLES20.glViewport(0, 0, mViewWidth, mViewheight);
+        GLES20.glViewport(0, 0, mViewWidth, mViewHeight);
 
         if(mSurfaceTexture == null) {
             return;
@@ -334,12 +337,14 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         float scaling;
 
         if(mIsUsingMask) {
+            flushMaskAspectRatio();
             scaling = mMaskAspectRatio;
         } else {
+            mDrawer.setFlipscale(mDrawerFlipScaleX, mDrawerFlipScaleY);
             scaling = mVideoWidth / (float)mVideoHeight;
         }
 
-        float viewRatio = mViewWidth / (float)mViewheight;
+        float viewRatio = mViewWidth / (float) mViewHeight;
         float s = scaling / viewRatio;
 
         int w, h;
@@ -348,14 +353,14 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
             w = mViewWidth;
             h = (int)(mViewWidth / scaling);
         } else {
-            h = mViewheight;
-            w = (int)(mViewheight * scaling);
+            h = mViewHeight;
+            w = (int)(mViewHeight * scaling);
         }
 
         mRenderViewport.width = w;
         mRenderViewport.height = h;
         mRenderViewport.x = (mViewWidth - mRenderViewport.width) / 2;
-        mRenderViewport.y = (mViewheight - mRenderViewport.height) / 2;
+        mRenderViewport.y = (mViewHeight - mRenderViewport.height) / 2;
         Log.i(LOG_TAG, String.format("View port: %d, %d, %d, %d", mRenderViewport.x, mRenderViewport.y, mRenderViewport.width, mRenderViewport.height));
     }
 
@@ -363,10 +368,10 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         mVideoUri = uri;
 
         if (mPlayer != null) {
-            synchronized (mPlayer) {
-                mPlayer.stop();
-                mPlayer.reset();
-            }
+
+            mPlayer.stop();
+            mPlayer.reset();
+
         } else {
             mPlayer = new MediaPlayer();
         }
@@ -399,7 +404,13 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
             public void onPrepared(MediaPlayer mp) {
                 mVideoWidth = mp.getVideoWidth();
                 mVideoHeight = mp.getVideoHeight();
-                calcViewport();
+                queueEvent(new Runnable() {
+                    @Override
+                    public void run() {
+                        calcViewport();
+                    }
+                });
+
                 if (preparedCallback != null) {
                     preparedCallback.playPrepared(mPlayer);
                 } else {
@@ -413,16 +424,15 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         try {
             mPlayer.prepare();
         }catch (Exception e) {
-
+            e.printStackTrace();
         }
 
     }
 
-    private void setMaskAspectRatio(float aspectRatio) {
-        mMaskAspectRatio = aspectRatio;
+    private void flushMaskAspectRatio() {
 
         float dstRatio = mVideoWidth / (float)mVideoHeight;
-        float s = dstRatio / aspectRatio;
+        float s = dstRatio / mMaskAspectRatio;
 
         if(s > 1.0f) {
             mDrawer.setFlipscale(mDrawerFlipScaleX / s, mDrawerFlipScaleY);

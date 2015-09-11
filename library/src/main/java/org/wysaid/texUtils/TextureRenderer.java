@@ -1,5 +1,6 @@
 package org.wysaid.texUtils;
 
+import android.annotation.SuppressLint;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 
@@ -126,6 +127,7 @@ public abstract class TextureRenderer {
         return false;
     }
 
+    @SuppressLint("Assert")
     protected void defaultInitialize() {
         int[] vertexBuffer = new int[1];
         GLES20.glGenBuffers(1, vertexBuffer, 0);

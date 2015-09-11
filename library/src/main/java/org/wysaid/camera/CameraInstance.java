@@ -237,7 +237,7 @@ public class CameraInstance {
         int fpsMax = 0;
 
         for(Integer n : frameRates) {
-            Log.i(LOG_TAG, String.format("Supported frame rate: " + n));
+            Log.i(LOG_TAG, "Supported frame rate: " + n);
             if(fpsMax < n) {
                 fpsMax = n;
             }

@@ -113,7 +113,6 @@ public class TextureRendererLerpBlur extends TextureRendererDrawOrigin {
     private int mSamplerStepLoc = 0;
 
     private int mIntensity = 0;
-    private boolean mShouldUpdateTexture = true;
 
     private float mSampleScaling = 1.0f;
 
@@ -138,7 +137,6 @@ public class TextureRendererLerpBlur extends TextureRendererDrawOrigin {
         mIntensity = intensity;
         if(mIntensity > mLevel)
             mIntensity = mLevel;
-        mShouldUpdateTexture = true;
     }
 
     @Override
