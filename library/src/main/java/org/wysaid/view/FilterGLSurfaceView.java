@@ -583,9 +583,9 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         ++mFramesCount;
         mTimeCount += currentTimestamp - mLastTimestamp;
         mLastTimestamp = currentTimestamp;
-        if(mTimeCount >= 1e3) {
+        if(mTimeCount >= 1000) {
             Log.i(LOG_TAG, String.format("每秒重绘帧率: %d", mFramesCount));
-            mTimeCount -= 1e3;
+            mTimeCount %= 1000;
             mFramesCount = 0;
         }
     }
@@ -625,9 +625,9 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         ++mFramesCount2;
         mTimeCount2 += currentTimestamp - mLastTimestamp2;
         mLastTimestamp2 = currentTimestamp;
-        if(mTimeCount2 >= 1e3) {
+        if(mTimeCount2 >= 1000) {
             Log.i(LOG_TAG, String.format("相机每秒采样率: %d", mFramesCount2));
-            mTimeCount2 -= 1e3;
+            mTimeCount2 %= 1000;
             mFramesCount2 = 0;
         }
     }

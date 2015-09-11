@@ -326,9 +326,9 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         ++mFramesCount2;
         mTimeCount2 += currentTimestamp - mLastTimestamp2;
         mLastTimestamp2 = currentTimestamp;
-        if(mTimeCount2 >= 1e3) {
+        if(mTimeCount2 >= 1000) {
             Log.i(LOG_TAG, String.format("播放帧率: %d", mFramesCount2));
-            mTimeCount2 -= 1e3;
+            mTimeCount2 %= 1000;
             mFramesCount2 = 0;
         }
     }
