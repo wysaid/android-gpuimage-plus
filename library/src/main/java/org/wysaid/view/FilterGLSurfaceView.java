@@ -339,7 +339,8 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         setEGLConfigChooser(8, 8, 8, 8, 8, 0);
         getHolder().setFormat(PixelFormat.RGBA_8888);
         setRenderer(this);
-        setRenderMode(RENDERMODE_WHEN_DIRTY);
+//        setRenderMode(RENDERMODE_WHEN_DIRTY);
+        setRenderMode(RENDERMODE_CONTINUOUSLY);
         setZOrderOnTop(true);
 //        setZOrderMediaOverlay(true);
 
@@ -614,7 +615,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
 //        Log.i(LOG_TAG, "onFrameAvailable...");
 
-        requestRender();
+//        requestRender();
 
         if(mLastTimestamp2 == 0)
             mLastTimestamp2 = System.currentTimeMillis();
