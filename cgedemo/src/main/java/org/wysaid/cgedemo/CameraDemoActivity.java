@@ -1,7 +1,6 @@
 package org.wysaid.cgedemo;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
@@ -18,22 +17,17 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
 import org.wysaid.camera.CameraInstance;
-import org.wysaid.myUtils.Common;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.nativePort.CGEFrameRecorder;
 import org.wysaid.nativePort.CGENativeLibrary;
 import org.wysaid.view.FilterGLSurfaceView;
-
-import java.io.IOException;
-import java.io.InputStream;
-
 
 public class CameraDemoActivity extends ActionBarActivity {
 
     private static final String effectConfigs[] = {
             "#unpack @blur lerp 0.5",
             "#unpack @style sketch 0.7",
-            "#unpack @krblend ol hehe.jpg 100",
+            "#unpack @blend ol hehe.jpg 100",
             "#unpack @blend add hehe.jpg 100",
             "#unpack @blend sr hehe.jpg 100",
             "@style min",
@@ -114,11 +108,7 @@ public class CameraDemoActivity extends ActionBarActivity {
 
     String mCurrentConfig;
 
-    private Button mTakePicBtn;
-    private Button mTakeShotBtn;
-
     private FilterGLSurfaceView mGLSurfaceView;
-    private SeekBar mSeekBar;
     private ImageView mThunbnailView;
 
     public final static String LOG_TAG = FilterGLSurfaceView.LOG_TAG;
@@ -128,37 +118,6 @@ public class CameraDemoActivity extends ActionBarActivity {
         return mCurrentInstance;
     }
 
-
-    CGENativeLibrary.LoadImageCallback loadImageCallback = new CGENativeLibrary.LoadImageCallback() {
-
-        //注意， 这里回传的name不包含任何路径名， 仅为具体的图片文件名如 1.jpg
-        @Override
-        public Bitmap loadImage(String name, Object arg) {
-
-            Log.i(Common.LOG_TAG, "正在加载图片: " + name);
-            AssetManager am = getAssets();
-            InputStream is;
-            try {
-                is = am.open(name);
-            } catch (IOException e) {
-                Log.e(Common.LOG_TAG, "Can not open file " + name);
-                return null;
-            }
-
-            Bitmap bmp = BitmapFactory.decodeStream(is);
-            return bmp;
-        }
-
-        @Override
-        public void loadImageOK(Bitmap bmp, Object arg) {
-            Log.i(Common.LOG_TAG, "加载图片完毕， 可以自行选择 recycle or cache");
-
-            //loadImage结束之后可以马上recycle
-            //唯一不需要马上recycle的应用场景为 多个不同的滤镜都使用到相同的bitmap
-            //那么可以选择缓存起来。
-            bmp.recycle();
-        }
-    };
 
     public class MyButtons extends Button {
 
@@ -175,14 +134,14 @@ public class CameraDemoActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_demo);
 
-        mTakePicBtn = (Button)findViewById(R.id.takePicBtn);
-        mTakeShotBtn = (Button)findViewById(R.id.takeShotBtn);
+        Button takePicBtn = (Button) findViewById(R.id.takePicBtn);
+        Button takeShotBtn = (Button) findViewById(R.id.takeShotBtn);
         mGLSurfaceView = (FilterGLSurfaceView)findViewById(R.id.myGLSurfaceView);
-        mGLSurfaceView.presetCameraForward(false);
-        mSeekBar = (SeekBar)findViewById(R.id.seekBar);
+//        mGLSurfaceView.presetCameraForward(false);
+        SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
         mThunbnailView = (ImageView)findViewById(R.id.imagePreview);
 
-        mTakePicBtn.setOnClickListener(new View.OnClickListener() {
+        takePicBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.i(LOG_TAG, "Taking Picture...");
@@ -200,7 +159,7 @@ public class CameraDemoActivity extends ActionBarActivity {
             }
         });
 
-        mTakeShotBtn.setOnClickListener(new View.OnClickListener() {
+        takeShotBtn.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -228,7 +187,7 @@ public class CameraDemoActivity extends ActionBarActivity {
             layout.addView(button);
         }
 
-        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 float intensity = progress / 100.0f;
@@ -285,9 +244,6 @@ public class CameraDemoActivity extends ActionBarActivity {
             }
         });
 
-        //第二个参数根据自身需要设置， 将作为 loadImage 第二个参数回传
-        CGENativeLibrary.setLoadImageCallback(loadImageCallback, null);
-
         Button flashBtn = (Button) findViewById(R.id.flashBtn);
         flashBtn.setOnClickListener(new View.OnClickListener() {
             int flashIndex = 0;
@@ -307,7 +263,7 @@ public class CameraDemoActivity extends ActionBarActivity {
             }
         });
 
-        mGLSurfaceView.presetRecordingSize(480, 640);
+        mGLSurfaceView.presetRecordingSize(640, 640);
         mGLSurfaceView.setZOrderOnTop(false);
         mGLSurfaceView.setZOrderMediaOverlay(true);
 
@@ -328,7 +284,7 @@ public class CameraDemoActivity extends ActionBarActivity {
             }
         });
 
-        Button thunbnailBtn = (Button)findViewById(R.id.thunbnailBtn);
+        Button thunbnailBtn = (Button) findViewById(R.id.thunbnailBtn);
 
         thunbnailBtn.setOnClickListener(new View.OnClickListener() {
             boolean showThunbnailWindow = false;
@@ -337,7 +293,7 @@ public class CameraDemoActivity extends ActionBarActivity {
             public void onClick(View v) {
                 showThunbnailWindow = !showThunbnailWindow;
                 if (showThunbnailWindow) {
-                    mGLSurfaceView.startThunbnailCliping(100, 120, new FilterGLSurfaceView.TakeThunbnailCallback() {
+                    mGLSurfaceView.startThunbnailCliping(150, 150, new FilterGLSurfaceView.TakeThunbnailCallback() {
                         @Override
                         public void takeThunbnailOK(Bitmap bmp) {
                             mThunbnailView.setImageBitmap(bmp);
@@ -352,6 +308,34 @@ public class CameraDemoActivity extends ActionBarActivity {
         });
 
         mThunbnailView.setVisibility(View.INVISIBLE);
+
+        Button bgBtn = (Button)findViewById(R.id.backgroundBtn);
+        bgBtn.setOnClickListener(new View.OnClickListener() {
+            boolean useBackground = false;
+            Bitmap backgroundBmp;
+
+            @Override
+            public void onClick(View v) {
+                useBackground = !useBackground;
+                if (useBackground) {
+                    if (backgroundBmp == null)
+                        backgroundBmp = BitmapFactory.decodeResource(getResources(), R.drawable.bgview);
+                    mGLSurfaceView.setBackgroundImage(backgroundBmp, false, new FilterGLSurfaceView.SetBackgroundImageCallback() {
+                        @Override
+                        public void setBackgroundImageOK() {
+                            Log.i(LOG_TAG, "Set Background Image OK!");
+                        }
+                    });
+                } else {
+                    mGLSurfaceView.setBackgroundImage(null, false, new FilterGLSurfaceView.SetBackgroundImageCallback() {
+                        @Override
+                        public void setBackgroundImageOK() {
+                            Log.i(LOG_TAG, "Cancel Background Image OK!");
+                        }
+                    });
+                }
+            }
+        });
     }
 
     private View.OnClickListener mFilterSwitchListener = new View.OnClickListener() {

@@ -35,6 +35,13 @@
 
             <Button
                 android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:id="@+id/galleryBtn"
+                android:text="相册"
+                android:layout_alignParentTop="true"/>
+
+            <Button
+                android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:id="@+id/takeShotBtn"
                 android:text="截取画面"/>

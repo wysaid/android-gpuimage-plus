@@ -1,24 +1,21 @@
 package org.wysaid.cgedemo;
 
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import org.wysaid.myUtils.Common;
+import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.nativePort.CGENativeLibrary;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 public class FilterDemoActivity extends ActionBarActivity {
 
@@ -26,11 +23,12 @@ public class FilterDemoActivity extends ActionBarActivity {
     private ImageView _imageView;
 
     private static String[] effectConfig = {
+            "@beautify bilateral 10 4 1 @style haze -0.5 -0.5 1 1 1 @curve RGB(0, 0)(94, 20)(160, 168)(255, 255) @curve R(0, 0)(129, 119)(255, 255)B(0, 0)(135, 151)(255, 255)RGB(0, 0)(146, 116)(255, 255)",
             "#unpack @blur lerp 0.5",
             "#unpack @style sketch 0.7",
-            "#unpack @blend ol hehe.jpg 100",
-            "#unpack @blend add hehe.jpg 100",
-            "#unpack @blend sr hehe.jpg 100",
+            "#unpack @krblend ol hehe.jpg 100",
+            "#unpack @krblend add hehe.jpg 100",
+            "#unpack @krblend sr hehe.jpg 100",
             "@style min",
             "@style max",
             "@beautify bilateral 100 3.9 4 ",
@@ -143,6 +141,16 @@ public class FilterDemoActivity extends ActionBarActivity {
         BitmapDrawable a = (BitmapDrawable)_imageView.getDrawable();
         _bitmap = a.getBitmap();
 
+        Button saveBtn = (Button) findViewById(R.id.saveBtn);
+        saveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BitmapDrawable a = (BitmapDrawable)_imageView.getDrawable();
+                Bitmap bmp = a.getBitmap();
+                ImageUtil.saveBitmap(bmp);
+            }
+        });
+
     }
 
     android.view.View.OnClickListener galleryBtnClickListener = new android.view.View.OnClickListener(){
@@ -155,7 +163,6 @@ public class FilterDemoActivity extends ActionBarActivity {
         }
     };
 
-    @Override
     public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         switch (requestCode)
         {
@@ -190,9 +197,10 @@ public class FilterDemoActivity extends ActionBarActivity {
                     String str = btn.getText().toString();
                     int index = Integer.parseInt(str.substring(6));
                     String config = effectConfig[index];
-                    final Bitmap bmp = Bitmap.createScaledBitmap(_bitmap, _bitmap.getWidth()-1, _bitmap.getHeight(), false);
-                    CGENativeLibrary.filterImage_MultipleEffectsWriteBack(bmp, config, 1.0f);
+                    Bitmap bmp = CGENativeLibrary.filterImage_MultipleEffects(_bitmap, config, 1.0f);
+
                     _imageView.setImageBitmap(bmp);
+//                    bmp.recycle();
                 }
             });
         }

@@ -26,6 +26,8 @@ import org.wysaid.myUtils.Common;
 import org.wysaid.myUtils.FrameBufferObject;
 import org.wysaid.nativePort.CGEFrameRecorder;
 import org.wysaid.nativePort.CGENativeLibrary;
+import org.wysaid.texUtils.TextureRenderer;
+import org.wysaid.texUtils.TextureRendererDrawOrigin;
 
 import java.nio.IntBuffer;
 

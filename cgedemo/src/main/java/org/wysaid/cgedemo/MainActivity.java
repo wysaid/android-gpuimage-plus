@@ -41,8 +41,7 @@ public class MainActivity extends ActionBarActivity {
                 return null;
             }
 
-            Bitmap bmp = BitmapFactory.decodeStream(is);
-            return bmp;
+            return BitmapFactory.decodeStream(is);
         }
 
         @Override
@@ -76,8 +75,6 @@ public class MainActivity extends ActionBarActivity {
             new DemoClassDescription("VideoPlayerActivity", "playerDemo")
     };
 
-    private LinearLayout mLayout;
-
     public class MyButton extends Button implements View.OnClickListener {
         private DemoClassDescription mDemo;
         public void setDemo(DemoClassDescription demo) {
@@ -100,8 +97,13 @@ public class MainActivity extends ActionBarActivity {
                 return ;
             }
 
-            if(cls != null)
-                startActivity(new Intent(MainActivity.this, cls));
+            try {
+                if(cls != null)
+                    startActivity(new Intent(MainActivity.this, cls));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
@@ -110,7 +112,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mLayout = (LinearLayout)findViewById(R.id.buttonLayout);
+        LinearLayout mLayout = (LinearLayout) findViewById(R.id.buttonLayout);
 
         for(DemoClassDescription demo : mDemos) {
             MyButton btn = new MyButton(this);

@@ -25,13 +25,14 @@
             android:layout_gravity="center_horizontal|top" />
 
         <ImageView
-            android:layout_width="100px"
-            android:layout_height="120px"
+            android:layout_width="150px"
+            android:layout_height="150px"
             android:layout_alignParentRight="true"
             android:layout_marginBottom="150dp"
             android:id="@+id/imagePreview"
             android:background="@drawable/bgview"
             android:layout_gravity="right|center_vertical" />
+
     </FrameLayout>
 
     <HorizontalScrollView
@@ -91,6 +92,12 @@
                 android:layout_height="match_parent"
                 android:id="@+id/shapeBtn"
                 android:text="切换风格"/>
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/backgroundBtn"
+                android:text="切换背景"/>
 
         </LinearLayout>
     </HorizontalScrollView>

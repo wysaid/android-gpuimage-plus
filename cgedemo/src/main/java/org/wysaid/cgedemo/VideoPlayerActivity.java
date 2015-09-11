@@ -1,6 +1,7 @@
 package org.wysaid.cgedemo;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
@@ -26,6 +27,9 @@ public class VideoPlayerActivity extends AppCompatActivity {
     VideoPlayerGLSurfaceView mPlayerView;
     Button mShapeBtn;
     Button mTakeshotBtn;
+    Button mGalleryBtn;
+
+    public static final int REQUEST_CODE_PICK_VIDEO = 1;
 
     static class MyButton extends Button implements View.OnClickListener {
 
@@ -138,13 +142,51 @@ public class VideoPlayerActivity extends AppCompatActivity {
                 btn.onClick(btn);
             }
         }
+
+        mGalleryBtn = (Button)findViewById(R.id.galleryBtn);
+        mGalleryBtn.setOnClickListener(galleryBtnClickListener);
+    }
+
+    android.view.View.OnClickListener galleryBtnClickListener = new android.view.View.OnClickListener(){
+
+        @Override
+        public  void onClick(final android.view.View view) {
+            Intent videoPickerIntent = new Intent(Intent.ACTION_GET_CONTENT);
+            videoPickerIntent.setType("video/*");
+            startActivityForResult(videoPickerIntent, REQUEST_CODE_PICK_VIDEO);
+        }
+    };
+
+    public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        switch (requestCode)
+        {
+            case REQUEST_CODE_PICK_VIDEO:
+                if(resultCode == RESULT_OK)
+                {
+
+                    mPlayerView.setVideoUri(data.getData(), new VideoPlayerGLSurfaceView.PlayPreparedCallback() {
+                        @Override
+                        public void playPrepared(MediaPlayer player) {
+                            Log.i(Common.LOG_TAG, "The video is prepared to play");
+                            player.start();
+                        }
+                    }, new VideoPlayerGLSurfaceView.PlayCompletionCallback() {
+                        @Override
+                        public void playComplete(MediaPlayer player) {
+                            Log.i(Common.LOG_TAG, "The video playing is over, restart...");
+                            player.start();
+                        }
+                    });
+                }
+            default: break;
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
         CameraInstance.getInstance().stopCamera();
-        Log.i(mPlayerView.LOG_TAG, "activity onPause...");
+        Log.i(VideoPlayerGLSurfaceView.LOG_TAG, "activity onPause...");
         mPlayerView.release();
         mPlayerView.onPause();
     }
