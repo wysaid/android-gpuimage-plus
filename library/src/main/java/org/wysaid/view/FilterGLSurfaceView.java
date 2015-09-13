@@ -759,6 +759,10 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         assert photoCallback != null : "photoCallback must not be null!!";
 
+        Camera.Parameters params = cameraInstance().getParams();
+        params.setRotation(90);
+        cameraInstance().setParams(params);
+
         cameraInstance().getCameraDevice().takePicture(shutterCallback, null, new Camera.PictureCallback() {
             @Override
             public void onPictureTaken(final byte[] data, Camera camera) {
