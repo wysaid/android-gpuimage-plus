@@ -759,9 +759,14 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         assert photoCallback != null : "photoCallback must not be null!!";
 
-//        Camera.Parameters params = cameraInstance().getParams();
-//        params.setRotation(90);
-//        cameraInstance().setParams(params);
+
+        Camera.Parameters params = cameraInstance().getParams();
+        final Camera.Size sz = params.getPictureSize();
+        if(sz.width != sz.height)
+        {
+            params.setRotation(90);
+            cameraInstance().setParams(params);
+        }
 
         cameraInstance().getCameraDevice().takePicture(shutterCallback, null, new Camera.PictureCallback() {
             @Override
@@ -771,6 +776,8 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
 
                 int width = bmp.getWidth(), height = bmp.getHeight();
+
+                boolean shouldRotate = (sz.width == width && sz.height == height);
 
                 if(width > maxTextureSize || height > maxTextureSize) {
                     float scaling = Math.max(width / (float) maxTextureSize, height / (float) maxTextureSize);
@@ -782,33 +789,59 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                     height = bmp.getHeight();
                 }
 
-                Bitmap bmp2 = Bitmap.createBitmap(height, width, Bitmap.Config.ARGB_8888);
+                Bitmap bmp2;
 
-                Canvas canvas = new Canvas(bmp2);
+                if(shouldRotate)
+                {
+                    bmp2 = Bitmap.createBitmap(height, width, Bitmap.Config.ARGB_8888);
 
-                if (cameraInstance().getFacing() == Camera.CameraInfo.CAMERA_FACING_BACK) {
-                    Matrix mat = new Matrix();
-                    int halfLen = Math.min(width, height) / 2;
-                    mat.setRotate(90, halfLen, halfLen);
-                    canvas.drawBitmap(bmp, mat, null);
-                } else {
-                    Matrix mat = new Matrix();
+                    Canvas canvas = new Canvas(bmp2);
 
-                    if (isFrontMirror) {
-                        mat.postTranslate(-width / 2, -height / 2);
-                        mat.postScale(-1.0f, 1.0f);
-                        mat.postTranslate(width / 2, height / 2);
+                    if (cameraInstance().getFacing() == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                        Matrix mat = new Matrix();
                         int halfLen = Math.min(width, height) / 2;
-                        mat.postRotate(90, halfLen, halfLen);
+                        mat.setRotate(90, halfLen, halfLen);
+                        canvas.drawBitmap(bmp, mat, null);
                     } else {
-                        int halfLen = Math.max(width, height) / 2;
-                        mat.postRotate(-90, halfLen, halfLen);
+                        Matrix mat = new Matrix();
+
+                        if (isFrontMirror) {
+                            mat.postTranslate(-width / 2, -height / 2);
+                            mat.postScale(-1.0f, 1.0f);
+                            mat.postTranslate(width / 2, height / 2);
+                            int halfLen = Math.min(width, height) / 2;
+                            mat.postRotate(90, halfLen, halfLen);
+                        } else {
+                            int halfLen = Math.max(width, height) / 2;
+                            mat.postRotate(-90, halfLen, halfLen);
+                        }
+
+                        canvas.drawBitmap(bmp, mat, null);
                     }
 
-                    canvas.drawBitmap(bmp, mat, null);
-                }
+                    bmp.recycle();
+                } else {
+                    if(cameraInstance().getFacing() == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                        bmp2 = bmp;
+                    } else {
 
-                bmp.recycle();
+                        bmp2 = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                        Canvas canvas = new Canvas(bmp2);
+                        Matrix mat = new Matrix();
+                        if (isFrontMirror) {
+                            mat.postTranslate(-width / 2, -height / 2);
+                            mat.postScale(1.0f, -1.0f);
+                            mat.postTranslate(width / 2, height / 2);
+                        } else {
+                            mat.postTranslate(-width / 2, -height / 2);
+                            mat.postScale(-1.0f, -1.0f);
+                            mat.postTranslate(width / 2, height / 2);
+                        }
+
+                        canvas.drawBitmap(bmp, mat, null);
+                    }
+
+                }
 
                 if (config != null) {
                     CGENativeLibrary.filterImage_MultipleEffectsWriteBack(bmp2, config, intensity);
