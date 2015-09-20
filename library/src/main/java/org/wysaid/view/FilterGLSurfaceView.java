@@ -15,6 +15,7 @@ import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.media.ExifInterface;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
@@ -29,6 +30,9 @@ import org.wysaid.nativePort.CGENativeLibrary;
 import org.wysaid.texUtils.TextureRenderer;
 import org.wysaid.texUtils.TextureRendererDrawOrigin;
 
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.IntBuffer;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -761,23 +765,63 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
 
         Camera.Parameters params = cameraInstance().getParams();
-        final Camera.Size sz = params.getPictureSize();
-        if(sz.width != sz.height)
-        {
-            params.setRotation(90);
-            cameraInstance().setParams(params);
-        }
+
+        params.setRotation(90);
+        cameraInstance().setParams(params);
 
         cameraInstance().getCameraDevice().takePicture(shutterCallback, null, new Camera.PictureCallback() {
             @Override
             public void onPictureTaken(final byte[] data, Camera camera) {
 
-                //默认数据格式已经设置为 JPEG
-                Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
+                Camera.Parameters params = camera.getParameters();
+                Camera.Size sz = params.getPictureSize();
 
-                int width = bmp.getWidth(), height = bmp.getHeight();
+                boolean shouldRotate;
 
-                boolean shouldRotate = (sz.width == width && sz.height == height);
+                Bitmap bmp;
+                int width, height;
+
+                //当拍出相片不为正方形时， 可以判断图片是否旋转
+                if(sz.width != sz.height) {
+                    //默认数据格式已经设置为 JPEG
+                    bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
+                    width = bmp.getWidth();
+                    height = bmp.getHeight();
+                    shouldRotate = (sz.width > sz.height && width > height) || (sz.width < sz.height && width < height);
+                } else {
+
+                    try {
+                        String tmpFilename = mContext.getExternalCacheDir() + "/picture_cache000.jpg";
+                        FileOutputStream fileout = new FileOutputStream(tmpFilename);
+                        BufferedOutputStream bufferOutStream = new BufferedOutputStream(fileout);
+                        bufferOutStream.write(data);
+                        bufferOutStream.flush();
+                        bufferOutStream.close();
+
+                        ExifInterface exifInterface = new ExifInterface(tmpFilename);
+                        int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+                        switch (orientation) {
+                            //被保存图片exif记录只有旋转90度， 和不旋转两种情况
+                            case ExifInterface.ORIENTATION_ROTATE_90:
+                                shouldRotate = true;
+                                break;
+                            default:
+                                shouldRotate = false;
+                                break;
+                        }
+
+                        bmp = BitmapFactory.decodeFile(tmpFilename);
+                        width = bmp.getWidth();
+                        height = bmp.getHeight();
+
+                    } catch (IOException e) {
+                        Log.e(LOG_TAG, "Err when saving bitmap...");
+                        e.printStackTrace();
+                        return;
+                    }
+                }
+
 
                 if(width > maxTextureSize || height > maxTextureSize) {
                     float scaling = Math.max(width / (float) maxTextureSize, height / (float) maxTextureSize);

@@ -35,6 +35,11 @@ public class ImageUtil {
         String path = getPath();
         long currentTime = System.currentTimeMillis();
         String filename = path + "/" + currentTime + ".jpg";
+        saveBitmap(bmp, filename);
+    }
+
+    public static void saveBitmap(Bitmap bmp, String filename) {
+
         Log.i(LOG_TAG, "saving Bitmap : " + filename);
 
         try {
