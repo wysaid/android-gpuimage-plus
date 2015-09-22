@@ -99,6 +99,12 @@
                 android:id="@+id/backgroundBtn"
                 android:text="切换背景"/>
 
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/fitViewBtn"
+                android:text="适应屏幕"/>
+
         </LinearLayout>
     </HorizontalScrollView>
 

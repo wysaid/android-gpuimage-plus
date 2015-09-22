@@ -82,6 +82,13 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     private boolean mIsUsingMask = false;
 
+    private boolean mFitFullView = false;
+
+    public void setFitFullView(boolean fit) {
+        mFitFullView = fit;
+        calcViewport();
+    }
+
     public boolean isUsingMask() {
         return mIsUsingMask;
     }
@@ -411,12 +418,24 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         int w, h;
 
-        if(s > 1.0) {
-            w = viewWidth;
-            h = (int)(viewWidth / scaling);
+        if(mFitFullView) {
+            //撑满全部view(内容大于view)
+            if(s > 1.0) {
+                w = (int)(viewHeight * scaling);
+                h = viewHeight;
+            } else {
+                h = viewWidth;
+                w = (int)(viewWidth / scaling);
+            }
         } else {
-            h = viewHeight;
-            w = (int)(viewHeight * scaling);
+            //显示全部内容(内容小于view)
+            if(s > 1.0) {
+                w = viewWidth;
+                h = (int)(viewWidth / scaling);
+            } else {
+                h = viewHeight;
+                w = (int)(viewHeight * scaling);
+            }
         }
 
         mDrawViewport = new TextureRenderer.Viewport();

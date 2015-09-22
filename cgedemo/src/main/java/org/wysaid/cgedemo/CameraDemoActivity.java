@@ -336,6 +336,16 @@ public class CameraDemoActivity extends ActionBarActivity {
                 }
             }
         });
+
+        Button fitViewBtn = (Button)findViewById(R.id.fitViewBtn);
+        fitViewBtn.setOnClickListener(new View.OnClickListener() {
+            boolean shouldFit = false;
+            @Override
+            public void onClick(View v) {
+                shouldFit = !shouldFit;
+                mGLSurfaceView.setFitFullView(shouldFit);
+            }
+        });
     }
 
     private View.OnClickListener mFilterSwitchListener = new View.OnClickListener() {
