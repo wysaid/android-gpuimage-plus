@@ -78,7 +78,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     public ClearColor clearColor;
 
-    private TextureRenderer.Viewport mDrawViewport;
+    private TextureRenderer.Viewport mDrawViewport = new TextureRenderer.Viewport();
 
     private boolean mIsUsingMask = false;
 
@@ -86,7 +86,8 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     public void setFitFullView(boolean fit) {
         mFitFullView = fit;
-        calcViewport();
+        if(mFrameRecorder != null)
+            calcViewport();
     }
 
     public boolean isUsingMask() {
@@ -437,8 +438,6 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 w = (int)(viewHeight * scaling);
             }
         }
-
-        mDrawViewport = new TextureRenderer.Viewport();
 
         mDrawViewport.width = w;
         mDrawViewport.height = h;

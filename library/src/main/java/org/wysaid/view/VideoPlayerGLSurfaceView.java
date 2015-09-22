@@ -63,7 +63,8 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
     public void setFitFullView(boolean fit) {
         mFitFullView = fit;
-        calcViewport();
+        if(mDrawer != null)
+            calcViewport();
     }
 
     private MediaPlayer mPlayer;
