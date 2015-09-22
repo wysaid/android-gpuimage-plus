@@ -145,6 +145,16 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
         mGalleryBtn = (Button)findViewById(R.id.galleryBtn);
         mGalleryBtn.setOnClickListener(galleryBtnClickListener);
+
+        Button fitViewBtn = (Button)findViewById(R.id.fitViewBtn);
+        fitViewBtn.setOnClickListener(new View.OnClickListener() {
+            boolean shouldFit = false;
+            @Override
+            public void onClick(View v) {
+                shouldFit = !shouldFit;
+                mPlayerView.setFitFullView(shouldFit);
+            }
+        });
     }
 
     android.view.View.OnClickListener galleryBtnClickListener = new android.view.View.OnClickListener(){

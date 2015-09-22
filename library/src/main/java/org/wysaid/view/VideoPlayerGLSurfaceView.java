@@ -59,6 +59,13 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
     private int mVideoWidth = 640;
     private int mVideoHeight = 480;
 
+    private boolean mFitFullView = false;
+
+    public void setFitFullView(boolean fit) {
+        mFitFullView = fit;
+        calcViewport();
+    }
+
     private MediaPlayer mPlayer;
 
     private Context mContext;
@@ -349,12 +356,24 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
         int w, h;
 
-        if(s > 1.0) {
-            w = mViewWidth;
-            h = (int)(mViewWidth / scaling);
+        if(mFitFullView) {
+            //撑满全部view(内容大于view)
+            if(s > 1.0) {
+                w = (int)(mViewHeight * scaling);
+                h = mViewHeight;
+            } else {
+                h = mViewWidth;
+                w = (int)(mViewWidth / scaling);
+            }
         } else {
-            h = mViewHeight;
-            w = (int)(mViewHeight * scaling);
+            //显示全部内容(内容小于view)
+            if(s > 1.0) {
+                w = mViewWidth;
+                h = (int)(mViewWidth / scaling);
+            } else {
+                h = mViewHeight;
+                w = (int)(mViewHeight * scaling);
+            }
         }
 
         mRenderViewport.width = w;
