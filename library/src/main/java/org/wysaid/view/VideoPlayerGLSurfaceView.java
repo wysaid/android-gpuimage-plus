@@ -77,25 +77,36 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         void playPrepared(MediaPlayer player);
     }
 
+    PlayPreparedCallback mPreparedCallback;
+
     public interface PlayCompletionCallback {
         void playComplete(MediaPlayer player);
     }
 
+    PlayCompletionCallback mPlayCompletionCallback;
+
     public synchronized void setVideoUri(final Uri uri, final PlayPreparedCallback preparedCallback, final PlayCompletionCallback completionCallback) {
 
-        queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                Log.i(LOG_TAG, "setVideoUri...");
-                if (mSurfaceTexture == null || mVideoTextureID == 0) {
-                    mVideoTextureID = Common.genSurfaceTextureID();
-                    mSurfaceTexture = new SurfaceTexture(mVideoTextureID);
-                    mSurfaceTexture.setOnFrameAvailableListener(VideoPlayerGLSurfaceView.this);
-                }
+        mVideoUri = uri;
+        mPreparedCallback = preparedCallback;
+        mPlayCompletionCallback = completionCallback;
 
-                _useUri(uri, preparedCallback, completionCallback);
-            }
-        });
+        if(mDrawer != null) {
+
+            queueEvent(new Runnable() {
+                @Override
+                public void run() {
+                    Log.i(LOG_TAG, "setVideoUri...");
+
+                    if (mSurfaceTexture == null || mVideoTextureID == 0) {
+                        mVideoTextureID = Common.genSurfaceTextureID();
+                        mSurfaceTexture = new SurfaceTexture(mVideoTextureID);
+                        mSurfaceTexture.setOnFrameAvailableListener(VideoPlayerGLSurfaceView.this);
+                    }
+                    _useUri();
+                }
+            });
+        }
     }
 
     //根据传入bmp回调不同
@@ -238,6 +249,13 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         if(mOnCreateCallback != null) {
             mOnCreateCallback.createOK();
         }
+
+        if (mVideoUri != null && (mSurfaceTexture == null || mVideoTextureID == 0)) {
+            mVideoTextureID = Common.genSurfaceTextureID();
+            mSurfaceTexture = new SurfaceTexture(mVideoTextureID);
+            mSurfaceTexture.setOnFrameAvailableListener(VideoPlayerGLSurfaceView.this);
+            _useUri();
+        }
     }
 
     @Override
@@ -285,6 +303,8 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
                     }
 
                     mIsUsingMask = false;
+                    mPreparedCallback = null;
+                    mPlayCompletionCallback = null;
 
                     Log.i(LOG_TAG, "Video player view release OK");
                 }
@@ -334,9 +354,9 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         ++mFramesCount2;
         mTimeCount2 += currentTimestamp - mLastTimestamp2;
         mLastTimestamp2 = currentTimestamp;
-        if(mTimeCount2 >= 1000) {
+        if(mTimeCount2 >= 1e3) {
             Log.i(LOG_TAG, String.format("播放帧率: %d", mFramesCount2));
-            mTimeCount2 %= 1000;
+            mTimeCount2 -= 1e3;
             mFramesCount2 = 0;
         }
     }
@@ -384,8 +404,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         Log.i(LOG_TAG, String.format("View port: %d, %d, %d, %d", mRenderViewport.x, mRenderViewport.y, mRenderViewport.width, mRenderViewport.height));
     }
 
-    private void _useUri(Uri uri, final PlayPreparedCallback preparedCallback, final PlayCompletionCallback completionCallback) {
-        mVideoUri = uri;
+    private void _useUri() {
 
         if (mPlayer != null) {
 
@@ -412,8 +431,8 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                if (completionCallback != null) {
-                    completionCallback.playComplete(mPlayer);
+                if (mPlayCompletionCallback != null) {
+                    mPlayCompletionCallback.playComplete(mPlayer);
                 }
                 Log.i(LOG_TAG, "Video Play Over");
             }
@@ -431,8 +450,8 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
                     }
                 });
 
-                if (preparedCallback != null) {
-                    preparedCallback.playPrepared(mPlayer);
+                if (mPreparedCallback != null) {
+                    mPreparedCallback.playPrepared(mPlayer);
                 } else {
                     mp.start();
                 }
