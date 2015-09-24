@@ -77,7 +77,7 @@ public class CameraInstance {
         return mFacing;
     }
 
-    public boolean tryOpenCamera(CameraOpenCallback callback, int facing) {
+    public synchronized boolean tryOpenCamera(CameraOpenCallback callback, int facing) {
         Log.i(LOG_TAG, "try open camera...");
 
         try
@@ -122,7 +122,7 @@ public class CameraInstance {
         return true;
     }
 
-    public void stopCamera() {
+    public synchronized void stopCamera() {
         if(mCameraDevice != null) {
             mIsPreviewing = false;
             mCameraDevice.stopPreview();
@@ -136,7 +136,7 @@ public class CameraInstance {
         return mCameraDevice != null;
     }
 
-    public void startPreview(SurfaceTexture texture) {
+    public synchronized void startPreview(SurfaceTexture texture) {
         Log.i(LOG_TAG, "Camera startPreview...");
         if(mIsPreviewing) {
             Log.e(LOG_TAG, "Err: camera is previewing...");
@@ -156,7 +156,7 @@ public class CameraInstance {
         }
     }
 
-    public void stopPreview() {
+    public synchronized void stopPreview() {
         if(mIsPreviewing && mCameraDevice != null) {
             Log.i(LOG_TAG, "Camera stopPreview...");
             mIsPreviewing = false;
@@ -168,7 +168,7 @@ public class CameraInstance {
         return mCameraDevice.getParameters();
     }
 
-    public void setParams(Camera.Parameters param) {
+    public synchronized void setParams(Camera.Parameters param) {
         mParams = param;
         mCameraDevice.setParameters(mParams);
     }
@@ -277,7 +277,7 @@ public class CameraInstance {
         Log.i(LOG_TAG, String.format("Camera Preview Size: %d x %d", szPrev.width, szPrev.height));
     }
 
-    public void setPictureSize(int width, int height, boolean isBigger) {
+    public synchronized void setPictureSize(int width, int height, boolean isBigger) {
         mParams = mCameraDevice.getParameters();
 
         List<Camera.Size> picSizes = mParams.getSupportedPictureSizes();
