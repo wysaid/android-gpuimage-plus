@@ -113,7 +113,14 @@ public class CameraInstance {
 
         if(mCameraDevice != null) {
             Log.i(LOG_TAG, "Camera opened!");
-            initCamera(DEFAULT_PREVIEW_RATE);
+
+            try {
+                initCamera(DEFAULT_PREVIEW_RATE);
+            } catch (Exception e) {
+                mCameraDevice.release();
+                mCameraDevice = null;
+                return false;
+            }
 
             if (callback != null) {
                 callback.cameraReady();
