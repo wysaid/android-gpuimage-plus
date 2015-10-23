@@ -346,6 +346,17 @@ public class CameraDemoActivity extends ActionBarActivity {
                 mGLSurfaceView.setFitFullView(shouldFit);
             }
         });
+
+        mGLSurfaceView.setOnCreateCallback(new FilterGLSurfaceView.OnCreateCallback() {
+            @Override
+            public void createOver(boolean success) {
+                if(success) {
+                    Log.i(LOG_TAG, "设备启动成功!");
+                } else {
+                    Log.e(LOG_TAG, "设备启动失败! 请检查app权限， 允许使用相机");
+                }
+            }
+        });
     }
 
     private View.OnClickListener mFilterSwitchListener = new View.OnClickListener() {
