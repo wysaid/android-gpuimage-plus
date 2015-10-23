@@ -22,6 +22,8 @@ import java.util.List;
 public class CameraInstance {
     public static final String LOG_TAG = Common.LOG_TAG;
 
+    private static final String ASSERT_MSG = "检测到CameraDevice 为 null! 请检查";
+
     private Camera mCameraDevice;
     private Camera.Parameters mParams;
 
@@ -108,6 +110,7 @@ public class CameraInstance {
         {
             Log.e(LOG_TAG, "Open Camera Failed!");
             e.printStackTrace();
+            mCameraDevice = null;
             return false;
         }
 
@@ -125,8 +128,11 @@ public class CameraInstance {
             if (callback != null) {
                 callback.cameraReady();
             }
+
+            return true;
         }
-        return true;
+
+        return false;
     }
 
     public synchronized void stopCamera() {
@@ -171,13 +177,19 @@ public class CameraInstance {
         }
     }
 
-    public Camera.Parameters getParams() {
-        return mCameraDevice.getParameters();
+    public synchronized Camera.Parameters getParams() {
+        if(mCameraDevice != null)
+            return mCameraDevice.getParameters();
+        assert mCameraDevice != null : ASSERT_MSG;
+        return null;
     }
 
     public synchronized void setParams(Camera.Parameters param) {
-        mParams = param;
-        mCameraDevice.setParameters(mParams);
+        if(mCameraDevice != null) {
+            mParams = param;
+            mCameraDevice.setParameters(mParams);
+        }
+        assert mCameraDevice != null : ASSERT_MSG;
     }
 
     public Camera getCameraDevice() {
@@ -285,7 +297,14 @@ public class CameraInstance {
     }
 
     public synchronized void setPictureSize(int width, int height, boolean isBigger) {
+        assert mCameraDevice != null : ASSERT_MSG;
+
+        if(mCameraDevice == null) {
+            return;
+        }
+
         mParams = mCameraDevice.getParameters();
+
 
         List<Camera.Size> picSizes = mParams.getSupportedPictureSizes();
         Camera.Size picSz = null;

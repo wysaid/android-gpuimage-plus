@@ -383,8 +383,8 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
                 w = (int)(mViewHeight * scaling);
                 h = mViewHeight;
             } else {
-                h = mViewWidth;
-                w = (int)(mViewWidth / scaling);
+                w = mViewWidth;
+                h = (int)(mViewWidth / scaling);
             }
         } else {
             //显示全部内容(内容小于view)

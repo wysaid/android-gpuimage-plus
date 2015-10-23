@@ -151,6 +151,11 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 @Override
                 public void run() {
 
+                    if(mFrameRecorder == null) {
+                        Log.e(LOG_TAG, "Error: switchCamera after release!!");
+                        return;
+                    }
+
                     cameraInstance().stopCamera();
 
                     int facing = mIsCameraBackForward ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
@@ -197,6 +202,9 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         Camera.Parameters parameters = cameraInstance().getParams();
 
+        if(parameters == null)
+            return false;
+
         try {
 
             if(!parameters.getSupportedFlashModes().contains(mode)) {
@@ -218,8 +226,12 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         queueEvent(new Runnable() {
             @Override
             public void run() {
-                assert mFrameRecorder != null && config != null : "Recorder & Config must not be null!";
-                mFrameRecorder.setFilterWidthConfig(config);
+
+                if(mFrameRecorder != null) {
+                    mFrameRecorder.setFilterWidthConfig(config);
+                } else {
+                    Log.e(LOG_TAG, "setFilterWithConfig after release!!");
+                }
             }
         });
     }
@@ -228,8 +240,11 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         queueEvent(new Runnable() {
             @Override
             public void run() {
-                assert mFrameRecorder != null : "Recorder must not be null!";
-                mFrameRecorder.setFilterIntensity(intensity);
+                if(mFrameRecorder != null) {
+                    mFrameRecorder.setFilterIntensity(intensity);
+                } else {
+                    Log.e(LOG_TAG, "setFilterIntensity after release!!");
+                }
             }
         });
     }
@@ -248,6 +263,11 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         queueEvent(new Runnable() {
             @Override
             public void run() {
+
+                if(mFrameRecorder == null) {
+                    Log.e(LOG_TAG, "setMaskBitmap after release!!");
+                    return;
+                }
 
                 if (bmp == null) {
                     mFrameRecorder.setMaskTexture(0, 1.0f);
@@ -286,6 +306,12 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         queueEvent(new Runnable() {
             @Override
             public void run() {
+
+                if(mFrameRecorder == null) {
+                    Log.e(LOG_TAG, "setBackgroundImage after reelase!!");
+                    return;
+                }
+
                 if(bmp == null) {
                     if(mBackgroundRenderer != null)
                         mBackgroundRenderer.release();
@@ -319,7 +345,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     }
 
     public interface OnCreateCallback {
-        void createOK();
+        void createOver(boolean success);
     }
 
     private OnCreateCallback mOnCreateCallback;
@@ -337,7 +363,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
             queueEvent(new Runnable() {
                 @Override
                 public void run() {
-                    callback.createOK();
+                    callback.createOver(cameraInstance().getCameraDevice() != null);
                 }
             });
         }
@@ -392,20 +418,18 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
             int facing = mIsCameraBackForward ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
 
-            cameraInstance().tryOpenCamera(new CameraInstance.CameraOpenCallback() {
-                @Override
-                public void cameraReady() {
-                    Log.i(LOG_TAG, "tryOpenCamera OK...");
-                }
-            }, facing);
+            if(!cameraInstance().tryOpenCamera(null, facing)) {
+                Log.e(LOG_TAG, "相机启动失败!!");
+            }
         }
 
         if(mOnCreateCallback != null) {
-            mOnCreateCallback.createOK();
+            mOnCreateCallback.createOver(cameraInstance().getCameraDevice() != null);
         }
     }
 
     private void calcViewport() {
+
         float scaling;
 
         if(mIsUsingMask) {
@@ -425,8 +449,8 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 w = (int)(viewHeight * scaling);
                 h = viewHeight;
             } else {
-                h = viewWidth;
-                w = (int)(viewWidth / scaling);
+                w = viewWidth;
+                h = (int)(viewWidth / scaling);
             }
         } else {
             //显示全部内容(内容小于view)
@@ -522,6 +546,11 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     }
 
     public synchronized void resumePreview() {
+
+        if(mFrameRecorder == null) {
+            Log.e(LOG_TAG, "resumePreview after release!!");
+            return;
+        }
 
         if(!cameraInstance().isCameraOpened()) {
 
@@ -728,7 +757,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 IntBuffer buffer;
                 Bitmap bmp;
 
-                if(noMask || !mIsUsingMask) {
+                if (noMask || !mIsUsingMask) {
 
                     bufferTexID = Common.genBlankTextureID(mRecordWidth, mRecordHeight);
                     frameBufferObject.bindTexture(bufferTexID);
@@ -780,7 +809,6 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     public synchronized void takePicture(final TakePictureCallback photoCallback, Camera.ShutterCallback shutterCallback, final String config, final float intensity, final boolean isFrontMirror) {
 
         assert photoCallback != null : "photoCallback must not be null!!";
-
 
         Camera.Parameters params = cameraInstance().getParams();
 

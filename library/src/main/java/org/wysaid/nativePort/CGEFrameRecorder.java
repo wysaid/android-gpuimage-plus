@@ -24,72 +24,89 @@ public class CGEFrameRecorder {
     //dstWidth/dstHeight should not be changed after "init()" is called.
     //srcWidth/srcHeight could be changed by calling "srcResize" function.
     public boolean init(int srcWidth, int srcHeight, int dstWidth, int dstHeight) {
-        return nativeInit(mNativeAddress, srcWidth, srcHeight, dstWidth, dstHeight);
+        if(mNativeAddress != null)
+            return nativeInit(mNativeAddress, srcWidth, srcHeight, dstWidth, dstHeight);
+        return false;
     }
 
     //Will effect the framebuffer
     public void update(int externalTexture, float[] transformMatrix) {
-        nativeUpdate(mNativeAddress, externalTexture, transformMatrix);
+        if(mNativeAddress != null)
+            nativeUpdate(mNativeAddress, externalTexture, transformMatrix);
     }
 
     //Won't effect the framebuffer
     //the arguments means the viewport.
     public void render(int x, int y, int width, int height) {
-        nativeRender(mNativeAddress, x, y, width, height);
+        if(mNativeAddress != null)
+            nativeRender(mNativeAddress, x, y, width, height);
     }
 
     public void drawCache() {
-        nativeDrawCache(mNativeAddress);
+        if(mNativeAddress != null)
+            nativeDrawCache(mNativeAddress);
     }
 
     //set the rotation of the camera texture
     public void setSrcRotation(float rad) {
-        nativeSetSrcRotation(mNativeAddress, rad);
+        if(mNativeAddress != null)
+            nativeSetSrcRotation(mNativeAddress, rad);
     }
 
     //set the flip/scaling for the camera texture
     public void setSrcFlipScale(float x, float y) {
-        nativeSetSrcFlipScale(mNativeAddress, x, y);
+        if(mNativeAddress != null)
+            nativeSetSrcFlipScale(mNativeAddress, x, y);
     }
 
     //set the render result's rotation
     public void setRenderRotation(float rad) {
-        nativeSetRenderRotation(mNativeAddress, rad);
+        if(mNativeAddress != null)
+            nativeSetRenderRotation(mNativeAddress, rad);
     }
 
     //set the render result's flip/scaling
     public void setRenderFlipScale(float x, float y) {
-        nativeSetRenderFlipScale(mNativeAddress, x, y);
+        if(mNativeAddress != null)
+            nativeSetRenderFlipScale(mNativeAddress, x, y);
     }
 
     //initialize the filters width config string
     public void setFilterWidthConfig(final String config) {
-        nativeSetFilterWidthConfig(mNativeAddress, config);
+        if(mNativeAddress != null)
+            nativeSetFilterWidthConfig(mNativeAddress, config);
     }
 
     //set the mask rotation (radian)
     public void setMaskRotation(float rot) {
-        nativeSetMaskRotation(mNativeAddress, rot);
+        if(mNativeAddress != null)
+            nativeSetMaskRotation(mNativeAddress, rot);
     }
 
     //set the mask flipscale
     public void setMaskFlipScale(float x, float y) {
-        nativeSetMaskFlipScale(mNativeAddress, x, y);
+        if(mNativeAddress != null)
+            nativeSetMaskFlipScale(mNativeAddress, x, y);
+
     }
 
 
     //set the intensity of the filter
     public void setFilterIntensity(float value) {
-        nativeSetFilterIntensity(mNativeAddress, value);
+        if(mNativeAddress != null)
+            nativeSetFilterIntensity(mNativeAddress, value);
     }
 
     public void srcResize(int width, int height) {
-        nativeSrcResize(mNativeAddress, width, height);
+        if(mNativeAddress != null)
+            nativeSrcResize(mNativeAddress, width, height);
     }
 
     public  void release() {
-        nativeRelease(mNativeAddress);
-        mNativeAddress = null;
+        if(mNativeAddress != null) {
+            nativeRelease(mNativeAddress);
+            mNativeAddress = null;
+        }
     }
 
     /////////////////视频录制相关////////////////////
@@ -132,15 +149,19 @@ public class CGEFrameRecorder {
 //    }
 
     public void setMaskTexture(int texID, float aspectRatio) {
-        nativeSetMaskTexture(mNativeAddress, texID, aspectRatio);
+        if(mNativeAddress != null)
+            nativeSetMaskTexture(mNativeAddress, texID, aspectRatio);
     }
 
     public void setMaskTextureRatio(float aspectRatio) {
-        nativeSetMaskTextureRatio(mNativeAddress, aspectRatio);
+        if(mNativeAddress != null)
+            nativeSetMaskTextureRatio(mNativeAddress, aspectRatio);
     }
 
     public int queryBufferTexture() {
-        return nativeQueryBufferTexture(mNativeAddress);
+        if(mNativeAddress != null)
+            return nativeQueryBufferTexture(mNativeAddress);
+        return 0;
     }
 
     /////////////////      private         ///////////////////////
