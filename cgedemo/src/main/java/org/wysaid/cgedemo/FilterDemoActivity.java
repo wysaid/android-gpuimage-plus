@@ -23,14 +23,27 @@ public class FilterDemoActivity extends ActionBarActivity {
     private ImageView _imageView;
 
     private static String[] effectConfig = {
-            "@beautify bilateral 10 4 1 @style haze -0.5 -0.5 1 1 1 @curve RGB(0, 0)(94, 20)(160, 168)(255, 255) @curve R(0, 0)(129, 119)(255, 255)B(0, 0)(135, 151)(255, 255)RGB(0, 0)(146, 116)(255, 255)",
-            "#unpack @blur lerp 0.5",
-            "#unpack @style sketch 0.7",
-            "#unpack @krblend ol hehe.jpg 100",
-            "#unpack @krblend add hehe.jpg 100",
-            "#unpack @krblend sr hehe.jpg 100",
+            "",
+            "#unpack @blur lerp 0.75",
+            "#unpack @style sketch 0.9",
+            "@beautify bilateral 100 3.5 2 ",
+            "@style crosshatch 0.01 0.003 ",
+            "@style edge 1 2 ",
+            "@style edge 1 2 @curve RGB(0, 255)(255, 0) ",
+            "@style edge 1 2 @curve RGB(0, 255)(255, 0) @adjust saturation 0 @adjust level 0.33 0.71 0.93 ",
+            "@adjust level 0.31 0.54 0.13 ",
+            "#unpack @style emboss 1 2 2 ",
+            "@style halftone 1.2 ",
+            "@vigblend overlay 255 0 0 255 100 0.12 0.54 0.5 0.5 3 ",
+            "@curve R(0, 0)(63, 101)(200, 84)(255, 255)G(0, 0)(86, 49)(180, 183)(255, 255)B(0, 0)(19, 17)(66, 41)(97, 92)(137, 156)(194, 211)(255, 255)RGB(0, 0)(82, 36)(160, 183)(255, 255) ",
+            "@adjust exposure 0.98 ",
+            "@adjust shadowhighlight -200 200 ",
+            "@adjust sharpen 10 1.5 ",
+            "@adjust colorbalance 0.99 0.52 -0.31 ",
+            "@adjust level 0.66 0.23 0.44 ",
             "@style min",
             "@style max",
+            "@style haze 0.5 -0.14 1 0.8 1 ",
             "@beautify bilateral 100 3.9 4 ",
             "@beautify bilateral 100 3.5 2 @adjust saturation 0 @adjust level 0.1 0.8 0.57 ",
             "@beautify bilateral 100 3.5 2 @adjust saturation 0 @style edge 1 1 @curve RGB(0, 255)(255, 0) @adjust level 0.37 0.56 0.55 ",
@@ -44,7 +57,7 @@ public class FilterDemoActivity extends ActionBarActivity {
             "@curve R(0, 0)(149, 145)(255, 255)G(0, 0)(149, 145)(255, 255)B(0, 0)(149, 145)(255, 255) @pixblend colordodge 0.937 0.482 0.835 1 20",//421
             "@curve G(0, 0)(101, 127)(255, 255) @pixblend colordodge 0.937 0.482 0.835 1 20"   ,//422
             "@curve B(0, 0)(70, 87)(140, 191)(255, 255) @pixblend pinlight 0.247 0.49 0.894 1 20"   ,//423
-            "@curve R(0, 0)(53, 28)(172, 203)(255, 255) @blend softlight e424_t.jpg 20"   ,//424
+            "@curve R(0, 0)(53, 28)(172, 203)(255, 255)"   ,//424
             "@adjust saturation 0.7 @pixblend screen 0.8112 0.243 1 1 40"   ,//425
             "@adjust saturation 0.7 @pixblend screen 1 0.243 0.69 1 30"   ,//426
 
@@ -57,7 +70,7 @@ public class FilterDemoActivity extends ActionBarActivity {
             "@curve R(0, 0)(149, 145)(255, 255)G(0, 0)(149, 145)(255, 255)B(0, 0)(149, 145)(255, 255) @pixblend colordodge 0.937 0.482 0.835 1 20",//421
             "@curve G(0, 0)(101, 127)(255, 255) @pixblend colordodge 0.937 0.482 0.835 1 20"   ,//422
             "@curve B(0, 0)(70, 87)(140, 191)(255, 255) @pixblend pinlight 0.247 0.49 0.894 1 20"   ,//423
-            "@curve R(0, 0)(53, 28)(172, 203)(255, 255) @blend softlight e424_t.jpg 20"   ,//424
+            "@curve R(0, 0)(53, 28)(172, 203)(255, 255)"   ,//424
             "@adjust saturation 0.7 @pixblend screen 0.8112 0.243 1 1 40"   ,//425
             "@adjust saturation 0.7 @pixblend screen 1 0.243 0.69 1 30"   ,//426
 

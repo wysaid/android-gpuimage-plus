@@ -15,23 +15,37 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import org.wysaid.camera.CameraInstance;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.nativePort.CGEFrameRecorder;
-import org.wysaid.nativePort.CGENativeLibrary;
 import org.wysaid.view.FilterGLSurfaceView;
 
 public class CameraDemoActivity extends ActionBarActivity {
 
     private static final String effectConfigs[] = {
-            "#unpack @blur lerp 0.5",
-            "#unpack @style sketch 0.7",
-            "#unpack @blend ol hehe.jpg 100",
-            "#unpack @blend add hehe.jpg 100",
-            "#unpack @blend sr hehe.jpg 100",
+            "",
+            "#unpack @blur lerp 0.75",
+            "#unpack @style sketch 0.9",
+            "@beautify bilateral 100 3.5 2 ",
+            "@style crosshatch 0.01 0.003 ",
+            "@style edge 1 2 ",
+            "@style edge 1 2 @curve RGB(0, 255)(255, 0) ",
+            "@style edge 1 2 @curve RGB(0, 255)(255, 0) @adjust saturation 0 @adjust level 0.33 0.71 0.93 ",
+            "@adjust level 0.31 0.54 0.13 ",
+            "#unpack @style emboss 1 2 2 ",
+            "@style halftone 1.2 ",
+            "@vigblend overlay 255 0 0 255 100 0.12 0.54 0.5 0.5 3 ",
+            "@curve R(0, 0)(63, 101)(200, 84)(255, 255)G(0, 0)(86, 49)(180, 183)(255, 255)B(0, 0)(19, 17)(66, 41)(97, 92)(137, 156)(194, 211)(255, 255)RGB(0, 0)(82, 36)(160, 183)(255, 255) ",
+            "@adjust exposure 0.98 ",
+            "@adjust shadowhighlight -200 200 ",
+            "@adjust sharpen 10 1.5 ",
+            "@adjust colorbalance 0.99 0.52 -0.31 ",
+            "@adjust level 0.66 0.23 0.44 ",
             "@style min",
             "@style max",
+            "@style haze 0.5 -0.14 1 0.8 1 ",
             "@curve R(0, 0)(71, 74)(164, 165)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20"   ,//415
             "@curve G(0, 0)(144, 166)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20"   ,//416
             "@curve B(0, 0)(68, 72)(149, 184)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20"   ,//417
@@ -118,6 +132,9 @@ public class CameraDemoActivity extends ActionBarActivity {
         return mCurrentInstance;
     }
 
+    private void showText(String s) {
+        Toast.makeText(CameraDemoActivity.this, s, Toast.LENGTH_LONG).show();
+    }
 
     public class MyButtons extends Button {
 
@@ -137,14 +154,14 @@ public class CameraDemoActivity extends ActionBarActivity {
         Button takePicBtn = (Button) findViewById(R.id.takePicBtn);
         Button takeShotBtn = (Button) findViewById(R.id.takeShotBtn);
         mGLSurfaceView = (FilterGLSurfaceView)findViewById(R.id.myGLSurfaceView);
-//        mGLSurfaceView.presetCameraForward(false);
+        mGLSurfaceView.presetCameraForward(false);
         SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
         mThunbnailView = (ImageView)findViewById(R.id.imagePreview);
 
         takePicBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i(LOG_TAG, "Taking Picture...");
+                showText("Taking Picture...");
 
                 mGLSurfaceView.takePicture(new FilterGLSurfaceView.TakePictureCallback() {
                     @Override
@@ -152,8 +169,9 @@ public class CameraDemoActivity extends ActionBarActivity {
                         if (bmp != null) {
                             ImageUtil.saveBitmap(bmp);
                             bmp.recycle();
+                            showText("Take picture success!");
                         } else
-                            Log.e(LOG_TAG, "Take picture failed!");
+                            showText("Take picture failed!");
                     }
                 }, null, mCurrentConfig, 1.0f, true);
             }
@@ -163,7 +181,7 @@ public class CameraDemoActivity extends ActionBarActivity {
 
             @Override
             public void onClick(View v) {
-                Log.i(LOG_TAG, "Taking Shot...");
+                showText("Taking Shot...");
 
                 mGLSurfaceView.takeShot(new FilterGLSurfaceView.TakePictureCallback() {
                     @Override
@@ -171,8 +189,9 @@ public class CameraDemoActivity extends ActionBarActivity {
                         if (bmp != null) {
                             ImageUtil.saveBitmap(bmp);
                             bmp.recycle();
+                            showText("Take Shot success!");
                         } else
-                            Log.e(LOG_TAG, "Take Shot failed!");
+                            showText("Take Shot failed!");
                     }
                 }, false);
             }
@@ -267,6 +286,17 @@ public class CameraDemoActivity extends ActionBarActivity {
         mGLSurfaceView.setZOrderOnTop(false);
         mGLSurfaceView.setZOrderMediaOverlay(true);
 
+        mGLSurfaceView.setOnCreateCallback(new FilterGLSurfaceView.OnCreateCallback() {
+            @Override
+            public void createOver(boolean success) {
+                if(success) {
+                    Log.i(LOG_TAG, "view 创建成功");
+                } else {
+                    Log.e(LOG_TAG, "view 创建失败!");
+                }
+            }
+        });
+
         Button pauseBtn = (Button)findViewById(R.id.pauseBtn);
         Button resumeBtn = (Button)findViewById(R.id.resumeBtn);
 
@@ -313,12 +343,11 @@ public class CameraDemoActivity extends ActionBarActivity {
         bgBtn.setOnClickListener(new View.OnClickListener() {
             boolean useBackground = false;
             Bitmap backgroundBmp;
-
             @Override
             public void onClick(View v) {
                 useBackground = !useBackground;
-                if (useBackground) {
-                    if (backgroundBmp == null)
+                if(useBackground) {
+                    if(backgroundBmp == null)
                         backgroundBmp = BitmapFactory.decodeResource(getResources(), R.drawable.bgview);
                     mGLSurfaceView.setBackgroundImage(backgroundBmp, false, new FilterGLSurfaceView.SetBackgroundImageCallback() {
                         @Override
