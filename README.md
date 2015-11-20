@@ -14,10 +14,10 @@ GPU accelerated filters for Android based on OpenGL.
 ## Screen Shots ##
 
 ![Android-GPUImage-plus](https://raw.githubusercontent.com/wysaid/android-gpuimage-plus/master/screenshots/0.jpg "Android-GPUImage-plus")
-<br>单张图片滤镜
+<br/>单张图片滤镜
 
 ![Android-GPUImage-plus](https://raw.githubusercontent.com/wysaid/android-gpuimage-plus/master/screenshots/1.jpg "Android-GPUImage-plus")
-<br>相机滤镜
+<br/>相机滤镜
 
 ![Android-GPUImage-plus](https://raw.githubusercontent.com/wysaid/android-gpuimage-plus/master/screenshots/2.jpg "Android-GPUImage-plus")
-<br>播放器滤镜
+<br/>播放器滤镜
