@@ -1,8 +1,15 @@
-package org.wysaid.cgedemo;
+package org.wysaid.cgeDemo;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.FaceDetector;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +19,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import org.wysaid.myUtils.Common;
 import org.wysaid.myUtils.ImageUtil;
@@ -164,6 +172,48 @@ public class FilterDemoActivity extends ActionBarActivity {
             }
         });
 
+        Button faceDetectionBtn = (Button)findViewById(R.id.faceDetectionBtn);
+        faceDetectionBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(Common.LOG_TAG, "人脸检测中");
+                BitmapDrawable a = (BitmapDrawable)_imageView.getDrawable();
+                Bitmap bmp = a.getBitmap().copy(Bitmap.Config.RGB_565, true);
+
+                ImageUtil.FaceRects rects = ImageUtil.findFaceByBitmap(bmp, 8);
+
+                if(rects == null) {
+                    Toast.makeText(FilterDemoActivity.this, "未知错误", Toast.LENGTH_LONG);
+                    return;
+                }
+
+                if(rects.numOfFaces > 0) {
+                    String content = "";
+
+                    Canvas canvas = new Canvas(bmp);
+                    Paint paint = new Paint();
+                    paint.setColor(Color.RED);
+                    paint.setStyle(Paint.Style.STROKE);
+                    paint.setStrokeWidth(4);
+
+                    for(int i = 0; i != rects.numOfFaces; ++i) {
+                        FaceDetector.Face face = rects.faces[i];
+                        PointF pnt = new PointF();
+                        face.getMidPoint(pnt);
+                        float eyeDis = face.eyesDistance();
+                        content += String.format("准确率: %g, 人脸中心 %g, %g, 眼间距: %g\n", face.confidence(), pnt.x, pnt.y, eyeDis);
+                        canvas.drawRect((int) (pnt.x - eyeDis * 1.5f), (int) (pnt.y - eyeDis * 1.5f), (int) (pnt.x + eyeDis * 1.5f), (int) (pnt.y + eyeDis * 1.5f), paint);
+                    }
+
+                    Toast.makeText(FilterDemoActivity.this, content, Toast.LENGTH_SHORT).show();
+                    _imageView.setImageBitmap(bmp);
+                } else {
+                    Log.i(Common.LOG_TAG, "未发现人脸");
+                    Toast.makeText(FilterDemoActivity.this, "未发现人脸", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
     }
 
     android.view.View.OnClickListener galleryBtnClickListener = new android.view.View.OnClickListener(){
@@ -182,18 +232,29 @@ public class FilterDemoActivity extends ActionBarActivity {
             case REQUEST_CODE_PICK_IMAGE:
                 if(resultCode == RESULT_OK)
                 {
-                    _imageView.setImageURI(data.getData());
-                    _bitmap = ((BitmapDrawable)_imageView.getDrawable()).getBitmap();
-                    int w = _bitmap.getWidth();
-                    int h = _bitmap.getHeight();
-                    float s = Math.max(w / 2048.0f, h / 2048.0f);
-                    if(s > 1.0f)
-                    {
-                        w /= s;
-                        h /= s;
+                    try {
+                        _imageView.setImageURI(data.getData());
+                        Bitmap bmp = ((BitmapDrawable)_imageView.getDrawable()).getBitmap();
+
+                        int w = bmp.getWidth();
+                        int h = bmp.getHeight();
+                        float s = Math.max(w / 2048.0f, h / 2048.0f);
+
+                        if(s > 1.0f) {
+                            w /= s;
+                            h /= s;
+                            _bitmap = Bitmap.createScaledBitmap(bmp, w, h, false);
+                        } else {
+                            _bitmap = bmp;
+                        }
+
+                        _imageView.setImageBitmap(_bitmap);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Error: 未能打开图片", Toast.LENGTH_LONG).show();
                     }
-                    _bitmap = Bitmap.createScaledBitmap(_bitmap, w, h, false);
-                    _imageView.setImageBitmap(_bitmap);
+
                 }
             default:break;
         }
