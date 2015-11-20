@@ -1,6 +1,7 @@
 package org.wysaid.myUtils;
 
 import android.graphics.Bitmap;
+import android.media.FaceDetector;
 import android.os.Environment;
 import android.util.Log;
 
@@ -17,7 +18,7 @@ public class ImageUtil {
     public static final String LOG_TAG = Common.LOG_TAG;
     public static final File parentPath = Environment.getExternalStorageDirectory();
     public static String storagePath = null;
-    public static final String DST_FOLDER = "cgeDemo";
+    public static final String DST_FOLDER = "libCGE";
 
     public static String getPath() {
         if(storagePath == null) {
@@ -56,6 +57,49 @@ public class ImageUtil {
 
         Log.i(LOG_TAG, "Bitmap " + filename + " saved!");
     }
+
+    public static class FaceRects {
+        public int numOfFaces; // 实际检测出的人脸数
+        public FaceDetector.Face[] faces; // faces.length >= numOfFaces
+    }
+
+    public static FaceRects findFaceByBitmap(Bitmap bmp) {
+        return findFaceByBitmap(bmp, 1);
+    }
+
+    public static FaceRects findFaceByBitmap(Bitmap bmp, int maxFaces) {
+
+        if(bmp == null) {
+            Log.e(LOG_TAG, "Invalid Bitmap for Face Detection!");
+            return null;
+        }
+
+        Bitmap newBitmap = bmp;
+
+        //人脸检测API 仅支持 RGB_565 格式当图像. (for now)
+        if(newBitmap.getConfig() != Bitmap.Config.RGB_565) {
+            newBitmap = newBitmap.copy(Bitmap.Config.RGB_565, false);
+        }
+
+        FaceRects rects = new FaceRects();
+        rects.faces = new FaceDetector.Face[maxFaces];
+
+        try {
+            FaceDetector detector = new FaceDetector(newBitmap.getWidth(), newBitmap.getHeight(), maxFaces);
+            rects.numOfFaces = detector.findFaces(newBitmap, rects.faces);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "findFaceByBitmap error: " + e.getMessage());
+            return null;
+        }
+
+
+        if(newBitmap != bmp) {
+            newBitmap.recycle();
+        }
+        return rects;
+    }
+
+
 
 }
 
