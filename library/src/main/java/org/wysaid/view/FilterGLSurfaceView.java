@@ -119,7 +119,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         });
     }
 
-    private CameraInstance cameraInstance() {
+    public CameraInstance cameraInstance() {
         return CameraInstance.getInstance();
     }
 
@@ -159,8 +159,9 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                     cameraInstance().stopCamera();
 
                     int facing = mIsCameraBackForward ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
-                        mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
-                        mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
+
+                    mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
+                    mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
 
                     if (mIsUsingMask) {
                         mFrameRecorder.setMaskTextureRatio(mMaskAspectRatio);
@@ -181,6 +182,13 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 }
             });
         }
+    }
+
+    //注意， focusAtPoint 会强制 focus mode 为 FOCUS_MODE_AUTO
+    //如果有自定义的focus mode， 请在 AutoFocusCallback 里面重设成所需的focus mode。
+    //x,y 取值范围: [0, 1]， 一般为 touchEventPosition / viewSize.
+    public void focusAtPoint(float x, float y, Camera.AutoFocusCallback focusCallback) {
+        cameraInstance().focusAtPoint(y, 1.0f - x, focusCallback);
     }
 
     // 参数为
@@ -307,38 +315,39 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
             @Override
             public void run() {
 
-                if(mFrameRecorder == null) {
+                if (mFrameRecorder == null) {
                     Log.e(LOG_TAG, "setBackgroundImage after reelase!!");
                     return;
                 }
 
-                if(bmp == null) {
-                    if(mBackgroundRenderer != null)
+                if (bmp == null) {
+                    if (mBackgroundRenderer != null)
                         mBackgroundRenderer.release();
                     mBackgroundRenderer = null;
-                    if(mBackgroundTexture != 0)
-                        GLES20.glDeleteTextures(1, new int[] {mBackgroundTexture}, 0);
+                    if (mBackgroundTexture != 0)
+                        GLES20.glDeleteTextures(1, new int[]{mBackgroundTexture}, 0);
                     mBackgroundTexture = 0;
-                    if(callback != null)
+                    if (callback != null)
                         callback.setBackgroundImageOK();
                     return;
                 }
 
-                if(mBackgroundTexture != 0) {
+                if (mBackgroundTexture != 0) {
                     GLES20.glDeleteTextures(1, new int[]{mBackgroundTexture}, 0);
                 }
 
                 mBackgroundTexture = Common.genNormalTextureID(bmp, GLES20.GL_NEAREST, GLES20.GL_CLAMP_TO_EDGE);
 
-                if(mBackgroundRenderer == null) {
+                if (mBackgroundRenderer == null) {
                     mBackgroundRenderer = TextureRendererDrawOrigin.create(false);
-                    mBackgroundRenderer.setFlipscale(1.0f, -1.0f);
+                    if(mBackgroundRenderer != null)
+                        mBackgroundRenderer.setFlipscale(1.0f, -1.0f);
                 }
 
-                if(shouldRecycle)
+                if (shouldRecycle)
                     bmp.recycle();
 
-                if(callback != null)
+                if (callback != null)
                     callback.setBackgroundImageOK();
             }
         });
@@ -377,8 +386,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         setEGLConfigChooser(8, 8, 8, 8, 8, 0);
         getHolder().setFormat(PixelFormat.RGBA_8888);
         setRenderer(this);
-//        setRenderMode(RENDERMODE_WHEN_DIRTY);
-        setRenderMode(RENDERMODE_CONTINUOUSLY);
+        setRenderMode(RENDERMODE_WHEN_DIRTY);
         setZOrderOnTop(true);
 //        setZOrderMediaOverlay(true);
 
@@ -475,37 +483,37 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         void releaseOK();
     }
 
-    public void release(final ReleaseOKCallback callback) {
-        synchronized (this) {
-            if(mFrameRecorder != null)
-            {
-                queueEvent(new Runnable() {
-                    @Override
-                    public void run() {
+    public synchronized void release(final ReleaseOKCallback callback) {
 
+        if(mFrameRecorder != null) {
+
+            queueEvent(new Runnable() {
+                @Override
+                public void run() {
+
+                    if (mFrameRecorder != null) {
                         mFrameRecorder.release();
                         mFrameRecorder = null;
                         GLES20.glDeleteTextures(1, new int[]{mTextureID}, 0);
                         mTextureID = 0;
                         mSurfaceTexture.release();
                         mSurfaceTexture = null;
-                        if(mBackgroundRenderer != null) {
+                        if (mBackgroundRenderer != null) {
                             mBackgroundRenderer.release();
                             mBackgroundRenderer = null;
                         }
-                        if(mBackgroundTexture != 0) {
+                        if (mBackgroundTexture != 0) {
                             GLES20.glDeleteTextures(1, new int[]{mBackgroundTexture}, 0);
                             mBackgroundTexture = 0;
                         }
 
-                        Log.i(LOG_TAG, "glsurfaceview release...");
-                        if(callback != null)
+                        Log.i(LOG_TAG, "GLSurfaceview release...");
+                        if (callback != null)
                             callback.releaseOK();
                     }
-                });
-            }
+                }
+            });
         }
-
     }
 
     @Override
@@ -593,27 +601,31 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
 
-        synchronized (mThunbnailLock) {
-            if(mTakeThunbnailCallback != null) {
+        if(mTakeThunbnailCallback != null && !mTakeThunbnailCallback.isUsingBitmap()) {
 
-                GLES20.glViewport(0, 0, mThunbnailWidth, mThunbnailHeight);
-                mFrameRecorder.drawCache();
+            synchronized (mThunbnailLock) {
 
-                mThunbnailBuffer.position(0);
-                GLES20.glReadPixels(0, 0, mThunbnailWidth, mThunbnailHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, mThunbnailBuffer);
+                // double judgement for mTakeThunbnailCallback ensure both performance and safety
+                if(mTakeThunbnailCallback != null) {
 
-                mThunbnailBmp.copyPixelsFromBuffer(mThunbnailBuffer);
+                    GLES20.glViewport(0, 0, mThunbnailWidth, mThunbnailHeight);
+                    mFrameRecorder.drawCache();
 
+                    mThunbnailBuffer.position(0);
+                    GLES20.glReadPixels(0, 0, mThunbnailWidth, mThunbnailHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, mThunbnailBuffer);
 
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        synchronized (mThunbnailLock) {
-                            if(mTakeThunbnailCallback != null)
-                                mTakeThunbnailCallback.takeThunbnailOK(mThunbnailBmp);
+                    mThunbnailBmp.copyPixelsFromBuffer(mThunbnailBuffer);
+
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            synchronized (mThunbnailLock) {
+                                if(mTakeThunbnailCallback != null)
+                                    mTakeThunbnailCallback.takeThunbnailOK(mThunbnailBmp);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         }
 
@@ -666,7 +678,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
 //        Log.i(LOG_TAG, "onFrameAvailable...");
 
-//        requestRender();
+        requestRender();
 
         if(mLastTimestamp2 == 0)
             mLastTimestamp2 = System.currentTimeMillis();
@@ -684,6 +696,11 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     }
 
     public interface TakeThunbnailCallback {
+        // 当 TakeThunbnailCallback 被设置之后
+        // 每一帧都会获取 isUsingBitmap() 返回值
+        // 当 isUsingBitmap() 返回 true 的时候 takeThunbnailOK 将不被调用
+        // 当 isUsingBitmap() 返回 false 的时候 takeThunbnailOK 正常执行
+        boolean isUsingBitmap();
         void takeThunbnailOK(Bitmap bmp);
     }
 
@@ -808,12 +825,26 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     public synchronized void takePicture(final TakePictureCallback photoCallback, Camera.ShutterCallback shutterCallback, final String config, final float intensity, final boolean isFrontMirror) {
 
-        assert photoCallback != null : "photoCallback must not be null!!";
-
         Camera.Parameters params = cameraInstance().getParams();
 
-        params.setRotation(90);
-        cameraInstance().setParams(params);
+        if(photoCallback == null || params == null) {
+            Log.e(LOG_TAG, "takePicture after release!");
+            if(photoCallback != null) {
+                photoCallback.takePictureOK(null);
+            }
+            return;
+        }
+
+        try {
+            params.setRotation(90);
+            cameraInstance().setParams(params);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Error when takePicture: " + e.toString());
+            if(photoCallback != null) {
+                photoCallback.takePictureOK(null);
+            }
+            return;
+        }
 
         cameraInstance().getCameraDevice().takePicture(shutterCallback, null, new Camera.PictureCallback() {
             @Override
@@ -835,6 +866,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                     height = bmp.getHeight();
                     shouldRotate = (sz.width > sz.height && width > height) || (sz.width < sz.height && width < height);
                 } else {
+                    Log.i(LOG_TAG, "Cache image to get exif.");
 
                     try {
                         String tmpFilename = mContext.getExternalCacheDir() + "/picture_cache000.jpg";
