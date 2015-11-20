@@ -10,14 +10,18 @@ public class TextureRendererEdge extends TextureRendererEmboss {
                 "varying vec2 texCoord;\n" +
                 "varying vec2 coords[8];\n" +
 
-                "uniform vec2 samplerSteps;\n" +
-                "const float stride = 2.0;\n" +
+                "uniform mat4 transform;\n" +
                 "uniform mat2 rotation;\n" +
+                "uniform vec2 flipScale;\n" +
+                "uniform vec2 samplerSteps;\n" +
+
+                "const float stride = 2.0;\n" +
 
                 "void main()\n" +
                 "{\n" +
                 "  gl_Position = vec4(vPosition, 0.0, 1.0);\n" +
-                "  texCoord = (vec2(vPosition.x, -vPosition.y) / 2.0) * rotation + 0.5;\n" +
+                "  vec2 coord = flipScale * (vPosition / 2.0 * rotation) + 0.5;\n" +
+                "  texCoord = (transform * vec4(coord, 0.0, 1.0)).xy;\n" +
 
                 "  coords[0] = texCoord - samplerSteps * stride;\n" +
                 "  coords[1] = texCoord + vec2(0.0, -samplerSteps.y) * stride;\n" +
