@@ -37,6 +37,12 @@
                 android:id="@+id/saveBtn"
                 android:text="保存"/>
 
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/faceDetectionBtn"
+                android:text="人脸查找"/>
+
         </LinearLayout>
 
     </HorizontalScrollView>
