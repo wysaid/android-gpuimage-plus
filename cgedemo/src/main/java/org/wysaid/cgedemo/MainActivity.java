@@ -1,4 +1,4 @@
-package org.wysaid.cgedemo;
+package org.wysaid.cgeDemo;
 
 import android.content.Context;
 import android.content.Intent;
@@ -91,7 +91,7 @@ public class MainActivity extends ActionBarActivity {
             Log.i(LOG_TAG, String.format("%s is clicked!", mDemo.title));
             Class cls = null;
             try {
-                cls = Class.forName("org.wysaid.cgedemo." + mDemo.activityName);
+                cls = Class.forName("org.wysaid.cgeDemo." + mDemo.activityName);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 return ;
