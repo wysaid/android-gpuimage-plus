@@ -1,4 +1,4 @@
-package org.wysaid.cgedemo;
+package org.wysaid.cgeDemo;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -132,8 +133,13 @@ public class CameraDemoActivity extends ActionBarActivity {
         return mCurrentInstance;
     }
 
-    private void showText(String s) {
-        Toast.makeText(CameraDemoActivity.this, s, Toast.LENGTH_LONG).show();
+    private void showText(final String s) {
+        mGLSurfaceView.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(CameraDemoActivity.this, s, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public class MyButtons extends Button {
@@ -282,14 +288,14 @@ public class CameraDemoActivity extends ActionBarActivity {
             }
         });
 
-        mGLSurfaceView.presetRecordingSize(640, 640);
+        mGLSurfaceView.presetRecordingSize(480, 640);
         mGLSurfaceView.setZOrderOnTop(false);
         mGLSurfaceView.setZOrderMediaOverlay(true);
 
         mGLSurfaceView.setOnCreateCallback(new FilterGLSurfaceView.OnCreateCallback() {
             @Override
             public void createOver(boolean success) {
-                if(success) {
+                if (success) {
                     Log.i(LOG_TAG, "view 创建成功");
                 } else {
                     Log.e(LOG_TAG, "view 创建失败!");
@@ -324,10 +330,20 @@ public class CameraDemoActivity extends ActionBarActivity {
                 showThunbnailWindow = !showThunbnailWindow;
                 if (showThunbnailWindow) {
                     mGLSurfaceView.startThunbnailCliping(150, 150, new FilterGLSurfaceView.TakeThunbnailCallback() {
+
+                        public boolean isUsing = false;
+
+                        @Override
+                        public boolean isUsingBitmap() {
+                            return isUsing;
+                        }
+
                         @Override
                         public void takeThunbnailOK(Bitmap bmp) {
+                            isUsing = true;
                             mThunbnailView.setImageBitmap(bmp);
                             mThunbnailView.setVisibility(View.VISIBLE);
+                            isUsing = false;
                         }
                     });
                 } else {
@@ -386,6 +402,39 @@ public class CameraDemoActivity extends ActionBarActivity {
                 }
             }
         });
+
+        mGLSurfaceView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, final MotionEvent event) {
+
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        Log.i(LOG_TAG, String.format("Tap to focus: %g, %g", event.getX(), event.getY()));
+                        final float focusX = event.getX() / mGLSurfaceView.getWidth();
+                        final float focusY = event.getY() / mGLSurfaceView.getHeight();
+
+                        mGLSurfaceView.focusAtPoint(focusX, focusY, new Camera.AutoFocusCallback() {
+                            @Override
+                            public void onAutoFocus(boolean success, Camera camera) {
+                                if (success) {
+                                    Log.e(LOG_TAG, String.format("手动对焦成功， 位置: %g, %g", focusX, focusY));
+                                } else {
+                                    Log.e(LOG_TAG, String.format("手动对焦失败， 位置: %g, %g", focusX, focusY));
+                                    mGLSurfaceView.cameraInstance().setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+                                }
+                            }
+                        });
+                    }
+                    break;
+                    default:
+                        break;
+                }
+
+                return true;
+            }
+        });
+
+        mGLSurfaceView.setPictureSize(600, 800, true);
     }
 
     private View.OnClickListener mFilterSwitchListener = new View.OnClickListener() {
