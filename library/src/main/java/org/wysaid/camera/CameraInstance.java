@@ -1,6 +1,7 @@
 package org.wysaid.camera;
 
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.Build;
@@ -9,6 +10,7 @@ import android.util.Log;
 import org.wysaid.myUtils.Common;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -38,8 +40,8 @@ public class CameraInstance {
     private int mPreviewWidth;
     private int mPreviewHeight;
 
-    private int mPictureWidth;
-    private int mPictureHeight;
+    private int mPictureWidth = 1000;
+    private int mPictureHeight = 1000;
 
     private int mPreferPreviewWidth = 640;
     private int mPreferPreviewHeight = 640;
@@ -200,7 +202,10 @@ public class CameraInstance {
     private Comparator<Camera.Size> comparatorBigger = new Comparator<Camera.Size>() {
         @Override
         public int compare(Camera.Size lhs, Camera.Size rhs) {
-            return rhs.width - lhs.width;
+            int w = rhs.width - lhs.width;
+            if(w == 0)
+                return rhs.height - lhs.height;
+            return w;
         }
     };
 
@@ -208,7 +213,10 @@ public class CameraInstance {
     private Comparator<Camera.Size> comparatorSmaller= new Comparator<Camera.Size>() {
         @Override
         public int compare(Camera.Size lhs, Camera.Size rhs) {
-            return lhs.width - rhs.width;
+            int w = lhs.width - rhs.width;
+            if(w == 0)
+                return lhs.height - rhs.height;
+            return w;
         }
     };
 
@@ -234,7 +242,7 @@ public class CameraInstance {
 
         for(Camera.Size sz : picSizes) {
             Log.i(LOG_TAG, String.format("Supported picture size: %d x %d", sz.width, sz.height));
-            if(picSz == null || (sz.width >= 1000 && sz.height >= 1000)) {
+            if(picSz == null || (sz.width >= mPictureWidth && sz.height >= mPictureHeight)) {
                 picSz = sz;
             }
         }
@@ -296,10 +304,23 @@ public class CameraInstance {
         Log.i(LOG_TAG, String.format("Camera Preview Size: %d x %d", szPrev.width, szPrev.height));
     }
 
+    public synchronized void setFocusMode(String focusMode) {
+
+        if(mCameraDevice == null)
+            return;
+
+        mParams = mCameraDevice.getParameters();
+        List<String> focusModes = mParams.getSupportedFocusModes();
+        if(focusModes.contains(focusMode)){
+            mParams.setFocusMode(focusMode);
+        }
+    }
+
     public synchronized void setPictureSize(int width, int height, boolean isBigger) {
-        assert mCameraDevice != null : ASSERT_MSG;
 
         if(mCameraDevice == null) {
+            mPictureWidth = width;
+            mPictureHeight = height;
             return;
         }
 
@@ -334,5 +355,51 @@ public class CameraInstance {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void focusAtPoint(float x, float y, final Camera.AutoFocusCallback callback) {
+        focusAtPoint(x, y, 0.2f, callback);
+    }
+
+    public synchronized void focusAtPoint(float x, float y, float radius, final Camera.AutoFocusCallback callback) {
+        if(mCameraDevice == null) {
+            Log.e(LOG_TAG, "Error: focus after release.");
+            return;
+        }
+
+        mParams = mCameraDevice.getParameters();
+
+        if(mParams.getMaxNumMeteringAreas() > 0) {
+
+            int focusRadius = (int) (radius * 1000.0f);
+            int left = (int) (x * 2000.0f - 1000.0f) - focusRadius;
+            int top = (int) (y * 2000.0f - 1000.0f) - focusRadius;
+
+            Rect focusArea = new Rect();
+            focusArea.left = Math.max(left, -1000);
+            focusArea.top = Math.max(top, -1000);
+            focusArea.right = Math.min(left + focusRadius, 1000);
+            focusArea.bottom = Math.min(top + focusRadius, 1000);
+            List<Camera.Area> meteringAreas = new ArrayList<Camera.Area>();
+            meteringAreas.add(new Camera.Area(focusArea, 800));
+
+            try {
+                mCameraDevice.cancelAutoFocus();
+                mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+                mParams.setFocusAreas(meteringAreas);
+                mCameraDevice.setParameters(mParams);
+                mCameraDevice.autoFocus(callback);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Error: focusAtPoint failed: " + e.toString());
+            }
+        } else {
+            Log.i(LOG_TAG, "The device does not support metering areas...");
+            try {
+                mCameraDevice.autoFocus(callback);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Error: focusAtPoint failed: " + e.toString());
+            }
+        }
+
     }
 }
