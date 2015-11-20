@@ -41,7 +41,7 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * Created by wangyang on 15/7/17.
  */
-public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
+public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
 
     public static final String LOG_TAG = Common.LOG_TAG;
 
@@ -378,7 +378,7 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         }
     }
 
-    public FilterGLSurfaceView(Context context, AttributeSet attrs) {
+    public CameraGLSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
         Log.i(LOG_TAG, "MyGLSurfaceView Construct...");
 

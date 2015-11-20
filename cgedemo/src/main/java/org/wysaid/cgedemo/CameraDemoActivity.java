@@ -21,16 +21,16 @@ import android.widget.Toast;
 import org.wysaid.camera.CameraInstance;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.nativePort.CGEFrameRecorder;
-import org.wysaid.view.FilterGLSurfaceView;
+import org.wysaid.view.CameraGLSurfaceView;
 
 public class CameraDemoActivity extends ActionBarActivity {
 
     String mCurrentConfig;
 
-    private FilterGLSurfaceView mGLSurfaceView;
+    private CameraGLSurfaceView mGLSurfaceView;
     private ImageView mThunbnailView;
 
-    public final static String LOG_TAG = FilterGLSurfaceView.LOG_TAG;
+    public final static String LOG_TAG = CameraGLSurfaceView.LOG_TAG;
 
     public static CameraDemoActivity mCurrentInstance = null;
     public static CameraDemoActivity getInstance() {
@@ -63,7 +63,7 @@ public class CameraDemoActivity extends ActionBarActivity {
 
         Button takePicBtn = (Button) findViewById(R.id.takePicBtn);
         Button takeShotBtn = (Button) findViewById(R.id.takeShotBtn);
-        mGLSurfaceView = (FilterGLSurfaceView)findViewById(R.id.myGLSurfaceView);
+        mGLSurfaceView = (CameraGLSurfaceView)findViewById(R.id.myGLSurfaceView);
         mGLSurfaceView.presetCameraForward(false);
         SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
         mThunbnailView = (ImageView)findViewById(R.id.imagePreview);
@@ -73,7 +73,7 @@ public class CameraDemoActivity extends ActionBarActivity {
             public void onClick(View v) {
                 showText("Taking Picture...");
 
-                mGLSurfaceView.takePicture(new FilterGLSurfaceView.TakePictureCallback() {
+                mGLSurfaceView.takePicture(new CameraGLSurfaceView.TakePictureCallback() {
                     @Override
                     public void takePictureOK(Bitmap bmp) {
                         if (bmp != null) {
@@ -93,7 +93,7 @@ public class CameraDemoActivity extends ActionBarActivity {
             public void onClick(View v) {
                 showText("Taking Shot...");
 
-                mGLSurfaceView.takeShot(new FilterGLSurfaceView.TakePictureCallback() {
+                mGLSurfaceView.takeShot(new CameraGLSurfaceView.TakePictureCallback() {
                     @Override
                     public void takePictureOK(Bitmap bmp) {
                         if (bmp != null) {
@@ -149,7 +149,7 @@ public class CameraDemoActivity extends ActionBarActivity {
                         mBmp = BitmapFactory.decodeResource(getResources(), R.drawable.mask1);
                     }
                     if (mBmp != null)
-                        mGLSurfaceView.setMaskBitmap(mBmp, false, new FilterGLSurfaceView.SetMaskBitmapCallback() {
+                        mGLSurfaceView.setMaskBitmap(mBmp, false, new CameraGLSurfaceView.SetMaskBitmapCallback() {
                             @Override
                             public void setMaskOK(CGEFrameRecorder recorder) {
                                 //使mask上下翻转
@@ -196,7 +196,7 @@ public class CameraDemoActivity extends ActionBarActivity {
         mGLSurfaceView.setZOrderOnTop(false);
         mGLSurfaceView.setZOrderMediaOverlay(true);
 
-        mGLSurfaceView.setOnCreateCallback(new FilterGLSurfaceView.OnCreateCallback() {
+        mGLSurfaceView.setOnCreateCallback(new CameraGLSurfaceView.OnCreateCallback() {
             @Override
             public void createOver(boolean success) {
                 if (success) {
@@ -233,7 +233,7 @@ public class CameraDemoActivity extends ActionBarActivity {
             public void onClick(View v) {
                 showThunbnailWindow = !showThunbnailWindow;
                 if (showThunbnailWindow) {
-                    mGLSurfaceView.startThunbnailCliping(150, 150, new FilterGLSurfaceView.TakeThunbnailCallback() {
+                    mGLSurfaceView.startThunbnailCliping(150, 150, new CameraGLSurfaceView.TakeThunbnailCallback() {
 
                         public boolean isUsing = false;
 
@@ -269,14 +269,14 @@ public class CameraDemoActivity extends ActionBarActivity {
                 if(useBackground) {
                     if(backgroundBmp == null)
                         backgroundBmp = BitmapFactory.decodeResource(getResources(), R.drawable.bgview);
-                    mGLSurfaceView.setBackgroundImage(backgroundBmp, false, new FilterGLSurfaceView.SetBackgroundImageCallback() {
+                    mGLSurfaceView.setBackgroundImage(backgroundBmp, false, new CameraGLSurfaceView.SetBackgroundImageCallback() {
                         @Override
                         public void setBackgroundImageOK() {
                             Log.i(LOG_TAG, "Set Background Image OK!");
                         }
                     });
                 } else {
-                    mGLSurfaceView.setBackgroundImage(null, false, new FilterGLSurfaceView.SetBackgroundImageCallback() {
+                    mGLSurfaceView.setBackgroundImage(null, false, new CameraGLSurfaceView.SetBackgroundImageCallback() {
                         @Override
                         public void setBackgroundImageOK() {
                             Log.i(LOG_TAG, "Cancel Background Image OK!");
@@ -296,7 +296,7 @@ public class CameraDemoActivity extends ActionBarActivity {
             }
         });
 
-        mGLSurfaceView.setOnCreateCallback(new FilterGLSurfaceView.OnCreateCallback() {
+        mGLSurfaceView.setOnCreateCallback(new CameraGLSurfaceView.OnCreateCallback() {
             @Override
             public void createOver(boolean success) {
                 if(success) {

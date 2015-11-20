@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         >
 
-        <org.wysaid.view.FilterGLSurfaceView
+        <org.wysaid.view.CameraGLSurfaceView
             android:id="@+id/myGLSurfaceView"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
