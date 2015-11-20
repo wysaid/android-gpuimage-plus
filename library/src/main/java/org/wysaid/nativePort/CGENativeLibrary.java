@@ -67,12 +67,25 @@ public class CGENativeLibrary {
         return result;
     }
 
+    public static Bitmap filterImage_MultipleEffects(Bitmap bmp, String config, float intensity) {
+        if(config == null || config == "") {
+            return bmp;
+        }
+        return cgeFilterImage_MultipleEffects(bmp, config, intensity);
+    }
+
+    public static void filterImage_MultipleEffectsWriteBack(Bitmap bmp, String config, float intensity) {
+        if(config != null && config != "") {
+            cgeFilterImage_MultipleEffectsWriteBack(bmp, config, intensity);
+        }
+    }
+
     // 多重特效滤镜， 提供配置文件内容直接进行， 返回相同大小的bitmap。
     // intensity 表示滤镜强度 [0, 1]
-    public static native Bitmap filterImage_MultipleEffects(Bitmap bmp, String config, float intensity);
+    public static native Bitmap cgeFilterImage_MultipleEffects(Bitmap bmp, String config, float intensity);
 
     // 同上， 结果直接写回传入bitmap， 无返回值
-    public static native void filterImage_MultipleEffectsWriteBack(Bitmap bmp, String config, float intensity);
+    public static native void cgeFilterImage_MultipleEffectsWriteBack(Bitmap bmp, String config, float intensity);
 
     ////////////////////////////////////
 
