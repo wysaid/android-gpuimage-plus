@@ -33,6 +33,10 @@ public class MainActivity extends ActionBarActivity {
             "#unpack @dynamic wave 1", //可调节速度
             "@dynamic wave 0.5",       //可调节混合
             "#unpack @style sketch 0.9",
+            "#unpack @krblend sr hehe.jpg 100 ",
+            "#unpack @krblend ol hehe.jpg 100",
+            "#unpack @krblend add hehe.jpg 100",
+            "#unpack @krblend darken hehe.jpg 100",
             "@beautify bilateral 100 3.5 2 ",
             "@style crosshatch 0.01 0.003 ",
             "@style edge 1 2 ",
