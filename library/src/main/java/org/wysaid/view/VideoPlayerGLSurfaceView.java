@@ -31,10 +31,27 @@ import javax.microedition.khronos.opengles.GL10;
 public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
 
     public static final String LOG_TAG = Common.LOG_TAG;
+    public static boolean ENABLE_RESOLUTION_FIX = true;
+    public boolean mResolutionShouldFix = false;
 
     private SurfaceTexture mSurfaceTexture;
     private int mVideoTextureID;
     private TextureRenderer mDrawer;
+
+    //setTextureRenderer 必须在OpenGL 线程调用!
+    public void setTextureRenderer(TextureRenderer drawer) {
+        if(mDrawer == null) {
+            Log.e(LOG_TAG, "Invalid Drawer!");
+            return;
+        }
+
+        if(mDrawer != drawer) {
+            mDrawer.release();
+            mDrawer = drawer;
+            calcViewport();
+        }
+    }
+
     private TextureRenderer.Viewport mRenderViewport = new TextureRenderer.Viewport();
     private float[] mTransformMatrix = new float[16];
     private boolean mIsUsingMask = false;
@@ -45,8 +62,8 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
     private float mDrawerFlipScaleX = 1.0f;
     private float mDrawerFlipScaleY = 1.0f;
 
-    private int mViewWidth = 640;
-    private int mViewHeight = 480;
+    private int mViewWidth = 1000;
+    private int mViewHeight = 1000;
 
     public int getViewWidth() {
         return mViewWidth;
@@ -56,8 +73,8 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         return mViewHeight;
     }
 
-    private int mVideoWidth = 640;
-    private int mVideoHeight = 480;
+    private int mVideoWidth = 1000;
+    private int mVideoHeight = 1000;
 
     private boolean mFitFullView = false;
 
@@ -73,6 +90,18 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
     private Uri mVideoUri;
 
+    public interface PlayerInitializeCallback {
+
+        //对player 进行初始化设置， 设置未默认启动的listener， 比如 bufferupdateListener.
+        void initPlayer(MediaPlayer player);
+    }
+
+    public void setPlayerInitializeCallback(PlayerInitializeCallback callback) {
+        mPlayerInitCallback = callback;
+    }
+
+    PlayerInitializeCallback mPlayerInitCallback;
+
     public interface PlayPreparedCallback {
         void playPrepared(MediaPlayer player);
     }
@@ -81,6 +110,21 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
     public interface PlayCompletionCallback {
         void playComplete(MediaPlayer player);
+
+
+        /*
+
+        what 取值: MEDIA_ERROR_UNKNOWN,
+                  MEDIA_ERROR_SERVER_DIED
+
+        extra 取值 MEDIA_ERROR_IO
+                  MEDIA_ERROR_MALFORMED
+                  MEDIA_ERROR_UNSUPPORTED
+                  MEDIA_ERROR_TIMED_OUT
+
+        returning false would cause the 'playComplete' to be called
+        */
+        boolean playFailed(MediaPlayer mp, int what, int extra);
     }
 
     PlayCompletionCallback mPlayCompletionCallback;
@@ -245,6 +289,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         mDrawer = TextureRendererDrawOrigin.create(true);
         if(mDrawer == null) {
             Log.e(LOG_TAG, "Create Drawer Failed!");
+            return;
         }
         if(mOnCreateCallback != null) {
             mOnCreateCallback.createOK();
@@ -273,16 +318,18 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
         Log.i(LOG_TAG, "Video player view release...");
 
-        synchronized (this) {
+        if(mPlayer != null) {
             queueEvent(new Runnable() {
                 @Override
                 public void run() {
+
                     Log.i(LOG_TAG, "Video player view release run...");
 
                     if(mPlayer != null) {
 
                         mPlayer.setSurface(null);
-                        mPlayer.stop();
+                        if(mPlayer.isPlaying())
+                            mPlayer.stop();
                         mPlayer.release();
                         mPlayer = null;
                     }
@@ -372,6 +419,10 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
             scaling = mVideoWidth / (float)mVideoHeight;
         }
 
+        if(mResolutionShouldFix) {
+            mDrawer.setRotation((float) (-Math.PI * 0.5));
+        }
+
         float viewRatio = mViewWidth / (float) mViewHeight;
         float s = scaling / viewRatio;
 
@@ -425,7 +476,23 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         } catch (Exception e) {
             e.printStackTrace();
             Log.e(LOG_TAG, "useUri failed");
+
+            if(mPlayCompletionCallback != null) {
+                this.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(mPlayCompletionCallback != null) {
+                            if(!mPlayCompletionCallback.playFailed(mPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, MediaPlayer.MEDIA_ERROR_UNSUPPORTED))
+                                mPlayCompletionCallback.playComplete(mPlayer);
+                        }
+                    }
+                });
+            }
             return;
+        }
+
+        if(mPlayerInitCallback != null) {
+            mPlayerInitCallback.initPlayer(mPlayer);
         }
 
         mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -443,6 +510,17 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
             public void onPrepared(MediaPlayer mp) {
                 mVideoWidth = mp.getVideoWidth();
                 mVideoHeight = mp.getVideoHeight();
+
+                //Mark: 临时兼容ios版
+                if(ENABLE_RESOLUTION_FIX && mVideoWidth == 640 && mVideoHeight == 480) {
+                    mVideoWidth = mp.getVideoHeight();
+                    mVideoHeight = mp.getVideoWidth();
+                    mResolutionShouldFix = true;
+                    Log.w(LOG_TAG, "Forcing player rotation!! Be careful for this invalid video!");
+                } else {
+                    mResolutionShouldFix = false;
+                }
+
                 queueEvent(new Runnable() {
                     @Override
                     public void run() {
@@ -455,15 +533,36 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
                 } else {
                     mp.start();
                 }
-                requestRender();
+//                requestRender(); //可能导致第一帧过快渲染 (先于surface texture 准备完成
                 Log.i(LOG_TAG, String.format("Video resolution 1: %d x %d", mVideoWidth, mVideoHeight));
             }
         });
 
+        mPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+
+                if (mPlayCompletionCallback != null)
+                    return mPlayCompletionCallback.playFailed(mp, what, extra);
+                return false;
+            }
+        });
+
         try {
-            mPlayer.prepare();
+            mPlayer.prepareAsync();
         }catch (Exception e) {
-            e.printStackTrace();
+            Log.i(LOG_TAG, String.format("Error handled: %s, play failure handler would be called!", e.toString()));
+            if(mPlayCompletionCallback != null) {
+                this.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(mPlayCompletionCallback != null) {
+                            if(!mPlayCompletionCallback.playFailed(mPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, MediaPlayer.MEDIA_ERROR_UNSUPPORTED))
+                                mPlayCompletionCallback.playComplete(mPlayer);
+                        }
+                    }
+                });
+            }
         }
 
     }
@@ -471,6 +570,11 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
     private void flushMaskAspectRatio() {
 
         float dstRatio = mVideoWidth / (float)mVideoHeight;
+
+        if(mResolutionShouldFix) {
+            dstRatio = mVideoHeight / (float)mVideoWidth;
+        }
+
         float s = dstRatio / mMaskAspectRatio;
 
         if(s > 1.0f) {
