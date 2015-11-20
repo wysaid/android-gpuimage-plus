@@ -1,4 +1,4 @@
-package org.wysaid.cgedemo;
+package org.wysaid.cgeDemo;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,12 +14,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import org.wysaid.camera.CameraInstance;
 import org.wysaid.myUtils.Common;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.texUtils.TextureRenderer;
+import org.wysaid.texUtils.TextureRendererDrawOrigin;
+import org.wysaid.texUtils.TextureRendererEdge;
+import org.wysaid.texUtils.TextureRendererEmboss;
+import org.wysaid.texUtils.TextureRendererLerpBlur;
 import org.wysaid.texUtils.TextureRendererMask;
+import org.wysaid.texUtils.TextureRendererWave;
 import org.wysaid.view.VideoPlayerGLSurfaceView;
 
 public class VideoPlayerActivity extends AppCompatActivity {
@@ -31,11 +37,25 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
     public static final int REQUEST_CODE_PICK_VIDEO = 1;
 
-    static class MyButton extends Button implements View.OnClickListener {
+    private VideoPlayerGLSurfaceView.PlayCompletionCallback playCompletionCallback = new VideoPlayerGLSurfaceView.PlayCompletionCallback() {
+        @Override
+        public void playComplete(MediaPlayer player) {
+            Log.i(Common.LOG_TAG, "The video playing is over, restart...");
+            player.start();
+        }
+
+        @Override
+        public boolean playFailed(MediaPlayer player, final int what, final int extra)
+        {
+            Toast.makeText(VideoPlayerActivity.this, String.format("Error occured! Stop playing, Err code: %d, %d", what, extra), Toast.LENGTH_LONG).show();
+            return true;
+        }
+    };
+
+    class MyButton extends Button implements View.OnClickListener {
 
         Uri videoUri;
         VideoPlayerGLSurfaceView videoView;
-        String buttonText;
 
         public MyButton(Context context) {
             super(context);
@@ -44,23 +64,21 @@ public class VideoPlayerActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
 
-            buttonText = getText().toString();
-            setText("加载中");
+            Toast.makeText(VideoPlayerActivity.this, "正在准备播放视频 " + videoUri.getHost() + videoUri.getPath() + " 如果是网络视频， 可能需要一段时间的等待", Toast.LENGTH_SHORT).show();
 
             videoView.setVideoUri(videoUri, new VideoPlayerGLSurfaceView.PlayPreparedCallback() {
                 @Override
                 public void playPrepared(MediaPlayer player) {
-                    Log.i(Common.LOG_TAG, "The video is prepared to play");
+                    mPlayerView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(VideoPlayerActivity.this, "开始播放 " + videoUri.getHost() + videoUri.getPath(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
                     player.start();
-                    setText(buttonText);
                 }
-            }, new VideoPlayerGLSurfaceView.PlayCompletionCallback() {
-                @Override
-                public void playComplete(MediaPlayer player) {
-                    Log.i(Common.LOG_TAG, "The video playing is over, restart...");
-                    player.start();
-                }
-            });
+            }, playCompletionCallback);
         }
     }
 
@@ -69,6 +87,8 @@ public class VideoPlayerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_player);
         mPlayerView = (VideoPlayerGLSurfaceView)findViewById(R.id.videoGLSurfaceView);
+//        mPlayerView.setZOrderOnTop(false);
+
         mShapeBtn = (Button)findViewById(R.id.switchShapeBtn);
 
         mShapeBtn.setOnClickListener(new View.OnClickListener() {
@@ -126,8 +146,8 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
         String[] filePaths = {
                 "android.resource://" + getPackageName() + "/" + R.raw.test,
-                "http://wge.wysaid.org/res/video/1.mp4",
-                "http://wysaid.org/p/test.mp4",
+                "http://wge.wysaid.org/res/video/1.mp4",  //网络视频
+                "http://wysaid.org/p/test.mp4",   //网络视频
         };
 
         for(int i = 0; i != filePaths.length; ++i) {
@@ -143,6 +163,77 @@ public class VideoPlayerActivity extends AppCompatActivity {
             }
         }
 
+        Button filterButton = new Button(this);
+        menuLayout.addView(filterButton);
+        filterButton.setText("切换滤镜");
+        filterButton.setOnClickListener(new View.OnClickListener() {
+            private int filterIndex;
+
+            @Override
+            public void onClick(View v) {
+                mPlayerView.queueEvent(new Runnable() {
+                    @Override
+                    public void run() {
+                        TextureRenderer drawer = null;
+                        ++filterIndex;
+                        filterIndex %= 5;
+                        switch (filterIndex) {
+                            case 0: //LerpBlur
+                            {
+                                TextureRendererLerpBlur lerpBlurDrawer = TextureRendererLerpBlur.create(true);
+                                if(lerpBlurDrawer != null) {
+                                    lerpBlurDrawer.setIntensity(16);
+                                    drawer = lerpBlurDrawer;
+                                }
+                            }
+                            break;
+
+                            case 1:
+                            {
+                                TextureRendererEdge edgeDrawer = TextureRendererEdge.create(true);
+                                if(edgeDrawer != null) {
+                                    drawer = edgeDrawer;
+                                }
+                            }
+                            break;
+
+                            case 2:
+                            {
+                                TextureRendererEmboss embossDrawer = TextureRendererEmboss.create(true);
+                                if(embossDrawer != null) {
+                                    drawer = embossDrawer;
+                                }
+                            }
+                            break;
+
+                            case 3:
+                            {
+                                TextureRendererWave waveDrawer = TextureRendererWave.create(true);
+                                if(waveDrawer != null) {
+                                    waveDrawer.setAutoMotion(0.4f);
+                                    drawer = waveDrawer;
+                                }
+                            }
+                            break;
+
+                            case 4:
+                            {
+                                TextureRendererDrawOrigin originDrawer = TextureRendererDrawOrigin.create(true);
+                                if(originDrawer != null) {
+                                    drawer = originDrawer;
+                                }
+                            }
+                            break;
+
+                            default:break;
+                        }
+
+                        mPlayerView.setTextureRenderer(drawer);
+                    }
+                });
+            }
+        });
+
         mGalleryBtn = (Button)findViewById(R.id.galleryBtn);
         mGalleryBtn.setOnClickListener(galleryBtnClickListener);
 
@@ -153,6 +244,23 @@ public class VideoPlayerActivity extends AppCompatActivity {
             public void onClick(View v) {
                 shouldFit = !shouldFit;
                 mPlayerView.setFitFullView(shouldFit);
+            }
+        });
+
+        mPlayerView.setPlayerInitializeCallback(new VideoPlayerGLSurfaceView.PlayerInitializeCallback() {
+            @Override
+            public void initPlayer(final MediaPlayer player) {
+                //针对网络视频进行进度检查
+                player.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
+                    @Override
+                    public void onBufferingUpdate(MediaPlayer mp, int percent) {
+                        Log.i(Common.LOG_TAG, "Buffer update: " + percent);
+                        if(percent == 100) {
+                            Log.i(Common.LOG_TAG, "缓冲完毕!");
+                            player.setOnBufferingUpdateListener(null);
+                        }
+                    }
+                });
             }
         });
     }
@@ -180,13 +288,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
                             Log.i(Common.LOG_TAG, "The video is prepared to play");
                             player.start();
                         }
-                    }, new VideoPlayerGLSurfaceView.PlayCompletionCallback() {
-                        @Override
-                        public void playComplete(MediaPlayer player) {
-                            Log.i(Common.LOG_TAG, "The video playing is over, restart...");
-                            player.start();
-                        }
-                    });
+                    }, playCompletionCallback);
                 }
             default: break;
         }
