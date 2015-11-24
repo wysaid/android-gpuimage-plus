@@ -42,7 +42,7 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * Created by wangyang on 15/7/17.
  */
-public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
+public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener, Camera.FaceDetectionListener {
 
     public static final String LOG_TAG = Common.LOG_TAG;
 
