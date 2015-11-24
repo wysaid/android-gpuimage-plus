@@ -109,6 +109,22 @@ public class CGEFrameRecorder {
         }
     }
 
+    public void enableFaceDetectWithDefaultFilter(boolean shouldDetect) {
+        if(shouldDetect) {
+            nativeSetTrackedFilter(mNativeAddress, "@beautify bilateral 100 6.8 1 @adjust brightness 0.14 @adjust contrast 1.12 ");
+        } else {
+            nativeSetTrackedFilter(mNativeAddress, "");
+        }
+    }
+
+    public void setTrackedFilterIntensity(float intensity) {
+        nativeSetTrackedFilterIntensity(mNativeAddress, intensity);
+    }
+
+    public void setFaceArea(float x, float y, float gx, float gy) {
+        nativeSetFaceArea(mNativeAddress, x, y, gx, gy);
+    }
+
     /////////////////视频录制相关////////////////////
 //
 //    public boolean startRecording(int fps, String filename) {
@@ -183,6 +199,12 @@ public class CGEFrameRecorder {
     private native void nativeSetMaskFlipScale(ByteBuffer holder, float x, float y);
 
     private native void nativeSrcResize(ByteBuffer holder, int width, int height);
+
+    //人脸美化相关
+
+    private native void nativeSetTrackedFilter(ByteBuffer holder, String config);
+    private native void nativeSetTrackedFilterIntensity(ByteBuffer holder, float intensity);
+    private native void nativeSetFaceArea(ByteBuffer holder, float x, float y, float gx, float gy);
 
     /////////////////视频录制相关////////////////////
 //    private native boolean nativeStartRecording(ByteBuffer holder, int fps, String filename);
