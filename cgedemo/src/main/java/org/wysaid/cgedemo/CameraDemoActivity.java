@@ -3,6 +3,7 @@ package org.wysaid.cgeDemo;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.RectF;
 import android.hardware.Camera;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -233,7 +234,9 @@ public class CameraDemoActivity extends ActionBarActivity {
             public void onClick(View v) {
                 showThunbnailWindow = !showThunbnailWindow;
                 if (showThunbnailWindow) {
-                    mGLSurfaceView.startThunbnailCliping(150, 150, new CameraGLSurfaceView.TakeThunbnailCallback() {
+                    float showLeft = 0.3f, showTop = 0.35f;
+                    float showRight = 0.4f + showLeft, showBottom = 0.3f + showTop;
+                    mGLSurfaceView.startThunbnailCliping(150, 150, new RectF(showLeft, showTop, showRight, showBottom), new CameraGLSurfaceView.TakeThunbnailCallback() {
 
                         public boolean isUsing = false;
 
