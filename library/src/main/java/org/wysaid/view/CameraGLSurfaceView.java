@@ -608,7 +608,18 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 // double judgement for mTakeThunbnailCallback ensure both performance and safety
                 if(mTakeThunbnailCallback != null) {
 
-                    GLES20.glViewport(0, 0, mThunbnailWidth, mThunbnailHeight);
+                    if(mThumnailClipingArea != null) {
+                        int clipW = (int)(mThunbnailWidth / mThumnailClipingArea.width());
+                        int clipH = (int)(mThunbnailHeight / mThumnailClipingArea.height());
+                        int x = -(int)(clipW * mThumnailClipingArea.left);
+                        int y = -(int)(clipH * mThumnailClipingArea.top);
+
+                        GLES20.glViewport(x, y, clipW, clipH);
+
+                    } else {
+                        GLES20.glViewport(0, 0, mThunbnailWidth, mThunbnailHeight);
+                    }
+
                     mFrameRecorder.drawCache();
 
                     mThunbnailBuffer.position(0);
@@ -708,6 +719,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     private TakeThunbnailCallback mTakeThunbnailCallback;
     private final int[] mThunbnailLock = new int[0];
     private int mThunbnailWidth, mThunbnailHeight;
+    RectF mThumnailClipingArea;
     private IntBuffer mThunbnailBuffer;
 
     public boolean isTakingThunbnail() {
@@ -718,23 +730,25 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         return status;
     }
 
-    public void startThunbnailCliping(Bitmap cache, TakeThunbnailCallback callback) {
+    public void startThunbnailCliping(Bitmap cache, RectF clipingArea, TakeThunbnailCallback callback) {
         synchronized (mThunbnailLock) {
             mTakeThunbnailCallback = callback;
             mThunbnailBmp = cache;
             mThunbnailWidth = cache.getWidth();
             mThunbnailHeight = cache.getHeight();
             mThunbnailBuffer = IntBuffer.allocate(mThunbnailWidth * mThunbnailHeight);
+            mThumnailClipingArea = clipingArea;
         }
     }
 
-    public void startThunbnailCliping(int width, int height, TakeThunbnailCallback callback) {
+    public void startThunbnailCliping(int width, int height, RectF clipingArea, TakeThunbnailCallback callback) {
         synchronized (mThunbnailLock) {
             mTakeThunbnailCallback = callback;
             mThunbnailBmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             mThunbnailWidth = width;
             mThunbnailHeight = height;
             mThunbnailBuffer = IntBuffer.allocate(width * height);
+            mThumnailClipingArea = clipingArea;
         }
     }
 
@@ -744,6 +758,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
             mThunbnailBmp.recycle();
             mThunbnailBmp = null;
             mThunbnailBuffer = null;
+            mThumnailClipingArea = null;
         }
     }
 
