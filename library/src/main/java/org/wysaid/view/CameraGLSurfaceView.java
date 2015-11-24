@@ -179,6 +179,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                         }
                     }, facing);
 
+                    resumeDetectingFace();
                     requestRender();
                 }
             });
@@ -352,6 +353,124 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                     callback.setBackgroundImageOK();
             }
         });
+    }
+
+    private boolean mIsDetectingFace = false;
+
+    public class FaceArea {
+        float x, y;
+        float gx, gy;
+    }
+
+    private int[] mFaceAreaLock = new int[0];
+    public FaceArea mFaceArea;
+//    public int mFaceCount = 0;
+
+    public boolean isDetectingFace() {
+        return mIsDetectingFace;
+    }
+
+    public synchronized boolean startDetectingFaceWithDefaultFilter() {
+
+        if(mIsDetectingFace) {
+            Log.e(LOG_TAG, "Detecting is started already!!");
+            return false;
+        }
+
+        int maxFaces;
+
+        try {
+
+            maxFaces = cameraInstance().getParams().getMaxNumDetectedFaces();
+
+            if(maxFaces <= 0) {
+                Log.e(LOG_TAG, "Device does not support face detection");
+                return false;
+            }
+
+            synchronized (mFaceAreaLock) {
+                mFaceArea = new FaceArea();
+            }
+
+            cameraInstance().getCameraDevice().setFaceDetectionListener(this);
+            cameraInstance().getCameraDevice().startFaceDetection();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        mIsDetectingFace = true;
+
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                if(mFrameRecorder != null)
+                    mFrameRecorder.enableFaceDetectWithDefaultFilter(true);
+            }
+        });
+        return true;
+    }
+
+    private void resumeDetectingFace() {
+        if(mIsDetectingFace) {
+            try {
+                cameraInstance().getCameraDevice().setFaceDetectionListener(this);
+                cameraInstance().getCameraDevice().startFaceDetection();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public synchronized void stopDetectingFace() {
+        if(mIsDetectingFace) {
+            mIsDetectingFace = false;
+            cameraInstance().getCameraDevice().stopFaceDetection();
+            cameraInstance().getCameraDevice().setFaceDetectionListener(null);
+        }
+
+        synchronized (mFaceAreaLock) {
+            mFaceArea = null;
+        }
+
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                if(mFrameRecorder != null)
+                    mFrameRecorder.enableFaceDetectWithDefaultFilter(false);
+            }
+        });
+    }
+
+    public void onFaceDetection(Camera.Face[] faces, Camera camera) {
+
+        synchronized (mFaceAreaLock) {
+
+            if(mFaceArea != null) {
+
+                if(faces != null && faces.length > 0) {
+                    Camera.Face face = faces[0];
+                    mFaceArea.x = (face.rect.left + face.rect.right) / 4000.0f + 0.5f;
+                    mFaceArea.y = (face.rect.top + face.rect.bottom) / 4000.0f + 0.5f;
+                    mFaceArea.gx = (face.rect.width() + face.rect.height()) / 8000.0f;
+                    mFaceArea.gy = 1.4142f * mFaceArea.gx;
+
+                    queueEvent(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(cameraInstance().getFacing() == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                                mFrameRecorder.setFaceArea(1.0f - mFaceArea.y, 1.0f - mFaceArea.x, mFaceArea.gx, mFaceArea.gy);
+                            } else {
+                                mFrameRecorder.setFaceArea(1.0f - mFaceArea.y, mFaceArea.x, mFaceArea.gx, mFaceArea.gy);
+                            }
+
+                        }
+                    });
+
+                }
+            }
+        }
     }
 
     public interface OnCreateCallback {
@@ -546,6 +665,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     public void stopPreview() {
 
+        stopDetectingFace();
+
         queueEvent(new Runnable() {
             @Override
             public void run() {
@@ -578,6 +699,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
             mFrameRecorder.srcResize(cameraInstance().previewHeight(), cameraInstance().previewWidth());
         }
 
+        resumeDetectingFace();
         requestRender();
     }
 
@@ -988,6 +1110,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 photoCallback.takePictureOK(bmp2);
 
                 cameraInstance().getCameraDevice().startPreview();
+                resumeDetectingFace();
             }
         });
     }
