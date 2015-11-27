@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.wysaid.cgeDemo" >
+    package="org.wysaid.cgeDemo">
+
+    <!--<uses-sdk android:minSdkVersion="14" -->
+        <!--android:targetSdkVersion="22"-->
+        <!--/>-->
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -32,18 +36,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".FilterDemoActivity"
-            android:label="@string/title_activity_filter_demo" >
-        </activity>
+            android:name=".ImageDemoActivity"
+            android:label="@string/title_activity_filter_demo"></activity>
         <activity
             android:name=".CameraDemoActivity"
-            android:label="@string/title_activity_camera_demo" >
-            android:screenOrientation="portrait">
-        </activity>
+            android:label="@string/title_activity_camera_demo"
+            android:screenOrientation="portrait"></activity>
         <activity
-            android:name=".VideoPlayerActivity"
-            android:label="@string/title_activity_video_player" >
-        </activity>
+            android:name=".SimplePlayerDemoActivity"
+            android:label="@string/title_activity_video_player"></activity>
+        <activity android:name=".VideoPlayerDemoActivity"></activity>
     </application>
 
 </manifest>

@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         >
 
-        <org.wysaid.view.CameraGLSurfaceView
+        <org.wysaid.view.CameraRecordGLSurfaceView
             android:id="@+id/myGLSurfaceView"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
@@ -84,6 +84,12 @@
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
+                android:id="@+id/recordBtn"
+                android:text="点按录像"/>
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
                 android:id="@+id/flashBtn"
                 android:text="切换闪光灯"/>
 
@@ -104,6 +110,12 @@
                 android:layout_height="match_parent"
                 android:id="@+id/fitViewBtn"
                 android:text="适应屏幕"/>
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/faceDetectionBtn"
+                android:text="人脸检测"/>
 
         </LinearLayout>
     </HorizontalScrollView>

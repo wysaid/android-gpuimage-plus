@@ -2,14 +2,12 @@ package org.wysaid.cgeDemo;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.FaceDetector;
-import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,7 +23,7 @@ import org.wysaid.myUtils.Common;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.nativePort.CGENativeLibrary;
 
-public class FilterDemoActivity extends ActionBarActivity {
+public class ImageDemoActivity extends ActionBarActivity {
 
     private Bitmap _bitmap;
     private ImageView _imageView;
@@ -80,7 +78,7 @@ public class FilterDemoActivity extends ActionBarActivity {
                 ImageUtil.FaceRects rects = ImageUtil.findFaceByBitmap(bmp, 8);
 
                 if(rects == null) {
-                    Toast.makeText(FilterDemoActivity.this, "未知错误", Toast.LENGTH_LONG);
+                    Toast.makeText(ImageDemoActivity.this, "未知错误", Toast.LENGTH_LONG);
                     return;
                 }
 
@@ -102,11 +100,11 @@ public class FilterDemoActivity extends ActionBarActivity {
                         canvas.drawRect((int) (pnt.x - eyeDis * 1.5f), (int) (pnt.y - eyeDis * 1.5f), (int) (pnt.x + eyeDis * 1.5f), (int) (pnt.y + eyeDis * 1.5f), paint);
                     }
 
-                    Toast.makeText(FilterDemoActivity.this, content, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ImageDemoActivity.this, content, Toast.LENGTH_SHORT).show();
                     _imageView.setImageBitmap(bmp);
                 } else {
                     Log.i(Common.LOG_TAG, "未发现人脸");
-                    Toast.makeText(FilterDemoActivity.this, "未发现人脸", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ImageDemoActivity.this, "未发现人脸", Toast.LENGTH_SHORT).show();
                 }
             }
         });

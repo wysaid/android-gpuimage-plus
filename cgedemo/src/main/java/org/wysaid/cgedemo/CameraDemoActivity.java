@@ -20,18 +20,21 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import org.wysaid.camera.CameraInstance;
+import org.wysaid.myUtils.FileUtil;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.nativePort.CGEFrameRecorder;
-import org.wysaid.view.CameraGLSurfaceView;
+import org.wysaid.view.CameraRecordGLSurfaceView;
 
 public class CameraDemoActivity extends ActionBarActivity {
 
-    String mCurrentConfig;
+    public static String lastVideoPathFileName;
 
-    private CameraGLSurfaceView mGLSurfaceView;
+    private String mCurrentConfig;
+
+    private CameraRecordGLSurfaceView mCameraView;
     private ImageView mThunbnailView;
 
-    public final static String LOG_TAG = CameraGLSurfaceView.LOG_TAG;
+    public final static String LOG_TAG = CameraRecordGLSurfaceView.LOG_TAG;
 
     public static CameraDemoActivity mCurrentInstance = null;
     public static CameraDemoActivity getInstance() {
@@ -39,7 +42,7 @@ public class CameraDemoActivity extends ActionBarActivity {
     }
 
     private void showText(final String s) {
-        mGLSurfaceView.post(new Runnable() {
+        mCameraView.post(new Runnable() {
             @Override
             public void run() {
                 Toast.makeText(CameraDemoActivity.this, s, Toast.LENGTH_SHORT).show();
@@ -47,7 +50,7 @@ public class CameraDemoActivity extends ActionBarActivity {
         });
     }
 
-    public class MyButtons extends Button {
+    public static class MyButtons extends Button {
 
         public String filterConfig;
 
@@ -57,15 +60,66 @@ public class CameraDemoActivity extends ActionBarActivity {
         }
     }
 
+    class RecordListener implements View.OnClickListener {
+
+//        boolean isRecording = false;
+//        String recordFilename;
+
+        @Override
+        public void onClick(View v) {
+
+            Toast.makeText(CameraDemoActivity.this, "Video recording module is not provided by now!", Toast.LENGTH_LONG).show();
+
+//            Button btn = (Button)v;
+//            isRecording = !isRecording;
+//            if(isRecording)
+//            {
+//                btn.setText("正在录制");
+//                Log.i(LOG_TAG, "Start recording...");
+//                mCameraView.setClearColor(1.0f, 0.0f, 0.0f, 0.3f);
+//                recordFilename = ImageUtil.getPath() + "/rec_" + System.currentTimeMillis() + ".mp4";
+////                recordFilename = ImageUtil.getPath(CameraDemoActivity.this, false) + "/rec_1.mp4";
+//                mCameraView.startRecording(recordFilename, new CameraRecordGLSurfaceView.StartRecordingCallback() {
+//                    @Override
+//                    public void startRecordingOver(boolean success) {
+//                        if (success) {
+//                            showText("启动录制成功");
+//                            FileUtil.saveTextContent(recordFilename, lastVideoPathFileName);
+//                        } else {
+//                            showText("启动录制失败");
+//                        }
+//                    }
+//                });
+//            }
+//            else
+//            {
+//                showText("录制完毕， 存储为 " + recordFilename);
+//                btn.setText("录制完毕");
+//                Log.i(LOG_TAG, "End recording...");
+//                mCameraView.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+//                mCameraView.endRecording(new CameraRecordGLSurfaceView.EndRecordingCallback() {
+//                    @Override
+//                    public void endRecordingOK() {
+//                        Log.i(LOG_TAG, "End recording OK");
+//                    }
+//                });
+//            }
+
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_demo);
 
+        lastVideoPathFileName = FileUtil.getPathInPackage(CameraDemoActivity.this, true) + "/lastVideoPath.txt";
+
         Button takePicBtn = (Button) findViewById(R.id.takePicBtn);
         Button takeShotBtn = (Button) findViewById(R.id.takeShotBtn);
-        mGLSurfaceView = (CameraGLSurfaceView)findViewById(R.id.myGLSurfaceView);
-        mGLSurfaceView.presetCameraForward(false);
+        Button recordBtn = (Button) findViewById(R.id.recordBtn);
+        mCameraView = (CameraRecordGLSurfaceView)findViewById(R.id.myGLSurfaceView);
+        mCameraView.presetCameraForward(false);
         SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
         mThunbnailView = (ImageView)findViewById(R.id.imagePreview);
 
@@ -74,7 +128,7 @@ public class CameraDemoActivity extends ActionBarActivity {
             public void onClick(View v) {
                 showText("Taking Picture...");
 
-                mGLSurfaceView.takePicture(new CameraGLSurfaceView.TakePictureCallback() {
+                mCameraView.takePicture(new CameraRecordGLSurfaceView.TakePictureCallback() {
                     @Override
                     public void takePictureOK(Bitmap bmp) {
                         if (bmp != null) {
@@ -94,7 +148,7 @@ public class CameraDemoActivity extends ActionBarActivity {
             public void onClick(View v) {
                 showText("Taking Shot...");
 
-                mGLSurfaceView.takeShot(new CameraGLSurfaceView.TakePictureCallback() {
+                mCameraView.takeShot(new CameraRecordGLSurfaceView.TakePictureCallback() {
                     @Override
                     public void takePictureOK(Bitmap bmp) {
                         if (bmp != null) {
@@ -108,6 +162,8 @@ public class CameraDemoActivity extends ActionBarActivity {
             }
         });
 
+        recordBtn.setOnClickListener(new RecordListener());
+
         LinearLayout layout = (LinearLayout) findViewById(R.id.menuLinearLayout);
 
         for(int i = 0; i != MainActivity.effectConfigs.length; ++i) {
@@ -120,8 +176,8 @@ public class CameraDemoActivity extends ActionBarActivity {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                float intensity = progress / (100.0f / 3.0f) - 1.0f;
-                mGLSurfaceView.setFilterIntensity(intensity);
+                float intensity = progress / 100.0f;
+                mCameraView.setFilterIntensity(intensity);
             }
 
             @Override
@@ -150,16 +206,16 @@ public class CameraDemoActivity extends ActionBarActivity {
                         mBmp = BitmapFactory.decodeResource(getResources(), R.drawable.mask1);
                     }
                     if (mBmp != null)
-                        mGLSurfaceView.setMaskBitmap(mBmp, false, new CameraGLSurfaceView.SetMaskBitmapCallback() {
+                        mCameraView.setMaskBitmap(mBmp, false, new CameraRecordGLSurfaceView.SetMaskBitmapCallback() {
                             @Override
                             public void setMaskOK(CGEFrameRecorder recorder) {
                                 //使mask上下翻转
-                                if(mGLSurfaceView.isUsingMask())
+                                if(mCameraView.isUsingMask())
                                     recorder.setMaskFlipScale(1.0f, -1.0f);
                             }
                         });
                 } else {
-                    mGLSurfaceView.setMaskBitmap(null, false);
+                    mCameraView.setMaskBitmap(null, false);
                 }
 
             }
@@ -170,7 +226,7 @@ public class CameraDemoActivity extends ActionBarActivity {
 
             @Override
             public void onClick(View v) {
-                mGLSurfaceView.switchCamera();
+                mCameraView.switchCamera();
             }
         });
 
@@ -187,17 +243,17 @@ public class CameraDemoActivity extends ActionBarActivity {
 
             @Override
             public void onClick(View v) {
-                mGLSurfaceView.setFlashLightMode(flashModes[flashIndex]);
+                mCameraView.setFlashLightMode(flashModes[flashIndex]);
                 ++flashIndex;
                 flashIndex %= flashModes.length;
             }
         });
 
-        mGLSurfaceView.presetRecordingSize(480, 640);
-        mGLSurfaceView.setZOrderOnTop(false);
-        mGLSurfaceView.setZOrderMediaOverlay(true);
+        mCameraView.presetRecordingSize(480, 640);
+        mCameraView.setZOrderOnTop(false);
+        mCameraView.setZOrderMediaOverlay(true);
 
-        mGLSurfaceView.setOnCreateCallback(new CameraGLSurfaceView.OnCreateCallback() {
+        mCameraView.setOnCreateCallback(new CameraRecordGLSurfaceView.OnCreateCallback() {
             @Override
             public void createOver(boolean success) {
                 if (success) {
@@ -214,14 +270,14 @@ public class CameraDemoActivity extends ActionBarActivity {
         pauseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mGLSurfaceView.stopPreview();
+                mCameraView.stopPreview();
             }
         });
 
         resumeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mGLSurfaceView.resumePreview();
+                mCameraView.resumePreview();
             }
         });
 
@@ -236,7 +292,7 @@ public class CameraDemoActivity extends ActionBarActivity {
                 if (showThunbnailWindow) {
                     float showLeft = 0.3f, showTop = 0.35f;
                     float showRight = 0.4f + showLeft, showBottom = 0.3f + showTop;
-                    mGLSurfaceView.startThunbnailCliping(150, 150, new RectF(showLeft, showTop, showRight, showBottom), new CameraGLSurfaceView.TakeThunbnailCallback() {
+                    mCameraView.startThunbnailCliping(150, 150, new RectF(showLeft, showTop, showRight, showBottom), new CameraRecordGLSurfaceView.TakeThunbnailCallback() {
 
                         public boolean isUsing = false;
 
@@ -254,7 +310,7 @@ public class CameraDemoActivity extends ActionBarActivity {
                         }
                     });
                 } else {
-                    mGLSurfaceView.stopThunbnailCliping();
+                    mCameraView.stopThunbnailCliping();
                     mThunbnailView.setVisibility(View.INVISIBLE);
                 }
             }
@@ -272,14 +328,14 @@ public class CameraDemoActivity extends ActionBarActivity {
                 if(useBackground) {
                     if(backgroundBmp == null)
                         backgroundBmp = BitmapFactory.decodeResource(getResources(), R.drawable.bgview);
-                    mGLSurfaceView.setBackgroundImage(backgroundBmp, false, new CameraGLSurfaceView.SetBackgroundImageCallback() {
+                    mCameraView.setBackgroundImage(backgroundBmp, false, new CameraRecordGLSurfaceView.SetBackgroundImageCallback() {
                         @Override
                         public void setBackgroundImageOK() {
                             Log.i(LOG_TAG, "Set Background Image OK!");
                         }
                     });
                 } else {
-                    mGLSurfaceView.setBackgroundImage(null, false, new CameraGLSurfaceView.SetBackgroundImageCallback() {
+                    mCameraView.setBackgroundImage(null, false, new CameraRecordGLSurfaceView.SetBackgroundImageCallback() {
                         @Override
                         public void setBackgroundImageOK() {
                             Log.i(LOG_TAG, "Cancel Background Image OK!");
@@ -295,39 +351,47 @@ public class CameraDemoActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 shouldFit = !shouldFit;
-                mGLSurfaceView.setFitFullView(shouldFit);
+                mCameraView.setFitFullView(shouldFit);
             }
         });
 
-        mGLSurfaceView.setOnCreateCallback(new CameraGLSurfaceView.OnCreateCallback() {
+        Button faceDetectionBtn = (Button)findViewById(R.id.faceDetectionBtn);
+        faceDetectionBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void createOver(boolean success) {
-                if(success) {
-                    Log.i(LOG_TAG, "设备启动成功!");
-                } else {
-                    Log.e(LOG_TAG, "设备启动失败! 请检查app权限， 允许使用相机");
-                }
+            public void onClick(View v) {
+                Toast.makeText(CameraDemoActivity.this, "FaceDetection module is not provided by now!", Toast.LENGTH_LONG).show();
+//                Button self = (Button) v;
+//                if (mCameraView.isDetectingFace()) {
+//                    mCameraView.stopDetectingFace();
+//                    self.setText("停止检测");
+//                } else {
+//                    if (mCameraView.startDetectingFaceWithDefaultFilter()) {
+//                        self.setText("正在检测");
+//                    } else {
+//                        self.setText("启动失败!");
+//                    }
+//                }
             }
         });
 
-        mGLSurfaceView.setOnTouchListener(new View.OnTouchListener() {
+        mCameraView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, final MotionEvent event) {
 
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN: {
                         Log.i(LOG_TAG, String.format("Tap to focus: %g, %g", event.getX(), event.getY()));
-                        final float focusX = event.getX() / mGLSurfaceView.getWidth();
-                        final float focusY = event.getY() / mGLSurfaceView.getHeight();
+                        final float focusX = event.getX() / mCameraView.getWidth();
+                        final float focusY = event.getY() / mCameraView.getHeight();
 
-                        mGLSurfaceView.focusAtPoint(focusX, focusY, new Camera.AutoFocusCallback() {
+                        mCameraView.focusAtPoint(focusX, focusY, new Camera.AutoFocusCallback() {
                             @Override
                             public void onAutoFocus(boolean success, Camera camera) {
                                 if (success) {
                                     Log.e(LOG_TAG, String.format("手动对焦成功， 位置: %g, %g", focusX, focusY));
                                 } else {
                                     Log.e(LOG_TAG, String.format("手动对焦失败， 位置: %g, %g", focusX, focusY));
-                                    mGLSurfaceView.cameraInstance().setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+                                    mCameraView.cameraInstance().setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
                                 }
                             }
                         });
@@ -341,14 +405,14 @@ public class CameraDemoActivity extends ActionBarActivity {
             }
         });
 
-        mGLSurfaceView.setPictureSize(600, 800, true);
+        mCameraView.setPictureSize(600, 800, true);
     }
 
     private View.OnClickListener mFilterSwitchListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             MyButtons btn = (MyButtons)v;
-            mGLSurfaceView.setFilterWithConfig(btn.filterConfig);
+            mCameraView.setFilterWithConfig(btn.filterConfig);
             mCurrentConfig = btn.filterConfig;
         }
     };
@@ -370,15 +434,15 @@ public class CameraDemoActivity extends ActionBarActivity {
         super.onPause();
         CameraInstance.getInstance().stopCamera();
         Log.i(LOG_TAG, "activity onPause...");
-        mGLSurfaceView.release(null);
-        mGLSurfaceView.onPause();
+        mCameraView.release(null);
+        mCameraView.onPause();
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        mGLSurfaceView.onResume();
+        mCameraView.onResume();
     }
 
     @Override
