@@ -1,6 +1,5 @@
 package org.wysaid.myUtils;
 
-import android.annotation.SuppressLint;
 import android.opengl.GLES20;
 import android.util.Log;
 
@@ -41,12 +40,13 @@ public class ProgramObject {
         return init(vsh, fsh, 0);
     }
 
-    @SuppressLint("Assert")
     public boolean init(final String vsh, final String fsh, int programID) {
         if(programID == 0)
             programID = GLES20.glCreateProgram();
 
-        assert programID != 0 : "glCreateProgram failed!";
+        if(programID == 0) {
+            Log.e(LOG_TAG, "Invalid Program ID! Check if the context is binded!");
+        }
 
         if(mVertexShader != null)
             mVertexShader.release();
@@ -167,7 +167,6 @@ public class ProgramObject {
             init(shaderCode, shaderType);
         }
 
-        @SuppressLint("Assert")
         public boolean init(final String shaderCode, final int shaderType) {
             mShaderType = shaderType;
             mShaderID = loadShader(shaderType, shaderCode);
