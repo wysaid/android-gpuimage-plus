@@ -174,19 +174,21 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private static final DemoClassDescription mDemos[] = new DemoClassDescription[]{
-            new DemoClassDescription("FilterDemoActivity", "filterDemo"),
-            new DemoClassDescription("CameraDemoActivity", "cameraDemo"),
-            new DemoClassDescription("VideoPlayerActivity", "playerDemo")
+            new DemoClassDescription("ImageDemoActivity", "Image Filter Demo"),
+            new DemoClassDescription("CameraDemoActivity", "Camera Filter Demo"),
+            new DemoClassDescription("SimplePlayerDemoActivity", "Simple Player Demo"),
+            new DemoClassDescription("VideoPlayerDemoActivity", "Video Player Demo")
     };
 
-    public class MyButton extends Button implements View.OnClickListener {
+    public class DemoButton extends Button implements View.OnClickListener {
         private DemoClassDescription mDemo;
         public void setDemo(DemoClassDescription demo) {
             mDemo = demo;
+            setAllCaps(false);
             setText(mDemo.title);
             setOnClickListener(this);
         }
-        MyButton(Context context) {
+        DemoButton(Context context) {
             super(context);
         }
 
@@ -219,7 +221,7 @@ public class MainActivity extends ActionBarActivity {
         LinearLayout mLayout = (LinearLayout) findViewById(R.id.buttonLayout);
 
         for(DemoClassDescription demo : mDemos) {
-            MyButton btn = new MyButton(this);
+            DemoButton btn = new DemoButton(this);
             btn.setDemo(demo);
             mLayout.addView(btn);
         }
