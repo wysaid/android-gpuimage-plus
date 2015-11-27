@@ -42,7 +42,7 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * Created by wangyang on 15/7/17.
  */
-public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener, Camera.FaceDetectionListener {
+public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener{
 
     public static final String LOG_TAG = Common.LOG_TAG;
 
@@ -51,18 +51,18 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     public int viewWidth;
     public int viewHeight;
 
-    private int mRecordWidth = 480;
-    private int mRecordHeight = 640;
+    protected int mRecordWidth = 480;
+    protected int mRecordHeight = 640;
 
-    private SurfaceTexture mSurfaceTexture;
-    private int mTextureID;
+    protected SurfaceTexture mSurfaceTexture;
+    protected int mTextureID;
 
-    private CGEFrameRecorder mFrameRecorder;
+    protected CGEFrameRecorder mFrameRecorder;
 
     public CGEFrameRecorder getRecorder() {
         return mFrameRecorder;
     }
-    private Context mContext;
+    protected Context mContext;
 
     public int maxPreviewWidth = 1280;
     public int maxPreviewHeight = 1280;
@@ -79,11 +79,11 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     public ClearColor clearColor;
 
-    private TextureRenderer.Viewport mDrawViewport = new TextureRenderer.Viewport();
+    protected TextureRenderer.Viewport mDrawViewport = new TextureRenderer.Viewport();
 
-    private boolean mIsUsingMask = false;
+    protected boolean mIsUsingMask = false;
 
-    private boolean mFitFullView = false;
+    protected boolean mFitFullView = false;
 
     public void setFitFullView(boolean fit) {
         mFitFullView = fit;
@@ -95,11 +95,11 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         return mIsUsingMask;
     }
 
-    private float mMaskAspectRatio = 1.0f;
-    private float[] mTransformMatrix = new float[16];
+    protected float mMaskAspectRatio = 1.0f;
+    protected float[] mTransformMatrix = new float[16];
 
     //是否使用后置摄像头
-    private boolean mIsCameraBackForward = true;
+    protected boolean mIsCameraBackForward = true;
 
     public boolean isCameraBackForward() {
         return mIsCameraBackForward;
@@ -179,7 +179,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                         }
                     }, facing);
 
-                    resumeDetectingFace();
+//                    resumeDetectingFace();
                     requestRender();
                 }
             });
@@ -355,129 +355,129 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         });
     }
 
-    private boolean mIsDetectingFace = false;
+//    protected boolean mIsDetectingFace = false;
+//
+//    public class FaceArea {
+//        float x, y;
+//        float gx, gy;
+//    }
+//
+//    protected int[] mFaceAreaLock = new int[0];
+//    public FaceArea mFaceArea;
+////    public int mFaceCount = 0;
+//
+//    public boolean isDetectingFace() {
+//        return mIsDetectingFace;
+//    }
+//
+//    public synchronized boolean startDetectingFaceWithDefaultFilter() {
+//
+//        if(mIsDetectingFace) {
+//            Log.e(LOG_TAG, "Detecting is started already!!");
+//            return false;
+//        }
+//
+//        int maxFaces;
+//
+//        try {
+//
+//            maxFaces = cameraInstance().getParams().getMaxNumDetectedFaces();
+//
+//            if(maxFaces <= 0) {
+//                Log.e(LOG_TAG, "Device does not support face detection");
+//                return false;
+//            }
+//
+//            synchronized (mFaceAreaLock) {
+//                mFaceArea = new FaceArea();
+//            }
+//
+//            cameraInstance().getCameraDevice().setFaceDetectionListener(this);
+//            cameraInstance().getCameraDevice().startFaceDetection();
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return false;
+//        }
+//
+//        mIsDetectingFace = true;
+//
+//        queueEvent(new Runnable() {
+//            @Override
+//            public void run() {
+//                if(mFrameRecorder != null)
+//                    mFrameRecorder.enableFaceDetectWithDefaultFilter(true);
+//            }
+//        });
+//        return true;
+//    }
+//
+//    protected void resumeDetectingFace() {
+//        if(mIsDetectingFace) {
+//            try {
+//                cameraInstance().getCameraDevice().setFaceDetectionListener(this);
+//                cameraInstance().getCameraDevice().startFaceDetection();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
+//
+//    public synchronized void stopDetectingFace() {
+//        if(mIsDetectingFace) {
+//            mIsDetectingFace = false;
+//            cameraInstance().getCameraDevice().stopFaceDetection();
+//            cameraInstance().getCameraDevice().setFaceDetectionListener(null);
+//        }
+//
+//        synchronized (mFaceAreaLock) {
+//            mFaceArea = null;
+//        }
+//
+//        queueEvent(new Runnable() {
+//            @Override
+//            public void run() {
+//                if(mFrameRecorder != null)
+//                    mFrameRecorder.enableFaceDetectWithDefaultFilter(false);
+//            }
+//        });
+//    }
 
-    public class FaceArea {
-        float x, y;
-        float gx, gy;
-    }
-
-    private int[] mFaceAreaLock = new int[0];
-    public FaceArea mFaceArea;
-//    public int mFaceCount = 0;
-
-    public boolean isDetectingFace() {
-        return mIsDetectingFace;
-    }
-
-    public synchronized boolean startDetectingFaceWithDefaultFilter() {
-
-        if(mIsDetectingFace) {
-            Log.e(LOG_TAG, "Detecting is started already!!");
-            return false;
-        }
-
-        int maxFaces;
-
-        try {
-
-            maxFaces = cameraInstance().getParams().getMaxNumDetectedFaces();
-
-            if(maxFaces <= 0) {
-                Log.e(LOG_TAG, "Device does not support face detection");
-                return false;
-            }
-
-            synchronized (mFaceAreaLock) {
-                mFaceArea = new FaceArea();
-            }
-
-            cameraInstance().getCameraDevice().setFaceDetectionListener(this);
-            cameraInstance().getCameraDevice().startFaceDetection();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-
-        mIsDetectingFace = true;
-
-        queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                if(mFrameRecorder != null)
-                    mFrameRecorder.enableFaceDetectWithDefaultFilter(true);
-            }
-        });
-        return true;
-    }
-
-    private void resumeDetectingFace() {
-        if(mIsDetectingFace) {
-            try {
-                cameraInstance().getCameraDevice().setFaceDetectionListener(this);
-                cameraInstance().getCameraDevice().startFaceDetection();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public synchronized void stopDetectingFace() {
-        if(mIsDetectingFace) {
-            mIsDetectingFace = false;
-            cameraInstance().getCameraDevice().stopFaceDetection();
-            cameraInstance().getCameraDevice().setFaceDetectionListener(null);
-        }
-
-        synchronized (mFaceAreaLock) {
-            mFaceArea = null;
-        }
-
-        queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                if(mFrameRecorder != null)
-                    mFrameRecorder.enableFaceDetectWithDefaultFilter(false);
-            }
-        });
-    }
-
-    public void onFaceDetection(Camera.Face[] faces, Camera camera) {
-
-        synchronized (mFaceAreaLock) {
-
-            if(mFaceArea != null) {
-
-                if(faces != null && faces.length > 0) {
-                    Camera.Face face = faces[0];
-                    mFaceArea.x = (face.rect.left + face.rect.right) / 4000.0f + 0.5f;
-                    mFaceArea.y = (face.rect.top + face.rect.bottom) / 4000.0f + 0.5f;
-                    mFaceArea.gx = (face.rect.width() + face.rect.height()) / 8000.0f;
-                    mFaceArea.gy = 1.4142f * mFaceArea.gx;
-
-                    queueEvent(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(cameraInstance().getFacing() == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                                mFrameRecorder.setFaceArea(1.0f - mFaceArea.y, 1.0f - mFaceArea.x, mFaceArea.gx, mFaceArea.gy);
-                            } else {
-                                mFrameRecorder.setFaceArea(1.0f - mFaceArea.y, mFaceArea.x, mFaceArea.gx, mFaceArea.gy);
-                            }
-
-                        }
-                    });
-
-                }
-            }
-        }
-    }
+//    public void onFaceDetection(Camera.Face[] faces, Camera camera) {
+//
+//        synchronized (mFaceAreaLock) {
+//
+//            if(mFaceArea != null) {
+//
+//                if(faces != null && faces.length > 0) {
+//                    Camera.Face face = faces[0];
+//                    mFaceArea.x = (face.rect.left + face.rect.right) / 4000.0f + 0.5f;
+//                    mFaceArea.y = (face.rect.top + face.rect.bottom) / 4000.0f + 0.5f;
+//                    mFaceArea.gx = (face.rect.width() + face.rect.height()) / 8000.0f;
+//                    mFaceArea.gy = 1.4142f * mFaceArea.gx;
+//
+//                    queueEvent(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            if(cameraInstance().getFacing() == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+//                                mFrameRecorder.setFaceArea(1.0f - mFaceArea.y, 1.0f - mFaceArea.x, mFaceArea.gx, mFaceArea.gy);
+//                            } else {
+//                                mFrameRecorder.setFaceArea(1.0f - mFaceArea.y, mFaceArea.x, mFaceArea.gx, mFaceArea.gy);
+//                            }
+//
+//                        }
+//                    });
+//
+//                }
+//            }
+//        }
+//    }
 
     public interface OnCreateCallback {
         void createOver(boolean success);
     }
 
-    private OnCreateCallback mOnCreateCallback;
+    protected OnCreateCallback mOnCreateCallback;
 
     //定制一些初始化操作
     public void setOnCreateCallback(final OnCreateCallback callback) {
@@ -556,7 +556,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         }
     }
 
-    private void calcViewport() {
+    protected void calcViewport() {
 
         float scaling;
 
@@ -659,13 +659,9 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         cameraInstance().stopCamera();
     }
 
-    private long mTimeCount = 0;
-    private long mFramesCount = 0;
-    private long mLastTimestamp = 0;
-
     public void stopPreview() {
 
-        stopDetectingFace();
+//        stopDetectingFace();
 
         queueEvent(new Runnable() {
             @Override
@@ -699,7 +695,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
             mFrameRecorder.srcResize(cameraInstance().previewHeight(), cameraInstance().previewWidth());
         }
 
-        resumeDetectingFace();
+//        resumeDetectingFace();
         requestRender();
     }
 
@@ -771,46 +767,29 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         GLES20.glEnable(GLES20.GL_BLEND);
         mFrameRecorder.render(mDrawViewport.x, mDrawViewport.y, mDrawViewport.width, mDrawViewport.height);
         GLES20.glDisable(GLES20.GL_BLEND);
-
-        if(mLastTimestamp == 0)
-            mLastTimestamp = System.currentTimeMillis();
-
-        long currentTimestamp = System.currentTimeMillis();
-
-        ++mFramesCount;
-        mTimeCount += currentTimestamp - mLastTimestamp;
-        mLastTimestamp = currentTimestamp;
-        if(mTimeCount >= 1000) {
-            Log.i(LOG_TAG, String.format("每秒重绘帧率: %d", mFramesCount));
-            mTimeCount %= 1000;
-            mFramesCount = 0;
-        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Log.i(LOG_TAG, "onResume...");
-//        int facing = mIsCameraBackForward ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
-//        cameraInstance().tryOpenCamera(null, facing);
+        Log.i(LOG_TAG, "glsurfaceview onResume...");
     }
 
     @Override
     public void onPause() {
-        Log.i(LOG_TAG, "surfaceview onPause in...");
+        Log.i(LOG_TAG, "glsurfaceview onPause in...");
 
         cameraInstance().stopCamera();
         super.onPause();
-        Log.i(LOG_TAG, "surfaceview onPause out...");
+        Log.i(LOG_TAG, "glsurfaceview onPause out...");
     }
 
-    private long mTimeCount2 = 0;
-    private long mFramesCount2 = 0;
-    private long mLastTimestamp2 = 0;
+    protected long mTimeCount2 = 0;
+    protected long mFramesCount2 = 0;
+    protected long mLastTimestamp2 = 0;
 
     @Override
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-//        Log.i(LOG_TAG, "onFrameAvailable...");
 
         requestRender();
 
@@ -838,12 +817,12 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         void takeThunbnailOK(Bitmap bmp);
     }
 
-    private Bitmap mThunbnailBmp;
-    private TakeThunbnailCallback mTakeThunbnailCallback;
-    private final int[] mThunbnailLock = new int[0];
-    private int mThunbnailWidth, mThunbnailHeight;
+    protected Bitmap mThunbnailBmp;
+    protected TakeThunbnailCallback mTakeThunbnailCallback;
+    protected final int[] mThunbnailLock = new int[0];
+    protected int mThunbnailWidth, mThunbnailHeight;
     RectF mThumnailClipingArea;
-    private IntBuffer mThunbnailBuffer;
+    protected IntBuffer mThunbnailBuffer;
 
     public boolean isTakingThunbnail() {
         boolean status;
@@ -1110,7 +1089,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 photoCallback.takePictureOK(bmp2);
 
                 cameraInstance().getCameraDevice().startPreview();
-                resumeDetectingFace();
+//                resumeDetectingFace();
             }
         });
     }
