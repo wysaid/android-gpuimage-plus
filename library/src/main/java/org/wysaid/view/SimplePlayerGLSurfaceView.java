@@ -10,13 +10,15 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.GLUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Surface;
 
 import org.wysaid.myUtils.Common;
-import org.wysaid.nativePort.CGEFrameRenderer;
 import org.wysaid.texUtils.TextureRenderer;
+import org.wysaid.texUtils.TextureRendererDrawOrigin;
+import org.wysaid.texUtils.TextureRendererMask;
 
 import java.nio.IntBuffer;
 
@@ -24,17 +26,31 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Created by wangyang on 15/11/26.
+ * Created by wangyang on 15/8/20.
  */
-
-public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
+public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
 
     public static final String LOG_TAG = Common.LOG_TAG;
+    public static boolean ENABLE_RESOLUTION_FIX = true;  // Special usage which will be removed soon!!
+    public boolean mResolutionShouldFix = false;
 
     private SurfaceTexture mSurfaceTexture;
     private int mVideoTextureID;
-    private CGEFrameRenderer mFrameRenderer;
+    private TextureRenderer mDrawer;
 
+    //setTextureRenderer 必须在OpenGL 线程调用!
+    public void setTextureRenderer(TextureRenderer drawer) {
+        if(mDrawer == null) {
+            Log.e(LOG_TAG, "Invalid Drawer!");
+            return;
+        }
+
+        if(mDrawer != drawer) {
+            mDrawer.release();
+            mDrawer = drawer;
+            calcViewport();
+        }
+    }
 
     private TextureRenderer.Viewport mRenderViewport = new TextureRenderer.Viewport();
     private float[] mTransformMatrix = new float[16];
@@ -43,6 +59,8 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         return mIsUsingMask;
     }
     private float mMaskAspectRatio = 1.0f;
+    private float mDrawerFlipScaleX = 1.0f;
+    private float mDrawerFlipScaleY = 1.0f;
 
     private int mViewWidth = 1000;
     private int mViewHeight = 1000;
@@ -62,7 +80,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
     public void setFitFullView(boolean fit) {
         mFitFullView = fit;
-        if(mFrameRenderer != null)
+        if(mDrawer != null)
             calcViewport();
     }
 
@@ -117,7 +135,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         mPreparedCallback = preparedCallback;
         mPlayCompletionCallback = completionCallback;
 
-        if(mFrameRenderer != null) {
+        if(mDrawer != null) {
 
             queueEvent(new Runnable() {
                 @Override
@@ -127,7 +145,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
                     if (mSurfaceTexture == null || mVideoTextureID == 0) {
                         mVideoTextureID = Common.genSurfaceTextureID();
                         mSurfaceTexture = new SurfaceTexture(mVideoTextureID);
-                        mSurfaceTexture.setOnFrameAvailableListener(VideoPlayerGLSurfaceView.this);
+                        mSurfaceTexture.setOnFrameAvailableListener(SimplePlayerGLSurfaceView.this);
                     }
                     _useUri();
                 }
@@ -135,76 +153,87 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         }
     }
 
-    public synchronized void setFilterWithConfig(final String config) {
-        queueEvent(new Runnable() {
-            @Override
-            public void run() {
-
-                if(mFrameRenderer != null) {
-                    mFrameRenderer.setFilterWidthConfig(config);
-                } else {
-                    Log.e(LOG_TAG, "setFilterWithConfig after release!!");
-                }
-            }
-        });
-    }
-
-    public void setFilterIntensity(final float intensity) {
-        queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                if(mFrameRenderer != null) {
-                    mFrameRenderer.setFilterIntensity(intensity);
-                } else {
-                    Log.e(LOG_TAG, "setFilterIntensity after release!!");
-                }
-            }
-        });
-    }
-
+    //根据传入bmp回调不同
+    //若设置之后使用mask， 则调用 setMaskOK
+    //否则调用 unsetMaskOK
     public interface SetMaskBitmapCallback {
-        void setMaskOK(CGEFrameRenderer recorder);
+        void setMaskOK(TextureRendererMask renderer);
+        void unsetMaskOK(TextureRenderer renderer);
     }
 
     public void setMaskBitmap(final Bitmap bmp, final boolean shouldRecycle) {
         setMaskBitmap(bmp, shouldRecycle, null);
     }
 
-    //注意， 当传入的bmp为null时， SetMaskBitmapCallback 不会执行.
-    public void setMaskBitmap(final Bitmap bmp, final boolean shouldRecycle, final SetMaskBitmapCallback callback) {
+    public synchronized void setMaskBitmap(final Bitmap bmp, final boolean shouldRecycle, final SetMaskBitmapCallback callback) {
+
+        if(mDrawer == null) {
+            Log.e(LOG_TAG, "setMaskBitmap after release!");
+            return;
+        }
 
         queueEvent(new Runnable() {
             @Override
             public void run() {
 
-                if (mFrameRenderer == null) {
-                    Log.e(LOG_TAG, "setMaskBitmap after release!!");
-                    return;
+                if(bmp == null) {
+                    Log.i(LOG_TAG, "Cancel Mask Bitmap!");
+
+                    setMaskTexture(0, 1.0f);
+
+                    if(callback != null) {
+                        callback.unsetMaskOK(mDrawer);
+                    }
+
+                    return ;
                 }
 
-                if (bmp == null) {
-                    mFrameRenderer.setMaskTexture(0, 1.0f);
-                    mIsUsingMask = false;
-                    calcViewport();
-                    return;
+                Log.i(LOG_TAG, "Use Mask Bitmap!");
+
+                int texID[] = {0};
+                GLES20.glGenTextures(1, texID, 0);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texID[0]);
+                GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bmp, 0);
+                GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+                GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
+                GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+                GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+
+                setMaskTexture(texID[0], bmp.getWidth() / (float) bmp.getHeight());
+
+                if(callback != null && mDrawer instanceof TextureRendererMask) {
+                    callback.setMaskOK((TextureRendererMask)mDrawer);
                 }
-
-                int texID = Common.genNormalTextureID(bmp, GLES20.GL_NEAREST, GLES20.GL_CLAMP_TO_EDGE);
-
-                mFrameRenderer.setMaskTexture(texID, bmp.getWidth() / (float) bmp.getHeight());
-                mIsUsingMask = true;
-                mMaskAspectRatio = bmp.getWidth() / (float) bmp.getHeight();
-
-                if (callback != null) {
-                    callback.setMaskOK(mFrameRenderer);
-                }
-
-                if (shouldRecycle)
+                if(shouldRecycle)
                     bmp.recycle();
 
-                calcViewport();
             }
         });
+    }
+
+    public synchronized void setMaskTexture(int texID, float aspectRatio) {
+        Log.i(LOG_TAG, "setMaskTexture... ");
+
+        if(texID == 0) {
+            if(mDrawer instanceof TextureRendererMask) {
+                mDrawer.release();
+                mDrawer = TextureRendererDrawOrigin.create(true);
+            }
+            mIsUsingMask = false;
+        }
+        else {
+            if(!(mDrawer instanceof  TextureRendererMask)) {
+                mDrawer.release();
+                TextureRendererMask drawer = TextureRendererMask.create(true);
+                assert drawer != null : "Drawer Create Failed!";
+                drawer.setMaskTexture(texID);
+                mDrawer = drawer;
+            }
+            mIsUsingMask = true;
+        }
+
+        mMaskAspectRatio = aspectRatio;
+        calcViewport();
     }
 
     public synchronized MediaPlayer getPlayer() {
@@ -225,7 +254,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
         assert callback != null : "无意义操作!";
 
-        if(mFrameRenderer == null) {
+        if(mDrawer == null) {
             mOnCreateCallback = callback;
         }
         else {
@@ -239,7 +268,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         }
     }
 
-    public VideoPlayerGLSurfaceView(Context context, AttributeSet attrs) {
+    public SimplePlayerGLSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         Log.i(LOG_TAG, "MyGLSurfaceView Construct...");
@@ -263,6 +292,11 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glDisable(GLES20.GL_STENCIL_TEST);
 
+        mDrawer = TextureRendererDrawOrigin.create(true);
+        if(mDrawer == null) {
+            Log.e(LOG_TAG, "Create Drawer Failed!");
+            return;
+        }
         if(mOnCreateCallback != null) {
             mOnCreateCallback.createOK();
         }
@@ -270,7 +304,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         if (mVideoUri != null && (mSurfaceTexture == null || mVideoTextureID == 0)) {
             mVideoTextureID = Common.genSurfaceTextureID();
             mSurfaceTexture = new SurfaceTexture(mVideoTextureID);
-            mSurfaceTexture.setOnFrameAvailableListener(VideoPlayerGLSurfaceView.this);
+            mSurfaceTexture.setOnFrameAvailableListener(SimplePlayerGLSurfaceView.this);
             _useUri();
         }
     }
@@ -306,9 +340,9 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
                         mPlayer = null;
                     }
 
-                    if(mFrameRenderer != null) {
-                        mFrameRenderer.release();
-                        mFrameRenderer = null;
+                    if(mDrawer != null) {
+                        mDrawer.release();
+                        mDrawer = null;
                     }
 
                     if(mSurfaceTexture != null) {
@@ -341,7 +375,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
     @Override
     public void onDrawFrame(GL10 gl) {
 
-        if(mSurfaceTexture == null || mFrameRenderer == null) {
+        if(mSurfaceTexture == null) {
             return;
         }
 
@@ -351,15 +385,14 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
             return;
         }
 
-        mSurfaceTexture.getTransformMatrix(mTransformMatrix);
-        mFrameRenderer.update(mVideoTextureID, mTransformMatrix);
-
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        GLES20.glViewport(0, 0, mViewWidth, mViewHeight);
 
-        GLES20.glEnable(GLES20.GL_BLEND);
-        mFrameRenderer.render(mRenderViewport.x, mRenderViewport.y, mRenderViewport.width, mRenderViewport.height);
-        GLES20.glDisable(GLES20.GL_BLEND);
+        mSurfaceTexture.getTransformMatrix(mTransformMatrix);
+        mDrawer.setTransform(mTransformMatrix);
+
+        mDrawer.renderTexture(mVideoTextureID, mRenderViewport);
 
     }
 
@@ -390,12 +423,18 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         float scaling;
 
         if(mIsUsingMask) {
+            flushMaskAspectRatio();
             scaling = mMaskAspectRatio;
         } else {
+            mDrawer.setFlipscale(mDrawerFlipScaleX, mDrawerFlipScaleY);
             scaling = mVideoWidth / (float)mVideoHeight;
         }
 
-        float viewRatio = mViewWidth / (float)mViewHeight;
+        if(mResolutionShouldFix) {
+            mDrawer.setRotation((float) (-Math.PI * 0.5));
+        }
+
+        float viewRatio = mViewWidth / (float) mViewHeight;
         float s = scaling / viewRatio;
 
         int w, h;
@@ -440,6 +479,9 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
         try {
             mPlayer.setDataSource(mContext, mVideoUri);
+
+//            mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
             mPlayer.setSurface(new Surface(mSurfaceTexture));
 
         } catch (Exception e) {
@@ -480,22 +522,19 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
                 mVideoWidth = mp.getVideoWidth();
                 mVideoHeight = mp.getVideoHeight();
 
+                //Mark: 临时兼容ios版
+                if(ENABLE_RESOLUTION_FIX && mVideoWidth == 640 && mVideoHeight == 480) {
+                    mVideoWidth = mp.getVideoHeight();
+                    mVideoHeight = mp.getVideoWidth();
+                    mResolutionShouldFix = true;
+                    Log.w(LOG_TAG, "Forcing player rotation!! Be careful for this invalid video!");
+                } else {
+                    mResolutionShouldFix = false;
+                }
+
                 queueEvent(new Runnable() {
                     @Override
                     public void run() {
-
-                        if(mFrameRenderer == null) {
-                            mFrameRenderer = new CGEFrameRenderer();
-                        }
-
-                        if(mFrameRenderer.init(mVideoWidth, mVideoHeight, mVideoWidth, mVideoHeight)) {
-                            //Keep right orientation for source texture blending
-                            mFrameRenderer.setSrcFlipScale(1.0f, -1.0f);
-                            mFrameRenderer.setRenderFlipScale(1.0f, -1.0f);
-                        } else {
-                            Log.e(LOG_TAG, "Frame Recorder init failed!");
-                        }
-
                         calcViewport();
                     }
                 });
@@ -505,7 +544,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
                 } else {
                     mp.start();
                 }
-
+//                requestRender(); //可能导致第一帧过快渲染 (先于surface texture 准备完成
                 Log.i(LOG_TAG, String.format("Video resolution 1: %d x %d", mVideoWidth, mVideoHeight));
             }
         });
@@ -539,6 +578,23 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
     }
 
+    private void flushMaskAspectRatio() {
+
+        float dstRatio = mVideoWidth / (float)mVideoHeight;
+
+        if(mResolutionShouldFix) {
+            dstRatio = mVideoHeight / (float)mVideoWidth;
+        }
+
+        float s = dstRatio / mMaskAspectRatio;
+
+        if(s > 1.0f) {
+            mDrawer.setFlipscale(mDrawerFlipScaleX / s, mDrawerFlipScaleY);
+        } else {
+            mDrawer.setFlipscale(mDrawerFlipScaleX, s * mDrawerFlipScaleY);
+        }
+    }
+
     public interface TakeShotCallback {
         //传入的bmp可以由接收者recycle
         void takeShotOK(Bitmap bmp);
@@ -547,7 +603,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
     public synchronized void takeShot(final TakeShotCallback callback) {
         assert callback != null : "callback must not be null!";
 
-        if(mFrameRenderer == null) {
+        if(mDrawer == null) {
             Log.e(LOG_TAG, "Drawer not initialized!");
             callback.takeShotOK(null);
             return;
