@@ -3,6 +3,7 @@ package org.wysaid.texUtils;
 import android.annotation.SuppressLint;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
+import android.util.Log;
 
 import org.wysaid.myUtils.Common;
 import org.wysaid.myUtils.ProgramObject;
@@ -127,13 +128,14 @@ public abstract class TextureRenderer {
         return false;
     }
 
-    @SuppressLint("Assert")
     protected void defaultInitialize() {
         int[] vertexBuffer = new int[1];
         GLES20.glGenBuffers(1, vertexBuffer, 0);
         mVertexBuffer = vertexBuffer[0];
 
-        assert mVertexBuffer != 0 : "Invalid VertexBuffer!";
+        if(mVertexBuffer == 0) {
+            Log.e(LOG_TAG, "Invalid VertexBuffer!");
+        }
 
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertexBuffer);
         FloatBuffer buffer = FloatBuffer.allocate(vertices.length);
