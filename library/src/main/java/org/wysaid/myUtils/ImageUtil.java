@@ -2,11 +2,9 @@ package org.wysaid.myUtils;
 
 import android.graphics.Bitmap;
 import android.media.FaceDetector;
-import android.os.Environment;
 import android.util.Log;
 
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -14,23 +12,8 @@ import java.io.IOException;
  * Created by wangyang on 15/7/27.
  */
 
-public class ImageUtil {
-    public static final String LOG_TAG = Common.LOG_TAG;
-    public static final File parentPath = Environment.getExternalStorageDirectory();
-    public static String storagePath = null;
-    public static final String DST_FOLDER = "libCGE";
+public class ImageUtil extends FileUtil{
 
-    public static String getPath() {
-        if(storagePath == null) {
-            storagePath = parentPath.getAbsolutePath() + "/" + DST_FOLDER;
-            File file = new File(storagePath);
-            if(!file.exists()) {
-                file.mkdir();
-            }
-        }
-
-        return storagePath;
-    }
 
     public static void saveBitmap(Bitmap bmp) {
         String path = getPath();
