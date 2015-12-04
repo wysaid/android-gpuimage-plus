@@ -99,7 +99,7 @@ public class FileUtil {
         }
 
         String content = "";
-        byte[] buffer = new byte[256]; //1KB cache for reading.
+        byte[] buffer = new byte[256]; //Create cache for reading.
 
         try {
 
