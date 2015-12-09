@@ -11,6 +11,8 @@ GPU accelerated filters for Android based on OpenGL.
 
 4. iOS version: [https://github.com/wysaid/ios-gpuimage-plus](https://github.com/wysaid/ios-gpuimage-plus "http://wysaid.org")
 
+5. 安卓版暂时不开放视频实时录制功能（这一块写的好费劲的😂）， 如果确实需要可以联系我
+
 ## Screen Shots ##
 
 ![Android-GPUImage-plus](https://raw.githubusercontent.com/wysaid/android-gpuimage-plus/master/screenshots/0.jpg "Android-GPUImage-plus")
