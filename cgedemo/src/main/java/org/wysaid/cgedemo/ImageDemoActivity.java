@@ -75,14 +75,14 @@ public class ImageDemoActivity extends ActionBarActivity {
                 BitmapDrawable a = (BitmapDrawable)_imageView.getDrawable();
                 Bitmap bmp = a.getBitmap().copy(Bitmap.Config.RGB_565, true);
 
-                ImageUtil.FaceRects rects = ImageUtil.findFaceByBitmap(bmp, 8);
+                ImageUtil.FaceRects rects = ImageUtil.findFaceByBitmap(bmp);
 
-                if(rects == null) {
+                if (rects == null) {
                     Toast.makeText(ImageDemoActivity.this, "未知错误", Toast.LENGTH_LONG);
                     return;
                 }
 
-                if(rects.numOfFaces > 0) {
+                if (rects.numOfFaces > 0) {
                     String content = "";
 
                     Canvas canvas = new Canvas(bmp);
@@ -91,13 +91,23 @@ public class ImageDemoActivity extends ActionBarActivity {
                     paint.setStyle(Paint.Style.STROKE);
                     paint.setStrokeWidth(4);
 
-                    for(int i = 0; i != rects.numOfFaces; ++i) {
+                    for (int i = 0; i != rects.numOfFaces; ++i) {
                         FaceDetector.Face face = rects.faces[i];
                         PointF pnt = new PointF();
                         face.getMidPoint(pnt);
+
                         float eyeDis = face.eyesDistance();
+                        float halfEyeDis = eyeDis / 2.0f;
+
                         content += String.format("准确率: %g, 人脸中心 %g, %g, 眼间距: %g\n", face.confidence(), pnt.x, pnt.y, eyeDis);
                         canvas.drawRect((int) (pnt.x - eyeDis * 1.5f), (int) (pnt.y - eyeDis * 1.5f), (int) (pnt.x + eyeDis * 1.5f), (int) (pnt.y + eyeDis * 1.5f), paint);
+
+                        //眼睛中心
+                        canvas.drawRect((int) (pnt.x - 2.0f), (int) (pnt.y - 2.0f), (int) (pnt.x + 2.0f), (int) (pnt.y + 2.0f), paint);
+
+                        //双眼
+                        canvas.drawRect((int) (pnt.x - halfEyeDis - 2.0f), (int) (pnt.y - 2.0f), (int) (pnt.x - halfEyeDis + 2.0f), (int) (pnt.y + 2.0f), paint);
+                        canvas.drawRect((int) (pnt.x + halfEyeDis - 2.0f), (int) (pnt.y - 2.0f), (int) (pnt.x + halfEyeDis + 2.0f), (int) (pnt.y + 2.0f), paint);
                     }
 
                     Toast.makeText(ImageDemoActivity.this, content, Toast.LENGTH_SHORT).show();
