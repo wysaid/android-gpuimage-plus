@@ -2,6 +2,7 @@ package org.wysaid.cgeDemo;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -19,8 +20,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import org.wysaid.myUtils.Common;
+import org.wysaid.common.Common;
 import org.wysaid.myUtils.ImageUtil;
+import org.wysaid.nativePort.CGEFaceFunctions;
 import org.wysaid.nativePort.CGENativeLibrary;
 
 public class ImageDemoActivity extends ActionBarActivity {
@@ -217,5 +219,33 @@ public class ImageDemoActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void faceTestCase(View view) {
+        Bitmap srcImage = BitmapFactory.decodeResource(this.getResources(), R.drawable.face0);
+        Bitmap dstImage = BitmapFactory.decodeResource(this.getResources(), R.drawable.face1);
+
+        if(srcImage == null || dstImage == null) {
+            Log.e(Common.LOG_TAG, "获取人脸资源图片失败");
+            return;
+        }
+
+        CGEFaceFunctions.FaceFeature srcFeature = new CGEFaceFunctions.FaceFeature(
+                new PointF(295.75f, 338.0f), new PointF(401.375f, 338.0f),
+                new PointF(348.5625f, 443.625f),
+                new PointF(348.5625f, 517.5626f),
+                srcImage.getWidth(), srcImage.getHeight()
+        );
+
+        CGEFaceFunctions.FaceFeature dstFeature = new CGEFaceFunctions.FaceFeature(
+                new PointF(397.0f, 756.0f), new PointF(691.0f, 749.0f),
+                new PointF(539.0f, 1068.0f),
+                new PointF(546.0f, 1233.0f),
+                dstImage.getWidth(), dstImage.getHeight()
+        );
+
+        Bitmap result = CGEFaceFunctions.blendFaceWidthFeatures(srcImage, srcFeature, dstImage, dstFeature, null);
+
+        _imageView.setImageBitmap(result);
     }
 }

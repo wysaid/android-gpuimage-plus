@@ -43,6 +43,14 @@
                 android:id="@+id/faceDetectionBtn"
                 android:text="人脸查找"/>
 
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:id="@+id/faceTestCaseBtn"
+                android:text="人脸测试"
+                android:onClick="faceTestCase"
+                />
+
         </LinearLayout>
 
     </HorizontalScrollView>

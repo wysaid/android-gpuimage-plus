@@ -1,12 +1,11 @@
 package org.wysaid.texUtils;
 
-import android.annotation.SuppressLint;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.util.Log;
 
-import org.wysaid.myUtils.Common;
-import org.wysaid.myUtils.ProgramObject;
+import org.wysaid.common.Common;
+import org.wysaid.common.ProgramObject;
 
 import java.nio.FloatBuffer;
 
