@@ -7,7 +7,7 @@ import android.hardware.Camera;
 import android.os.Build;
 import android.util.Log;
 
-import org.wysaid.myUtils.Common;
+import org.wysaid.common.Common;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -103,10 +103,13 @@ public class CameraInstance {
             if(mCameraDevice != null)
                 mCameraDevice.release();
 
-            if(mDefaultCameraID >= 0)
+            if(mDefaultCameraID >= 0) {
                 mCameraDevice = Camera.open(mDefaultCameraID);
-            else
+            }
+            else {
                 mCameraDevice = Camera.open();
+                mFacing = Camera.CameraInfo.CAMERA_FACING_BACK; //default: back facing
+            }
         }
         catch(Exception e)
         {

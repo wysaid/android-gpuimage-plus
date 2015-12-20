@@ -15,7 +15,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Surface;
 
-import org.wysaid.myUtils.Common;
+import org.wysaid.common.Common;
 import org.wysaid.texUtils.TextureRenderer;
 import org.wysaid.texUtils.TextureRendererDrawOrigin;
 import org.wysaid.texUtils.TextureRendererMask;

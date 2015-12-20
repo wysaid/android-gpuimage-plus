@@ -24,8 +24,8 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 
 import org.wysaid.camera.CameraInstance;
-import org.wysaid.myUtils.Common;
-import org.wysaid.myUtils.FrameBufferObject;
+import org.wysaid.common.Common;
+import org.wysaid.common.FrameBufferObject;
 import org.wysaid.nativePort.CGEFrameRecorder;
 import org.wysaid.nativePort.CGENativeLibrary;
 import org.wysaid.texUtils.TextureRenderer;
