@@ -1,4 +1,4 @@
-package org.wysaid.myUtils;
+package org.wysaid.common;
 
 import android.graphics.Bitmap;
 import android.opengl.GLES11Ext;

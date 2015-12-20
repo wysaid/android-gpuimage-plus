@@ -1,4 +1,4 @@
-package org.wysaid.myUtils;
+package org.wysaid.common;
 
 import android.opengl.GLES20;
 import android.util.Log;

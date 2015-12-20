@@ -11,7 +11,7 @@ import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.util.Log;
 
-import org.wysaid.myUtils.Common;
+import org.wysaid.common.Common;
 
 public class CGENativeLibrary {
 

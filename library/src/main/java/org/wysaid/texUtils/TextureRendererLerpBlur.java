@@ -3,8 +3,8 @@ package org.wysaid.texUtils;
 import android.opengl.GLES20;
 import android.util.Log;
 
-import org.wysaid.myUtils.FrameBufferObject;
-import org.wysaid.myUtils.ProgramObject;
+import org.wysaid.common.FrameBufferObject;
+import org.wysaid.common.ProgramObject;
 
 /**
  * Created by wangyang on 15/7/24.
