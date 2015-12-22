@@ -242,6 +242,9 @@ public class ImageDemoActivity extends ActionBarActivity {
 
         Bitmap result = CGEFaceFunctions.blendFaceWidthFeatures(srcImage, srcFeature, dstImage, dstFeature, null);
 
-        _imageView.setImageBitmap(result);
+        if(result != null)
+            _imageView.setImageBitmap(result);
+        else
+            Log.e(Common.LOG_TAG, "合成失败");
     }
 }
