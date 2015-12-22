@@ -6,7 +6,6 @@ import android.graphics.PointF;
 import org.wysaid.common.Common;
 import org.wysaid.common.SharedContext;
 
-
 /**
  * Created by wangyang on 15/12/20.
  */
