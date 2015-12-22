@@ -13,6 +13,10 @@ public class CGEFaceFunctions {
 
     public static class FaceFeature {
 
+        static {
+            NativeLibraryLoader.load();
+        }
+
         public FaceFeature() {}
         public FaceFeature(PointF leftEye, PointF rightEye, PointF mouse, PointF chin, float imgWidth, float imgHeight) {
             leftEyePos = leftEye;
