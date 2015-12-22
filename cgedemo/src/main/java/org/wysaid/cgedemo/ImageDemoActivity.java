@@ -40,11 +40,9 @@ public class ImageDemoActivity extends ActionBarActivity {
         LinearLayout menuLayout = (LinearLayout) findViewById(R.id.menuLayout);
         menuLayout.setHorizontalScrollBarEnabled(true);
 
-        int layoutWidth = 0;
         for(int i = 0; i != MainActivity.effectConfigs.length; ++i)
         {
             Button btn = new Button(this);
-            layoutWidth += btn.getWidth();
             btn.setText("filter" + i);
             btn.setOnClickListener(buttonClickListener);
             menuLayout.addView(btn);
@@ -52,8 +50,6 @@ public class ImageDemoActivity extends ActionBarActivity {
 
         Button btn = (Button)findViewById(R.id.galleryBtn);
         btn.setOnClickListener(galleryBtnClickListener);
-
-//        CGENativeLibrary.globalInit();
 
         _imageView = (ImageView) findViewById(R.id.mainImageView);
         BitmapDrawable a = (BitmapDrawable)_imageView.getDrawable();
