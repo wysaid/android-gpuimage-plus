@@ -177,7 +177,8 @@ public class MainActivity extends ActionBarActivity {
             new DemoClassDescription("ImageDemoActivity", "Image Filter Demo"),
             new DemoClassDescription("CameraDemoActivity", "Camera Filter Demo"),
             new DemoClassDescription("SimplePlayerDemoActivity", "Simple Player Demo"),
-            new DemoClassDescription("VideoPlayerDemoActivity", "Video Player Demo")
+            new DemoClassDescription("VideoPlayerDemoActivity", "Video Player Demo"),
+            new DemoClassDescription("FaceDemoActivity", "Face Demo")
     };
 
     public class DemoButton extends Button implements View.OnClickListener {

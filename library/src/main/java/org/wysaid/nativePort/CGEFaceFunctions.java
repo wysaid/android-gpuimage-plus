@@ -11,26 +11,32 @@ import org.wysaid.common.SharedContext;
  */
 public class CGEFaceFunctions {
 
+    static {
+        NativeLibraryLoader.load();
+    }
+
     public static class FaceFeature {
 
-        static {
-            NativeLibraryLoader.load();
+        public FaceFeature() {
+            leftEyePos = new PointF();
+            rightEyePos = new PointF();
+            mouthPos = new PointF();
+            chinPos = new PointF();
         }
 
-        public FaceFeature() {}
         public FaceFeature(PointF leftEye, PointF rightEye, PointF mouse, PointF chin, float imgWidth, float imgHeight) {
             leftEyePos = leftEye;
             rightEyePos = rightEye;
-            mousePos = mouse;
+            mouthPos = mouse;
             chinPos = chin;
             faceImageWidth = imgWidth;
             faceImageHeight = imgHeight;
         }
 
-        PointF leftEyePos, rightEyePos;
-        PointF mousePos;
-        PointF chinPos;
-        float faceImageWidth, faceImageHeight;
+        public PointF leftEyePos, rightEyePos;
+        public PointF mouthPos;
+        public PointF chinPos;
+        public float faceImageWidth, faceImageHeight;
     }
 
     public static Bitmap blendFaceWidthFeatures(Bitmap srcImage, FaceFeature srcFeature, Bitmap dstImage, FaceFeature dstFeature, SharedContext context) {
@@ -47,7 +53,7 @@ public class CGEFaceFunctions {
         float[] srcFaceFeature = {
                 srcFeature.leftEyePos.x, srcFeature.leftEyePos.y,
                 srcFeature.rightEyePos.x, srcFeature.rightEyePos.y,
-                srcFeature.mousePos.x, srcFeature.mousePos.y,
+                srcFeature.mouthPos.x, srcFeature.mouthPos.y,
                 srcFeature.chinPos.x, srcFeature.chinPos.y,
                 srcFeature.faceImageWidth, srcFeature.faceImageHeight,
         };
@@ -55,7 +61,7 @@ public class CGEFaceFunctions {
         float[] dstFaceFeature = {
                 dstFeature.leftEyePos.x, dstFeature.leftEyePos.y,
                 dstFeature.rightEyePos.x, dstFeature.rightEyePos.y,
-                dstFeature.mousePos.x, dstFeature.mousePos.y,
+                dstFeature.mouthPos.x, dstFeature.mouthPos.y,
                 dstFeature.chinPos.x, dstFeature.chinPos.y,
                 dstFeature.faceImageWidth, dstFeature.faceImageHeight,
         };
