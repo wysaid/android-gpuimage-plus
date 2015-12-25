@@ -217,6 +217,8 @@ public class ImageDemoActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    static boolean rev = false;
+
     public void faceTestCase(View view) {
         Bitmap srcImage = BitmapFactory.decodeResource(this.getResources(), R.drawable.face0);
         Bitmap dstImage = BitmapFactory.decodeResource(this.getResources(), R.drawable.face1);
@@ -227,9 +229,9 @@ public class ImageDemoActivity extends ActionBarActivity {
         }
 
         CGEFaceFunctions.FaceFeature srcFeature = new CGEFaceFunctions.FaceFeature(
-                new PointF(295.75f, 338.0f), new PointF(401.375f, 338.0f),
-                new PointF(348.5625f, 443.625f),
-                new PointF(348.5625f, 517.5626f),
+                new PointF(156, 186), new PointF(274, 147),
+                new PointF(257, 311),
+                new PointF(297, 416),
                 srcImage.getWidth(), srcImage.getHeight()
         );
 
@@ -240,7 +242,15 @@ public class ImageDemoActivity extends ActionBarActivity {
                 dstImage.getWidth(), dstImage.getHeight()
         );
 
-        Bitmap result = CGEFaceFunctions.blendFaceWidthFeatures(srcImage, srcFeature, dstImage, dstFeature, null);
+        rev = !rev;
+
+        Bitmap result;
+
+        if(rev) {
+            result = CGEFaceFunctions.blendFaceWidthFeatures(srcImage, srcFeature, dstImage, dstFeature, null);
+        } else {
+            result = CGEFaceFunctions.blendFaceWidthFeatures(dstImage, dstFeature, srcImage, srcFeature, null);
+        }
 
         if(result != null)
             _imageView.setImageBitmap(result);

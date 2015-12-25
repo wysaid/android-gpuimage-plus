@@ -46,6 +46,7 @@
             android:name=".SimplePlayerDemoActivity"
             android:label="@string/title_activity_video_player"></activity>
         <activity android:name=".VideoPlayerDemoActivity"></activity>
+        <activity android:name=".FaceDemoActivity"></activity>
     </application>
 
 </manifest>
