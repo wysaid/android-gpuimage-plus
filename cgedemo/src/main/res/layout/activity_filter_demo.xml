@@ -14,7 +14,7 @@
         android:layout_alignParentTop="true"
         />
 
-    <ImageView
+    <org.wysaid.view.ImageGLSurfaceView
         android:id="@+id/mainImageView"
         android:src="@drawable/bgview"
         android:layout_width="match_parent"
