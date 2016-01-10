@@ -7,7 +7,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
-import android.graphics.drawable.BitmapDrawable;
 import android.media.FaceDetector;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -16,19 +15,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import org.wysaid.common.Common;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.nativePort.CGEFaceFunctions;
-import org.wysaid.nativePort.CGENativeLibrary;
+import org.wysaid.view.ImageGLSurfaceView;
+
+import java.io.InputStream;
 
 public class ImageDemoActivity extends ActionBarActivity {
 
     private Bitmap _bitmap;
-    private ImageView _imageView;
+    private ImageGLSurfaceView _imageView;
 
     public static final int REQUEST_CODE_PICK_IMAGE = 1;
 
@@ -51,72 +51,31 @@ public class ImageDemoActivity extends ActionBarActivity {
         Button btn = (Button)findViewById(R.id.galleryBtn);
         btn.setOnClickListener(galleryBtnClickListener);
 
-        _imageView = (ImageView) findViewById(R.id.mainImageView);
-        BitmapDrawable a = (BitmapDrawable)_imageView.getDrawable();
-        _bitmap = a.getBitmap();
+        _imageView = (ImageGLSurfaceView) findViewById(R.id.mainImageView);
+        _bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bgview);
+
+        _imageView.setSurfaceCreatedCallback(new ImageGLSurfaceView.OnSurfaceCreatedCallback() {
+            @Override
+            public void surfaceCreated() {
+                _imageView.setImageBitmap(_bitmap);
+            }
+        });
 
         Button saveBtn = (Button) findViewById(R.id.saveBtn);
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BitmapDrawable a = (BitmapDrawable)_imageView.getDrawable();
-                Bitmap bmp = a.getBitmap();
-                ImageUtil.saveBitmap(bmp);
-            }
-        });
 
-        Button faceDetectionBtn = (Button)findViewById(R.id.faceDetectionBtn);
-        faceDetectionBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i(Common.LOG_TAG, "人脸检测中");
-                BitmapDrawable a = (BitmapDrawable)_imageView.getDrawable();
-                Bitmap bmp = a.getBitmap().copy(Bitmap.Config.RGB_565, true);
-
-                ImageUtil.FaceRects rects = ImageUtil.findFaceByBitmap(bmp);
-
-                if (rects == null) {
-                    Toast.makeText(ImageDemoActivity.this, "未知错误", Toast.LENGTH_LONG);
-                    return;
-                }
-
-                if (rects.numOfFaces > 0) {
-                    String content = "";
-
-                    Canvas canvas = new Canvas(bmp);
-                    Paint paint = new Paint();
-                    paint.setColor(Color.RED);
-                    paint.setStyle(Paint.Style.STROKE);
-                    paint.setStrokeWidth(4);
-
-                    for (int i = 0; i != rects.numOfFaces; ++i) {
-                        FaceDetector.Face face = rects.faces[i];
-                        PointF pnt = new PointF();
-                        face.getMidPoint(pnt);
-
-                        float eyeDis = face.eyesDistance();
-                        float halfEyeDis = eyeDis / 2.0f;
-
-                        content += String.format("准确率: %g, 人脸中心 %g, %g, 眼间距: %g\n", face.confidence(), pnt.x, pnt.y, eyeDis);
-                        canvas.drawRect((int) (pnt.x - eyeDis * 1.5f), (int) (pnt.y - eyeDis * 1.5f), (int) (pnt.x + eyeDis * 1.5f), (int) (pnt.y + eyeDis * 1.5f), paint);
-
-                        //眼睛中心
-                        canvas.drawRect((int) (pnt.x - 2.0f), (int) (pnt.y - 2.0f), (int) (pnt.x + 2.0f), (int) (pnt.y + 2.0f), paint);
-
-                        //双眼
-                        canvas.drawRect((int) (pnt.x - halfEyeDis - 2.0f), (int) (pnt.y - 2.0f), (int) (pnt.x - halfEyeDis + 2.0f), (int) (pnt.y + 2.0f), paint);
-                        canvas.drawRect((int) (pnt.x + halfEyeDis - 2.0f), (int) (pnt.y - 2.0f), (int) (pnt.x + halfEyeDis + 2.0f), (int) (pnt.y + 2.0f), paint);
+                _imageView.getResultBitmap(new ImageGLSurfaceView.QueryResultBitmapCallback() {
+                    @Override
+                    public void get(final Bitmap bmp) {
+                        ImageUtil.saveBitmap(bmp);
                     }
-
-                    Toast.makeText(ImageDemoActivity.this, content, Toast.LENGTH_SHORT).show();
-                    _imageView.setImageBitmap(bmp);
-                } else {
-                    Log.i(Common.LOG_TAG, "未发现人脸");
-                    Toast.makeText(ImageDemoActivity.this, "未发现人脸", Toast.LENGTH_SHORT).show();
-                }
+                });
             }
         });
 
+        _imageView.setDisplayMode(ImageGLSurfaceView.DisplayMode.DISPLAY_ASPECT_FIT);
     }
 
     android.view.View.OnClickListener galleryBtnClickListener = new android.view.View.OnClickListener(){
@@ -136,8 +95,9 @@ public class ImageDemoActivity extends ActionBarActivity {
                 if(resultCode == RESULT_OK)
                 {
                     try {
-                        _imageView.setImageURI(data.getData());
-                        Bitmap bmp = ((BitmapDrawable)_imageView.getDrawable()).getBitmap();
+
+                        InputStream stream = getContentResolver().openInputStream(data.getData());
+                        Bitmap bmp = BitmapFactory.decodeStream(stream);
 
                         int w = bmp.getWidth();
                         int h = bmp.getHeight();
@@ -170,14 +130,11 @@ public class ImageDemoActivity extends ActionBarActivity {
             _imageView.post(new Runnable() {
                 @Override
                 public void run() {
-                    Button btn = (Button)view;
+                    Button btn = (Button) view;
                     String str = btn.getText().toString();
                     int index = Integer.parseInt(str.substring(6));
                     String config = MainActivity.effectConfigs[index];
-                    Bitmap bmp = CGENativeLibrary.filterImage_MultipleEffects(_bitmap, config, 1.0f);
-
-                    _imageView.setImageBitmap(bmp);
-//                    bmp.recycle();
+                    _imageView.setFilterWithConfig(config);
                 }
             });
         }
@@ -219,7 +176,8 @@ public class ImageDemoActivity extends ActionBarActivity {
 
     static boolean rev = false;
 
-    public void faceTestCase(View view) {
+    public void faceBlendTestCase(View view) {
+
         Bitmap srcImage = BitmapFactory.decodeResource(this.getResources(), R.drawable.face0);
         Bitmap dstImage = BitmapFactory.decodeResource(this.getResources(), R.drawable.face1);
 
@@ -256,5 +214,75 @@ public class ImageDemoActivity extends ActionBarActivity {
             _imageView.setImageBitmap(result);
         else
             Log.e(Common.LOG_TAG, "合成失败");
+    }
+
+    public void faceDetectTestCase(View view) {
+
+        Log.i(Common.LOG_TAG, "人脸检测中");
+
+        _imageView.getResultBitmap(new ImageGLSurfaceView.QueryResultBitmapCallback() {
+            @Override
+            public void get(final Bitmap bmp) {
+
+                _imageView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        ImageUtil.FaceRects rects = ImageUtil.findFaceByBitmap(bmp, 8);
+
+                        if (rects == null) {
+                            Toast.makeText(ImageDemoActivity.this, "未知错误", Toast.LENGTH_LONG);
+                            return;
+                        }
+
+                        if (rects.numOfFaces > 0) {
+                            String content = "";
+
+                            Canvas canvas = new Canvas(bmp);
+                            Paint paint = new Paint();
+                            paint.setColor(Color.RED);
+                            paint.setStyle(Paint.Style.STROKE);
+                            paint.setStrokeWidth(4);
+
+                            for (int i = 0; i != rects.numOfFaces; ++i) {
+                                FaceDetector.Face face = rects.faces[i];
+                                PointF pnt = new PointF();
+                                face.getMidPoint(pnt);
+
+                                float eyeDis = face.eyesDistance();
+                                float halfEyeDis = eyeDis / 2.0f;
+
+                                content += String.format("准确率: %g, 人脸中心 %g, %g, 眼间距: %g\n", face.confidence(), pnt.x, pnt.y, eyeDis);
+                                canvas.drawRect((int) (pnt.x - eyeDis * 1.5f), (int) (pnt.y - eyeDis * 1.5f), (int) (pnt.x + eyeDis * 1.5f), (int) (pnt.y + eyeDis * 1.5f), paint);
+
+                                //眼睛中心
+                                canvas.drawRect((int) (pnt.x - 2.0f), (int) (pnt.y - 2.0f), (int) (pnt.x + 2.0f), (int) (pnt.y + 2.0f), paint);
+
+                                //双眼
+                                canvas.drawRect((int) (pnt.x - halfEyeDis - 2.0f), (int) (pnt.y - 2.0f), (int) (pnt.x - halfEyeDis + 2.0f), (int) (pnt.y + 2.0f), paint);
+                                canvas.drawRect((int) (pnt.x + halfEyeDis - 2.0f), (int) (pnt.y - 2.0f), (int) (pnt.x + halfEyeDis + 2.0f), (int) (pnt.y + 2.0f), paint);
+                            }
+
+                            Toast.makeText(ImageDemoActivity.this, content, Toast.LENGTH_SHORT).show();
+                            _imageView.setImageBitmap(bmp);
+                        } else {
+                            Log.i(Common.LOG_TAG, "未发现人脸");
+                            Toast.makeText(ImageDemoActivity.this, "未发现人脸", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    static int displayIndex;
+
+    public void switchDisplayMode(View view) {
+        ImageGLSurfaceView.DisplayMode[] modes = {
+                ImageGLSurfaceView.DisplayMode.DISPLAY_SCALE_TO_FILL,
+                ImageGLSurfaceView.DisplayMode.DISPLAY_ASPECT_FILL,
+                ImageGLSurfaceView.DisplayMode.DISPLAY_ASPECT_FIT,
+        };
+
+        _imageView.setDisplayMode(modes[++displayIndex % modes.length]);
     }
 }
