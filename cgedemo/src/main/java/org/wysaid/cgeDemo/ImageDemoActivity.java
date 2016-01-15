@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import org.wysaid.common.Common;
@@ -29,6 +30,7 @@ public class ImageDemoActivity extends ActionBarActivity {
 
     private Bitmap _bitmap;
     private ImageGLSurfaceView _imageView;
+    private String _currentConfig;
 
     public static final int REQUEST_CODE_PICK_IMAGE = 1;
 
@@ -58,10 +60,11 @@ public class ImageDemoActivity extends ActionBarActivity {
             @Override
             public void surfaceCreated() {
                 _imageView.setImageBitmap(_bitmap);
+                _imageView.setFilterWithConfig(_currentConfig);
             }
         });
 
-        Button saveBtn = (Button) findViewById(R.id.saveBtn);
+        Button saveBtn = (Button) findViewById(R.id.saveSingleFrameBtn);
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -76,6 +79,25 @@ public class ImageDemoActivity extends ActionBarActivity {
         });
 
         _imageView.setDisplayMode(ImageGLSurfaceView.DisplayMode.DISPLAY_ASPECT_FIT);
+
+        SeekBar seekBar = (SeekBar)findViewById(R.id.seekBar);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float intensity = progress / 100.0f;
+                _imageView.setFilterIntensity(intensity);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
     }
 
     android.view.View.OnClickListener galleryBtnClickListener = new android.view.View.OnClickListener(){
@@ -130,11 +152,11 @@ public class ImageDemoActivity extends ActionBarActivity {
             _imageView.post(new Runnable() {
                 @Override
                 public void run() {
-                    Button btn = (Button) view;
+                    Button btn = (Button)view;
                     String str = btn.getText().toString();
                     int index = Integer.parseInt(str.substring(6));
-                    String config = MainActivity.effectConfigs[index];
-                    _imageView.setFilterWithConfig(config);
+                    _currentConfig = MainActivity.effectConfigs[index];
+                    _imageView.setFilterWithConfig(_currentConfig);
                 }
             });
         }
@@ -150,6 +172,15 @@ public class ImageDemoActivity extends ActionBarActivity {
     public void onPause() {
         Log.i(Common.LOG_TAG, "Filter Demo onPause...");
         super.onPause();
+        _imageView.release();
+        _imageView.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        Log.i(Common.LOG_TAG, "Filter Demo onResume...");
+        super.onResume();
+        _imageView.onResume();
     }
 
     @Override

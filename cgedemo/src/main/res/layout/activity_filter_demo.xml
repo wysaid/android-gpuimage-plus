@@ -6,19 +6,18 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context=".ImageDemoActivity">
 
-    <Button
-        android:layout_width="100dp"
-        android:layout_height="50dp"
-        android:id="@+id/galleryBtn"
-        android:text="相册"
-        android:layout_alignParentTop="true"
-        />
-
     <org.wysaid.view.ImageGLSurfaceView
         android:id="@+id/mainImageView"
-        android:src="@drawable/bgview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <SeekBar
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_alignParentTop="true"
+        android:id="@+id/seekBar"
+        android:layout_gravity="center_horizontal|top"
+        />
 
     <HorizontalScrollView
         android:layout_width="match_parent"
@@ -34,21 +33,36 @@
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
-                android:id="@+id/saveBtn"
+                android:id="@+id/galleryBtn"
+                android:text="相册"
+                />
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/saveSingleFrameBtn"
                 android:text="保存"/>
 
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
+                android:id="@+id/switchDisplayModeBtn"
+                android:onClick="switchDisplayMode"
+                android:text="切换显示"/>
+
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
                 android:id="@+id/faceDetectionBtn"
+                android:onClick="faceDetectTestCase"
                 android:text="人脸查找"/>
 
             <Button
                 android:layout_width="100dp"
                 android:layout_height="50dp"
-                android:id="@+id/faceTestCaseBtn"
-                android:text="人脸测试"
-                android:onClick="faceTestCase"
+                android:id="@+id/faceBlendTestCaseBtn"
+                android:text="人脸混合"
+                android:onClick="faceBlendTestCase"
                 />
 
         </LinearLayout>
