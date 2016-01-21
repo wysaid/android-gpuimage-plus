@@ -65,6 +65,14 @@
                 android:onClick="faceBlendTestCase"
                 />
 
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:id="@+id/multiThreadBlendTestCaseBtn"
+                android:text="多线程混合"
+                android:onClick="multiThreadBlendTestCase"
+                />
+
         </LinearLayout>
 
     </HorizontalScrollView>
