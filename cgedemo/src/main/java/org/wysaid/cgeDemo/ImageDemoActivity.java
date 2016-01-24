@@ -237,9 +237,9 @@ public class ImageDemoActivity extends ActionBarActivity {
         Bitmap result;
 
         if(rev) {
-            result = CGEFaceFunctions.blendFaceWidthFeatures(srcImage, srcFeature, dstImage, dstFeature, null);
+            result = CGEFaceFunctions.blendFaceWidthFeatures(srcImage, srcFeature, dstImage, dstFeature, CGEFaceFunctions.AutoLumAdjustMode.LumAdjust_OnlyBrightness, null);
         } else {
-            result = CGEFaceFunctions.blendFaceWidthFeatures(dstImage, dstFeature, srcImage, srcFeature, null);
+            result = CGEFaceFunctions.blendFaceWidthFeatures(dstImage, dstFeature, srcImage, srcFeature, CGEFaceFunctions.AutoLumAdjustMode.LumAdjust_OnlyBrightness, null);
         }
 
         if(result != null)
@@ -265,7 +265,7 @@ public class ImageDemoActivity extends ActionBarActivity {
         @Override
         public void run() {
             SharedContext context = SharedContext.create();
-            result = CGEFaceFunctions.blendFaceWidthFeatures(_srcImage, _srcFeature, _dstImage, _dstFeature, context);
+            result = CGEFaceFunctions.blendFaceWidthFeatures(_srcImage, _srcFeature, _dstImage, _dstFeature, CGEFaceFunctions.AutoLumAdjustMode.LumAdjust_OnlyBrightness, context);
             context.release();
         }
     }
