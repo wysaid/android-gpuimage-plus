@@ -24,10 +24,10 @@ public class CGEFaceFunctions {
             chinPos = new PointF();
         }
 
-        public FaceFeature(PointF leftEye, PointF rightEye, PointF mouse, PointF chin, float imgWidth, float imgHeight) {
+        public FaceFeature(PointF leftEye, PointF rightEye, PointF mouth, PointF chin, float imgWidth, float imgHeight) {
             leftEyePos = leftEye;
             rightEyePos = rightEye;
-            mouthPos = mouse;
+            mouthPos = mouth;
             chinPos = chin;
             faceImageWidth = imgWidth;
             faceImageHeight = imgHeight;
@@ -39,7 +39,14 @@ public class CGEFaceFunctions {
         public float faceImageWidth, faceImageHeight;
     }
 
-    public static Bitmap blendFaceWidthFeatures(Bitmap srcImage, FaceFeature srcFeature, Bitmap dstImage, FaceFeature dstFeature, SharedContext context) {
+    public enum AutoLumAdjustMode
+    {
+        LumAdjust_NONE,
+        LumAdjust_FollowHSl,
+        LumAdjust_OnlyBrightness,
+    };
+
+    public static Bitmap blendFaceWidthFeatures(Bitmap srcImage, FaceFeature srcFeature, Bitmap dstImage, FaceFeature dstFeature, AutoLumAdjustMode mode, SharedContext context) {
         SharedContext ctx = context == null ? SharedContext.create() : context;
         ctx.makeCurrent();
 
@@ -66,7 +73,7 @@ public class CGEFaceFunctions {
                 dstFeature.faceImageWidth, dstFeature.faceImageHeight,
         };
 
-        Bitmap result = nativeBlendFaceWithFeatures(srcTexID, srcFaceFeature, dstTexID, dstFaceFeature);
+        Bitmap result = nativeBlendFaceWithFeatures(srcTexID, srcFaceFeature, dstTexID, dstFaceFeature, mode.ordinal());
 
         if(context == null) {
             ctx.release();
@@ -78,6 +85,6 @@ public class CGEFaceFunctions {
 
     ////////////////////////////////////
 
-    private static native Bitmap nativeBlendFaceWithFeatures(int srcTexID, float[] srcFeature, int dstTexID, float[] dstFeature);
+    private static native Bitmap nativeBlendFaceWithFeatures(int srcTexID, float[] srcFeature, int dstTexID, float[] dstFeature, int mode);
 
 }
