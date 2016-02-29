@@ -23,6 +23,7 @@ import org.wysaid.common.Common;
 import org.wysaid.common.SharedContext;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.nativePort.CGEFaceFunctions;
+import org.wysaid.nativePort.CGEFaceTracker;
 import org.wysaid.view.ImageGLSurfaceView;
 
 import java.io.InputStream;
@@ -237,9 +238,9 @@ public class ImageDemoActivity extends ActionBarActivity {
         Bitmap result;
 
         if(rev) {
-            result = CGEFaceFunctions.blendFaceWidthFeatures(srcImage, srcFeature, dstImage, dstFeature, CGEFaceFunctions.AutoLumAdjustMode.LumAdjust_OnlyBrightness, null);
+            result = CGEFaceFunctions.blendFaceWidthFeatures(srcImage, srcFeature, dstImage, dstFeature, null);
         } else {
-            result = CGEFaceFunctions.blendFaceWidthFeatures(dstImage, dstFeature, srcImage, srcFeature, CGEFaceFunctions.AutoLumAdjustMode.LumAdjust_OnlyBrightness, null);
+            result = CGEFaceFunctions.blendFaceWidthFeatures(dstImage, dstFeature, srcImage, srcFeature, null);
         }
 
         if(result != null)
@@ -265,7 +266,7 @@ public class ImageDemoActivity extends ActionBarActivity {
         @Override
         public void run() {
             SharedContext context = SharedContext.create();
-            result = CGEFaceFunctions.blendFaceWidthFeatures(_srcImage, _srcFeature, _dstImage, _dstFeature, CGEFaceFunctions.AutoLumAdjustMode.LumAdjust_OnlyBrightness, context);
+            result = CGEFaceFunctions.blendFaceWidthFeatures(_srcImage, _srcFeature, _dstImage, _dstFeature, context);
             context.release();
         }
     }
@@ -387,5 +388,36 @@ public class ImageDemoActivity extends ActionBarActivity {
         };
 
         _imageView.setDisplayMode(modes[++displayIndex % modes.length]);
+    }
+
+    public void faceTrackerTestCase(View view) {
+
+        CGEFaceTracker tracker = CGEFaceTracker.createFaceTracker();
+
+        if(tracker != null) {
+
+            if(!_bitmap.isMutable()) {
+                _bitmap = _bitmap.copy(_bitmap.getConfig(), true);
+            }
+
+            CGEFaceTracker.FaceResultSimple result = tracker.detectFaceWithSimpleResult(_bitmap, true);
+
+            Log.i(Common.LOG_TAG, String.format("LeftEye: %g, %g, rightEye: %g, %g, nose: %g, %g, mouth: %g, %g, jaw: %g, %g", result.leftEyePos.x, result.leftEyePos.y, result.rightEyepos.x, result.rightEyepos.y, result.nosePos.x, result.nosePos.y, result.mouthPos.x, result.mouthPos.y, result.jawPos.x, result.jawPos.y));
+
+            Canvas cvs = new Canvas(_bitmap);
+            Paint paint = new Paint();
+            paint.setStrokeWidth(3.0f);
+            paint.setColor(0xffffffff);
+            cvs.drawCircle(result.leftEyePos.x, result.leftEyePos.y, 5, paint);
+            cvs.drawCircle(result.rightEyepos.x, result.rightEyepos.y, 5, paint);
+            cvs.drawCircle(result.nosePos.x, result.nosePos.y, 5, paint);
+            cvs.drawCircle(result.mouthPos.x, result.mouthPos.y, 5, paint);
+            cvs.drawCircle(result.jawPos.x, result.jawPos.y, 5, paint);
+
+
+            _imageView.setImageBitmap(_bitmap);
+        }
+
+        tracker.release();
     }
 }

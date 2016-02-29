@@ -73,6 +73,14 @@
                 android:onClick="multiThreadBlendTestCase"
                 />
 
+            <Button
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:id="@+id/faceTrackerTestCase"
+                android:text="人脸关键点检测"
+                android:onClick="faceTrackerTestCase"
+                />
+
         </LinearLayout>
 
     </HorizontalScrollView>
