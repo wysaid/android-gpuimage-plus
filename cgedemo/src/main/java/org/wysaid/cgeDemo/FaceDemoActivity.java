@@ -79,7 +79,7 @@ public class FaceDemoActivity extends AppCompatActivity {
 
     public void showResult(View view) {
         Log.i(Common.LOG_TAG, "showResult...");
-        Bitmap bmp = CGEFaceFunctions.blendFaceWidthFeatures(mFirstFaceImage, mFirstFaceFeature, mSecondFaceImage, mSecondFaceFeature, CGEFaceFunctions.AutoLumAdjustMode.LumAdjust_OnlyBrightness, null);
+        Bitmap bmp = CGEFaceFunctions.blendFaceWidthFeatures(mFirstFaceImage, mFirstFaceFeature, mSecondFaceImage, mSecondFaceFeature, null);
         mResultView.setImageBitmap(bmp);
         mResultView.setVisibility(View.VISIBLE);
         mFaceDemoView.setVisibility(View.GONE);
