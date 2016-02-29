@@ -9,6 +9,7 @@ import org.wysaid.common.Common;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 
 /**
  * Created by wangyang on 15/11/27.
@@ -84,10 +85,32 @@ public class FileUtil {
         Log.i(LOG_TAG, "Saving text : " + filename);
 
         try {
-            FileOutputStream fileout = new FileOutputStream(filename);
-            fileout.write(text.getBytes());
-            fileout.flush();
-            fileout.close();
+            FileOutputStream fileOut = new FileOutputStream(filename);
+            fileOut.write(text.getBytes());
+            fileOut.flush();
+            fileOut.close();
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Error: " + e.getMessage());
+        }
+    }
+
+    public static void saveStreamContent(InputStream is, String filename) {
+        Log.i(LOG_TAG, "Saving Input Stream : " + filename);
+
+        byte[] buffer = new byte[4096]; //Create cache for reading.
+
+        try {
+            FileOutputStream fileOut = new FileOutputStream(filename);
+
+            while(true) {
+                int len = is.read(buffer);
+                if(len <= 0)
+                    break;
+                fileOut.write(buffer, 0, len);
+            }
+
+            fileOut.flush();
+            fileOut.close();
         } catch (Exception e) {
             Log.e(LOG_TAG, "Error: " + e.getMessage());
         }
@@ -105,11 +128,11 @@ public class FileUtil {
 
         try {
 
-            FileInputStream filein = new FileInputStream(filename);
+            FileInputStream fileIn = new FileInputStream(filename);
             int len;
 
             while(true) {
-                len = filein.read(buffer);
+                len = fileIn.read(buffer);
 
                 if(len <= 0)
                     break;

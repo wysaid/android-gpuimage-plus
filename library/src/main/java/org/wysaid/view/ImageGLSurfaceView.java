@@ -32,6 +32,7 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
     }
 
     protected CGEImageHandler mImageHandler;
+    protected float mFilterIntensity = 1.0f;
 
     public CGEImageHandler getImageHandler() {
         return mImageHandler;
@@ -71,20 +72,49 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
         queueEvent(new Runnable() {
             @Override
             public void run() {
+                if (mImageHandler == null) {
+                    Log.e(LOG_TAG, "set config after release!!");
+                    return;
+                }
+
                 mImageHandler.setFilterWithConfig(config);
                 requestRender();
             }
         });
     }
 
+    protected int[] mSettingIntensityLock = new int[0];
+    protected int mSettingIntensityCount = 2;
+
     public void setFilterIntensity(final float intensity) {
         if(mImageHandler == null)
             return;
 
+        mFilterIntensity = intensity;
+
+        synchronized (mSettingIntensityLock) {
+
+            if(mSettingIntensityCount <= 0) {
+                Log.i(LOG_TAG,  "强度调整速度过快, 丢弃更新帧...");
+                return;
+            }
+            --mSettingIntensityCount;
+        }
+
         queueEvent(new Runnable() {
             @Override
             public void run() {
-                mImageHandler.setFilterIntensity(intensity);
+
+                if (mImageHandler == null) {
+                    Log.e(LOG_TAG, "set intensity after release!!");
+                } else {
+                    mImageHandler.setFilterIntensity(mFilterIntensity);
+                    requestRender();
+                }
+
+                synchronized (mSettingIntensityLock) {
+                    ++mSettingIntensityCount;
+                }
             }
         });
     }
@@ -105,6 +135,11 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
         queueEvent(new Runnable() {
             @Override
             public void run() {
+
+                if(mImageHandler == null) {
+                    Log.e(LOG_TAG, "set image after release!!");
+                    return;
+                }
 
                 if(mImageHandler.initWidthBitmap(bmp)) {
 

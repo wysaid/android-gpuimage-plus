@@ -12,7 +12,7 @@ import java.io.IOException;
  * Created by wangyang on 15/7/27.
  */
 
-public class ImageUtil extends FileUtil {
+public class ImageUtil extends FileUtil{
 
 
     public static void saveBitmap(Bitmap bmp) {

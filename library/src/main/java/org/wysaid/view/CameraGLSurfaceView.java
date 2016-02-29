@@ -717,6 +717,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         mSurfaceTexture.getTransformMatrix(mTransformMatrix);
         mFrameRecorder.update(mTextureID, mTransformMatrix);
+        mFrameRecorder.runProc();
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
 

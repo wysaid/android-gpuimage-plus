@@ -7,8 +7,7 @@
 package org.wysaid.nativePort;
 
 import android.graphics.Bitmap;
-import android.opengl.GLES20;
-import android.opengl.GLUtils;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import org.wysaid.common.Common;
@@ -18,6 +17,52 @@ public class CGENativeLibrary {
     static {
         NativeLibraryLoader.load();
     }
+
+    public enum TextureBlendMode
+    {
+        CGE_BLEND_MIX,            // 0 正常
+        CGE_BLEND_DISSOLVE,       // 1 溶解
+
+        CGE_BLEND_DARKEN,         // 2 变暗
+        CGE_BLEND_MULTIPLY,       // 3 正片叠底
+        CGE_BLEND_COLORBURN,      // 4 颜色加深
+        CGE_BLEND_LINEARBURN,     // 5 线性加深
+        CGE_BLEND_DARKER_COLOR,   // 6 深色
+
+        CGE_BLEND_LIGHTEN,        // 7 变亮
+        CGE_BLEND_SCREEN,         // 8 滤色
+        CGE_BLEND_COLORDODGE,     // 9 颜色减淡
+        CGE_BLEND_LINEARDODGE,    // 10 线性减淡
+        CGE_BLEND_LIGHTERCOLOR,  // 11 浅色
+
+        CGE_BLEND_OVERLAY,        // 12 叠加
+        CGE_BLEND_SOFTLIGHT,      // 13 柔光
+        CGE_BLEND_HARDLIGHT,      // 14 强光
+        CGE_BLEND_VIVIDLIGHT,     // 15 亮光
+        CGE_BLEND_LINEARLIGHT,    // 16 线性光
+        CGE_BLEND_PINLIGHT,       // 17 点光
+        CGE_BLEND_HARDMIX,        // 18 实色混合
+
+        CGE_BLEND_DIFFERENCE,     // 19 差值
+        CGE_BLEND_EXCLUDE,        // 20 排除
+        CGE_BLEND_SUBTRACT,       // 21 减去
+        CGE_BLEND_DIVIDE,         // 22 划分
+
+        CGE_BLEND_HUE,            // 23 色相
+        CGE_BLEND_SATURATION,     // 24 饱和度
+        CGE_BLEND_COLOR,          // 25 颜色
+        CGE_BLEND_LUMINOSITY,     // 26 明度
+
+        /////////////    More blend mode below (You can't see them in Adobe Photoshop)    //////////////
+
+        CGE_BLEND_ADD,			  // 27
+        CGE_BLEND_ADDREV,         // 28
+        CGE_BLEND_COLORBW,		  // 29
+
+        /////////////    More blend mode above     //////////////
+
+        CGE_BLEND_TYPE_MAX_NUM //Its value defines the max num of blend.
+    };
 
     public interface LoadImageCallback {
         Bitmap loadImage(String name, Object arg);
@@ -50,35 +95,59 @@ public class CGENativeLibrary {
             return null;
         }
 
-        TextureResult result = new TextureResult();
-        int[] texID = new int[1];
-        GLES20.glGenTextures(1, texID, 0);
-        result.texID = texID[0];
-        result.width = bmp.getWidth();
-        result.height = bmp.getHeight();
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, result.texID);
-        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bmp, 0);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+        TextureResult result = loadTextureByBitmap(bmp);
 
         loadImageCallback.loadImageOK(bmp, callbackArg);
         return result;
     }
 
+    //May be called from jni.
+    public static TextureResult loadTextureByBitmap(Bitmap bmp) {
+
+        if(bmp == null) {
+            return null;
+        }
+
+        TextureResult result = new TextureResult();
+
+        result.texID = Common.genNormalTextureID(bmp);
+        result.width = bmp.getWidth();
+        result.height = bmp.getHeight();
+        return result;
+    }
+
+    public static TextureResult loadTextureByFile(String fileName) {
+        Bitmap bmp = BitmapFactory.decodeFile(fileName);
+        TextureResult result = loadTextureByBitmap(bmp);
+        bmp.recycle();
+        return result;
+    }
+
     public static Bitmap filterImage_MultipleEffects(Bitmap bmp, String config, float intensity) {
-        if(config == null || config == "") {
+        if(config == null || config.length() == 0) {
             return bmp;
         }
         return cgeFilterImage_MultipleEffects(bmp, config, intensity);
     }
 
     public static void filterImage_MultipleEffectsWriteBack(Bitmap bmp, String config, float intensity) {
-        if(config != null && config != "") {
+        if(config != null && config.length() != 0) {
             cgeFilterImage_MultipleEffectsWriteBack(bmp, config, intensity);
         }
     }
+
+    public enum BlendFilterType {
+        BLEND_NORMAL,
+        BLEND_KEEP_RATIO,
+        BLEND_TILE,
+    }
+
+    //带纹理的 blendFilter 较为特殊， 增加单独处理方法, 第二个参数 texID 表示将要使用到的纹理id
+    public static long createBlendFilter(TextureBlendMode blendMode, int texID, int texWidth, int texHeight, BlendFilterType blendFilterType, float intensity) {
+        return cgeCreateBlendFilter(blendMode.ordinal(), texID, texWidth, texHeight, blendFilterType.ordinal(), intensity);
+    }
+
+    //////////////////////   native method  //////////////////
 
     // 多重特效滤镜， 提供配置文件内容直接进行， 返回相同大小的bitmap。
     // intensity 表示滤镜强度 [0, 1]
@@ -89,9 +158,8 @@ public class CGENativeLibrary {
 
     ////////////////////////////////////
 
-//    private static native boolean cgeContextInit();
-//    private static native void cgeContextRelease();
-
-
+    public static native long cgeCreateFilterWithConfig(String config, float intensity);
+    public static native void cgeDeleteFilterWithAddress(long address);
+    public static native long cgeCreateBlendFilter(int blendMode, int texID, int texWidth, int texHeight, int blendFilterType, float intensity);
 
 }

@@ -2,8 +2,6 @@ package org.wysaid.nativePort;
 
 import android.graphics.Bitmap;
 
-import java.nio.ByteBuffer;
-
 /**
  * Created by wysaid on 15/12/25.
  * Mail: admin@wysaid.org
@@ -18,7 +16,7 @@ public class CGEImageHandler {
         NativeLibraryLoader.load();
     }
 
-    protected ByteBuffer mNativeAddress;
+    protected long mNativeAddress;
 
     public CGEImageHandler() {
         mNativeAddress = nativeCreateHandler();
@@ -47,30 +45,43 @@ public class CGEImageHandler {
         nativeSetDrawerFlipScale(mNativeAddress, x, y);
     }
 
+    //直接传 null 可以清空当前使用的滤镜。
     public void setFilterWithConfig(String config) {
-        nativeSetFilterWithConfig(mNativeAddress, config);
+        nativeSetFilterWithConfig(mNativeAddress, config, true, true);
+    }
+
+    public void setFilterWithConfig(String config, boolean shouldClearOlder, boolean shouldProcess) {
+        nativeSetFilterWithConfig(mNativeAddress, config, shouldClearOlder, shouldProcess);
     }
 
     public void setFilterIntensity(float intensity) {
-        nativeSetFilterIntensity(mNativeAddress, intensity);
+        nativeSetFilterIntensity(mNativeAddress, intensity, true);
+    }
+
+    public void setFilterIntensity(float intensity, boolean shouldProcess) {
+        nativeSetFilterIntensity(mNativeAddress, intensity, shouldProcess);
     }
 
     public void drawResult() {
         nativeDrawResult(mNativeAddress);
     }
 
+    //绑定handler输出的FBO
     public void bindTargetFBO() {
         nativeBindTargetFBO(mNativeAddress);
     }
 
+    //绑定handler输出的FBO 并且设置viewport为FBO大小
     public void setAsTarget() {
         nativeSetAsTarget(mNativeAddress);
     }
 
+    //交换缓存
     public void swapBufferFBO() {
         nativeSwapBufferFBO(mNativeAddress);
     }
 
+    //恢复图像
     public void revertImage() {
         nativeRevertImage(mNativeAddress);
     }
@@ -79,30 +90,35 @@ public class CGEImageHandler {
         nativeProcessingFilters(mNativeAddress);
     }
 
+    public void processWithFilter(long filterAddress) {
+        nativeProcessWithFilter(mNativeAddress, filterAddress);
+    }
+
     public void release() {
-        if(mNativeAddress != null) {
+        if(mNativeAddress != 0) {
             nativeRelease(mNativeAddress);
-            mNativeAddress = null;
+            mNativeAddress = 0;
         }
     }
 
     /////////////////      protected         ///////////////////////
 
-    protected native ByteBuffer nativeCreateHandler();
-    protected native boolean nativeInitWithBitmap(ByteBuffer holder, Bitmap bmp);
-    protected native Bitmap nativeGetResultBitmap(ByteBuffer holder);
+    protected native long nativeCreateHandler();
+    protected native boolean nativeInitWithBitmap(long holder, Bitmap bmp);
+    protected native Bitmap nativeGetResultBitmap(long holder);
 
-    protected native void nativeSetDrawerRotation(ByteBuffer holder, float rad);
-    protected native void nativeSetDrawerFlipScale(ByteBuffer holder, float x, float y);
-    protected native boolean nativeSetFilterWithConfig(ByteBuffer holder, String config);
-    protected native void nativeSetFilterIntensity(ByteBuffer holder, float value);
+    protected native void nativeSetDrawerRotation(long holder, float rad);
+    protected native void nativeSetDrawerFlipScale(long holder, float x, float y);
+    protected native boolean nativeSetFilterWithConfig(long holder, String config, boolean shouldCleanOlder, boolean shouldProcess);
+    protected native void nativeSetFilterIntensity(long holder, float value, boolean shouldProcess);
 
-    protected native void nativeDrawResult(ByteBuffer holder);
-    protected native void nativeBindTargetFBO(ByteBuffer holder);
-    protected native void nativeSetAsTarget(ByteBuffer holder);
-    protected native void nativeSwapBufferFBO(ByteBuffer holder);
-    protected native void nativeRevertImage(ByteBuffer holder);
-    protected native void nativeProcessingFilters(ByteBuffer holder);
+    protected native void nativeDrawResult(long holder);
+    protected native void nativeBindTargetFBO(long holder);
+    protected native void nativeSetAsTarget(long holder);
+    protected native void nativeSwapBufferFBO(long holder);
+    protected native void nativeRevertImage(long holder);
+    protected native void nativeProcessingFilters(long holder);
+    protected native void nativeProcessWithFilter(long holder, long filterAddress);
 
-    protected native void nativeRelease(ByteBuffer holder);
+    protected native void nativeRelease(long holder);
 }
