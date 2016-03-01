@@ -37,12 +37,13 @@ public class ProgramObject {
     }
 
     public boolean init(final String vsh, final String fsh) {
-        return init(vsh, fsh, 0);
+        return init(vsh, fsh, mProgramID);
     }
 
     public boolean init(final String vsh, final String fsh, int programID) {
-        if(programID == 0)
+        if(programID == 0) {
             programID = GLES20.glCreateProgram();
+        }
 
         if(programID == 0) {
             Log.e(LOG_TAG, "Invalid Program ID! Check if the context is binded!");
@@ -74,6 +75,10 @@ public class ProgramObject {
             String msg = GLES20.glGetProgramInfoLog(programID);
             Log.e(LOG_TAG, msg);
             return false;
+        }
+
+        if(mProgramID != programID && mProgramID != 0) {
+            GLES20.glDeleteProgram(mProgramID);
         }
 
         mProgramID = programID;
