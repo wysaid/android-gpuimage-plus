@@ -12,10 +12,10 @@ public class NativeLibraryLoader {
             return;
         mLibraryLoaded = true;
 //        System.loadLibrary("gnustl_shared");
-//        System.loadLibrary("x264.142");
-//        System.loadLibrary("ffmpeg");
+        System.loadLibrary("x264.142");
+        System.loadLibrary("ffmpeg");
         System.loadLibrary("CGE");
-//        FFmpegNativeLibrary.avRegisterAll();
+        CGEFFmpegNativeLibrary.avRegisterAll();
     }
 
 }
