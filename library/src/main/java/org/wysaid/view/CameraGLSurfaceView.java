@@ -6,7 +6,6 @@ package org.wysaid.view;
 
 
 import android.content.Context;
-
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -62,7 +61,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     public CGEFrameRecorder getRecorder() {
         return mFrameRecorder;
     }
-    protected Context mContext;
 
     public int maxPreviewWidth = 1280;
     public int maxPreviewHeight = 1280;
@@ -201,7 +199,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     //    Camera.Parameters.FLASH_MODE_TORCH 等
     public synchronized boolean setFlashLightMode(String mode) {
 
-        if(!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
+        if(!getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
             Log.e(LOG_TAG, "当前设备不支持闪光灯!");
             return false;
         }
@@ -355,124 +353,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         });
     }
 
-//    protected boolean mIsDetectingFace = false;
-//
-//    public class FaceArea {
-//        float x, y;
-//        float gx, gy;
-//    }
-//
-//    protected int[] mFaceAreaLock = new int[0];
-//    public FaceArea mFaceArea;
-////    public int mFaceCount = 0;
-//
-//    public boolean isDetectingFace() {
-//        return mIsDetectingFace;
-//    }
-//
-//    public synchronized boolean startDetectingFaceWithDefaultFilter() {
-//
-//        if(mIsDetectingFace) {
-//            Log.e(LOG_TAG, "Detecting is started already!!");
-//            return false;
-//        }
-//
-//        int maxFaces;
-//
-//        try {
-//
-//            maxFaces = cameraInstance().getParams().getMaxNumDetectedFaces();
-//
-//            if(maxFaces <= 0) {
-//                Log.e(LOG_TAG, "Device does not support face detection");
-//                return false;
-//            }
-//
-//            synchronized (mFaceAreaLock) {
-//                mFaceArea = new FaceArea();
-//            }
-//
-//            cameraInstance().getCameraDevice().setFaceDetectionListener(this);
-//            cameraInstance().getCameraDevice().startFaceDetection();
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return false;
-//        }
-//
-//        mIsDetectingFace = true;
-//
-//        queueEvent(new Runnable() {
-//            @Override
-//            public void run() {
-//                if(mFrameRecorder != null)
-//                    mFrameRecorder.enableFaceDetectWithDefaultFilter(true);
-//            }
-//        });
-//        return true;
-//    }
-//
-//    protected void resumeDetectingFace() {
-//        if(mIsDetectingFace) {
-//            try {
-//                cameraInstance().getCameraDevice().setFaceDetectionListener(this);
-//                cameraInstance().getCameraDevice().startFaceDetection();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
-//
-//    public synchronized void stopDetectingFace() {
-//        if(mIsDetectingFace) {
-//            mIsDetectingFace = false;
-//            cameraInstance().getCameraDevice().stopFaceDetection();
-//            cameraInstance().getCameraDevice().setFaceDetectionListener(null);
-//        }
-//
-//        synchronized (mFaceAreaLock) {
-//            mFaceArea = null;
-//        }
-//
-//        queueEvent(new Runnable() {
-//            @Override
-//            public void run() {
-//                if(mFrameRecorder != null)
-//                    mFrameRecorder.enableFaceDetectWithDefaultFilter(false);
-//            }
-//        });
-//    }
-
-//    public void onFaceDetection(Camera.Face[] faces, Camera camera) {
-//
-//        synchronized (mFaceAreaLock) {
-//
-//            if(mFaceArea != null) {
-//
-//                if(faces != null && faces.length > 0) {
-//                    Camera.Face face = faces[0];
-//                    mFaceArea.x = (face.rect.left + face.rect.right) / 4000.0f + 0.5f;
-//                    mFaceArea.y = (face.rect.top + face.rect.bottom) / 4000.0f + 0.5f;
-//                    mFaceArea.gx = (face.rect.width() + face.rect.height()) / 8000.0f;
-//                    mFaceArea.gy = 1.4142f * mFaceArea.gx;
-//
-//                    queueEvent(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            if(cameraInstance().getFacing() == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-//                                mFrameRecorder.setFaceArea(1.0f - mFaceArea.y, 1.0f - mFaceArea.x, mFaceArea.gx, mFaceArea.gy);
-//                            } else {
-//                                mFrameRecorder.setFaceArea(1.0f - mFaceArea.y, mFaceArea.x, mFaceArea.gx, mFaceArea.gy);
-//                            }
-//
-//                        }
-//                    });
-//
-//                }
-//            }
-//        }
-//    }
-
     public interface OnCreateCallback {
         void createOver(boolean success);
     }
@@ -511,7 +391,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 //        setZOrderMediaOverlay(true);
 
         clearColor = new ClearColor();
-        mContext = context;
     }
 
     @Override
@@ -858,7 +737,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     public void stopThunbnailCliping() {
         synchronized (mThunbnailLock) {
             mTakeThunbnailCallback = null;
-            mThunbnailBmp.recycle();
+            if(mThunbnailBmp != null && !mThunbnailBmp.isRecycled())
+            	mThunbnailBmp.recycle();
             mThunbnailBmp = null;
             mThunbnailBuffer = null;
             mThumnailClipingArea = null;
@@ -987,7 +867,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                     Log.i(LOG_TAG, "Cache image to get exif.");
 
                     try {
-                        String tmpFilename = mContext.getExternalCacheDir() + "/picture_cache000.jpg";
+                        String tmpFilename = getContext().getExternalCacheDir() + "/picture_cache000.jpg";
                         FileOutputStream fileout = new FileOutputStream(tmpFilename);
                         BufferedOutputStream bufferOutStream = new BufferedOutputStream(fileout);
                         bufferOutStream.write(data);
