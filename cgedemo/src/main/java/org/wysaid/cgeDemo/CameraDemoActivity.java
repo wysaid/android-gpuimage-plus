@@ -17,17 +17,17 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
-import android.widget.Toast;
 
 import org.wysaid.camera.CameraInstance;
 import org.wysaid.myUtils.FileUtil;
 import org.wysaid.myUtils.ImageUtil;
+import org.wysaid.myUtils.MsgUtil;
 import org.wysaid.nativePort.CGEFrameRecorder;
 import org.wysaid.view.CameraRecordGLSurfaceView;
 
 public class CameraDemoActivity extends ActionBarActivity {
 
-    public static String lastVideoPathFileName;
+    public static String lastVideoPathFileName = FileUtil.getPath() + "/lastVideoPath.txt";
 
     private String mCurrentConfig;
 
@@ -45,7 +45,7 @@ public class CameraDemoActivity extends ActionBarActivity {
         mCameraView.post(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(CameraDemoActivity.this, s, Toast.LENGTH_SHORT).show();
+                MsgUtil.toastMsg(CameraDemoActivity.this, s);
             }
         });
     }
@@ -62,48 +62,45 @@ public class CameraDemoActivity extends ActionBarActivity {
 
     class RecordListener implements View.OnClickListener {
 
-//        boolean isRecording = false;
-//        String recordFilename;
+        boolean isRecording = false;
+        String recordFilename;
 
         @Override
         public void onClick(View v) {
-
-            Toast.makeText(CameraDemoActivity.this, "Video recording module is not provided by now!", Toast.LENGTH_LONG).show();
-
-//            Button btn = (Button)v;
-//            isRecording = !isRecording;
-//            if(isRecording)
-//            {
-//                btn.setText("正在录制");
-//                Log.i(LOG_TAG, "Start recording...");
-//                mCameraView.setClearColor(1.0f, 0.0f, 0.0f, 0.3f);
-//                recordFilename = ImageUtil.getPath() + "/rec_" + System.currentTimeMillis() + ".mp4";
-////                recordFilename = ImageUtil.getPath(CameraDemoActivity.this, false) + "/rec_1.mp4";
-//                mCameraView.startRecording(recordFilename, new CameraRecordGLSurfaceView.StartRecordingCallback() {
-//                    @Override
-//                    public void startRecordingOver(boolean success) {
-//                        if (success) {
-//                            showText("启动录制成功");
-//                            FileUtil.saveTextContent(recordFilename, lastVideoPathFileName);
-//                        } else {
-//                            showText("启动录制失败");
-//                        }
-//                    }
-//                });
-//            }
-//            else
-//            {
-//                showText("录制完毕， 存储为 " + recordFilename);
-//                btn.setText("录制完毕");
-//                Log.i(LOG_TAG, "End recording...");
-//                mCameraView.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-//                mCameraView.endRecording(new CameraRecordGLSurfaceView.EndRecordingCallback() {
-//                    @Override
-//                    public void endRecordingOK() {
-//                        Log.i(LOG_TAG, "End recording OK");
-//                    }
-//                });
-//            }
+            Button btn = (Button)v;
+            isRecording = !isRecording;
+            if(isRecording)
+            {
+                btn.setText("正在录制");
+                Log.i(LOG_TAG, "Start recording...");
+                mCameraView.setClearColor(1.0f, 0.0f, 0.0f, 0.3f);
+                recordFilename = ImageUtil.getPath() + "/rec_" + System.currentTimeMillis() + ".mp4";
+//                recordFilename = ImageUtil.getPath(CameraDemoActivity.this, false) + "/rec_1.mp4";
+                mCameraView.startRecording(recordFilename, new CameraRecordGLSurfaceView.StartRecordingCallback() {
+                    @Override
+                    public void startRecordingOver(boolean success) {
+                        if (success) {
+                            showText("启动录制成功");
+                            FileUtil.saveTextContent(recordFilename, lastVideoPathFileName);
+                        } else {
+                            showText("启动录制失败");
+                        }
+                    }
+                });
+            }
+            else
+            {
+                showText("录制完毕， 存储为 " + recordFilename);
+                btn.setText("录制完毕");
+                Log.i(LOG_TAG, "End recording...");
+                mCameraView.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+                mCameraView.endRecording(new CameraRecordGLSurfaceView.EndRecordingCallback() {
+                    @Override
+                    public void endRecordingOK() {
+                        Log.i(LOG_TAG, "End recording OK");
+                    }
+                });
+            }
 
         }
     }
@@ -113,8 +110,7 @@ public class CameraDemoActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_demo);
 
-        lastVideoPathFileName = FileUtil.getPathInPackage(CameraDemoActivity.this, true) + "/lastVideoPath.txt";
-
+//        lastVideoPathFileName = FileUtil.getPathInPackage(CameraDemoActivity.this, true) + "/lastVideoPath.txt";
         Button takePicBtn = (Button) findViewById(R.id.takePicBtn);
         Button takeShotBtn = (Button) findViewById(R.id.takeShotBtn);
         Button recordBtn = (Button) findViewById(R.id.recordBtn);
@@ -352,25 +348,6 @@ public class CameraDemoActivity extends ActionBarActivity {
             public void onClick(View v) {
                 shouldFit = !shouldFit;
                 mCameraView.setFitFullView(shouldFit);
-            }
-        });
-
-        Button faceDetectionBtn = (Button)findViewById(R.id.faceDetectionBtn);
-        faceDetectionBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(CameraDemoActivity.this, "FaceDetection module is not provided by now!", Toast.LENGTH_LONG).show();
-//                Button self = (Button) v;
-//                if (mCameraView.isDetectingFace()) {
-//                    mCameraView.stopDetectingFace();
-//                    self.setText("停止检测");
-//                } else {
-//                    if (mCameraView.startDetectingFaceWithDefaultFilter()) {
-//                        self.setText("正在检测");
-//                    } else {
-//                        self.setText("启动失败!");
-//                    }
-//                }
             }
         });
 
