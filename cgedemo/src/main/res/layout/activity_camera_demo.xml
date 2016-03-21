@@ -111,12 +111,6 @@
                 android:id="@+id/fitViewBtn"
                 android:text="适应屏幕"/>
 
-            <Button
-                android:layout_width="100dp"
-                android:layout_height="match_parent"
-                android:id="@+id/faceDetectionBtn"
-                android:text="人脸检测"/>
-
         </LinearLayout>
     </HorizontalScrollView>
 

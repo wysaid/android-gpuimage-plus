@@ -129,7 +129,7 @@ public class MainActivity extends ActionBarActivity {
             "@adjust hsl 0.02 -0.31 -0.17 @curve R(0, 28)(23, 45)(117, 148)(135, 162)G(0, 8)(131, 152)(255, 255)B(0, 17)(58, 80)(132, 131)(127, 131)(255, 225)"
     };
 
-    CGENativeLibrary.LoadImageCallback loadImageCallback = new CGENativeLibrary.LoadImageCallback() {
+    public CGENativeLibrary.LoadImageCallback loadImageCallback = new CGENativeLibrary.LoadImageCallback() {
 
         //注意， 这里回传的name不包含任何路径名， 仅为具体的图片文件名如 1.jpg
         @Override
