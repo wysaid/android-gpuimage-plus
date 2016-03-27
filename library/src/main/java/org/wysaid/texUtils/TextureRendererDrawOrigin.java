@@ -40,13 +40,13 @@ public class TextureRendererDrawOrigin extends TextureRenderer {
         return setProgramDefualt(getVertexShaderString(), getFragmentShaderString(), isExternalOES);
     }
 
-    @Override
-    public void release() {
-        GLES20.glDeleteBuffers(1, new int[]{mVertexBuffer}, 0);
-        mVertexBuffer = 0;
-        mProgram.release();
-        mProgram = null;
-    }
+//    @Override
+//    public void release() {
+//        GLES20.glDeleteBuffers(1, new int[]{mVertexBuffer}, 0);
+//        mVertexBuffer = 0;
+//        mProgram.release();
+//        mProgram = null;
+//    }
 
     @Override
     public void renderTexture(int texID, Viewport viewport) {

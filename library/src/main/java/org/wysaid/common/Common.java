@@ -6,6 +6,8 @@ import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.util.Log;
 
+import java.nio.FloatBuffer;
+
 /**
  * Created by wangyang on 15/7/27.
  */
@@ -14,6 +16,7 @@ public class Common {
 
     public static final boolean DEBUG = true;
     public static final String LOG_TAG = "wysaid";
+    public static final float[] FULLSCREEN_VERTICES = {-1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f};
 
     public static void checkGLError(final String tag) {
         int loopCnt = 0;
@@ -81,5 +84,21 @@ public class Common {
 
     public static void deleteTextureID(int texID) {
         GLES20.glDeleteTextures(1, new int[]{texID}, 0);
+    }
+
+    public static int genFullscreenVertexArrayBuffer() {
+        int[] vertexBuffer = new int[1];
+        GLES20.glGenBuffers(1, vertexBuffer, 0);
+
+        if(vertexBuffer[0] == 0) {
+            Log.e(LOG_TAG, "Invalid VertexBuffer! You must call this within an OpenGL thread!");
+            return 0;
+        }
+
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBuffer[0]);
+        FloatBuffer buffer = FloatBuffer.allocate(FULLSCREEN_VERTICES.length);
+        buffer.put(FULLSCREEN_VERTICES).position(0);
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, 32, buffer, GLES20.GL_STATIC_DRAW);
+        return vertexBuffer[0];
     }
 }

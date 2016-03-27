@@ -83,7 +83,7 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
         });
     }
 
-    protected int[] mSettingIntensityLock = new int[0];
+    protected final int[] mSettingIntensityLock = new int[0];
     protected int mSettingIntensityCount = 2;
 
     public void setFilterIntensity(final float intensity) {

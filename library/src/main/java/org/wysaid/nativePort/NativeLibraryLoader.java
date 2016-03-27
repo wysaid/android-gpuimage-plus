@@ -15,6 +15,8 @@ public class NativeLibraryLoader {
         System.loadLibrary("x264.142");
         System.loadLibrary("ffmpeg");
         System.loadLibrary("CGE");
+        System.loadLibrary("opencv_java3");
+        System.loadLibrary("cgeFaceTracker");
         CGEFFmpegNativeLibrary.avRegisterAll();
     }
 

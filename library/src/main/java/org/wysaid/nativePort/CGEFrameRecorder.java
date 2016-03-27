@@ -94,12 +94,6 @@ public class CGEFrameRecorder extends CGEFrameRenderer {
 
     private native long nativeCreateRecorder();
 
-    //人脸美化相关
-
-//    private native void nativeSetTrackedFilter(long holder, String config);
-//    private native void nativeSetTrackedFilterIntensity(long holder, float intensity);
-//    private native void nativeSetFaceArea(long holder, float x, float y, float gx, float gy);
-
     /////////////////视频录制相关////////////////////
     private native boolean nativeStartRecording(long holder, int fps, String filename);
     private native boolean nativeIsRecordingStarted(long holder);
