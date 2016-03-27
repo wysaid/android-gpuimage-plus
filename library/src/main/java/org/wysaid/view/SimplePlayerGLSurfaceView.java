@@ -84,8 +84,6 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
 
     private MediaPlayer mPlayer;
 
-    private Context mContext;
-
     private Uri mVideoUri;
 
     public interface PlayerInitializeCallback {
@@ -220,7 +218,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
             mIsUsingMask = false;
         }
         else {
-            if(!(mDrawer instanceof  TextureRendererMask)) {
+            if(!(mDrawer instanceof TextureRendererMask)) {
                 mDrawer.release();
                 TextureRendererMask drawer = TextureRendererMask.create(true);
                 assert drawer != null : "Drawer Create Failed!";
@@ -270,7 +268,6 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
         super(context, attrs);
 
         Log.i(LOG_TAG, "MyGLSurfaceView Construct...");
-        mContext = context;
 
         setEGLContextClientVersion(2);
         setEGLConfigChooser(8, 8, 8, 8, 8, 0);
@@ -472,7 +469,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
         }
 
         try {
-            mPlayer.setDataSource(mContext, mVideoUri);
+            mPlayer.setDataSource(getContext(), mVideoUri);
 
 //            mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 

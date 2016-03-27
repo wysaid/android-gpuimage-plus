@@ -30,7 +30,7 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
         return mShouldRecord;
     }
 
-    private final static int[] mRecordStateLock = new int[0];
+    private final int[] mRecordStateLock = new int[0];
 
     private AudioRecordRunnable mAudioRecordRunnable;
     private Thread mAudioThread;

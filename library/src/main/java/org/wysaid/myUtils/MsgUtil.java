@@ -20,7 +20,7 @@ public class MsgUtil {
     }
 
     public static void setCurrentToast(Context context, Toast toast) {
-        mContext = new WeakReference<>(context);
+        mContext = new WeakReference<Context>(context);
         mToast = toast;
     }
 
@@ -40,7 +40,7 @@ public class MsgUtil {
                 return;
             }
 
-            mContext = new WeakReference<>(context);
+            mContext = new WeakReference<Context>(context);
             mToast = Toast.makeText(mContext.get(), "", duration);
             mToast.setDuration(duration);
         }

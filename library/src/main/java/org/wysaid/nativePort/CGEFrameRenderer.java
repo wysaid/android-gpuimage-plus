@@ -138,6 +138,15 @@ public class CGEFrameRenderer {
         return nativeGetImageHandler(mNativeAddress);
     }
 
+    public void bindImageFBO() {
+        nativeBindImageFBO(mNativeAddress);
+    }
+
+    //nativeFilter 为 JNI 下的 CGEImageFilterInterfaceAbstract 或者其子类.
+    public void processWithFilter(long nativeFilter) {
+        nativeProcessWithFilter(mNativeAddress, nativeFilter);
+    }
+
     /////////////////      protected         ///////////////////////
 
     protected native long nativeCreateRenderer();
@@ -167,5 +176,9 @@ public class CGEFrameRenderer {
     protected native int nativeQueryBufferTexture(long holder);
 
     protected native long nativeGetImageHandler(long holder);
+    protected native void nativeBindImageFBO(long holder);
+
+    //辅助方法
+    protected native void nativeProcessWithFilter(long holder, long nativeFilter);
 
 }

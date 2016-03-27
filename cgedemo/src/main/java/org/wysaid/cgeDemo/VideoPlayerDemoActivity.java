@@ -15,11 +15,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
-import android.widget.Toast;
 
 import org.wysaid.common.Common;
 import org.wysaid.myUtils.FileUtil;
 import org.wysaid.myUtils.ImageUtil;
+import org.wysaid.myUtils.MsgUtil;
 import org.wysaid.nativePort.CGEFrameRenderer;
 import org.wysaid.view.VideoPlayerGLSurfaceView;
 
@@ -44,7 +44,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
         @Override
         public boolean playFailed(MediaPlayer player, final int what, final int extra)
         {
-            Toast.makeText(VideoPlayerDemoActivity.this, String.format("Error occured! Stop playing, Err code: %d, %d", what, extra), Toast.LENGTH_LONG).show();
+            MsgUtil.toastMsg(VideoPlayerDemoActivity.this, String.format("Error occured! Stop playing, Err code: %d, %d", what, extra));
             return true;
         }
     };
@@ -61,7 +61,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
 
-            Toast.makeText(VideoPlayerDemoActivity.this, "正在准备播放视频 " + videoUri.getHost() + videoUri.getPath() + " 如果是网络视频， 可能需要一段时间的等待", Toast.LENGTH_SHORT).show();
+            MsgUtil.toastMsg(VideoPlayerDemoActivity.this, "正在准备播放视频 " + videoUri.getHost() + videoUri.getPath() + " 如果是网络视频， 可能需要一段时间的等待");
 
             videoView.setVideoUri(videoUri, new VideoPlayerGLSurfaceView.PlayPreparedCallback() {
                 @Override
@@ -69,7 +69,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
                     mPlayerView.post(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(VideoPlayerDemoActivity.this, "开始播放 " + videoUri.getHost() + videoUri.getPath(), Toast.LENGTH_SHORT).show();
+                            MsgUtil.toastMsg(VideoPlayerDemoActivity.this, "开始播放 " + videoUri.getHost() + videoUri.getPath());
                         }
                     });
 
@@ -149,7 +149,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
 
                     String lastVideoFileName = FileUtil.getTextContent(CameraDemoActivity.lastVideoPathFileName);
                     if(lastVideoFileName == null) {
-                        Toast.makeText(VideoPlayerDemoActivity.this, "No video is recorded, please record one in the 2nd case.", Toast.LENGTH_LONG).show();
+                        MsgUtil.toastMsg(VideoPlayerDemoActivity.this, "No video is recorded, please record one in the 2nd case.");
                         return;
                     }
 

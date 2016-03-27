@@ -17,11 +17,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
-import android.widget.Toast;
 
 import org.wysaid.common.Common;
 import org.wysaid.common.SharedContext;
 import org.wysaid.myUtils.ImageUtil;
+import org.wysaid.myUtils.MsgUtil;
 import org.wysaid.nativePort.CGEFaceFunctions;
 import org.wysaid.nativePort.CGEFaceTracker;
 import org.wysaid.view.ImageGLSurfaceView;
@@ -139,7 +139,7 @@ public class ImageDemoActivity extends ActionBarActivity {
 
                     } catch (Exception e) {
                         e.printStackTrace();
-                        Toast.makeText(this, "Error: 未能打开图片", Toast.LENGTH_LONG).show();
+                        MsgUtil.toastMsg(this, "Error: 未能打开图片");
                     }
 
                 }
@@ -334,7 +334,7 @@ public class ImageDemoActivity extends ActionBarActivity {
                         ImageUtil.FaceRects rects = ImageUtil.findFaceByBitmap(bmp, 8);
 
                         if (rects == null) {
-                            Toast.makeText(ImageDemoActivity.this, "未知错误", Toast.LENGTH_LONG);
+                            MsgUtil.toastMsg(ImageDemoActivity.this, "未知错误");
                             return;
                         }
 
@@ -366,11 +366,11 @@ public class ImageDemoActivity extends ActionBarActivity {
                                 canvas.drawRect((int) (pnt.x + halfEyeDis - 2.0f), (int) (pnt.y - 2.0f), (int) (pnt.x + halfEyeDis + 2.0f), (int) (pnt.y + 2.0f), paint);
                             }
 
-                            Toast.makeText(ImageDemoActivity.this, content, Toast.LENGTH_SHORT).show();
+                            MsgUtil.toastMsg(ImageDemoActivity.this, content);
                             _imageView.setImageBitmap(bmp);
                         } else {
                             Log.i(Common.LOG_TAG, "未发现人脸");
-                            Toast.makeText(ImageDemoActivity.this, "未发现人脸", Toast.LENGTH_SHORT).show();
+                            MsgUtil.toastMsg(ImageDemoActivity.this, "未发现人脸");
                         }
                     }
                 });
@@ -391,6 +391,8 @@ public class ImageDemoActivity extends ActionBarActivity {
     }
 
     public void faceTrackerTestCase(View view) {
+//        if(!CGEFaceTracker.isTrackerSetup())
+//            CGEFaceTracker.setupTracker(this);
 
         CGEFaceTracker tracker = CGEFaceTracker.createFaceTracker();
 

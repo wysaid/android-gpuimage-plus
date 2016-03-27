@@ -12,10 +12,13 @@ public class CGEFaceTracker {
 
     static {
         NativeLibraryLoader.load();
+    }
 
-        System.loadLibrary("opencv_java3");
-        System.loadLibrary("cgeFaceTracker");
-
+    public interface TrackerProcessor {
+        void setupProc(CGEFrameRenderer renderer, int width, int height);
+        void processTracking(CGEFrameRenderer renderer);
+        void drawProcResults();
+        void clearData();
     }
 
     //临时处理， 后续将扩展更复杂的操作

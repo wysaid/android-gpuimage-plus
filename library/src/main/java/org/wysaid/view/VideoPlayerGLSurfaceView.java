@@ -351,6 +351,8 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         mSurfaceTexture.getTransformMatrix(mTransformMatrix);
         mFrameRenderer.update(mVideoTextureID, mTransformMatrix);
 
+        mFrameRenderer.runProc();
+
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
