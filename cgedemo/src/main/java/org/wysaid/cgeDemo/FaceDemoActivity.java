@@ -4,17 +4,18 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
-import android.widget.Toast;
 
 import org.wysaid.common.Common;
-import org.wysaid.demoViews.FaceDemoView;
+import org.wysaid.demoUtils.FaceDemoView;
 import org.wysaid.myUtils.ImageUtil;
+import org.wysaid.myUtils.MsgUtil;
 import org.wysaid.nativePort.CGEFaceFunctions;
 
 public class FaceDemoActivity extends AppCompatActivity {
@@ -66,7 +67,7 @@ public class FaceDemoActivity extends AppCompatActivity {
         Log.i(Common.LOG_TAG, "setAsFirstPhoto...");
         mFirstFaceFeature = mFaceDemoView.getFeature();
         mFirstFaceImage = mFaceDemoView.getFaceimage();
-        Toast.makeText(this, "当前画面设置为第一张图", Toast.LENGTH_SHORT).show();
+        MsgUtil.toastMsg(this, "当前画面设置为第一张图");
     }
 
     public void setAsSecondPhoto(View view) {
@@ -74,15 +75,23 @@ public class FaceDemoActivity extends AppCompatActivity {
 
         mSecondFaceFeature = mFaceDemoView.getFeature();
         mSecondFaceImage = mFaceDemoView.getFaceimage();
-        Toast.makeText(this, "当前画面设置为第二张图", Toast.LENGTH_SHORT).show();
+        MsgUtil.toastMsg(this, "当前画面设置为第二张图");
     }
 
     public void showResult(View view) {
         Log.i(Common.LOG_TAG, "showResult...");
-        Bitmap bmp = CGEFaceFunctions.blendFaceWidthFeatures(mFirstFaceImage, mFirstFaceFeature, mSecondFaceImage, mSecondFaceFeature, null);
-        mResultView.setImageBitmap(bmp);
-        mResultView.setVisibility(View.VISIBLE);
-        mFaceDemoView.setVisibility(View.GONE);
+
+        if(mResultView.getVisibility() != View.VISIBLE) {
+            Bitmap bmp = CGEFaceFunctions.blendFaceWidthFeatures(mFirstFaceImage, mFirstFaceFeature, mSecondFaceImage, mSecondFaceFeature, null);
+            mResultView.setImageBitmap(bmp);
+            mResultView.setVisibility(View.VISIBLE);
+            mFaceDemoView.setVisibility(View.GONE);
+            ((Button)view).setText("隐藏结果");
+        } else {
+            mResultView.setVisibility(View.INVISIBLE);
+            mFaceDemoView.setVisibility(View.VISIBLE);
+            ((Button)view).setText("显示结果");
+        }
     }
 
     public void choosePhoto(View view) {

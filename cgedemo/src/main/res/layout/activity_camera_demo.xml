@@ -111,6 +111,60 @@
                 android:id="@+id/fitViewBtn"
                 android:text="适应屏幕"/>
 
+            <Button
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:id="@+id/newEffect1Btn"
+                android:textAllCaps="false"
+                android:text="diamond"
+                android:onClick="diamond"
+                />
+
+            <Button
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:id="@+id/newEffect2Btn"
+                android:textAllCaps="false"
+                android:text="soCold"
+                android:onClick="soCold"
+                />
+
+            <Button
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:id="@+id/newEffect3Btn"
+                android:textAllCaps="false"
+                android:text="flowerSea"
+                android:onClick="flowerSea"
+                />
+
+            <Button
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:id="@+id/newEffect4Btn"
+                android:textAllCaps="false"
+                android:text="love"
+                android:onClick="love"
+                />
+
+            <Button
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:id="@+id/newEffect5Btn"
+                android:textAllCaps="false"
+                android:text="myQueen"
+                android:onClick="myQueen"
+                />
+
+            <Button
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:id="@+id/newEffect6Btn"
+                android:textAllCaps="false"
+                android:text="prettyGirl"
+                android:onClick="prettyGirl"
+                />
+
         </LinearLayout>
     </HorizontalScrollView>
 

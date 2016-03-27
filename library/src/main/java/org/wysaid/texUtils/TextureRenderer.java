@@ -20,7 +20,17 @@ public abstract class TextureRenderer {
     public abstract boolean init(boolean isExternalOES);
 
     //为了保证GLContext 的对应， 不能等待finalize
-    public abstract void release();
+    public void release() {
+        if(mVertexBuffer != 0) {
+            GLES20.glDeleteBuffers(1, new int[]{mVertexBuffer}, 0);
+            mVertexBuffer = 0;
+        }
+
+        if(mProgram != null) {
+            mProgram.release();
+            mProgram = null;
+        }
+    }
 
     public abstract void renderTexture(int texID, Viewport viewport);
 

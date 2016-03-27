@@ -1,11 +1,9 @@
-package org.wysaid.demoViews;
+package org.wysaid.demoUtils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.PointF;
 import android.media.FaceDetector;
 import android.util.AttributeSet;
@@ -24,13 +22,15 @@ import org.wysaid.nativePort.CGEFaceFunctions;
  * Mail: admin@wysaid.org
  * blog: wysaid.org
  */
+
 public class FaceDemoView extends View implements OnTouchListener{
 
-public static class FaceController {
+    public static class FaceController {
         public Bitmap image;
         public PointF pos;
         public float rotation;
         public float halfWidth, halfHeight;
+        private Matrix matrix = new Matrix();
 
         FaceController(Bitmap img) {
             image = img;
@@ -40,7 +40,6 @@ public static class FaceController {
         }
 
         public void drawController(Canvas canvas) {
-            Matrix matrix = new Matrix();
             matrix.setTranslate(pos.x - halfWidth, pos.y - halfHeight);
             matrix.postRotate(rotation, pos.x, pos.y);
             canvas.drawBitmap(image, matrix, null);
@@ -58,6 +57,7 @@ public static class FaceController {
     private FaceController mMouthController;
     private FaceController mChinController;
     private FaceController mSelectedController;
+    private Matrix mMatrix = new Matrix();
 
     public Bitmap getFaceimage() {
         return mFaceImage;
@@ -116,23 +116,6 @@ public static class FaceController {
             feature.rightEyePos = new PointF(pnt.x + halfEyeDis, pnt.y);
             feature.mouthPos = new PointF(pnt.x, pnt.y + eyeDis);
             feature.chinPos = new PointF(pnt.x, pnt.y + eyeDis * 1.5f);
-
-//            if(!mFaceImage.isMutable())
-//                mFaceImage = mFaceImage.copy(mFaceImage.getConfig(), true);
-//
-//            Canvas canvas = new Canvas(mFaceImage);
-//            Paint paint = new Paint();
-//            paint.setColor(Color.RED);
-//            paint.setStyle(Paint.Style.STROKE);
-//            paint.setStrokeWidth(4);
-//            canvas.drawRect((int) (pnt.x - eyeDis * 1.5f), (int) (pnt.y - eyeDis * 1.5f), (int) (pnt.x + eyeDis * 1.5f), (int) (pnt.y + eyeDis * 1.5f), paint);
-//
-//            //眼睛中心
-//            canvas.drawRect((int) (pnt.x - 2.0f), (int) (pnt.y - 2.0f), (int) (pnt.x + 2.0f), (int) (pnt.y + 2.0f), paint);
-//
-//            //双眼
-//            canvas.drawRect((int) (pnt.x - halfEyeDis - 2.0f), (int) (pnt.y - 2.0f), (int) (pnt.x - halfEyeDis + 2.0f), (int) (pnt.y + 2.0f), paint);
-//            canvas.drawRect((int) (pnt.x + halfEyeDis - 2.0f), (int) (pnt.y - 2.0f), (int) (pnt.x + halfEyeDis + 2.0f), (int) (pnt.y + 2.0f), paint);
 
             mLeftEyeController.pos = new PointF(feature.leftEyePos.x * mImageScaling + mOriginPos.x, feature.leftEyePos.y * mImageScaling + mOriginPos.y);
             mRightEyeController.pos = new PointF(feature.rightEyePos.x * mImageScaling + mOriginPos.x, feature.rightEyePos.y * mImageScaling + mOriginPos.y);
@@ -228,7 +211,7 @@ public static class FaceController {
         switch (action)
         {
             case MotionEvent.ACTION_DOWN:
-                
+
                 mSelectedController = null;
 
                 if(mLeftEyeController.onTouchPosition(touchX, touchY))
@@ -284,10 +267,9 @@ public static class FaceController {
         if(mFaceImage == null)
             return;
 
-        Matrix matrix = new Matrix();
-        matrix.setScale(mImageScaling, mImageScaling);
-        matrix.postTranslate(mOriginPos.x, mOriginPos.y);
-        canvas.drawBitmap(mFaceImage, matrix, null);
+        mMatrix.setScale(mImageScaling, mImageScaling);
+        mMatrix.postTranslate(mOriginPos.x, mOriginPos.y);
+        canvas.drawBitmap(mFaceImage, mMatrix, null);
 
         mLeftEyeController.drawController(canvas);
         mRightEyeController.drawController(canvas);

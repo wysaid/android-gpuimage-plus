@@ -25,10 +25,12 @@ import android.view.SurfaceHolder;
 import org.wysaid.camera.CameraInstance;
 import org.wysaid.common.Common;
 import org.wysaid.common.FrameBufferObject;
+import org.wysaid.nativePort.CGEFaceTracker;
 import org.wysaid.nativePort.CGEFrameRecorder;
 import org.wysaid.nativePort.CGENativeLibrary;
 import org.wysaid.texUtils.TextureRenderer;
 import org.wysaid.texUtils.TextureRendererDrawOrigin;
+import org.wysaid.trackingEffects.CGETrackingEffectCommon;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -41,7 +43,7 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * Created by wangyang on 15/7/17.
  */
-public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener{
+public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
 
     public static final String LOG_TAG = Common.LOG_TAG;
 
@@ -83,6 +85,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     protected boolean mFitFullView = false;
 
+    protected boolean mIsTransformMatrixSet = false;
+
     public void setFitFullView(boolean fit) {
         mFitFullView = fit;
         if(mFrameRecorder != null)
@@ -94,13 +98,31 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     }
 
     protected float mMaskAspectRatio = 1.0f;
-    protected float[] mTransformMatrix = new float[16];
 
     //是否使用后置摄像头
     protected boolean mIsCameraBackForward = true;
 
     public boolean isCameraBackForward() {
         return mIsCameraBackForward;
+    }
+
+    protected CGEFaceTracker.TrackerProcessor mTrackingProc;
+
+    public void setTrackingProc(final CGEFaceTracker.TrackerProcessor proc) {
+        if(mTrackingProc != null) {
+            mTrackingProc.clearData();
+            mTrackingProc = null;
+        }
+
+        if(mFrameRecorder == null || proc == null)
+            return;
+
+        proc.setupProc(mFrameRecorder, mRecordWidth, mRecordHeight);
+        mTrackingProc = proc;
+    }
+
+    public CGEFaceTracker.TrackerProcessor getTrackingProc() {
+        return mTrackingProc;
     }
 
     public void setClearColor(float r, float g, float b, float a) {
@@ -177,7 +199,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                         }
                     }, facing);
 
-//                    resumeDetectingFace();
                     requestRender();
                 }
             });
@@ -248,7 +269,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         queueEvent(new Runnable() {
             @Override
             public void run() {
-                if(mFrameRecorder != null) {
+                if (mFrameRecorder != null) {
                     mFrameRecorder.setFilterIntensity(intensity);
                 } else {
                     Log.e(LOG_TAG, "setFilterIntensity after release!!");
@@ -411,6 +432,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         mSurfaceTexture.setOnFrameAvailableListener(this);
 
         mFrameRecorder = new CGEFrameRecorder();
+        mIsTransformMatrixSet = false;
         if(!mFrameRecorder.init(mRecordWidth, mRecordHeight, mRecordWidth, mRecordHeight)) {
             Log.e(LOG_TAG, "Frame Recorder init failed!");
         }
@@ -510,6 +532,13 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                         if (callback != null)
                             callback.releaseOK();
                     }
+
+                    if(mTrackingProc != null) {
+                        mTrackingProc.clearData();
+                        mTrackingProc = null;
+                    }
+
+                    CGETrackingEffectCommon.clearTrackingEffect();
                 }
             });
         }
@@ -539,8 +568,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     }
 
     public void stopPreview() {
-
-//        stopDetectingFace();
 
         queueEvent(new Runnable() {
             @Override
@@ -574,7 +601,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
             mFrameRecorder.srcResize(cameraInstance().previewHeight(), cameraInstance().previewWidth());
         }
 
-//        resumeDetectingFace();
         requestRender();
     }
 
@@ -594,8 +620,20 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         mSurfaceTexture.updateTexImage();
 
-        mSurfaceTexture.getTransformMatrix(mTransformMatrix);
-        mFrameRecorder.update(mTextureID, mTransformMatrix);
+        if(!mIsTransformMatrixSet) {
+            //TransformMatrix 只需要设置一次
+            float[] transformMatrix = new float[16];
+            mSurfaceTexture.getTransformMatrix(transformMatrix);
+            mFrameRecorder.update(mTextureID, transformMatrix);
+//            mIsTransformMatrixSet = true;
+        }
+
+        //进行人脸追踪
+        if(mTrackingProc != null) {
+            mTrackingProc.processTracking(mFrameRecorder);
+            mTrackingProc.drawProcResults();
+        }
+
         mFrameRecorder.runProc();
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
@@ -970,7 +1008,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 photoCallback.takePictureOK(bmp2);
 
                 cameraInstance().getCameraDevice().startPreview();
-//                resumeDetectingFace();
             }
         });
     }

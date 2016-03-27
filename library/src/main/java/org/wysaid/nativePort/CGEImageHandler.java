@@ -101,6 +101,7 @@ public class CGEImageHandler {
         }
     }
 
+
     /////////////////      protected         ///////////////////////
 
     protected native long nativeCreateHandler();
