@@ -1,6 +1,12 @@
 # Android-GPUImage-plus
 GPU accelerated filters for Android based on OpenGL. 
 
+## 声明 ##
+
+   作者发现有的网友反编译repo里面的demo, 使用了视频录制功能, 所以作者准备近期放出视频录制功能(以及jni部分代码)
+   你等不及的话, 就反编译demo吧， 你开心就好😬, 不会找你麻烦的。 
+   也谢谢有的网友的捐献.
+
 ## 简介 ##
 
 1.  This repo is an "Android Studio Project", comprising "cgeDemo", "library" two sub-modules. All java code and the "libCGE.so"(Written in C++&OpenGL with NDK) is provided. Hundreds of built-in filters are available in the demo. 😋If you'd like to add your own filter, please refer to the document for the "Effect String Definition Rule" below.
