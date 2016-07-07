@@ -30,7 +30,6 @@ import org.wysaid.nativePort.CGEFrameRecorder;
 import org.wysaid.nativePort.CGENativeLibrary;
 import org.wysaid.texUtils.TextureRenderer;
 import org.wysaid.texUtils.TextureRendererDrawOrigin;
-import org.wysaid.trackingEffects.CGETrackingEffectCommon;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -538,7 +537,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                         mTrackingProc = null;
                     }
 
-                    CGETrackingEffectCommon.clearTrackingEffect();
                 }
             });
         }

@@ -23,7 +23,6 @@ import org.wysaid.myUtils.FileUtil;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.myUtils.MsgUtil;
 import org.wysaid.nativePort.CGEFrameRecorder;
-import org.wysaid.trackingEffects.CGETrackingEffectCommon;
 import org.wysaid.view.CameraRecordGLSurfaceView;
 
 public class CameraDemoActivity extends ActionBarActivity {
@@ -246,8 +245,8 @@ public class CameraDemoActivity extends ActionBarActivity {
             }
         });
 
-//        mCameraView.presetRecordingSize(480, 640);
-        mCameraView.presetRecordingSize(720, 1280);
+        mCameraView.presetRecordingSize(480, 640);
+//        mCameraView.presetRecordingSize(720, 1280);
         mCameraView.setZOrderOnTop(false);
         mCameraView.setZOrderMediaOverlay(true);
 
@@ -255,7 +254,6 @@ public class CameraDemoActivity extends ActionBarActivity {
             @Override
             public void createOver(boolean success) {
                 if (success) {
-                    CGETrackingEffectCommon.setupTrackingEffect(720, 1280);
                     Log.i(LOG_TAG, "view 创建成功");
                 } else {
                     Log.e(LOG_TAG, "view 创建失败!");
@@ -397,96 +395,6 @@ public class CameraDemoActivity extends ActionBarActivity {
             mCurrentConfig = btn.filterConfig;
         }
     };
-
-    public void diamond(View view) {
-        mCameraView.queueEvent(new Runnable() {
-            @Override
-            public void run() {
-
-                if(mCameraView.getTrackingProc() == null) {
-                    CGETrackingEffectCommon effect = CGETrackingEffectCommon.createEffect(CameraDemoActivity.this, "/sdcard/libCGE/demoRes/diamond");
-                    mCameraView.setTrackingProc(effect);
-                } else {
-                    mCameraView.setTrackingProc(null);
-                }
-            }
-        });
-    }
-
-    public void soCold(View view) {
-        mCameraView.queueEvent(new Runnable() {
-            @Override
-            public void run() {
-
-                if(mCameraView.getTrackingProc() == null) {
-                    CGETrackingEffectCommon effect = CGETrackingEffectCommon.createEffect(CameraDemoActivity.this, "/sdcard/libCGE/demoRes/haolenga");
-                    mCameraView.setTrackingProc(effect);
-                } else {
-                    mCameraView.setTrackingProc(null);
-                }
-            }
-        });
-    }
-
-    public void flowerSea(View view) {
-        mCameraView.queueEvent(new Runnable() {
-            @Override
-            public void run() {
-
-                if(mCameraView.getTrackingProc() == null) {
-                    CGETrackingEffectCommon effect = CGETrackingEffectCommon.createEffect(CameraDemoActivity.this, "/sdcard/libCGE/demoRes/huahai");
-                    mCameraView.setTrackingProc(effect);
-                } else {
-                    mCameraView.setTrackingProc(null);
-                }
-            }
-        });
-    }
-
-    public void love(View view) {
-        mCameraView.queueEvent(new Runnable() {
-            @Override
-            public void run() {
-
-                if(mCameraView.getTrackingProc() == null) {
-                    CGETrackingEffectCommon effect = CGETrackingEffectCommon.createEffect(CameraDemoActivity.this, "/sdcard/libCGE/demoRes/love");
-                    mCameraView.setTrackingProc(effect);
-                } else {
-                    mCameraView.setTrackingProc(null);
-                }
-            }
-        });
-    }
-
-    public void myQueen(View view) {
-        mCameraView.queueEvent(new Runnable() {
-            @Override
-            public void run() {
-
-                if(mCameraView.getTrackingProc() == null) {
-                    CGETrackingEffectCommon effect = CGETrackingEffectCommon.createEffect(CameraDemoActivity.this, "/sdcard/libCGE/demoRes/myqueen");
-                    mCameraView.setTrackingProc(effect);
-                } else {
-                    mCameraView.setTrackingProc(null);
-                }
-            }
-        });
-    }
-
-    public void prettyGirl(View view) {
-        mCameraView.queueEvent(new Runnable() {
-            @Override
-            public void run() {
-
-                if(mCameraView.getTrackingProc() == null) {
-                    CGETrackingEffectCommon effect = CGETrackingEffectCommon.createEffect(CameraDemoActivity.this, "/sdcard/libCGE/demoRes/prettygirl");
-                    mCameraView.setTrackingProc(effect);
-                } else {
-                    mCameraView.setTrackingProc(null);
-                }
-            }
-        });
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
