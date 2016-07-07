@@ -735,7 +735,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     protected Bitmap mThunbnailBmp;
     protected TakeThunbnailCallback mTakeThunbnailCallback;
-    protected final int[] mThunbnailLock = new int[0];
+    protected final Object mThunbnailLock = new Object();
     protected int mThunbnailWidth, mThunbnailHeight;
     RectF mThumnailClipingArea;
     protected IntBuffer mThunbnailBuffer;
