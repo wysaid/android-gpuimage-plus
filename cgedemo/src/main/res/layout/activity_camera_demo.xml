@@ -49,67 +49,78 @@
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:id="@+id/takePicBtn"
-                android:text="拍照"/>
+                android:textAllCaps="false"
+                android:text="TakePicture"/>
 
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:id="@+id/takeShotBtn"
-                android:text="截屏"/>
+                android:textAllCaps="false"
+                android:text="TakeShot"/>
 
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:id="@+id/thunbnailBtn"
-                android:text="启动预览"/>
+                android:textAllCaps="false"
+                android:text="ExtraView"/>
 
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:id="@+id/pauseBtn"
-                android:text="暂停"/>
+                android:textAllCaps="false"
+                android:text="Pause"/>
 
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:id="@+id/resumeBtn"
-                android:text="继续"/>
+                android:textAllCaps="false"
+                android:text="Resume"/>
 
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:id="@+id/switchCameraBtn"
-                android:text="切换前后"/>
+                android:textAllCaps="false"
+                android:text="Switch"/>
 
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:id="@+id/recordBtn"
-                android:text="点按录像"/>
+                android:textAllCaps="false"
+                android:text="Record"/>
 
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:id="@+id/flashBtn"
-                android:text="切换闪光灯"/>
+                android:textAllCaps="false"
+                android:text="Flash"/>
 
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:id="@+id/shapeBtn"
-                android:text="切换风格"/>
+                android:textAllCaps="false"
+                android:text="Style"/>
 
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:id="@+id/backgroundBtn"
-                android:text="切换背景"/>
+                android:textAllCaps="false"
+                android:text="Background"/>
 
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:id="@+id/fitViewBtn"
-                android:text="适应屏幕"/>
+                android:textAllCaps="false"
+                android:text="fitScreen"/>
 
         </LinearLayout>
     </HorizontalScrollView>

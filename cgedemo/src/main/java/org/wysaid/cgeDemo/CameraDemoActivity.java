@@ -164,10 +164,11 @@ public class CameraDemoActivity extends ActionBarActivity {
 
         for(int i = 0; i != MainActivity.effectConfigs.length; ++i) {
             MyButtons button = new MyButtons(this, MainActivity.effectConfigs[i]);
+            button.setAllCaps(false);
             if(i == 0)
-                button.setText("无特效");
+                button.setText("None");
             else
-                button.setText("特效" + i);
+                button.setText("Filter" + i);
             button.setOnClickListener(mFilterSwitchListener);
             layout.addView(button);
         }
@@ -208,7 +209,7 @@ public class CameraDemoActivity extends ActionBarActivity {
                         mCameraView.setMaskBitmap(mBmp, false, new CameraRecordGLSurfaceView.SetMaskBitmapCallback() {
                             @Override
                             public void setMaskOK(CGEFrameRecorder recorder) {
-                                //使mask上下翻转
+                                //flip mask
                                 if(mCameraView.isUsingMask())
                                     recorder.setMaskFlipScale(1.0f, -1.0f);
                             }
@@ -370,9 +371,9 @@ public class CameraDemoActivity extends ActionBarActivity {
                             @Override
                             public void onAutoFocus(boolean success, Camera camera) {
                                 if (success) {
-                                    Log.e(LOG_TAG, String.format("手动对焦成功， 位置: %g, %g", focusX, focusY));
+                                    Log.e(LOG_TAG, String.format("Focus OK, pos: %g, %g", focusX, focusY));
                                 } else {
-                                    Log.e(LOG_TAG, String.format("手动对焦失败， 位置: %g, %g", focusX, focusY));
+                                    Log.e(LOG_TAG, String.format("Focus failed, pos: %g, %g", focusX, focusY));
                                     mCameraView.cameraInstance().setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
                                 }
                             }
