@@ -105,25 +105,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         return mIsCameraBackForward;
     }
 
-    protected CGEFaceTracker.TrackerProcessor mTrackingProc;
-
-    public void setTrackingProc(final CGEFaceTracker.TrackerProcessor proc) {
-        if(mTrackingProc != null) {
-            mTrackingProc.clearData();
-            mTrackingProc = null;
-        }
-
-        if(mFrameRecorder == null || proc == null)
-            return;
-
-        proc.setupProc(mFrameRecorder, mRecordWidth, mRecordHeight);
-        mTrackingProc = proc;
-    }
-
-    public CGEFaceTracker.TrackerProcessor getTrackingProc() {
-        return mTrackingProc;
-    }
-
     public void setClearColor(float r, float g, float b, float a) {
         clearColor.r = r;
         clearColor.g = g;
@@ -532,11 +513,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                             callback.releaseOK();
                     }
 
-                    if(mTrackingProc != null) {
-                        mTrackingProc.clearData();
-                        mTrackingProc = null;
-                    }
-
                 }
             });
         }
@@ -624,12 +600,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
             mSurfaceTexture.getTransformMatrix(transformMatrix);
             mFrameRecorder.update(mTextureID, transformMatrix);
 //            mIsTransformMatrixSet = true;
-        }
-
-        //进行人脸追踪
-        if(mTrackingProc != null) {
-            mTrackingProc.processTracking(mFrameRecorder);
-            mTrackingProc.drawProcResults();
         }
 
         mFrameRecorder.runProc();
