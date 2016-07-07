@@ -164,7 +164,10 @@ public class CameraDemoActivity extends ActionBarActivity {
 
         for(int i = 0; i != MainActivity.effectConfigs.length; ++i) {
             MyButtons button = new MyButtons(this, MainActivity.effectConfigs[i]);
-            button.setText("特效" + i);
+            if(i == 0)
+                button.setText("无特效");
+            else
+                button.setText("特效" + i);
             button.setOnClickListener(mFilterSwitchListener);
             layout.addView(button);
         }

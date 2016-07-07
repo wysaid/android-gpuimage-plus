@@ -1,10 +1,10 @@
 # Android-GPUImage-plus
 GPU accelerated filters for Android based on OpenGL. 
 
-## Tips ##
+## note ##
 
-   作者发现有的网友反编译repo里面的demo, 使用了视频录制功能, 所以作者准备近期放出视频录制功能
-   你等不及的话, 就反编译demo吧
+The video-record feature is available now.
+The LUT filter is supported now.
 
 ## 简介 ##
 
@@ -261,6 +261,10 @@ mid (中值) 暂无参数
 
 bilateral (双边滤波): 后接 三个参数 模糊半径(blurScale) 范围&#91;-100, 100&#93;, 色彩容差(distanceFactor) 范围&#91;1, 20&#93; 和 重复次数(repeat times) 范围 &gt;= 1
                       其中 重复次数为可选参数， 如果不填， 则默认为 1
+
+face (美颜): 后接一个或三个参数 美颜强度(intensity) 范围 (0, 1&#93;, 为0无效果, 相片宽(width), 相片高(height)
+其中 相片宽高不填的情况下默认 720x1280
+例: "@beautify face 1 720 1280"
 
 ======↑新增加 2015-3-19
 
