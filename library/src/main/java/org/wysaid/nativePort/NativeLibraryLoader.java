@@ -16,10 +16,6 @@ public class NativeLibraryLoader {
         System.loadLibrary("ffmpeg");
         System.loadLibrary("CGE");
 
-        //You ignore the two libraries below(decreasing your package size), if you don't want any face features.
-        System.loadLibrary("opencv_java3");
-        System.loadLibrary("FaceTracker");
-
         CGEFFmpegNativeLibrary.avRegisterAll();
     }
 
