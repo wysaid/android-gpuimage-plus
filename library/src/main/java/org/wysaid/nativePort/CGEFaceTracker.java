@@ -65,10 +65,11 @@ public class CGEFaceTracker {
         super.finalize();
     }
 
+    //Send your own tracking file, face tracking ref: https://github.com/kylemcdonald/FaceTracker
 //    public static void setupTracker(Context context) {
 //        setupTracker(context, "face2.tracker", "face.tri", "face.con");
 //    }
-
+//
 //    public static void setupTracker(Context context, String modelFile, String triFile, String conFile) {
 //
 //        if(sIsTrackerSetup) {

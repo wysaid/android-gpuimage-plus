@@ -43,17 +43,18 @@ public class CGEFrameRecorder extends CGEFrameRenderer {
             nativePauseRecording(mNativeAddress);
     }
 
-    public boolean isRecordingPaused() {
-        if(mNativeAddress != 0)
-            return nativeIsRecordingPaused(mNativeAddress);
-        return false;
-    }
-
-    public boolean resumeRecording() {
-        if(mNativeAddress != 0)
-            return nativeResumeRecording(mNativeAddress);
-        return false;
-    }
+    //Not completed by now
+//    public boolean isRecordingPaused() {
+//        if(mNativeAddress != 0)
+//            return nativeIsRecordingPaused(mNativeAddress);
+//        return false;
+//    }
+//
+//    public boolean resumeRecording() {
+//        if(mNativeAddress != 0)
+//            return nativeResumeRecording(mNativeAddress);
+//        return false;
+//    }
 
     public double getTimestamp() {
         if(mNativeAddress != 0)
@@ -99,8 +100,8 @@ public class CGEFrameRecorder extends CGEFrameRenderer {
     private native boolean nativeIsRecordingStarted(long holder);
     private native boolean nativeEndRecording(long holder, boolean shouldSave);
     private native void nativePauseRecording(long holder);
-    private native boolean nativeIsRecordingPaused(long holder);
-    private native boolean nativeResumeRecording(long holder);
+//    private native boolean nativeIsRecordingPaused(long holder);
+//    private native boolean nativeResumeRecording(long holder);
     private native double nativeGetTimestamp(long holder);
 
     private native double nativeGetVideoStreamtime(long holder);
