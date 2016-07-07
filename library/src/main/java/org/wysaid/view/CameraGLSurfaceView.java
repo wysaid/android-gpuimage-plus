@@ -594,13 +594,10 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         mSurfaceTexture.updateTexImage();
 
-        if(!mIsTransformMatrixSet) {
-            //TransformMatrix 只需要设置一次
-            float[] transformMatrix = new float[16];
-            mSurfaceTexture.getTransformMatrix(transformMatrix);
-            mFrameRecorder.update(mTextureID, transformMatrix);
-//            mIsTransformMatrixSet = true;
-        }
+        //TransformMatrix 只需要设置一次
+        float[] transformMatrix = new float[16];
+        mSurfaceTexture.getTransformMatrix(transformMatrix);
+        mFrameRecorder.update(mTextureID, transformMatrix);
 
         mFrameRecorder.runProc();
 
