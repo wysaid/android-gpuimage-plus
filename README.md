@@ -3,7 +3,10 @@ GPU accelerated filters for Android based on OpenGL.
 
 ## note ##
 
-update 2016-7-7: The video-record feature is available now. The LUT filter is supported now.
+update 2016-7-7: 
+    The video-record feature is available now. 
+    The LUT filter is supported now.
+    New function "@beautify face ..." for face beautification, see the description string below.
 
 ## 简介 ##
 
