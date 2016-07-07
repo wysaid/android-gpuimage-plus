@@ -27,6 +27,7 @@ public class MainActivity extends ActionBarActivity {
 
     public static final String effectConfigs[] = {
             "",
+            "@beautify face 1 480 640", //美颜效果
             "@adjust lut edgy_amber.png",
             "@adjust lut filmstock.png",
             "@adjust lut foggy_night.png",
