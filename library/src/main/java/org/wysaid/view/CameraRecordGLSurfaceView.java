@@ -13,6 +13,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 /**
@@ -148,11 +149,12 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
     class AudioRecordRunnable implements Runnable {
 
         int bufferSize;
-        short[] audioData;
+        //        short[] audioData;
         int bufferReadResult;
         public AudioRecord audioRecord;
         public volatile boolean isInitialized;
         private static final int sampleRate = 44100;
+        ByteBuffer audioBufferRef;
         ShortBuffer audioBuffer;
         StartRecordingCallback recordingCallback;
 
@@ -162,10 +164,12 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
             try {
                 bufferSize = AudioRecord.getMinBufferSize(sampleRate,
                         AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+                Log.i(LOG_TAG, "audio min buffer size: " + bufferSize);
                 audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate,
                         AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,bufferSize);
-                audioData = new short[bufferSize];
-                audioBuffer = ByteBuffer.allocateDirect(bufferSize * 2).asShortBuffer();
+//                audioData = new short[bufferSize];
+                audioBufferRef = ByteBuffer.allocateDirect(bufferSize * 2).order(ByteOrder.nativeOrder());
+                audioBuffer = audioBufferRef.asShortBuffer();
             } catch (Exception e) {
                 if(audioRecord != null){
                     audioRecord.release();
@@ -233,12 +237,14 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
                         break;
                 }
 
-                bufferReadResult = this.audioRecord.read(audioData, 0, audioData.length);
+                audioBufferRef.position(0);
+                bufferReadResult = this.audioRecord.read(audioBufferRef, bufferSize * 2);
                 if (mShouldRecord && bufferReadResult > 0 && mFrameRecorder != null &&
                         mFrameRecorder.getTimestamp() > mFrameRecorder.getAudioStreamtime()) {
+//                    Log.e(LOG_TAG, "buffer Result: " + bufferReadResult);
                     audioBuffer.position(0);
-                    audioBuffer.put(audioData).position(0);
-                    mFrameRecorder.recordAudioFrame(audioBuffer, bufferReadResult);
+//                    audioBuffer.put(audioData).position(0);
+                    mFrameRecorder.recordAudioFrame(audioBuffer, bufferReadResult / 2);
                 }
             }
             this.audioRecord.stop();
