@@ -578,6 +578,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         requestRender();
     }
 
+    private float[] transformMatrix = new float[16];
+
     @Override
     public void onDrawFrame(GL10 gl) {
 
@@ -595,7 +597,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         mSurfaceTexture.updateTexImage();
 
         //TransformMatrix 只需要设置一次
-        float[] transformMatrix = new float[16];
         mSurfaceTexture.getTransformMatrix(transformMatrix);
         mFrameRecorder.update(mTextureID, transformMatrix);
 
