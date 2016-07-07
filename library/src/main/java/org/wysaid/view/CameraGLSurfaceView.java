@@ -25,7 +25,6 @@ import android.view.SurfaceHolder;
 import org.wysaid.camera.CameraInstance;
 import org.wysaid.common.Common;
 import org.wysaid.common.FrameBufferObject;
-import org.wysaid.nativePort.CGEFaceTracker;
 import org.wysaid.nativePort.CGEFrameRecorder;
 import org.wysaid.nativePort.CGENativeLibrary;
 import org.wysaid.texUtils.TextureRenderer;
@@ -578,6 +577,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         requestRender();
     }
 
+    private float[] _transformMatrix = new float[16];
+
     @Override
     public void onDrawFrame(GL10 gl) {
 
@@ -594,14 +595,9 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         mSurfaceTexture.updateTexImage();
 
-        if(!mIsTransformMatrixSet) {
-            //TransformMatrix 只需要设置一次
-            float[] transformMatrix = new float[16];
-            mSurfaceTexture.getTransformMatrix(transformMatrix);
-            mFrameRecorder.update(mTextureID, transformMatrix);
-//            mIsTransformMatrixSet = true;
-        }
-
+        //TransformMatrix 一般只需要设置一次, 待优化
+        mSurfaceTexture.getTransformMatrix(_transformMatrix);
+        mFrameRecorder.update(mTextureID, _transformMatrix);
         mFrameRecorder.runProc();
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
