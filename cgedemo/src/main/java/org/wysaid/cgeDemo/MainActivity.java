@@ -27,6 +27,12 @@ public class MainActivity extends ActionBarActivity {
 
     public static final String effectConfigs[] = {
             "",
+            "@adjust lut edgy_amber.png",
+            "@adjust lut filmstock.png",
+            "@adjust lut foggy_night.png",
+            "@adjust lut late_sunset.png",
+            "@adjust lut soft_warming.png",
+            "@adjust lut wildbird.png",
             "@beautify bilateral 10 4 1 @style haze -0.5 -0.5 1 1 1 @curve RGB(0, 0)(94, 20)(160, 168)(255, 255) @curve R(0, 0)(129, 119)(255, 255)B(0, 0)(135, 151)(255, 255)RGB(0, 0)(146, 116)(255, 255)",
             "#unpack @blur lerp 0.75", //可调节模糊强度
             "@blur lerp 1", //可调节混合强度

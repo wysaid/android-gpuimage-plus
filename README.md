@@ -166,6 +166,8 @@ exposure (曝光) : 后接一个参数 intensity, 范围 &#91;-10, 10&#93;
 
 colorbalance (色彩平衡): 后接三个参数 redShift &#91;-1, 1&#93;, greenShift &#91;-1, 1&#93;, blueShift &#91;-1, 1&#93;. (添加日期: 2015-3-30)
 
+lut (lookup table) 方法提供通用的lut滤镜解决方案, 格式: "@lookup &lt;lut_image_name&gt;", lut_image_name 表示用于查找的图片文件名(参见demo).
+
 注: &#91;&#93; 中的表示该值的缩写，可以使用缩写代替原本过长的参数值。
 &lt;arg*&gt; 表示该方法所需的参数，具体范围请参考相关class。 &lt;arg*&gt;的个数与具体&lt;function&gt;有关，
 
