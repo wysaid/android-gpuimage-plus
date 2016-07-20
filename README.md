@@ -39,4 +39,4 @@ Paypal:
 
 ## 文档 ##
 
-![ParsingRule](https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule "rule")
+[https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule](https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule "http://wysaid.org")
