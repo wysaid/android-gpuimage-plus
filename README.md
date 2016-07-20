@@ -26,8 +26,6 @@ update 2016-7-7:
 
 ## Donate ##
 
-Welcome donations. More work may be paid for the donors' issue as thanks.
-
 Alipay:
 
 ![Alipay](https://raw.githubusercontent.com/wysaid/android-gpuimage-plus/master/screenshots/alipay.jpg "alipay")
