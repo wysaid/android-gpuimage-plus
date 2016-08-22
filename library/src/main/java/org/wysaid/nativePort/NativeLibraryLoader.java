@@ -1,9 +1,5 @@
 package org.wysaid.nativePort;
 
-import android.util.Log;
-
-import org.wysaid.common.Common;
-
 /**
  * Created by wangyang on 15/7/30.
  */
