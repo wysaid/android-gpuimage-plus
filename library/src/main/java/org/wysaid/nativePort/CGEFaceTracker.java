@@ -11,8 +11,8 @@ import android.graphics.PointF;
 public class CGEFaceTracker {
 
     static {
-        //You ignore the two libraries below(decreasing your package size), if you don't want any face features.
-        System.loadLibrary("opencv_java3");
+        //You can ignore the two libraries below(decreasing your package size), if you don't want any face features.
+//        System.loadLibrary("opencv_java3");  // OpenCV is static built into FaceTracker now.
         System.loadLibrary("FaceTracker");
     }
 
