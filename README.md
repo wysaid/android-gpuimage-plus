@@ -24,7 +24,7 @@ GPU accelerated filters for Android based on OpenGL.
 
 Some utils are available for new version: [https://github.com/wysaid/cge-tools](https://github.com/wysaid/cge-tools "http://wysaid.org")
 
-[![Tool](https://raw.githubusercontent.com/wysaid/cge-tools/master/screenshots/0.jpg "Paypal")](cge-tool)
+[![Tool](https://raw.githubusercontent.com/wysaid/cge-tools/master/screenshots/0.jpg "cge-tool")](https://github.com/wysaid/cge-tools)
 
 ## Donate ##
 
