@@ -14,10 +14,10 @@
         android:layout_height="match_parent">
 
         <Button
-            android:layout_width="150dp"
+            android:layout_width="250dp"
             android:layout_height="50dp"
             android:id="@+id/testCase1Btn"
-            android:text="testCase1"
+            android:text="OffscreenVideoRendering"
             android:textAllCaps="false"
             android:onClick="testCase1"
             />
