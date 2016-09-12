@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.wysaid.cgeDemo">
 
-    <!--<uses-sdk android:minSdkVersion="14" -->
-        <!--android:targetSdkVersion="22"-->
-        <!--/>-->
+    <!-- <uses-sdk android:minSdkVersion="14" -->
+    <!-- android:targetSdkVersion="22" -->
+    <!-- /> -->
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -25,10 +25,10 @@
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -37,16 +37,17 @@
         </activity>
         <activity
             android:name=".ImageDemoActivity"
-            android:label="@string/title_activity_filter_demo"></activity>
+            android:label="@string/title_activity_filter_demo" />
         <activity
             android:name=".CameraDemoActivity"
             android:label="@string/title_activity_camera_demo"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".SimplePlayerDemoActivity"
-            android:label="@string/title_activity_video_player"></activity>
-        <activity android:name=".VideoPlayerDemoActivity"></activity>
-        <activity android:name=".FaceDemoActivity"></activity>
+            android:label="@string/title_activity_video_player" />
+        <activity android:name=".VideoPlayerDemoActivity" />
+        <activity android:name=".FaceDemoActivity" />
+        <activity android:name=".TestCaseActivity">
     </application>
 
 </manifest>
