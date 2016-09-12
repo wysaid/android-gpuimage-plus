@@ -47,7 +47,7 @@
             android:label="@string/title_activity_video_player" />
         <activity android:name=".VideoPlayerDemoActivity" />
         <activity android:name=".FaceDemoActivity" />
-        <activity android:name=".TestCaseActivity">
+        <activity android:name=".TestCaseActivity" />
     </application>
 
 </manifest>
