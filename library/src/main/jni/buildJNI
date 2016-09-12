@@ -1,0 +1,54 @@
+#!/bin/bash
+
+#replace the path below with your ndk-dir 
+#NDK=/Users/wangyang/android_dev/android-ndk
+
+if [[ "$NDK" == "" ]]; then
+
+echo "Please specify the NDK variable to your ndk-dir"
+exit
+
+fi
+
+cd $(dirname $0)
+
+for i in $*
+do
+
+if [ "${i}" == "-r" ] || [ "${i}" == "--release" ]; then
+
+export CGE_RELEASE_MODE=1
+
+echo "release mode enabled!"
+
+fi
+
+if [ "${i}" == "-b" ] || [ "${i}" == "-B" ]; then
+
+BUILD_ARG=-B
+
+echo "force rebuild!"
+
+fi
+
+if [ "${i}" == "--no-face" ] || [ "${i}" == "-nf" ]; then
+
+NO_FACE=1
+
+echo "disable face module!"
+
+fi
+
+done
+
+if [[ "$NO_FACE" == "" ]]; then
+
+export CGE_USE_FACE_MODULE=1
+
+fi
+
+export CGE_USE_VIDEO_MODULE=1
+
+echo "The NDK dir is: ${NDK}, If the shell can not run normally, you should set the NDK variable to your local ndk-dir"
+
+$NDK/ndk-build ${BUILD_ARG}
