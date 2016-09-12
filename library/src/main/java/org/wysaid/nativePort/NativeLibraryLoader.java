@@ -17,6 +17,9 @@ public class NativeLibraryLoader {
 //        try {
             System.loadLibrary("ffmpeg");
             System.loadLibrary("CGE");
+
+            //User defined mothods, not required. (including offscreen video rendering)
+            System.loadLibrary("CGEExt");
             CGEFFmpegNativeLibrary.avRegisterAll();
 //        } catch (Throwable t) {
 //            Log.e(Common.LOG_TAG, "Load library for 'cge' failed! Please check your project config.", t);
