@@ -20,7 +20,7 @@ public class CGENativeLibrary {
 
     public enum TextureBlendMode
     {
-        CGE_BLEND_MIX,            // 0 正常
+        CGE_BLEND_MIX,            // 0 正常 - "result.rgb = src.rgb * (1 - alpha) + dst.rgb * alpha, alpha = intensity * dst.a, result.a = src.a" - Because android is using premultiplied bitmap&texture, 'CGE_BLEND_MIX' may get a result of twice the strength of the blendImage's alpha channel(The result would be darker than you want). For common usage of mix blending, please use 'CGE_BLEND_ADDREV'.
         CGE_BLEND_DISSOLVE,       // 1 溶解
 
         CGE_BLEND_DARKEN,         // 2 变暗
@@ -56,7 +56,7 @@ public class CGENativeLibrary {
         /////////////    More blend mode below (You can't see them in Adobe Photoshop)    //////////////
 
         CGE_BLEND_ADD,			  // 27
-        CGE_BLEND_ADDREV,         // 28
+        CGE_BLEND_ADDREV,         // 28 - A fix for premultiplied BLEND_MIX
         CGE_BLEND_COLORBW,		  // 29
 
         /////////////    More blend mode above     //////////////
