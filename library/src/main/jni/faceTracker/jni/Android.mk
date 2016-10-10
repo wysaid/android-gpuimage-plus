@@ -167,16 +167,15 @@ LOCAL_STATIC_LIBRARIES := \
 LOCAL_CPPFLAGS := -frtti -std=gnu++11
 LOCAL_LDLIBS :=  -llog -ljnigraphics -lz -ldl -lm
 
-LOCAL_CFLAGS    := -D_CGE_LOGS_ -DANDROID_NDK -DCGE_LOG_TAG=\"libCGE\" -D__STDC_CONSTANT_MACROS -O3 -ffast-math -funroll-loops -mfloat-abi=softfp
-
-ifneq ($(TARGET_ARCH_ABI),armeabi)
+LOCAL_CFLAGS    := -D_CGE_LOGS_ -DANDROID_NDK -DCGE_LOG_TAG=\"libCGE\" -D__STDC_CONSTANT_MACROS -O3 -ffast-math -funroll-loops
 
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
-LOCAL_CFLAGS := $(LOCAL_CFLAGS) -march=armv7-a
+LOCAL_CFLAGS := $(LOCAL_CFLAGS) -march=armv7-a -mfpu=neon -mfloat-abi=softfp
+LOCAL_ARM_NEON := true
 endif
 
-LOCAL_CFLAGS := $(LOCAL_CFLAGS) -mfpu=neon
-LOCAL_ARM_NEON := true
+ifeq ($(TARGET_ARCH_ABI),armeabi)
+LOCAL_CFLAGS := $(LOCAL_CFLAGS) -mfloat-abi=softfp
 endif
 
 LOCAL_SHARED_LIBRARIES := opencv CGE
