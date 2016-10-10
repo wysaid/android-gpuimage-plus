@@ -15,6 +15,12 @@ GPU accelerated filters for Android based on OpenGL.
 
 5. Extra functions can be provided to the donors such as 'realtime video recording with gpu filters'. See the precompiled apk about this function: [https://github.com/wysaid/android-gpuimage-plus/tree/master/demoRelease](https://github.com/wysaid/android-gpuimage-plus/tree/master/demoRelease "http://wysaid.org")
 
+6.(TODO: All architecture will be supported) armeabi, armeabi-v7a, x86 is currently supported. You can build by yourself
+```
+export NDK=path/of/your/ndk
+cd folder/of/jni (android-gpuimage-plus/library/src/main/jni)
+./buildJNI
+```
 
 ## Manual ##
 
