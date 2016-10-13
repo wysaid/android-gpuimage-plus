@@ -1,4 +1,4 @@
-# Android-GPUImage-plus
+# Android-GPUImage-Plus
 GPU accelerated filters for Android based on OpenGL. 
 
 ## Abstract ##
