@@ -1,5 +1,5 @@
 # Android-GPUImage-Plus
-Android Image, Camera And Video Filters Based On OpenGL.
+Image, Camera And Video Filters Based On OpenGL.
 
 ## Abstract ##
 
