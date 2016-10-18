@@ -19,7 +19,12 @@ Image, Camera And Video Filters Based On OpenGL.
 ```
 export NDK=path/of/your/ndk
 cd folder/of/jni (android-gpuimage-plus/library/src/main/jni)
+
+#try this if you want to link with ffmpeg
 ./buildJNI
+
+#try this if you don't want ffmpeg
+$NDK/ndk-build
 ```
 
 ## Manual ##
