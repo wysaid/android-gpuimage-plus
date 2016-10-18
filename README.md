@@ -27,7 +27,7 @@ cd folder/of/jni (android-gpuimage-plus/library/src/main/jni)
 export CGE_USE_VIDEO_MODULE=1
 $NDK/ndk-build
 ```
-Note that the generated file "libFaceTracker.so" is not necessary. So just drop remove this file if you don't want any feature with it.
+Note that the generated file "libFaceTracker.so" is not necessary. So just remove this file if you don't want any feature with it.
 
 ## Manual ##
 
