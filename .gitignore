@@ -8,6 +8,4 @@
 target/
 tmp
 objs/
-armeabi*/
 obj/
-libs/
