@@ -20,10 +20,11 @@ Image, Camera And Video Filters Based On OpenGL.
 export NDK=path/of/your/ndk
 cd folder/of/jni (android-gpuimage-plus/library/src/main/jni)
 
-#try this if you want to link with ffmpeg
+#This will make all arch: armeabi, armeabi-v7a arm64-v8a, x86
 ./buildJNI
 
-#try this if you don't want ffmpeg
+#Try this if you failed to run the shell above
+export CGE_USE_VIDEO_MODULE=1
 $NDK/ndk-build
 ```
 
