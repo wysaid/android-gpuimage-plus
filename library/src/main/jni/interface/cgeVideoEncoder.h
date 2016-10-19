@@ -51,7 +51,7 @@ namespace CGE
 			int channels; //声音包含几个通道
 		};
 
-		bool init(const char* filename, int fps, int width, int height, bool hasAudio = true);
+		bool init(const char* filename, int fps, int width, int height, bool hasAudio = true, int bitRate = 1650000);
 
 		void setRecordDataFormat(RecordDataFormat fmt);
 
