@@ -16,7 +16,7 @@
 
 
 static AVStream *addStream(AVFormatContext *oc, AVCodec **codec,
-                            enum AVCodecID codec_id, int frameRate, int width = -1, int height = -1)
+                            enum AVCodecID codec_id, int frameRate, int width = -1, int height = -1, int bitRate = 1650000)
 {
     AVCodecContext *c;
     AVStream *st;
@@ -49,7 +49,7 @@ static AVStream *addStream(AVFormatContext *oc, AVCodec **codec,
     case AVMEDIA_TYPE_VIDEO:
         c->codec_id = codec_id;
 
-        c->bit_rate = 1650000;
+        c->bit_rate = bitRate;
         /* Resolution must be a multiple of two. */
         c->width    = width;
         c->height   = height;
@@ -210,7 +210,7 @@ namespace CGE
 			av_free(m_audioPacketBuffer);
 	}
 
-	bool CGEVideoEncoderMP4::init(const char* filename, int fps, int width, int height, bool hasAudio)
+	bool CGEVideoEncoderMP4::init(const char* filename, int fps, int width, int height, bool hasAudio, int bitRate)
 	{
 		m_hasAudio = hasAudio;
 
