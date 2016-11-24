@@ -12,6 +12,7 @@
 #include <string>
 #include <fstream>
 #include <mutex>
+#include "cgeFFmpegHeaders.h"
 
 struct AVFrame;
 
@@ -41,7 +42,7 @@ namespace CGE
 			const unsigned char* data[8];
 			int width, height;
 			int linesize[8];
-			long pts;
+			int64_t pts;
 		};
 
 		struct AudioSampleData
@@ -51,7 +52,7 @@ namespace CGE
 			int channels; //声音包含几个通道
 		};
 
-		bool init(const char* filename, int fps, int width, int height, bool hasAudio = true, int bitRate = 1650000);
+		bool init(const char* filename, int fps, int width, int height, bool hasAudio = true,AVFormatContext *inputFormatContext=nullptr);
 
 		void setRecordDataFormat(RecordDataFormat fmt);
 

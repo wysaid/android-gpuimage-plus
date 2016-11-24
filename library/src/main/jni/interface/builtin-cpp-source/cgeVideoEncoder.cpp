@@ -16,18 +16,16 @@
 
 
 static AVStream *addStream(AVFormatContext *oc, AVCodec **codec,
-                            enum AVCodecID codec_id, int frameRate, int width = -1, int height = -1, int bitRate = 1650000)
+                            enum AVCodecID codec_id, int frameRate, int width = -1, int height = -1,AVFormatContext *inputFormatContext=nullptr)
 {
     AVCodecContext *c;
     AVStream *st;
-
     /* find the encoder */
     *codec = avcodec_find_encoder(codec_id);
     if (!(*codec)) {
         CGE_LOG_ERROR("Could not find encoder for '%s'\n", avcodec_get_name(codec_id));
         return nullptr;
     }
-
     st = avformat_new_stream(oc, *codec);
     if (!st) {
         CGE_LOG_ERROR("Could not allocate stream\n");
@@ -36,20 +34,67 @@ static AVStream *addStream(AVFormatContext *oc, AVCodec **codec,
     st->id = oc->nb_streams-1;
     c = st->codec;
 
+
+    int video_bitRate =1650000;//最大视频码率
+    int audio_bitRate =64000;//最大音频码率
+    AVRational videoTimeBase = {0};
+    AVRational audioTimeBase = {0};
+    int rotate=0;
+    int sample_rate=44100;
+
+    AVCodecContext *audioCodecContext=nullptr;
+    if(nullptr!=inputFormatContext){
+        int i=0;
+        for (i = 0; i < inputFormatContext->nb_streams; i++) {
+            AVCodecContext *avCodecContext = inputFormatContext->streams[i]->codec;
+
+            if (avCodecContext->codec_type == AVMEDIA_TYPE_VIDEO) {
+                videoTimeBase=inputFormatContext->streams[i]->avg_frame_rate;
+                if(avCodecContext->bit_rate<video_bitRate){
+                    video_bitRate=avCodecContext->bit_rate;
+                }
+                 AVDictionary *metadata = inputFormatContext->streams[i]->metadata;
+                 AVDictionaryEntry * entry= av_dict_get(metadata, "rotate", NULL, AV_DICT_IGNORE_SUFFIX);
+                 if(NULL!=entry)
+                  rotate = atoi(entry->value);
+            } else if (avCodecContext->codec_type == AVMEDIA_TYPE_AUDIO) {
+                audioCodecContext=avCodecContext;
+                c->time_base=avCodecContext->time_base;
+                st->time_base=inputFormatContext->streams[i]->time_base;
+                sample_rate=avCodecContext->sample_rate;
+                 if(avCodecContext->bit_rate<audio_bitRate){
+                    audio_bitRate=avCodecContext->bit_rate;
+                }
+            }
+        }
+    }
+   // CGE_LOG_ERROR("this is new file---videoTimeBase.den=%d----videoTimeBase.num=%d---audioTimeBase.den=%d---audioTimeBase.num=%d---video_bitRate=%d----audio_bitRate=%d---rotate=%d--sample_rate=%d\n", videoTimeBase.den,videoTimeBase.num,audioTimeBase.den,audioTimeBase.num,video_bitRate,audio_bitRate,rotate,sample_rate);
+
+
     switch ((*codec)->type) {
     case AVMEDIA_TYPE_AUDIO:
-        c->sample_fmt  = AV_SAMPLE_FMT_FLTP;
-        c->bit_rate    = 64000;
-        c->sample_rate = 44100;
-        c->channels    = 1;
-        c->flags      |= CODEC_FLAG_GLOBAL_HEADER;
-        c->strict_std_compliance = -2;
+        if(nullptr==audioCodecContext){
+            c->sample_fmt  = AV_SAMPLE_FMT_FLTP;
+            c->bit_rate    = audio_bitRate;
+            c->sample_rate = sample_rate;
+            c->channels    = 1;
+            c->flags      |= CODEC_FLAG_GLOBAL_HEADER;
+            c->strict_std_compliance = -2;
+        }else{
+            c->sample_fmt  = audioCodecContext->sample_fmt;
+            c->bit_rate    = audio_bitRate;
+            c->sample_rate = audioCodecContext->sample_rate;
+            c->channels    = audioCodecContext->channels;
+            c->flags      |= CODEC_FLAG_GLOBAL_HEADER;
+            c->strict_std_compliance = -2;
+        }
+
         break;
 
     case AVMEDIA_TYPE_VIDEO:
         c->codec_id = codec_id;
 
-        c->bit_rate = bitRate;
+        c->bit_rate = video_bitRate;
         /* Resolution must be a multiple of two. */
         c->width    = width;
         c->height   = height;
@@ -57,8 +102,21 @@ static AVStream *addStream(AVFormatContext *oc, AVCodec **codec,
          * of which frame timestamps are represented. For fixed-fps content,
          * timebase should be 1/framerate and timestamp increments should be
          * identical to 1. */
-        c->time_base.den = frameRate;
-        c->time_base.num = 1;
+        if(videoTimeBase.den!=0&&videoTimeBase.num!=0){
+            c->time_base.den= videoTimeBase.num;
+            c->time_base.num= videoTimeBase.den;
+        }else{
+            c->time_base.den = frameRate;
+            c->time_base.num = 1;
+        }
+        if(rotate!=0){
+          char rotate_char[10]={0};
+          sprintf(rotate_char,"%d",rotate);
+          av_dict_set(&st->metadata,"rotate",rotate_char,0);
+        }
+
+        //CGE_LOG_ERROR("c->time_base.den=%d---c->time_base.num=%d\n", c->time_base.den,c->time_base.num);
+
         c->gop_size      = 12; /* emit one intra frame every twelve frames at most */
         c->pix_fmt       = AV_PIX_FMT_YUV420P;
 
@@ -210,8 +268,9 @@ namespace CGE
 			av_free(m_audioPacketBuffer);
 	}
 
-	bool CGEVideoEncoderMP4::init(const char* filename, int fps, int width, int height, bool hasAudio, int bitRate)
+	bool CGEVideoEncoderMP4::init(const char* filename, int fps, int width, int height, bool hasAudio,AVFormatContext *inputFormatContext)
 	{
+
 		m_hasAudio = hasAudio;
 
 		avformat_alloc_output_context2(&m_context->pFormatCtx, nullptr, nullptr, filename);
@@ -238,12 +297,12 @@ namespace CGE
 
 		if(m_context->pOutputFmt->video_codec != AV_CODEC_ID_NONE)
 		{
-			m_context->pVideoStream = addStream(m_context->pFormatCtx, &m_context->pVideoCodec, m_context->pOutputFmt->video_codec, fps, width, height);
+			m_context->pVideoStream = addStream(m_context->pFormatCtx, &m_context->pVideoCodec, m_context->pOutputFmt->video_codec, fps, width, height,inputFormatContext);
 		}
 
 		if(m_hasAudio && m_context->pOutputFmt->audio_codec != AV_CODEC_ID_NONE)
 		{
-			m_context->pAudioStream = addStream(m_context->pFormatCtx, &m_context->pAudioCodec, m_context->pOutputFmt->audio_codec, fps, width, height);
+			m_context->pAudioStream = addStream(m_context->pFormatCtx, &m_context->pAudioCodec, m_context->pOutputFmt->audio_codec, fps, width, height,inputFormatContext);
 		}
 
 		if(m_videoPacketBuffer != nullptr)
@@ -377,6 +436,7 @@ namespace CGE
 				CGE_LOG_ERROR("Could not allocate resampler context\n");
 				return false;
 			}
+
 
 			/* set options */
 			av_opt_set_int       (swr_ctx, "in_channel_count",   c->channels,       0);

@@ -115,7 +115,7 @@ namespace CGE
     // A simple-slow offscreen video rendering function.
     bool cgeGenerateVideoWithFilter(const char* outputFilename, const char* inputFilename, const char* filterConfig, float filterIntensity, GLuint texID, CGETextureBlendMode blendMode, float blendIntensity, bool mute, CGETexLoadArg* loadArg)
     {
-        static const int ENCODE_FPS = 30;
+        float ENCODE_FPS = 30;
         
         CGEVideoDecodeHandler* decodeHandler = new CGEVideoDecodeHandler();
         
@@ -139,7 +139,24 @@ namespace CGE
         CGEVideoEncoderMP4 mp4Encoder;
         
         mp4Encoder.setRecordDataFormat(CGEVideoEncoderMP4::FMT_RGBA8888);
-        if(!mp4Encoder.init(outputFilename, ENCODE_FPS, videoWidth, videoHeight, !mute))
+        
+        AVFormatContext *pFormatContext=decodeHandler->getFormatContext();
+        if(nullptr==pFormatContext){
+            CGE_LOG_ERROR("pFormatContext - is null!");
+            return false;
+        }
+        int i = 0;
+        
+        
+        for (i = 0; i < pFormatContext->nb_streams; i++) {
+            AVCodecContext *avCodecContext = pFormatContext->streams[i]->codec;
+            if (avCodecContext->codec_type == AVMEDIA_TYPE_VIDEO) {
+                ENCODE_FPS=pFormatContext->streams[i]->avg_frame_rate.num*1.0f/pFormatContext->streams[i]->avg_frame_rate.den;
+                break;
+            }
+        }
+
+        if(!mp4Encoder.init(outputFilename, ENCODE_FPS, videoWidth, videoHeight, !mute,pFormatContext))
         {
             CGE_LOG_ERROR("CGEVideoEncoderMP4 - start recording failed!");
             return false;

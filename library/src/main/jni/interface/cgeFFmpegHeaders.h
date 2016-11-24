@@ -10,13 +10,13 @@
 
 extern "C"
 {
-#include "libavcodec/avcodec.h"
-#include "libavformat/avformat.h"
-#include "libavutil/avutil.h"
-#include "libswresample/swresample.h"
-#include "libswscale/swscale.h"
+#include "../ffmpeg/libavcodec/avcodec.h"
+#include "../ffmpeg/libavformat/avformat.h"
+#include "../ffmpeg/libavutil/avutil.h"
+#include "../ffmpeg/libswresample/swresample.h"
+#include "../ffmpeg/libswscale/swscale.h"
 
-#include "libavutil/opt.h"
-#include "libavutil/imgutils.h"
+#include "../ffmpeg/libavutil/opt.h"
+#include "../ffmpeg/libavutil/imgutils.h"
 
 }
