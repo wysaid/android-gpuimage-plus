@@ -10,6 +10,7 @@
 #define _CGEVIDEODECODER_H_
 
 #include "cgeCommonDefine.h"
+#include "cgeFFmpegHeaders.h"
 
 struct AVFrame;
 class CGEVideoDecodeContext;
@@ -249,8 +250,11 @@ namespace CGE
 
 		int getWidth() { return m_width; }
 		int getHeight() { return m_height; }
+
 		double getTotalTime();
 		double getCurrentTimestamp();
+		int64_t getCurrentPktPts();
+		AVFormatContext * getFormatContext();
 
 	protected:
 		CGEVideoDecodeContext* m_context;
@@ -260,6 +264,7 @@ namespace CGE
 		CGEVideoFrameBufferData m_cachedVideoFrame;
 		CGEAudioFrameBufferData m_cachedAudioFrame;
 		double m_currentTimestamp;
+		int64_t m_currentPktPts;
 
 	private:
 		unsigned char* m_bufferPtr; //视频帧缓冲

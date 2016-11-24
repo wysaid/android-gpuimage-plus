@@ -71,7 +71,7 @@ namespace CGE
 		int				audioStreamIndex;
 	};
 
-	CGEVideoDecodeHandler::CGEVideoDecodeHandler() : m_bufferPtr(nullptr), m_width(0), m_height(0), m_samplingStyle(ssFastBilinear), m_currentTimestamp(0.0)
+	CGEVideoDecodeHandler::CGEVideoDecodeHandler() : m_bufferPtr(nullptr), m_width(0), m_height(0), m_samplingStyle(ssFastBilinear), m_currentTimestamp(0.0),m_currentPktPts(0)
 	{
 		m_context = new CGEVideoDecodeContext();
 		memset(&m_cachedVideoFrame, 0, sizeof(m_cachedVideoFrame));
@@ -82,6 +82,7 @@ namespace CGE
 	{
 		close();
 	}
+
 
 	bool CGEVideoDecodeHandler::open(const char* filename)
 	{		
@@ -213,6 +214,7 @@ namespace CGE
 				if(gotFrame)
 				{
                     m_currentTimestamp = 1000.0 * (m_context->pVideoFrame->pkt_pts - m_context->pVideoStream->start_time) * av_q2d(m_context->pVideoStream->time_base);
+                    m_currentPktPts=m_context->pVideoFrame->pkt_pts;
 
                     av_free_packet(&m_context->packet);
 					return FrameType_VideoFrame;
@@ -336,6 +338,16 @@ namespace CGE
 	{
 		return m_currentTimestamp;
 	}
+    int64_t CGEVideoDecodeHandler::getCurrentPktPts()
+	{
+		return m_currentPktPts;
+	}
+    AVFormatContext * CGEVideoDecodeHandler::getFormatContext()
+	{
+		return m_context->pFormatCtx;
+	}
+
+
 }
 
 #endif
