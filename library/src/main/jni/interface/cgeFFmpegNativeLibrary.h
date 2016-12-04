@@ -21,6 +21,9 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFFmpegNativeLibrary_avRegis
   (JNIEnv *, jclass); //注册 ffmpeg
 
 
+//JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEFFmpegNativeLibrary_nativeGenerateVideoWithFilter
+//  (JNIEnv *, jclass, jstring, jstring, jstring, jfloat, jobject, jint, jfloat, jboolean);
+
 #ifdef __cplusplus
 }
 #endif
