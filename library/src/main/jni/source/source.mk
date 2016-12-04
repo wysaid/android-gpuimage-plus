@@ -5,7 +5,7 @@
 #
 
 CGEEXT_ROOT := $(call my-dir)
-
+CGE_ROOT := $(CGEEXT_ROOT)/..
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := CGEExt
@@ -14,15 +14,30 @@ LOCAL_MODULE    := CGEExt
 
 #### CGE Library headers ###########
 LOCAL_C_INCLUDES := \
-					$(CGEEXT_ROOT) \
-					$(CGEEXT_ROOT)/../include \
-					$(CGEEXT_ROOT)/../include/filters \
-					$(CGEEXT_ROOT)/../interface \
+			\
+			$(CGEEXT_ROOT) \
+			$(CGEEXT_ROOT)/../include \
+			$(CGEEXT_ROOT)/../include/filters \
+			$(CGEEXT_ROOT)/../interface \
 
 
 #### CGE Library native source  ###########
 
 LOCAL_SRC_FILES :=  \
+			$(CGE_ROOT)/interface/cgeNativeLibrary.cpp \
+			$(CGE_ROOT)/interface/cgeFFmpegNativeLibrary.cpp \
+			$(CGE_ROOT)/interface/cgeSharedGLContext.cpp \
+			$(CGE_ROOT)/interface/cgeFrameRenderer.cpp \
+			$(CGE_ROOT)/interface/cgeFrameRendererWrapper.cpp \
+			$(CGE_ROOT)/interface/cgeFrameRecorder.cpp \
+			$(CGE_ROOT)/interface/cgeFrameRecorderWrapper.cpp \
+			$(CGE_ROOT)/interface/cgeVideoEncoder.cpp \
+			$(CGE_ROOT)/interface/cgeUtilFunctions.cpp \
+			$(CGE_ROOT)/interface/cgeVideoDecoder.cpp \
+			$(CGE_ROOT)/interface/cgeVideoPlayer.cpp \
+			$(CGE_ROOT)/interface/cgeImageHandlerAndroid.cpp \
+			$(CGE_ROOT)/interface/cgeImageHandlerWrapper.cpp \
+			\
 			$(CGEEXT_ROOT)/cgeVideoUtils.cpp \
 
 
@@ -37,6 +52,6 @@ LOCAL_CFLAGS := $(LOCAL_CFLAGS) -D_CGE_USE_FFMPEG_
 
 endif
 
-LOCAL_SHARED_LIBRARIES := CGE
+LOCAL_SHARED_LIBRARIES := CGE ffmpeg
 
 include $(BUILD_SHARED_LIBRARY)
