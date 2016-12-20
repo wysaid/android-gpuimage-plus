@@ -71,7 +71,7 @@ public class CameraDemoActivity extends ActionBarActivity {
             isRecording = !isRecording;
             if(isRecording)
             {
-                btn.setText("正在录制");
+                btn.setText("Recording");
                 Log.i(LOG_TAG, "Start recording...");
                 mCameraView.setClearColor(1.0f, 0.0f, 0.0f, 0.3f);
                 recordFilename = ImageUtil.getPath() + "/rec_" + System.currentTimeMillis() + ".mp4";
@@ -80,18 +80,18 @@ public class CameraDemoActivity extends ActionBarActivity {
                     @Override
                     public void startRecordingOver(boolean success) {
                         if (success) {
-                            showText("启动录制成功");
+                            showText("Start recording OK");
                             FileUtil.saveTextContent(recordFilename, lastVideoPathFileName);
                         } else {
-                            showText("启动录制失败");
+                            showText("Start recording failed");
                         }
                     }
                 });
             }
             else
             {
-                showText("录制完毕， 存储为 " + recordFilename);
-                btn.setText("录制完毕");
+                showText("Recorded as: " + recordFilename);
+                btn.setText("Recorded");
                 Log.i(LOG_TAG, "End recording...");
                 mCameraView.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
                 mCameraView.endRecording(new CameraRecordGLSurfaceView.EndRecordingCallback() {
@@ -258,9 +258,9 @@ public class CameraDemoActivity extends ActionBarActivity {
             @Override
             public void createOver(boolean success) {
                 if (success) {
-                    Log.i(LOG_TAG, "view 创建成功");
+                    Log.i(LOG_TAG, "view create OK");
                 } else {
-                    Log.e(LOG_TAG, "view 创建失败!");
+                    Log.e(LOG_TAG, "view create failed!");
                 }
             }
         });
