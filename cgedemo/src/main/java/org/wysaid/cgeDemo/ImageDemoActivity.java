@@ -215,7 +215,7 @@ public class ImageDemoActivity extends ActionBarActivity {
         Bitmap dstImage = BitmapFactory.decodeResource(this.getResources(), R.drawable.face1);
 
         if(srcImage == null || dstImage == null) {
-            Log.e(Common.LOG_TAG, "获取人脸资源图片失败");
+            Log.e(Common.LOG_TAG, "Get face picture failed");
             return;
         }
 
@@ -246,7 +246,7 @@ public class ImageDemoActivity extends ActionBarActivity {
         if(result != null)
             _imageView.setImageBitmap(result);
         else
-            Log.e(Common.LOG_TAG, "合成失败");
+            Log.e(Common.LOG_TAG, "merge failed");
     }
 
     class FaceBlendRunnable implements Runnable {
