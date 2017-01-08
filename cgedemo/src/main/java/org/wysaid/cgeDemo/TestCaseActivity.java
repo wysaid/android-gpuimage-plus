@@ -10,7 +10,9 @@ import android.view.View;
 import android.widget.Toast;
 
 import org.wysaid.common.Common;
+import org.wysaid.common.SharedContext;
 import org.wysaid.myUtils.FileUtil;
+import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.myUtils.MsgUtil;
 import org.wysaid.nativePort.CGEFFmpegNativeLibrary;
 import org.wysaid.nativePort.CGENativeLibrary;
@@ -28,7 +30,7 @@ public class TestCaseActivity extends AppCompatActivity {
         setContentView(R.layout.activity_test_case);
     }
 
-    public void testCase1(View view) {
+    public void testCaseOffscreenVideoRendering(View view) {
 
         Log.i(LOG_TAG, "Test case 1 clicked!\n");
 
@@ -60,5 +62,20 @@ public class TestCaseActivity extends AppCompatActivity {
 
         MsgUtil.toastMsg(this, "Done! The file is generated at: " + outputFilename);
         Log.i(LOG_TAG, "Done! The file is generated at: " + outputFilename);
+    }
+
+    public void testCaseCustomFilter(View view) {
+        Bitmap src = BitmapFactory.decodeResource(this.getResources(), R.drawable.bgview);
+        int maxIndex = CGENativeLibrary.cgeGetCustomFilterNum();
+        SharedContext glContext = SharedContext.create();
+        glContext.makeCurrent();
+        for(int i = 0; i != maxIndex; ++i)
+        {
+            //If a gl context is already binded, then pass true for the last arg, or false otherwise.
+            //It's better to create a gl context manually, so that the cpp layer will not create it each time.
+            Bitmap dst = CGENativeLibrary.cgeFilterImageWithCustomFilter(src, i, 1.0f, true);
+            ImageUtil.saveBitmap(dst);
+            dst.recycle();
+        }
     }
 }

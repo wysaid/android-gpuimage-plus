@@ -162,4 +162,10 @@ public class CGENativeLibrary {
     public static native void cgeDeleteFilterWithAddress(long address);
     public static native long cgeCreateBlendFilter(int blendMode, int texID, int texWidth, int texHeight, int blendFilterType, float intensity);
 
+    ////////////////////////////////////
+    // 自定义滤镜范例， 请参考 jni/source 目录下的 customFilter.
+    public static native Bitmap cgeFilterImageWithCustomFilter(Bitmap bmp, int index, float intensity, boolean hasContext);
+    public static native long cgeCreateCustomNativeFilter(int index, float intensity);
+    public static native int cgeGetCustomFilterNum();
+
 }

@@ -247,6 +247,13 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRenderer_nativeProcess
 	renderer->getImageHandler()->processingWithFilter((CGEImageFilterInterfaceAbstract*)filter);
 }
 
+JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRenderer_nativeSetFilterWithAddr
+  (JNIEnv *, jobject, jlong addr, jlong filter)
+{
+	CGEFrameRenderer* renderer = (CGEFrameRenderer*)addr;
+	renderer->setFilter((CGEImageFilterInterfaceAbstract*)filter);
+}
+
 
 }
 

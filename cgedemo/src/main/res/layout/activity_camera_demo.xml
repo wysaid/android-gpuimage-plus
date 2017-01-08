@@ -122,6 +122,15 @@
                 android:textAllCaps="false"
                 android:text="fitScreen"/>
 
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/customFilterBtn"
+                android:textAllCaps="false"
+                android:text="Custom"
+                android:onClick="customFilterClicked"
+                />
+
         </LinearLayout>
     </HorizontalScrollView>
 

@@ -139,6 +139,10 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRenderer_nativeSwapBuf
 JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRenderer_nativeProcessWithFilter
   (JNIEnv *, jobject, jlong, jlong);
 
+////
+
+JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRenderer_nativeSetFilterWithAddr
+  (JNIEnv *, jobject, jlong, jlong);
 
 #ifdef __cplusplus
 }
