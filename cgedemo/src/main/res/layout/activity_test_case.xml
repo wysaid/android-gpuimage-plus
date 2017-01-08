@@ -11,7 +11,11 @@
 
     <GridLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:columnCount="1"
+        android:layout_centerInParent="true"
+        >
 
         <Button
             android:layout_width="250dp"
@@ -19,7 +23,16 @@
             android:id="@+id/testCase1Btn"
             android:text="OffscreenVideoRendering"
             android:textAllCaps="false"
-            android:onClick="testCase1"
+            android:onClick="testCaseOffscreenVideoRendering"
+            />
+
+        <Button
+            android:layout_width="250dp"
+            android:layout_height="50dp"
+            android:id="@+id/testCase2Btn"
+            android:text="CustomFilter"
+            android:textAllCaps="false"
+            android:onClick="testCaseCustomFilter"
             />
 
     </GridLayout>

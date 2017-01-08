@@ -23,6 +23,7 @@ import org.wysaid.myUtils.FileUtil;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.myUtils.MsgUtil;
 import org.wysaid.nativePort.CGEFrameRecorder;
+import org.wysaid.nativePort.CGENativeLibrary;
 import org.wysaid.view.CameraRecordGLSurfaceView;
 
 public class CameraDemoActivity extends ActionBarActivity {
@@ -399,6 +400,19 @@ public class CameraDemoActivity extends ActionBarActivity {
             mCurrentConfig = btn.filterConfig;
         }
     };
+
+    int customFilterIndex = 0;
+    public void customFilterClicked(View view) {
+        ++customFilterIndex;
+        customFilterIndex %= CGENativeLibrary.cgeGetCustomFilterNum();
+        mCameraView.queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                long customFilter = CGENativeLibrary.cgeCreateCustomNativeFilter(customFilterIndex, 1.0f);
+                mCameraView.getRecorder().setNativeFilter(customFilter);
+            }
+        });
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

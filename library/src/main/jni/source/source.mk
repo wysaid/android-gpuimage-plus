@@ -39,6 +39,11 @@ LOCAL_SRC_FILES :=  \
 			$(CGE_ROOT)/interface/cgeImageHandlerWrapper.cpp \
 			\
 			$(CGEEXT_ROOT)/cgeVideoUtils.cpp \
+			$(CGEEXT_ROOT)/cgeCustomFilters.cpp \
+			$(CGEEXT_ROOT)/cgeCustomFilterWrapper.cpp \
+			$(CGEEXT_ROOT)/customHelper.cpp \
+			$(CGEEXT_ROOT)/customFilter_0.cpp \
+			$(CGEEXT_ROOT)/customFilter_N.cpp \
 
 
 LOCAL_CPPFLAGS := -frtti -std=gnu++11

@@ -147,6 +147,11 @@ public class CGEFrameRenderer {
         nativeProcessWithFilter(mNativeAddress, nativeFilter);
     }
 
+    //用于加入自定义滤镜
+    public void setNativeFilter(long nativeFilter) {
+        nativeSetFilterWithAddr(mNativeAddress, nativeFilter);
+    }
+
     /////////////////      protected         ///////////////////////
 
     protected native long nativeCreateRenderer();
@@ -181,4 +186,6 @@ public class CGEFrameRenderer {
     //辅助方法
     protected native void nativeProcessWithFilter(long holder, long nativeFilter);
 
+    //特殊用法, 谨慎使用, 使用不当可能造成程序运行异常.
+    protected native void nativeSetFilterWithAddr(long holder, long filter);
 }

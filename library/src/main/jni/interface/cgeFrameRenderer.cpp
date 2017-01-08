@@ -225,6 +225,15 @@ namespace CGE
 		m_frameHandler->addImageFilter(filter);
 	}
 
+	void CGEFrameRenderer::setFilter(CGEImageFilterInterfaceAbstract* filter)
+	{
+		CHECK_RENDERER_STATUS;
+
+		std::unique_lock<std::mutex> uniqueLock(m_resultMutex);
+		m_frameHandler->clearImageFilters(true);
+		m_frameHandler->addImageFilter(filter);
+	}
+
 	void CGEFrameRenderer::setFilterIntensity(float value)
 	{
 		CHECK_RENDERER_STATUS;

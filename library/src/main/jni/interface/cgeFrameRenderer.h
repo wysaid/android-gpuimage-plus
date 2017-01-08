@@ -78,6 +78,8 @@ namespace CGE
 
 		void setFilterIntensity(float value);
 
+		void setFilter(CGEImageFilterInterfaceAbstract* filter);
+
 		GLuint getTargetTexture();
 		GLuint getBufferTexture();
 
