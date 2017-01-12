@@ -77,5 +77,7 @@ public class TestCaseActivity extends AppCompatActivity {
             ImageUtil.saveBitmap(dst);
             dst.recycle();
         }
+
+        glContext.release();
     }
 }
