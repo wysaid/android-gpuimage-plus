@@ -43,10 +43,11 @@ public class ProgramObject {
     public boolean init(final String vsh, final String fsh, int programID) {
         if(programID == 0) {
             programID = GLES20.glCreateProgram();
-        }
 
-        if(programID == 0) {
-            Log.e(LOG_TAG, "Invalid Program ID! Check if the context is binded!");
+            if(programID == 0) {
+                Log.e(LOG_TAG, "Invalid Program ID! Check if the context is bound!");
+                return false;
+            }
         }
 
         if(mVertexShader != null)
