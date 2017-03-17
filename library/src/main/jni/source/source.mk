@@ -47,7 +47,7 @@ LOCAL_SRC_FILES :=  \
 
 
 LOCAL_CPPFLAGS := -frtti -std=gnu++11
-LOCAL_LDLIBS :=  -llog -lEGL -lGLESv2 -ljnigraphics
+LOCAL_LDLIBS :=  -llog -lEGL -lGLESv2 -ljnigraphics -latomic
 
 LOCAL_CFLAGS    := -DANDROID_NDK -DCGE_LOG_TAG=\"cgeExt\" -DCGE_TEXTURE_PREMULTIPLIED=1 -D__STDC_CONSTANT_MACROS -D_CGE_DISABLE_GLOBALCONTEXT_ -O3 -ffast-math -D_CGE_ONLY_FILTERS_ -D_CGE_LOGS_
 
