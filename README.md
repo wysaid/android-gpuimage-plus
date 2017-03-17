@@ -15,7 +15,7 @@ Image, Camera And Video Filters Based On OpenGL.
 
 5. Extra functions can be provided to the donors such as 'realtime video recording with gpu filters'. See the precompiled apk about this function: [https://github.com/wysaid/android-gpuimage-plus/tree/master/demoRelease](https://github.com/wysaid/android-gpuimage-plus/tree/master/demoRelease "http://wysaid.org")
 
-6. To build with the jni part, pleasae try: (The precompiled '.so' files are using NDK-r10e, and the newest version NDK-R13b(3/17/2017) is also supported.)
+6. To build with the jni part, pleasae try: (The precompiled '.so' files are using NDK-r10e, and the newest version NDK-r13b(3/17/2017) is also supported.)
 ```
 export NDK=path/of/your/ndk
 cd folder/of/jni (android-gpuimage-plus/library/src/main/jni)
