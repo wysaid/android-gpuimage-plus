@@ -273,7 +273,7 @@ namespace CGE
             {
                 if(!mute)
                 {
-#if 0
+#if 1
                     AVFrame* pAudioFrame = decodeHandler->getCurrentAudioAVFrame();
                     if(pAudioFrame == nullptr)
                         continue;
@@ -287,7 +287,7 @@ namespace CGE
                     encodeData.nbSamples[0] = decodeData->nbSamples;
                     encodeData.channels = decodeData->channels;
 
-                    // CGE_LOG_INFO("ts: %g, nbSamples: %d, bps: %d, channels: %d, linesize: %d, format: %d", decodeData->timestamp, decodeData->nbSamples, decodeData->bytesPerSample, decodeData->channels, decodeData->linesize, decodeData->format);
+                    CGE_LOG_INFO("ts: %g, nbSamples: %d, bps: %d, channels: %d, linesize: %d, format: %d", decodeData->timestamp, decodeData->nbSamples, decodeData->bytesPerSample, decodeData->channels, decodeData->linesize, decodeData->format);
 
                     mp4Encoder.record(encodeData);
 
