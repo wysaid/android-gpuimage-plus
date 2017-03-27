@@ -252,6 +252,8 @@ namespace CGE
 		double getTotalTime();
 		double getCurrentTimestamp();
 
+		int getAudioSampleRate();
+
 	protected:
 		CGEVideoDecodeContext* m_context;
 		int m_width, m_height;

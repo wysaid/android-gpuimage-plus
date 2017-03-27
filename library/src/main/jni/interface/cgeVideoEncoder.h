@@ -51,7 +51,7 @@ namespace CGE
 			int channels; //声音包含几个通道
 		};
 
-		bool init(const char* filename, int fps, int width, int height, bool hasAudio = true, int bitRate = 1650000);
+		bool init(const char* filename, int fps, int width, int height, bool hasAudio = true, int bitRate = 1650000, int audioSampleRate = 44100);
 
 		void setRecordDataFormat(RecordDataFormat fmt);
 
@@ -70,6 +70,8 @@ namespace CGE
 
 		//丢弃视频
 		void drop();
+
+		int getAudioSampleRate();
 
 	protected:
 		bool _openVideo();

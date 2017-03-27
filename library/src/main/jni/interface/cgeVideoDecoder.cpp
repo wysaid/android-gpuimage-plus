@@ -336,6 +336,11 @@ namespace CGE
 	{
 		return m_currentTimestamp;
 	}
+
+	int CGEVideoDecodeHandler::getAudioSampleRate()
+	{
+		return (m_context && m_context->pAudioStream) ? m_context->pAudioStream->codec->sample_rate : 0;
+	}
 }
 
 #endif

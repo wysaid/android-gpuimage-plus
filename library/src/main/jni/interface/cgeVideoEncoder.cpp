@@ -16,7 +16,7 @@
 
 
 static AVStream *addStream(AVFormatContext *oc, AVCodec **codec,
-                            enum AVCodecID codec_id, int frameRate, int width = -1, int height = -1, int bitRate = 1650000)
+                            enum AVCodecID codec_id, int frameRate, int width = -1, int height = -1, int bitRate = 1650000, int audioSampleRate = 44100)
 {
     AVCodecContext *c;
     AVStream *st;
@@ -40,7 +40,7 @@ static AVStream *addStream(AVFormatContext *oc, AVCodec **codec,
     case AVMEDIA_TYPE_AUDIO:
         c->sample_fmt  = AV_SAMPLE_FMT_FLTP;
         c->bit_rate    = 64000;
-        c->sample_rate = 44100;
+        c->sample_rate = audioSampleRate;
         c->channels    = 1;
         c->flags      |= CODEC_FLAG_GLOBAL_HEADER;
         c->strict_std_compliance = -2;
@@ -210,7 +210,7 @@ namespace CGE
 			av_free(m_audioPacketBuffer);
 	}
 
-	bool CGEVideoEncoderMP4::init(const char* filename, int fps, int width, int height, bool hasAudio, int bitRate)
+	bool CGEVideoEncoderMP4::init(const char* filename, int fps, int width, int height, bool hasAudio, int bitRate, int audioSampleRate)
 	{
 		m_hasAudio = hasAudio;
 
@@ -757,6 +757,11 @@ namespace CGE
 	double CGEVideoEncoderMP4::getAudioStreamTime()
 	{
 		return (m_context && m_context->pAudioStream) ? m_context->pAudioStream->pts.val * av_q2d(m_context->pAudioStream->time_base) : 0.0;
+	}
+
+	int CGEVideoEncoderMP4::getAudioSampleRate()
+	{
+		return (m_context && m_context->pAudioStream) ? m_context->pAudioStream->codec->sample_rate : 0;
 	}
 }
 

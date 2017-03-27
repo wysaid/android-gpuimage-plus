@@ -138,8 +138,12 @@ namespace CGE
         
         CGEVideoEncoderMP4 mp4Encoder;
         
+        int audioSampleRate = decodeHandler->getAudioSampleRate();
+
+        CGE_LOG_INFO("The input audio sample-rate: %d", audioSampleRate);
+
         mp4Encoder.setRecordDataFormat(CGEVideoEncoderMP4::FMT_RGBA8888);
-        if(!mp4Encoder.init(outputFilename, ENCODE_FPS, videoWidth, videoHeight, !mute))
+        if(!mp4Encoder.init(outputFilename, ENCODE_FPS, videoWidth, videoHeight, !mute, 1650000, audioSampleRate))
         {
             CGE_LOG_ERROR("CGEVideoEncoderMP4 - start recording failed!");
             return false;
@@ -261,6 +265,7 @@ namespace CGE
                     frame->pts = videoPTS;
                     if(frame->data[0] == nullptr)
                         continue;
+                    //maybe wrong for some audio, replace with the code below.
                     mp4Encoder.recordVideoFrame(frame);
                 }
             }
@@ -268,11 +273,25 @@ namespace CGE
             {
                 if(!mute)
                 {
+#if 0
                     AVFrame* pAudioFrame = decodeHandler->getCurrentAudioAVFrame();
                     if(pAudioFrame == nullptr)
                         continue;
                     
                     mp4Encoder.recordAudioFrame(pAudioFrame);
+#else
+
+                    auto* decodeData = decodeHandler->getCurrentAudioFrame();
+                    CGEVideoEncoderMP4::AudioSampleData encodeData;
+                    encodeData.data[0] = (const unsigned short*)decodeData->data;
+                    encodeData.nbSamples[0] = decodeData->nbSamples;
+                    encodeData.channels = decodeData->channels;
+
+                    // CGE_LOG_INFO("ts: %g, nbSamples: %d, bps: %d, channels: %d, linesize: %d, format: %d", decodeData->timestamp, decodeData->nbSamples, decodeData->bytesPerSample, decodeData->channels, decodeData->linesize, decodeData->format);
+
+                    mp4Encoder.record(encodeData);
+
+#endif
                 }
             }
             else
