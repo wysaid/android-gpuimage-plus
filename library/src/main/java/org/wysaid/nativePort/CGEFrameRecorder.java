@@ -14,7 +14,7 @@ public class CGEFrameRecorder extends CGEFrameRenderer {
     }
 
     public CGEFrameRecorder() {
-        super(0); //防止多次初始化
+        super(0); //avoid multiple creation.
         mNativeAddress = nativeCreateRecorder();
     }
 
