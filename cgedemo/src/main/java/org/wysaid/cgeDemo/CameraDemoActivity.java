@@ -414,6 +414,12 @@ public class CameraDemoActivity extends ActionBarActivity {
         });
     }
 
+    public void dynamicFilterClicked(View view) {
+
+        mCameraView.setFilterWithConfig("#unpack @dynamic mf 10 0");
+
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

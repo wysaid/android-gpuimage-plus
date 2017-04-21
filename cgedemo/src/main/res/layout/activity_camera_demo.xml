@@ -131,6 +131,15 @@
                 android:onClick="customFilterClicked"
                 />
 
+            <Button
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/dynamicFilterBtn"
+                android:textAllCaps="false"
+                android:text="Dynamic"
+                android:onClick="dynamicFilterClicked"
+                />
+
         </LinearLayout>
     </HorizontalScrollView>
 
