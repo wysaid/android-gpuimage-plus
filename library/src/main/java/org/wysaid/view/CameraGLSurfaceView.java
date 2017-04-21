@@ -685,7 +685,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         mTimeCount2 += currentTimestamp - mLastTimestamp2;
         mLastTimestamp2 = currentTimestamp;
         if(mTimeCount2 >= 1000) {
-            Log.i(LOG_TAG, String.format("相机每秒采样率: %d", mFramesCount2));
+            Log.i(LOG_TAG, String.format("camera sample rate: %d", mFramesCount2));
             mTimeCount2 %= 1000;
             mFramesCount2 = 0;
         }
