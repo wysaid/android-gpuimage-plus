@@ -34,7 +34,7 @@ public class MainActivity extends ActionBarActivity {
             "@adjust lut late_sunset.png",
             "@adjust lut soft_warming.png",
             "@adjust lut wildbird.png",
-            "@beautify bilateral 10 4 1 @style haze -0.5 -0.5 1 1 1 @curve RGB(0, 0)(94, 20)(160, 168)(255, 255) @curve R(0, 0)(129, 119)(255, 255)B(0, 0)(135, 151)(255, 255)RGB(0, 0)(146, 116)(255, 255)",
+            "#unpack @style cm mapping0.jpg 80 80 8 31", //字符画效果(ASCII art)
             "#unpack @blur lerp 0.75", //可调节模糊强度
             "@blur lerp 1", //可调节混合强度
             "#unpack @dynamic wave 1", //可调节速度

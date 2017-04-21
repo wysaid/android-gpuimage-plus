@@ -22,7 +22,6 @@ import org.wysaid.common.Common;
 import org.wysaid.common.SharedContext;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.myUtils.MsgUtil;
-import org.wysaid.nativePort.CGEFaceFunctions;
 import org.wysaid.nativePort.CGEFaceTracker;
 import org.wysaid.view.ImageGLSurfaceView;
 
@@ -207,119 +206,6 @@ public class ImageDemoActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    static boolean rev = false;
-
-    public void faceBlendTestCase(View view) {
-
-        Bitmap srcImage = BitmapFactory.decodeResource(this.getResources(), R.drawable.face0);
-        Bitmap dstImage = BitmapFactory.decodeResource(this.getResources(), R.drawable.face1);
-
-        if(srcImage == null || dstImage == null) {
-            Log.e(Common.LOG_TAG, "Get face picture failed");
-            return;
-        }
-
-        CGEFaceFunctions.FaceFeature srcFeature = new CGEFaceFunctions.FaceFeature(
-                new PointF(156, 186), new PointF(274, 147),
-                new PointF(257, 311),
-                new PointF(297, 416),
-                srcImage.getWidth(), srcImage.getHeight()
-        );
-
-        CGEFaceFunctions.FaceFeature dstFeature = new CGEFaceFunctions.FaceFeature(
-                new PointF(397.0f, 756.0f), new PointF(691.0f, 749.0f),
-                new PointF(539.0f, 1068.0f),
-                new PointF(546.0f, 1233.0f),
-                dstImage.getWidth(), dstImage.getHeight()
-        );
-
-        rev = !rev;
-
-        Bitmap result;
-
-        if(rev) {
-            result = CGEFaceFunctions.blendFaceWidthFeatures(srcImage, srcFeature, dstImage, dstFeature, null);
-        } else {
-            result = CGEFaceFunctions.blendFaceWidthFeatures(dstImage, dstFeature, srcImage, srcFeature, null);
-        }
-
-        if(result != null)
-            _imageView.setImageBitmap(result);
-        else
-            Log.e(Common.LOG_TAG, "merge failed");
-    }
-
-    class FaceBlendRunnable implements Runnable {
-
-        CGEFaceFunctions.FaceFeature _srcFeature, _dstFeature;
-        Bitmap _srcImage, _dstImage;
-
-        public Bitmap result;
-
-        public FaceBlendRunnable(Bitmap srcImage, CGEFaceFunctions.FaceFeature srcFeature, Bitmap dstImage, CGEFaceFunctions.FaceFeature dstFeature) {
-            _srcImage = srcImage;
-            _srcFeature = srcFeature;
-            _dstImage = dstImage;
-            _dstFeature = dstFeature;
-        }
-
-        @Override
-        public void run() {
-            SharedContext context = SharedContext.create();
-            result = CGEFaceFunctions.blendFaceWidthFeatures(_srcImage, _srcFeature, _dstImage, _dstFeature, context);
-            context.release();
-        }
-    }
-
-    public void multiThreadBlendTestCase(View view) {
-        Bitmap srcImage = BitmapFactory.decodeResource(this.getResources(), R.drawable.face0);
-        Bitmap dstImage = BitmapFactory.decodeResource(this.getResources(), R.drawable.face1);
-
-        if(srcImage == null || dstImage == null) {
-            Log.e(Common.LOG_TAG, "获取人脸资源图片失败");
-            return;
-        }
-
-        CGEFaceFunctions.FaceFeature srcFeature = new CGEFaceFunctions.FaceFeature(
-                new PointF(156, 186), new PointF(274, 147),
-                new PointF(257, 311),
-                new PointF(297, 416),
-                srcImage.getWidth(), srcImage.getHeight()
-        );
-
-        CGEFaceFunctions.FaceFeature dstFeature = new CGEFaceFunctions.FaceFeature(
-                new PointF(397.0f, 756.0f), new PointF(691.0f, 749.0f),
-                new PointF(539.0f, 1068.0f),
-                new PointF(546.0f, 1233.0f),
-                dstImage.getWidth(), dstImage.getHeight()
-        );
-
-        Thread[] threads = new Thread[10];
-        FaceBlendRunnable[] runnables = new FaceBlendRunnable[10];
-
-        for(int i = 0; i < 10; ++i) {
-
-            runnables[i] = new FaceBlendRunnable(srcImage, srcFeature, dstImage, dstFeature);
-            threads[i] = new Thread(runnables[i]);
-            threads[i].start();
-        }
-
-        for(int i = 0; i < 10; ++i) {
-
-            try {
-                threads[i].join();
-            } catch (Exception e) {
-                e.printStackTrace();
-                continue;
-            }
-
-            Bitmap result = runnables[i].result;
-
-            ImageUtil.saveBitmap(result);
-            Log.i(Common.LOG_TAG, String.format("第 %d 张混合人脸已保存!", i));
-        }
-    }
-
     public void faceDetectTestCase(View view) {
 
         Log.i(Common.LOG_TAG, "人脸检测中");
@@ -391,8 +277,6 @@ public class ImageDemoActivity extends ActionBarActivity {
     }
 
     public void faceTrackerTestCase(View view) {
-//        if(!CGEFaceTracker.isTrackerSetup())
-//            CGEFaceTracker.setupTracker(this);
 
         CGEFaceTracker tracker = CGEFaceTracker.createFaceTracker();
 
