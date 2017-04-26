@@ -117,9 +117,9 @@ public class TestCaseActivity extends AppCompatActivity {
                 SharedContext glContext = SharedContext.create();
                 glContext.makeCurrent();
                 for(int i = 0; i != maxIndex && !mShouldStopThread; ++i) {
-                    //If a gl context is already binded, then pass true for the last arg, or false otherwise.
-                    //It's better to create a gl context manually, so that the cpp layer will not create it each time.
-                    //You can also use CGEImageHandler to do this.
+                    //If a gl context is already binded, you should pass true for the last arg, or false otherwise.
+                    //It's better to create a gl context manually, so that the cpp layer will not create it each time when the function is called.
+                    //You can also use CGEImageHandler to do this. (Maybe faster)
                     Bitmap dst = CGENativeLibrary.cgeFilterImageWithCustomFilter(src, i, 1.0f, true);
                     ImageUtil.saveBitmap(dst);
                     dst.recycle();
@@ -148,7 +148,7 @@ public class TestCaseActivity extends AppCompatActivity {
                 glContext.makeCurrent();
 
                 //You can also use "NativeLibrary.filterImage_MultipleEffects" like the function "testCaseCustomFilter".
-                //But use a CGEImageHandler, you can do the filter faster, because the handler will not be created for every filter.
+                //But when you use a CGEImageHandler, you can do the filter faster, because the handler will not be created for every filter.
                 CGEImageHandler handler = new CGEImageHandler();
                 handler.initWidthBitmap(src);
 
