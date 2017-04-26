@@ -15,7 +15,7 @@ namespace CGE
 {
 	struct CGEVideoDecodeContext
 	{
-		CGEVideoDecodeContext() : pFormatCtx(nullptr), pVideoCodecCtx(nullptr), pAudioCodecCtx(nullptr), pVideoCodec(nullptr), pAudioCodec(nullptr), pVideoFrame(nullptr), pVideoFrameRGB(nullptr), pAudioFrame(nullptr), pVideoStream(nullptr), pAudioStream(nullptr), videoStreamIndex(-1), audioStreamIndex(-1) {}
+		CGEVideoDecodeContext() : pFormatCtx(nullptr), pVideoCodecCtx(nullptr), pAudioCodecCtx(nullptr), pVideoCodec(nullptr), pAudioCodec(nullptr), pVideoFrame(nullptr), pVideoFrameRGB(nullptr), pAudioFrame(nullptr), pVideoStream(nullptr), pAudioStream(nullptr), videoStreamIndex(-1), audioStreamIndex(-1), pSwrCtx(nullptr) {}
 		~CGEVideoDecodeContext()
 		{
 			cleanup();
@@ -48,6 +48,15 @@ namespace CGE
 			pVideoFrameRGB = nullptr;
 			pAudioFrame = nullptr;
 
+			if(pSwrCtx != nullptr)
+			{
+				av_free(dstSampleData[0]);
+				dstSampleData = nullptr;
+				dstSamplesSize = 0;
+				swr_free(&pSwrCtx);
+				pSwrCtx = nullptr;
+			}
+
 			videoStreamIndex = -1;
 			audioStreamIndex = -1;
 		}
@@ -66,6 +75,12 @@ namespace CGE
 		AVPacket        packet;
 		AVStream        *pVideoStream;
 		AVStream		*pAudioStream;
+
+		SwrContext      *pSwrCtx;
+		uint8_t**       dstSampleData;
+		int             dstSamplesLinesize;
+		int             dstSamplesSize;
+		int             maxDstNbSamples;
 
 		int				videoStreamIndex;
 		int				audioStreamIndex;
@@ -285,14 +300,67 @@ namespace CGE
 
 	const CGEAudioFrameBufferData* CGEVideoDecodeHandler::getCurrentAudioFrame()
 	{
-		
+		if(m_context->pSwrCtx == nullptr)
+		{
+			if(m_context->pAudioStream->codec->sample_fmt != AV_SAMPLE_FMT_S16)
+			{
+				m_context->pSwrCtx = swr_alloc();
+				if(m_context->pSwrCtx == nullptr)
+				{
+					CGE_LOG_ERROR("Allocate resampler context failed!\n");
+					return nullptr;
+				}
+
+				auto ctx = m_context->pSwrCtx;
+				auto c = m_context->pAudioStream->codec;
+
+				av_opt_set_int       (ctx, "in_channel_count",   c->channels,       0);
+				av_opt_set_int       (ctx, "in_sample_rate",     c->sample_rate,    0);
+				av_opt_set_sample_fmt(ctx, "in_sample_fmt",      c->sample_fmt, 0);
+				av_opt_set_int       (ctx, "out_channel_count",  1,       0);
+				av_opt_set_int       (ctx, "out_sample_rate",    c->sample_rate,    0);
+				av_opt_set_sample_fmt(ctx, "out_sample_fmt",     AV_SAMPLE_FMT_S16,     0);
+
+				int ret;
+
+				if ((ret = swr_init(ctx)) < 0)
+				{
+					CGE_LOG_ERROR("Failed to initialize the resampling context: %d\n", ret);
+					return nullptr;
+				}
+
+				m_context->maxDstNbSamples = c->codec->capabilities & CODEC_CAP_VARIABLE_FRAME_SIZE ?
+			10000 : c->frame_size;
+
+				ret = av_samples_alloc_array_and_samples(&m_context->dstSampleData, &m_context->dstSamplesLinesize, c->channels, m_context->maxDstNbSamples, c->sample_fmt, 0);
+
+				if (ret < 0)
+				{
+					CGE_LOG_ERROR("Could not allocate destination samples\n");
+					return nullptr;
+				}
+
+				m_context->dstSamplesSize = av_samples_get_buffer_size(NULL, c->channels, m_context->maxDstNbSamples, c->sample_fmt, 0);
+
+			}
+			else
+			{
+				CGE_LOG_ERROR("errorxxxx");
+			}
+		}
+
+		int ret = swr_convert(m_context->pSwrCtx, m_context->dstSampleData, m_context->dstSamplesSize, (const uint8_t**)m_context->pAudioFrame->data, m_context->pAudioFrame->nb_samples);
+
+		if(ret <= 0)
+			return nullptr;
+
 		m_cachedAudioFrame.timestamp = av_frame_get_best_effort_timestamp(m_context->pAudioFrame);
-		m_cachedAudioFrame.data = m_context->pAudioFrame->data[0];
+		m_cachedAudioFrame.data = m_context->dstSampleData[0];
 		m_cachedAudioFrame.nbSamples = m_context->pAudioFrame->nb_samples;
-		m_cachedAudioFrame.bytesPerSample = av_get_bytes_per_sample((AVSampleFormat)m_context->pAudioFrame->format);
-		m_cachedAudioFrame.channels = av_frame_get_channels(m_context->pAudioFrame);
-		m_cachedAudioFrame.linesize = m_context->pAudioFrame->linesize[0];					
-		m_cachedAudioFrame.format = (CGESampleFormat)m_context->pAudioFrame->format;
+		m_cachedAudioFrame.channels = 1;//av_frame_get_channels(m_context->pAudioFrame);
+		m_cachedAudioFrame.bytesPerSample = 2;
+		m_cachedAudioFrame.linesize = m_context->dstSamplesSize;
+		m_cachedAudioFrame.format = CGE_SAMPLE_FMT_S16;
 		return &m_cachedAudioFrame;
 	}
 
