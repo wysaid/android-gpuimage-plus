@@ -1,6 +1,7 @@
 package org.wysaid.myUtils;
 
 import android.content.Context;
+import android.view.View;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
@@ -50,5 +51,9 @@ public class MsgUtil {
             mToast.setText(msg);
             mToast.show();
         }
+    }
+
+    public static boolean isDisplaying() {
+        return mToast != null && (mToast.getView() != null && mToast.getView().getWindowVisibility() == View.VISIBLE);
     }
 }
