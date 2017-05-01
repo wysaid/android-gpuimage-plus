@@ -171,10 +171,6 @@ public class MainActivity extends ActionBarActivity {
     public static class DemoClassDescription {
         String activityName;
         String title;
-//        DemoClassDescription() {
-//            activityName = null;
-//            title = null;
-//        }
 
         DemoClassDescription(String _name, String _title) {
             activityName = _name;

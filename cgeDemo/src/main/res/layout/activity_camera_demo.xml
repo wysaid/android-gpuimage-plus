@@ -62,13 +62,6 @@
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
-                android:id="@+id/thunbnailBtn"
-                android:textAllCaps="false"
-                android:text="ExtraView"/>
-
-            <Button
-                android:layout_width="100dp"
-                android:layout_height="match_parent"
                 android:id="@+id/pauseBtn"
                 android:textAllCaps="false"
                 android:text="Pause"/>
@@ -107,13 +100,6 @@
                 android:id="@+id/shapeBtn"
                 android:textAllCaps="false"
                 android:text="Style"/>
-
-            <Button
-                android:layout_width="100dp"
-                android:layout_height="match_parent"
-                android:id="@+id/backgroundBtn"
-                android:textAllCaps="false"
-                android:text="Background"/>
 
             <Button
                 android:layout_width="100dp"

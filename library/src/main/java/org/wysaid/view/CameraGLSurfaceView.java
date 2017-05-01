@@ -65,7 +65,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     public int maxPreviewWidth = 1280;
     public int maxPreviewHeight = 1280;
 
-    //将对preview进行缩放。 使用默认值即可， 最好不要修改
+    //The max preview size. Change it to 1920+ if you want to preview with 1080P
     void setMaxPreviewSize(int w, int h) {
         maxPreviewWidth = w;
         maxPreviewHeight = h;
@@ -123,7 +123,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         return CameraInstance.getInstance();
     }
 
-    //在onSurfaceCreated之前设置有效
+    //should be called before 'onSurfaceCreated'.
     public void presetCameraForward(boolean isBackForward) {
         mIsCameraBackForward = isBackForward;
     }
@@ -184,14 +184,14 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         }
     }
 
-    //注意， focusAtPoint 会强制 focus mode 为 FOCUS_MODE_AUTO
-    //如果有自定义的focus mode， 请在 AutoFocusCallback 里面重设成所需的focus mode。
-    //x,y 取值范围: [0, 1]， 一般为 touchEventPosition / viewSize.
+    //Attention， 'focusAtPoint' will change focus mode to 'FOCUS_MODE_AUTO'
+    //If you want to keep the previous focus mode， please reset the focus mode after 'AutoFocusCallback'.
+    //x,y should be: [0, 1]， stands for 'touchEventPosition / viewSize'.
     public void focusAtPoint(float x, float y, Camera.AutoFocusCallback focusCallback) {
         cameraInstance().focusAtPoint(y, 1.0f - x, focusCallback);
     }
 
-    // 参数为
+    // mode value should be:
     //    Camera.Parameters.FLASH_MODE_AUTO;
     //    Camera.Parameters.FLASH_MODE_OFF;
     //    Camera.Parameters.FLASH_MODE_ON;
@@ -200,7 +200,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     public synchronized boolean setFlashLightMode(String mode) {
 
         if(!getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
-            Log.e(LOG_TAG, "当前设备不支持闪光灯!");
+            Log.e(LOG_TAG, "No flash light is supported by current device!");
             return false;
         }
 
@@ -223,7 +223,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
             parameters.setFlashMode(mode);
             cameraInstance().setParams(parameters);
         } catch (Exception e) {
-            Log.e(LOG_TAG, "修改闪光灯状态失败, 请检查是否正在使用前置摄像头?");
+            Log.e(LOG_TAG, "Switch flash light failed, check if you're using front camera.");
             return false;
         }
 
@@ -265,7 +265,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         setMaskBitmap(bmp, shouldRecycle, null);
     }
 
-    //注意， 当传入的bmp为null时， SetMaskBitmapCallback 不会执行.
+    //bmp should not be null.
     public void setMaskBitmap(final Bitmap bmp, final boolean shouldRecycle, final SetMaskBitmapCallback callback) {
 
         queueEvent(new Runnable() {
@@ -302,57 +302,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         });
     }
 
-    public interface SetBackgroundImageCallback {
-        void setBackgroundImageOK();
-    }
-
-    TextureRendererDrawOrigin mBackgroundRenderer;
-    int mBackgroundTexture;
-
-    public void setBackgroundImage(final Bitmap bmp, final boolean shouldRecycle, final SetBackgroundImageCallback callback) {
-
-        queueEvent(new Runnable() {
-            @Override
-            public void run() {
-
-                if (mFrameRecorder == null) {
-                    Log.e(LOG_TAG, "setBackgroundImage after reelase!!");
-                    return;
-                }
-
-                if (bmp == null) {
-                    if (mBackgroundRenderer != null)
-                        mBackgroundRenderer.release();
-                    mBackgroundRenderer = null;
-                    if (mBackgroundTexture != 0)
-                        GLES20.glDeleteTextures(1, new int[]{mBackgroundTexture}, 0);
-                    mBackgroundTexture = 0;
-                    if (callback != null)
-                        callback.setBackgroundImageOK();
-                    return;
-                }
-
-                if (mBackgroundTexture != 0) {
-                    GLES20.glDeleteTextures(1, new int[]{mBackgroundTexture}, 0);
-                }
-
-                mBackgroundTexture = Common.genNormalTextureID(bmp, GLES20.GL_NEAREST, GLES20.GL_CLAMP_TO_EDGE);
-
-                if (mBackgroundRenderer == null) {
-                    mBackgroundRenderer = TextureRendererDrawOrigin.create(false);
-                    if(mBackgroundRenderer != null)
-                        mBackgroundRenderer.setFlipscale(1.0f, -1.0f);
-                }
-
-                if (shouldRecycle)
-                    bmp.recycle();
-
-                if (callback != null)
-                    callback.setBackgroundImageOK();
-            }
-        });
-    }
-
     public interface OnCreateCallback {
         void createOver(boolean success);
     }
@@ -362,13 +311,13 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     //定制一些初始化操作
     public void setOnCreateCallback(final OnCreateCallback callback) {
 
-        assert callback != null : "无意义操作!";
+        assert callback != null : "Invalid Operation!";
 
         if(mFrameRecorder == null) {
             mOnCreateCallback = callback;
         }
         else {
-            // 已经创建完毕， 直接执行
+            // Already created, just run.
             queueEvent(new Runnable() {
                 @Override
                 public void run() {
@@ -387,7 +336,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         getHolder().setFormat(PixelFormat.RGBA_8888);
         setRenderer(this);
         setRenderMode(RENDERMODE_WHEN_DIRTY);
-        setZOrderOnTop(true);
+//        setZOrderOnTop(true);
 //        setZOrderMediaOverlay(true);
 
         clearColor = new ClearColor();
@@ -498,14 +447,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                         mTextureID = 0;
                         mSurfaceTexture.release();
                         mSurfaceTexture = null;
-                        if (mBackgroundRenderer != null) {
-                            mBackgroundRenderer.release();
-                            mBackgroundRenderer = null;
-                        }
-                        if (mBackgroundTexture != 0) {
-                            GLES20.glDeleteTextures(1, new int[]{mBackgroundTexture}, 0);
-                            mBackgroundTexture = 0;
-                        }
 
                         Log.i(LOG_TAG, "GLSurfaceview release...");
                         if (callback != null)
@@ -595,7 +536,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         mSurfaceTexture.updateTexImage();
 
-        //TransformMatrix 只需要设置一次
         mSurfaceTexture.getTransformMatrix(_transformMatrix);
         mFrameRecorder.update(mTextureID, _transformMatrix);
 
@@ -603,50 +543,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
 
-        if(mTakeThunbnailCallback != null && !mTakeThunbnailCallback.isUsingBitmap()) {
-
-            synchronized (mThunbnailLock) {
-
-                // double judgement for mTakeThunbnailCallback ensure both performance and safety
-                if(mTakeThunbnailCallback != null) {
-
-                    if(mThumnailClipingArea != null) {
-                        int clipW = (int)(mThunbnailWidth / mThumnailClipingArea.width());
-                        int clipH = (int)(mThunbnailHeight / mThumnailClipingArea.height());
-                        int x = -(int)(clipW * mThumnailClipingArea.left);
-                        int y = -(int)(clipH * mThumnailClipingArea.top);
-
-                        GLES20.glViewport(x, y, clipW, clipH);
-
-                    } else {
-                        GLES20.glViewport(0, 0, mThunbnailWidth, mThunbnailHeight);
-                    }
-
-                    mFrameRecorder.drawCache();
-
-                    mThunbnailBuffer.position(0);
-                    GLES20.glReadPixels(0, 0, mThunbnailWidth, mThunbnailHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, mThunbnailBuffer);
-
-                    mThunbnailBmp.copyPixelsFromBuffer(mThunbnailBuffer);
-
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            synchronized (mThunbnailLock) {
-                                if(mTakeThunbnailCallback != null)
-                                    mTakeThunbnailCallback.takeThunbnailOK(mThunbnailBmp);
-                            }
-                        }
-                    });
-                }
-            }
-        }
-
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-        if(mBackgroundRenderer != null) {
-            GLES20.glViewport(0, 0, viewWidth, viewHeight);
-            mBackgroundRenderer.renderTexture(mBackgroundTexture, null);
-        }
+
         GLES20.glEnable(GLES20.GL_BLEND);
         mFrameRecorder.render(mDrawViewport.x, mDrawViewport.y, mDrawViewport.width, mDrawViewport.height);
         GLES20.glDisable(GLES20.GL_BLEND);
@@ -691,65 +589,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         }
     }
 
-    public interface TakeThunbnailCallback {
-        // 当 TakeThunbnailCallback 被设置之后
-        // 每一帧都会获取 isUsingBitmap() 返回值
-        // 当 isUsingBitmap() 返回 true 的时候 takeThunbnailOK 将不被调用
-        // 当 isUsingBitmap() 返回 false 的时候 takeThunbnailOK 正常执行
-        boolean isUsingBitmap();
-        void takeThunbnailOK(Bitmap bmp);
-    }
-
-    protected Bitmap mThunbnailBmp;
-    protected TakeThunbnailCallback mTakeThunbnailCallback;
-    protected final Object mThunbnailLock = new Object();
-    protected int mThunbnailWidth, mThunbnailHeight;
-    RectF mThumnailClipingArea;
-    protected IntBuffer mThunbnailBuffer;
-
-    public boolean isTakingThunbnail() {
-        boolean status;
-        synchronized (mThunbnailLock) {
-            status = mTakeThunbnailCallback != null;
-        }
-        return status;
-    }
-
-    public void startThunbnailCliping(Bitmap cache, RectF clipingArea, TakeThunbnailCallback callback) {
-        synchronized (mThunbnailLock) {
-            mTakeThunbnailCallback = callback;
-            mThunbnailBmp = cache;
-            mThunbnailWidth = cache.getWidth();
-            mThunbnailHeight = cache.getHeight();
-            mThunbnailBuffer = IntBuffer.allocate(mThunbnailWidth * mThunbnailHeight);
-            mThumnailClipingArea = clipingArea;
-        }
-    }
-
-    public void startThunbnailCliping(int width, int height, RectF clipingArea, TakeThunbnailCallback callback) {
-        synchronized (mThunbnailLock) {
-            mTakeThunbnailCallback = callback;
-            mThunbnailBmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            mThunbnailWidth = width;
-            mThunbnailHeight = height;
-            mThunbnailBuffer = IntBuffer.allocate(width * height);
-            mThumnailClipingArea = clipingArea;
-        }
-    }
-
-    public void stopThunbnailCliping() {
-        synchronized (mThunbnailLock) {
-            mTakeThunbnailCallback = null;
-            if(mThunbnailBmp != null && !mThunbnailBmp.isRecycled())
-            	mThunbnailBmp.recycle();
-            mThunbnailBmp = null;
-            mThunbnailBuffer = null;
-            mThumnailClipingArea = null;
-        }
-    }
-
     public interface TakePictureCallback {
-        //传入的bmp可以由接收者recycle
+        //You can recycle the bitmap.
         void takePictureOK(Bitmap bmp);
     }
 
