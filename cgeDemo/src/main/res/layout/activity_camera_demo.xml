@@ -24,15 +24,6 @@
             android:id="@+id/seekBar"
             android:layout_gravity="center_horizontal|top" />
 
-        <ImageView
-            android:layout_width="150px"
-            android:layout_height="150px"
-            android:layout_alignParentRight="true"
-            android:layout_marginBottom="150dp"
-            android:id="@+id/imagePreview"
-            android:background="@drawable/bgview"
-            android:layout_gravity="right|center_vertical" />
-
     </FrameLayout>
 
     <HorizontalScrollView

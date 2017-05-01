@@ -33,7 +33,6 @@ public class CameraDemoActivity extends ActionBarActivity {
     private String mCurrentConfig;
 
     private CameraRecordGLSurfaceView mCameraView;
-    private ImageView mThunbnailView;
 
     public final static String LOG_TAG = CameraRecordGLSurfaceView.LOG_TAG;
 
@@ -118,7 +117,6 @@ public class CameraDemoActivity extends ActionBarActivity {
         mCameraView = (CameraRecordGLSurfaceView)findViewById(R.id.myGLSurfaceView);
         mCameraView.presetCameraForward(false);
         SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
-        mThunbnailView = (ImageView)findViewById(R.id.imagePreview);
 
         takePicBtn.setOnClickListener(new View.OnClickListener() {
             @Override
