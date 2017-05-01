@@ -187,7 +187,6 @@ public class MainActivity extends ActionBarActivity {
             new DemoClassDescription("CameraDemoActivity", "Camera Filter Demo"),
             new DemoClassDescription("SimplePlayerDemoActivity", "Simple Player Demo"),
             new DemoClassDescription("VideoPlayerDemoActivity", "Video Player Demo"),
-            new DemoClassDescription("FaceDemoActivity", "Face Demo"),
             new DemoClassDescription("TestCaseActivity", "Test Cases")
     };
 
