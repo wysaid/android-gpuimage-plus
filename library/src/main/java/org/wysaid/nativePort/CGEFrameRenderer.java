@@ -32,7 +32,7 @@ public class CGEFrameRenderer {
         return false;
     }
 
-    //Will effect the framebuffer
+    //Will affect the framebuffer
     public void update(int externalTexture, float[] transformMatrix) {
         if(mNativeAddress != 0)
             nativeUpdate(mNativeAddress, externalTexture, transformMatrix);
@@ -43,7 +43,7 @@ public class CGEFrameRenderer {
             nativeRunProc(mNativeAddress);
     }
 
-    //Won't effect the framebuffer
+    //Won't affect the framebuffer
     //the arguments means the viewport.
     public void render(int x, int y, int width, int height) {
         if(mNativeAddress != 0)
