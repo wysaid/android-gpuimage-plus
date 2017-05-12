@@ -33,6 +33,8 @@ En: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-En
 
 Ch: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule](https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule "http://wysaid.org")
 
+>Note: you can add your own shader filter with c++. Please see the demo for further details.
+
 ## Tool ##
 
 Some utils are available for new version: [https://github.com/wysaid/cge-tools](https://github.com/wysaid/cge-tools "http://wysaid.org")
