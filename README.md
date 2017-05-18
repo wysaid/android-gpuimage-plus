@@ -117,7 +117,7 @@ handler.processingFilters(); //Run the filters.
 jobject resultBitmap = handler.getResultBitmap(env);
 ```
 
->If no gl context exists, the class [CGESharedGLContext](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/interface/cgeSharedGLContext.h#L22) maybe helpful.
+>If no gl context exists, the class [CGESharedGLContext](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/interface/cgeSharedGLContext.h#L22) may be helpful.
 
 
 __In Java, you can simply follow the sample:__
