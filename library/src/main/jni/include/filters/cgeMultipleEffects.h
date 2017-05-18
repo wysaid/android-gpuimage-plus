@@ -49,7 +49,7 @@ namespace CGE
 		void setBufferLoadFunction(CGEBufferLoadFun fLoad, void* loadParam, CGEBufferUnloadFun fUnload, void* unloadParam);
 		void setTextureLoadFunction(CGETextureLoadFun texLoader, void* arg);
 
-		bool initWithEffectID(int index);
+		// bool initWithEffectID(int index);
 		bool initWithEffectString(const char* pstr);
 		bool initCustomize(); //特殊用法， 自由组合
 

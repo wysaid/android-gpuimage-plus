@@ -14,7 +14,6 @@
 #include "cgeBilateralBlurFilter.h"
 #include "cgeMosaicBlurFilter.h"
 #include "cgeLiquidationFilter.h"
-#include "cgeLightFilter.h"
 #include "cgeHalftoneFilter.h"
 #include "cgePolarPixellateFilter.h"
 #include "cgePolkaDotFilter.h"

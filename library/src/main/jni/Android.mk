@@ -14,12 +14,12 @@ LOCAL_MODULE    := CGE
 
 CGE_ROOT=$(LOCAL_PATH)
 
-CGE_SOURCE=$(CGE_ROOT)/src
+CGE_SOURCE=$(CGE_ROOT)/cge
 
 CGE_INCLUDE=$(CGE_ROOT)/include
 
 #### CGE Library headers ###########
-LOCAL_EXPORT_C_INCLUDES := \
+LOCAL_C_INCLUDES := \
 					$(CGE_ROOT)/interface \
 					$(CGE_INCLUDE) \
 					$(CGE_INCLUDE)/filters \
@@ -28,10 +28,81 @@ LOCAL_EXPORT_C_INCLUDES := \
 #### CGE Library native source  ###########
 
 LOCAL_SRC_FILES :=  \
-				cge/$(TARGET_ARCH_ABI)/libCGE.so
+			$(CGE_SOURCE)/common/cgeCommonDefine.cpp \
+			$(CGE_SOURCE)/common/cgeGLFunctions.cpp \
+			$(CGE_SOURCE)/common/cgeImageFilter.cpp \
+			$(CGE_SOURCE)/common/cgeImageHandler.cpp \
+			$(CGE_SOURCE)/common/cgeShaderFunctions.cpp \
+			$(CGE_SOURCE)/common/cgeGlobal.cpp \
+			$(CGE_SOURCE)/common/cgeTextureUtils.cpp \
+			\
+			$(CGE_SOURCE)/filters/cgeAdvancedEffects.cpp \
+			$(CGE_SOURCE)/filters/cgeAdvancedEffectsCommon.cpp \
+			$(CGE_SOURCE)/filters/cgeBilateralBlurFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeMosaicBlurFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeBeautifyFilter.cpp \
+			\
+			$(CGE_SOURCE)/filters/cgeBrightnessAdjust.cpp \
+			$(CGE_SOURCE)/filters/cgeColorLevelAdjust.cpp \
+			$(CGE_SOURCE)/filters/cgeContrastAdjust.cpp \
+			$(CGE_SOURCE)/filters/cgeCurveAdjust.cpp \
+			$(CGE_SOURCE)/filters/cgeExposureAdjust.cpp \
+			$(CGE_SOURCE)/filters/cgeFilterBasic.cpp \
+			$(CGE_SOURCE)/filters/cgeHueAdjust.cpp \
+			$(CGE_SOURCE)/filters/cgeMonochromeAdjust.cpp \
+			$(CGE_SOURCE)/filters/cgeSaturationAdjust.cpp \
+			$(CGE_SOURCE)/filters/cgeSelectiveColorAdjust.cpp \
+			$(CGE_SOURCE)/filters/cgeShadowHighlightAdjust.cpp \
+			$(CGE_SOURCE)/filters/cgeSharpenBlurAdjust.cpp \
+			$(CGE_SOURCE)/filters/cgeTiltshiftAdjust.cpp \
+			$(CGE_SOURCE)/filters/cgeVignetteAdjust.cpp \
+			$(CGE_SOURCE)/filters/cgeWhiteBalanceAdjust.cpp \
+			$(CGE_SOURCE)/filters/cgeColorBalanceAdjust.cpp \
+			$(CGE_SOURCE)/filters/cgeLookupFilter.cpp \
+			\
+			$(CGE_SOURCE)/filters/cgeBlendFilter.cpp \
+			\
+			$(CGE_SOURCE)/filters/cgeDataParsingEngine.cpp \
+			$(CGE_SOURCE)/filters/cgeMultipleEffects.cpp \
+			$(CGE_SOURCE)/filters/cgeMultipleEffectsCommon.cpp \
+			\
+			$(CGE_SOURCE)/filters/cgeHazeFilter.cpp \
+			$(CGE_SOURCE)/filters/cgePolarPixellateFilter.cpp \
+			$(CGE_SOURCE)/filters/cgePolkaDotFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeHalftoneFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeEdgeFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeEmbossFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeCrosshatchFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeLiquidationFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeRandomBlurFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeMinValueFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeMaxValueFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeSketchFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeLerpblurFilter.cpp \
+			\
+			$(CGE_SOURCE)/filters/cgeDynamicFilters.cpp \
+			$(CGE_SOURCE)/filters/cgeDynamicWaveFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeMotionFlowFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeColorMappingFilter.cpp \
+			$(CGE_SOURCE)/extends/cgeThread.cpp \
+			\
+			$(CGE_ROOT)/interface/cgeNativeLibrary.cpp \
+			$(CGE_ROOT)/interface/cgeFFmpegNativeLibrary.cpp \
+			$(CGE_ROOT)/interface/cgeSharedGLContext.cpp \
+			$(CGE_ROOT)/interface/cgeFrameRenderer.cpp \
+			$(CGE_ROOT)/interface/cgeFrameRendererWrapper.cpp \
+			$(CGE_ROOT)/interface/cgeFrameRecorder.cpp \
+			$(CGE_ROOT)/interface/cgeFrameRecorderWrapper.cpp \
+			$(CGE_ROOT)/interface/cgeVideoEncoder.cpp \
+			$(CGE_ROOT)/interface/cgeUtilFunctions.cpp \
+			$(CGE_ROOT)/interface/cgeVideoDecoder.cpp \
+			$(CGE_ROOT)/interface/cgeVideoPlayer.cpp \
+			$(CGE_ROOT)/interface/cgeImageHandlerAndroid.cpp \
+			$(CGE_ROOT)/interface/cgeImageHandlerWrapper.cpp \
 
 
 LOCAL_CPPFLAGS := -frtti -std=gnu++11
+LOCAL_LDLIBS :=  -llog -lEGL -lGLESv2 -ljnigraphics -latomic
 
 # 'CGE_USE_VIDEO_MODULE' determines if the project should compile with ffmpeg.
 
@@ -59,13 +130,13 @@ ifndef CGE_USE_VIDEO_MODULE
 
 #LOCAL_CFLAGS := $(LOCAL_CFLAGS) -D_CGE_ONLY_FILTERS_
 
-include $(PREBUILT_SHARED_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
 else 
 
 LOCAL_SHARED_LIBRARIES := ffmpeg
 
-include $(PREBUILT_SHARED_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
 ################################
 

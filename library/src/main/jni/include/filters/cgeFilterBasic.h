@@ -24,8 +24,6 @@
 #include "cgeSelectiveColorAdjust.h"
 #include "cgeExposureAdjust.h"
 #include "cgeHueAdjust.h"
-#include "cgeFastTiltShift.h"
-#include "cgeEdgeExtract.h"
 #include "cgeColorBalanceAdjust.h"
 #include "cgeLookupFilter.h"
 

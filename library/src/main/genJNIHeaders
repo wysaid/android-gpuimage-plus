@@ -1,3 +1,0 @@
-#!/bin/bash
-cd $(dirname $0)
-javah -d jni -classpath /Users/wysaid/android_develop/android-sdk-macosx/platforms/android-22/android.jar:../../build/intermediates/classes/debug  -jni org.wysaid.nativePort.CGEFrameRecorder
