@@ -64,8 +64,8 @@ protected void onCreate(Bundle savedInstanceState) {
 >Your filter must inherit [CGEImageFilterAbstract](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L42) or its child class. Most of the filters are inherited from [CGEImageFilterInterface](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L57) because it has many useful functions.
 
 ```
-// A simple customized filter
-class CustomFilter_0 : public CGE::CGEImageFilterInterface
+// A simple customized filter to do a color reversal.
+class MyCustomFilter : public CGE::CGEImageFilterInterface
 {
 public:
     
@@ -125,8 +125,11 @@ jobject resultBitmap = handler.getResultBitmap(env);
 >If no gl context exists, the class [CGESharedGLContext](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/interface/cgeSharedGLContext.h#L22) maybe helpful.
 
 
-__In Java, you can follow the sample:__
+__In Java, you can simply follow the sample:__
 
+See: [CGENativeLibrary.cgeFilterImageWithCustomFilter](https://github.com/wysaid/android-gpuimage-plus/blob/master/cgeDemo/src/main/java/org/wysaid/cgeDemo/TestCaseActivity.java#L123)
+
+__Or to do with a [CGEImageHandler](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/java/org/wysaid/nativePort/CGEImageHandler.java#L93)__
 
 ### 3. Filter Rule String ###
 
