@@ -4,10 +4,8 @@ Image, Camera And Video Filters Based On OpenGL.
 ## Abstract ##
 
 1.  This repo is an "Android Studio Project", comprising "cgeDemo", "library" two sub-modules. Hundreds of built-in filters are available in the demo. 😋If you'd like to add your own filter, please take a look at the manual page. Or you can follow the demo code. The new custom filter should be written in C++.
-(Translate: 本repo为一个Android Studio Project, 包含 cgeDemo, library 两个子模块. 所有代码已开源. 😋如果要自行添加滤镜， 请参考下方的文档页面。 也可以参考内置的样本, 使用C++编写自己的滤镜)
 
 2. Demo and Library will be updated as needed. Welcome for your questions or PR.
-(Ch: 不定期更新demo和library. 如有问题欢迎提问， 也欢迎PR.)
 
 3. Extra functions can be provided to the donors such as 'realtime video recording with gpu filters'. See the precompiled apk about this function: [https://github.com/wysaid/android-gpuimage-plus/tree/master/demoRelease](https://github.com/wysaid/android-gpuimage-plus/tree/master/demoRelease "http://wysaid.org")
 
