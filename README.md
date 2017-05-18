@@ -1,5 +1,6 @@
 # Android-GPUImage-Plus
 Image, Camera And Video Filters Based On OpenGL.
+All source code are open now.
 
 ## Abstract ##
 
@@ -137,6 +138,10 @@ Ch: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule](h
 Some utils are available for new version: [https://github.com/wysaid/cge-tools](https://github.com/wysaid/cge-tools "http://wysaid.org")
 
 [![Tool](https://raw.githubusercontent.com/wysaid/cge-tools/master/screenshots/0.jpg "cge-tool")](https://github.com/wysaid/cge-tools)
+
+## License ##
+
+[MIT License](https://github.com/wysaid/android-gpuimage-plus/blob/master/LICENSE)
 
 ## Donate ##
 
