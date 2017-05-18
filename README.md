@@ -7,9 +7,7 @@ Image, Camera And Video Filters Based On OpenGL.
 
 2. Demo and Library will be updated as needed. Welcome for your questions or PR.
 
-3. Extra functions can be provided to the donors such as 'realtime video recording with gpu filters'. See the precompiled apk about this function: [https://github.com/wysaid/android-gpuimage-plus/tree/master/demoRelease](https://github.com/wysaid/android-gpuimage-plus/tree/master/demoRelease "http://wysaid.org")
-
-4. To build with the jni part, pleasae try:
+3. To build with the jni part, pleasae try:
 ```
 export NDK=path/of/your/ndk
 cd folder/of/jni (android-gpuimage-plus/library/src/main/jni)
@@ -26,7 +24,7 @@ $NDK/ndk-build
 
 Note that the generated file "libFaceTracker.so" is not necessary. So just remove this file if you don't want any feature of it.
 
-5. iOS version: [https://github.com/wysaid/ios-gpuimage-plus](https://github.com/wysaid/ios-gpuimage-plus "http://wysaid.org")
+4. iOS version: [https://github.com/wysaid/ios-gpuimage-plus](https://github.com/wysaid/ios-gpuimage-plus "http://wysaid.org")
 
 ## Manual ##
 
