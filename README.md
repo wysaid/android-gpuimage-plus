@@ -87,8 +87,7 @@ public:
         //m_program is defined in 'CGEImageFilterInterface'
         return m_program.initWithShaderStrings(g_vshDefaultWithoutTexCoord, s_fsh);
     }
-    
-    // No need to 
+
     //void render2Texture(CGE::CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID)
     //{
     //  //Your own render functions here.
