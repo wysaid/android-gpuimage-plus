@@ -9,10 +9,12 @@
 #define _CGEDYNAMICFILTERS_H_
 
 #include "cgeDynamicWaveFilter.h"
+#include "cgeMotionFlowFilter.h"
 
 namespace CGE
 {
 	CGEDynamicWaveFilter* createDynamicWaveFilter();
+    CGEMotionFlowFilter* createMotionFlowFilter();
 }
 
 #endif

@@ -35,18 +35,14 @@
 #if defined(DEBUG) || defined(_DEBUG) || defined(_CGE_LOGS_)
 #define  CGE_LOG_INFO(...)  __android_log_print(ANDROID_LOG_INFO, CGE_LOG_TAG, __VA_ARGS__)
 #define  CGE_LOG_ERROR(...)  __android_log_print(ANDROID_LOG_ERROR, CGE_LOG_TAG, __VA_ARGS__)
+ #define CGE_LOG_CODE(...) __VA_ARGS__
 #else
 #define  CGE_LOG_INFO(...)
 #define  CGE_LOG_ERROR(...)
+ #define CGE_LOG_CODE(...)
 #endif
 
-#if defined(DEBUG) || defined(_DEBUG) || defined(_CGE_LOGS_)
-#define CGE_LOG_CODE(...) __VA_ARGS__
-#else
-#define CGE_LOG_CODE(...)
-#endif
-
-#if defined(_CGE_MEMORY_LEAK_TEST_) && _CGE_MEMORY_LEAK_TEST_
+#if defined(_CGE_GENERAL_ERROR_TEST_) && _CGE_GENERAL_ERROR_TEST_
 #define CGE_UNEXPECTED_ERR_MSG(...) __VA_ARGS__
 //for important log msg
 #define CGE_LOG_KEEP(...) __android_log_print(ANDROID_LOG_WARN, CGE_LOG_TAG, __VA_ARGS__)

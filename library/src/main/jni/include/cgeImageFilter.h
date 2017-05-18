@@ -27,8 +27,8 @@ namespace CGE
 	extern CGEConstString g_fshFastAdjustRGB;
 	extern CGEConstString g_fshCurveMapNoIntensity;
 
-	extern CGEConstString g_vshTest;
-	extern CGEConstString g_fshTest;
+//	extern CGEConstString g_vshTest;
+//	extern CGEConstString g_fshTest;
 
 	extern CGEConstString g_paramFastAdjustArrayName;
 	extern CGEConstString g_paramFastAdjustRGBArrayName;

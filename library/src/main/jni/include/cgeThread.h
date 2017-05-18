@@ -172,6 +172,11 @@ namespace CGE
 
 		void run(const Work& work);
 
+        static CGEThreadPool* globalThreadPool;
+        static void setGlobalThreadNum(size_t maxThreadNum);
+        static void runOnGlobalPool(const Work& work);
+        static void clearGlobalPool();
+        
 	private:
 
 		std::list<Work> m_workList;

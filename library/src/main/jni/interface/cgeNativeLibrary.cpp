@@ -15,8 +15,7 @@
 #include "cgeGLFunctions.h"
 #include "cgeSharedGLContext.h"
 
-#include "cgeBlendFilter.h"
-#include "cgeMultipleEffects.h"
+#include "cgeFilters.h"
 
 #include "cgeUtilFunctions.h"
 

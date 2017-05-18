@@ -23,11 +23,6 @@ namespace CGE
 
 		jobject getResultBitmap(JNIEnv* env);
 
-		void useImageFBO()
-		{
-			glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer);
-		}
-
 		void processingFilters();
 
 		void swapBufferFBO();

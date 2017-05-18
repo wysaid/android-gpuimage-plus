@@ -163,13 +163,15 @@ namespace CGE
 		{
 			bind();
 			glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texID, 0);
-			CGE_LOG_CODE(
-				if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-				{
-					CGE_LOG_ERROR("CGE::FrameBuffer::bindTexture2D - Frame buffer is not valid!");
-				}
-			)
-		}
+            CGE_LOG_CODE
+            (
+             GLenum code = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+             if(code != GL_FRAMEBUFFER_COMPLETE)
+             {
+                 CGE_LOG_ERROR("CGE::FrameBuffer::bindTexture2D - Frame buffer is not valid: %x\n", code);
+             }
+             )
+        }
 
 		inline void bindTexture2D(GLuint texID, GLsizei x, GLsizei y, GLsizei w, GLsizei h, GLenum attachment = GL_COLOR_ATTACHMENT0) const
 		{

@@ -87,8 +87,8 @@ namespace CGE
 		void addImageFilter(CGEImageFilterInterfaceAbstract* proc);
 		void popImageFilter();
 		void clearImageFilters(bool bDelMem = true);
-		size_t getFilterNum() { return m_vecFilters.size(); }
-		CGEImageFilterInterfaceAbstract* getFilterByIndex(GLuint index)
+		inline size_t getFilterNum() { return m_vecFilters.size(); }
+		inline CGEImageFilterInterfaceAbstract* getFilterByIndex(GLuint index)
 		{ return index >= m_vecFilters.size() ? nullptr : m_vecFilters[index]; }
 		int getFilterIndexByAddr(const void* addr);
 		bool insertFilterAtIndex(CGEImageFilterInterfaceAbstract* proc, GLuint index);
