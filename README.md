@@ -34,7 +34,7 @@ Note that the generated file "libFaceTracker.so" is not necessary. So just remov
 
 ### 1. Usage ###
 
-_Sample Code for doing a filter with Bitmap_
+___Sample Code for doing a filter with Bitmap___
 ```
 //Simply apply a filter to a Bitmap.
 @Override
@@ -56,12 +56,11 @@ protected void onCreate(Bundle savedInstanceState) {
     //Save the result image to /sdcard/libCGE/rec_???.jpg.
     ImageUtil.saveBitmap(dstImage);
 }
-
 ```
 
 ### 2. Custom Shader Filter ###
 
-_Write your own filter_
+___Write your own filter___
 >Your filter must inherit [CGEImageFilterAbstract](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L42) or its child class. Most of the filters are inherited from [CGEImageFilterInterface](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L57) because it has many useful functions.
 
 ```
@@ -96,11 +95,38 @@ public:
     //  //Do not override this function to use the CGEImageFilterInterface's.
     //}
 };
-
-
 ```
 
 >Note: To add your own shader filter with c++. [Please see the demo for further details](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/source/customFilter_N.cpp).
+
+___Run your own filter___
+
+*In C++, you can use a CGEImageHandler to do that:*
+```
+//Assume the gl context already exists:
+//JNIEnv* env = ...;
+//jobject bitmap = ...;
+CGEImageHandlerAndroid handler;
+CustomFilterType* customFilter = new CustomFilterType();
+
+//You should handle the return value (false is returned when failed.)
+customFilter->init();
+handler.initWithBitmap(env, bitmap);
+
+//The customFilter will be released when the handler' destructor is called.
+//So you don't have to call 'delete customFilter' if you add it into the handler.
+handler.addImageFilter(customFilter);
+
+handler.processingFilters(); //Run the filters.
+
+jobject resultBitmap = handler.getResultBitmap(env);
+```
+
+>If no gl context exists, the class [CGESharedGLContext](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/interface/cgeSharedGLContext.h#L22) maybe helpful.
+
+
+*In Java, you can follow the sample: *
+
 
 ### 3. Filter Rule String ###
 
