@@ -32,11 +32,53 @@ Note that the generated file "libFaceTracker.so" is not necessary. So just remov
 
 ## Manual ##
 
+### 1. Usage ###
+
+_Sample Code for doing a filter with Bitmap_
+
+
+
+```
+//Simply apply a filter to a Bitmap.
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+    Bitmap srcImage = ...;
+
+    //HSL Adjust (hue: 0.02, saturation: -0.31, luminance: -0.17)
+    //Please see the manual for more details.
+    String ruleString = "@adjust hsl 0.02 -0.31 -0.17";
+
+    Bitmap dstImage = CGENativeLibrary.filterImage_MultipleEffects(src, ruleString, 1.0f);
+
+    //Then the dstImage is applied with the filter.
+    //It's so convenient, isn't it?
+
+    //Save the result image to /sdcard/libCGE/rec_???.jpg.
+    ImageUtil.saveBitmap(dstImage);
+}
+
+```
+
+### 2. Custom Shader Filter ###
+
+_Sample Code_
+
+```
+
+
+
+```
+
+>Note: To add your own shader filter with c++. [Please see the demo for further details](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/source/customFilter_N.cpp).
+
+### 3. Filter Rule String ###
+
 En: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-En](https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-En "http://wysaid.org")
 
 Ch: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule](https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule "http://wysaid.org")
-
->Note: you can add your own shader filter with c++. Please see the demo for further details.
 
 ## Tool ##
 
