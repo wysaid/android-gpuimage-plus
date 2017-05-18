@@ -101,7 +101,7 @@ public:
 
 ___Run your own filter___
 
-** In C++, you can use a CGEImageHandler to do that:**
+__In C++, you can use a CGEImageHandler to do that:__
 ```
 //Assume the gl context already exists:
 //JNIEnv* env = ...;
@@ -125,7 +125,7 @@ jobject resultBitmap = handler.getResultBitmap(env);
 >If no gl context exists, the class [CGESharedGLContext](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/interface/cgeSharedGLContext.h#L22) maybe helpful.
 
 
-** In Java, you can follow the sample: **
+__In Java, you can follow the sample:__
 
 
 ### 3. Filter Rule String ###
