@@ -35,9 +35,6 @@ Note that the generated file "libFaceTracker.so" is not necessary. So just remov
 ### 1. Usage ###
 
 _Sample Code for doing a filter with Bitmap_
-
-
-
 ```
 //Simply apply a filter to a Bitmap.
 @Override
@@ -64,10 +61,41 @@ protected void onCreate(Bundle savedInstanceState) {
 
 ### 2. Custom Shader Filter ###
 
-_Sample Code_
+_Write your own filter_
+>Your filter must inherit [CGEImageFilterAbstract](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L42) or its child class. Most of the filters are inherited from [CGEImageFilterInterface](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L57) because it has many useful functions.
 
 ```
+// A simple customized filter
+class CustomFilter_0 : public CGE::CGEImageFilterInterface
+{
+public:
+    
+    bool init()
+    {
+        CGEConstString fragmentShaderString = CGE_SHADER_STRING_PRECISION_H
+        (
+        varying vec2 textureCoordinate;  //defined in 'g_vshDefaultWithoutTexCoord'
+        uniform sampler2D inputImageTexture; // the same to above.
 
+        void main()
+        {
+        	vec4 src = texture2D(inputImageTexture, textureCoordinate);
+        	src.rgb = 1.0 - src.rgb;  //Simply reverse all channels.
+        	gl_FragColor = src;
+        }
+        );
+
+    	//m_program is defined in 'CGEImageFilterInterface'
+        return m_program.initWithShaderStrings(g_vshDefaultWithoutTexCoord, s_fsh);
+    }
+    
+    // No need to 
+    //void render2Texture(CGE::CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID)
+    //{
+    //	//Your own render functions here.
+    //  //Do not override this function to use the CGEImageFilterInterface's.
+    //}
+};
 
 
 ```
