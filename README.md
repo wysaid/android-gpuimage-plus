@@ -78,20 +78,20 @@ public:
 
         void main()
         {
-        	vec4 src = texture2D(inputImageTexture, textureCoordinate);
-        	src.rgb = 1.0 - src.rgb;  //Simply reverse all channels.
-        	gl_FragColor = src;
+            vec4 src = texture2D(inputImageTexture, textureCoordinate);
+            src.rgb = 1.0 - src.rgb;  //Simply reverse all channels.
+            gl_FragColor = src;
         }
         );
 
-    	//m_program is defined in 'CGEImageFilterInterface'
+        //m_program is defined in 'CGEImageFilterInterface'
         return m_program.initWithShaderStrings(g_vshDefaultWithoutTexCoord, s_fsh);
     }
     
     // No need to 
     //void render2Texture(CGE::CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID)
     //{
-    //	//Your own render functions here.
+    //  //Your own render functions here.
     //  //Do not override this function to use the CGEImageFilterInterface's.
     //}
 };
