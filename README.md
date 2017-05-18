@@ -60,7 +60,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 ### 2. Custom Shader Filter ###
 
-___Write your own filter___
+#### 2.1 Write your own filter ####
 >Your filter must inherit [CGEImageFilterAbstract](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L42) or its child class. Most of the filters are inherited from [CGEImageFilterInterface](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L57) because it has many useful functions.
 
 ```
@@ -99,7 +99,7 @@ public:
 
 >Note: To add your own shader filter with c++. [Please see the demo for further details](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/source/customFilter_N.cpp).
 
-___Run your own filter___
+#### 2.2 Run your own filter ####
 
 __In C++, you can use a CGEImageHandler to do that:__
 ```
