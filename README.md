@@ -58,7 +58,7 @@ protected void onCreate(Bundle savedInstanceState) {
 ### 2. Custom Shader Filter ###
 
 #### 2.1 Write your own filter ####
->Your filter must inherit [CGEImageFilterAbstract](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L42) or its child class. Most of the filters are inherited from [CGEImageFilterInterface](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L57) because it has many useful functions.
+>Your filter must inherit [CGEImageFilterInterfaceAbstract](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L42) or its child class. Most of the filters are inherited from [CGEImageFilterInterface](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L57) because it has many useful functions.
 
 ```
 // A simple customized filter to do a color reversal.
