@@ -15,6 +15,7 @@ cd folder/of/jni (android-gpuimage-plus/library/src/main/jni)
 
 #This will make all arch: armeabi, armeabi-v7a arm64-v8a, x86
 ./buildJNI
+#Or use "sh buildJNI"
 
 #Try this if you failed to run the shell above
 export CGE_USE_VIDEO_MODULE=1
