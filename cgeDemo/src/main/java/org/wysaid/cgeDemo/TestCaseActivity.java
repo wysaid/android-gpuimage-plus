@@ -1,8 +1,10 @@
 package org.wysaid.cgeDemo;
 
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -98,6 +100,7 @@ public class TestCaseActivity extends AppCompatActivity {
 
                 showMsg("Done! The file is generated at: " + outputFilename);
                 Log.i(LOG_TAG, "Done! The file is generated at: " + outputFilename);
+                sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + outputFilename)));
             }
         });
 
@@ -121,10 +124,11 @@ public class TestCaseActivity extends AppCompatActivity {
                     //It's better to create a gl context manually, so that the cpp layer will not create it each time when the function is called.
                     //You can also use CGEImageHandler to do this. (Maybe faster)
                     Bitmap dst = CGENativeLibrary.cgeFilterImageWithCustomFilter(src, i, 1.0f, true);
-                    ImageUtil.saveBitmap(dst);
+                    String s = ImageUtil.saveBitmap(dst);
                     dst.recycle();
 
                     showMsg("The filter is applied! See it: /sdcard/libCGE/rec_*.jpg");
+                    sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + s)));
                 }
 
                 glContext.release();
@@ -161,10 +165,11 @@ public class TestCaseActivity extends AppCompatActivity {
                     //To accelerate this, you can add a Bitmap arg for "getResultBitmap",
                     // and reuse the Bitmap instead of recycle it every time.
                     Bitmap dst = handler.getResultBitmap();
-                    ImageUtil.saveBitmap(dst);
+                    String s = ImageUtil.saveBitmap(dst);
                     dst.recycle();  //Maybe reuse it will be better.
 
                     showMsg("The config " + filterConfig + "is applied! See it: /sdcard/libCGE/rec_*.jpg");
+                    sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + s)));
                 }
 
                 glContext.release();

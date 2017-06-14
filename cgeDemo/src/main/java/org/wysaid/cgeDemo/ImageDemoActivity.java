@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.media.FaceDetector;
+import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -73,7 +74,8 @@ public class ImageDemoActivity extends ActionBarActivity {
                 _imageView.getResultBitmap(new ImageGLSurfaceView.QueryResultBitmapCallback() {
                     @Override
                     public void get(final Bitmap bmp) {
-                        ImageUtil.saveBitmap(bmp);
+                        String s = ImageUtil.saveBitmap(bmp);
+                        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + s)));
                     }
                 });
             }

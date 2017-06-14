@@ -139,10 +139,13 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
                 mPlayerView.takeShot(new SimplePlayerGLSurfaceView.TakeShotCallback() {
                     @Override
                     public void takeShotOK(Bitmap bmp) {
-                        if(bmp != null)
-                            ImageUtil.saveBitmap(bmp);
-                        else
+                        if(bmp != null) {
+                            String s = ImageUtil.saveBitmap(bmp);
+                            sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + s)));
+                        }
+                        else {
                             Log.e(Common.LOG_TAG, "take shot failed!");
+                        }
                     }
                 });
             }

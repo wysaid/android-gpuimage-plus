@@ -15,14 +15,14 @@ import java.io.IOException;
 public class ImageUtil extends FileUtil {
 
 
-    public static void saveBitmap(Bitmap bmp) {
+    public static String saveBitmap(Bitmap bmp) {
         String path = getPath();
         long currentTime = System.currentTimeMillis();
         String filename = path + "/" + currentTime + ".jpg";
-        saveBitmap(bmp, filename);
+        return saveBitmap(bmp, filename);
     }
 
-    public static void saveBitmap(Bitmap bmp, String filename) {
+    public static String saveBitmap(Bitmap bmp, String filename) {
 
         Log.i(LOG_TAG, "saving Bitmap : " + filename);
 
@@ -35,10 +35,11 @@ public class ImageUtil extends FileUtil {
         } catch (IOException e) {
             Log.e(LOG_TAG, "Err when saving bitmap...");
             e.printStackTrace();
-            return;
+            return null;
         }
 
         Log.i(LOG_TAG, "Bitmap " + filename + " saved!");
+        return filename;
     }
 
     public static class FaceRects {

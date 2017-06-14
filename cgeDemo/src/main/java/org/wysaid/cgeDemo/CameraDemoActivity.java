@@ -1,10 +1,11 @@
 package org.wysaid.cgeDemo;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.RectF;
 import android.hardware.Camera;
+import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,7 +15,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
@@ -127,9 +127,10 @@ public class CameraDemoActivity extends ActionBarActivity {
                     @Override
                     public void takePictureOK(Bitmap bmp) {
                         if (bmp != null) {
-                            ImageUtil.saveBitmap(bmp);
+                            String s = ImageUtil.saveBitmap(bmp);
                             bmp.recycle();
                             showText("Take picture success!");
+                            sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + s)));
                         } else
                             showText("Take picture failed!");
                     }
@@ -147,9 +148,10 @@ public class CameraDemoActivity extends ActionBarActivity {
                     @Override
                     public void takePictureOK(Bitmap bmp) {
                         if (bmp != null) {
-                            ImageUtil.saveBitmap(bmp);
+                            String s = ImageUtil.saveBitmap(bmp);
                             bmp.recycle();
                             showText("Take Shot success!");
+                            sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + s)));
                         } else
                             showText("Take Shot failed!");
                     }
