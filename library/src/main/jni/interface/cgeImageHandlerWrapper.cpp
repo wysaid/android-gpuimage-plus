@@ -125,6 +125,33 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEImageHandler_nativeSetFilte
 	}
 }
 
+JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEImageHandler_nativeSetFilterIntensityAtIndex
+  (JNIEnv *env, jobject, jlong addr, jfloat intensity, jint index, jboolean shouldProcess)
+{
+	CGEImageHandlerAndroid* handler = (CGEImageHandlerAndroid*)addr;
+
+	auto&& filters = handler->peekFilters();
+
+	if(index < 0 || index >= filters.size())
+	{
+		return false;
+	}
+
+	auto* filter = filters[index];
+
+	assert(filter != nullptr); //impossible
+
+	filter->setIntensity(intensity);
+
+	if(shouldProcess && handler->getTargetTextureID() != 0)
+	{
+		handler->revertToKeptResult();
+		handler->processingFilters();
+	}
+
+	return true;
+}
+
 JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEImageHandler_nativeDrawResult
   (JNIEnv *env, jobject, jlong addr)
 {

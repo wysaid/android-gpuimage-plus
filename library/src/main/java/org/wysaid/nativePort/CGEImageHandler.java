@@ -45,11 +45,15 @@ public class CGEImageHandler {
         nativeSetDrawerFlipScale(mNativeAddress, x, y);
     }
 
-    //直接传 null 可以清空当前使用的滤镜。
     public void setFilterWithConfig(String config) {
         nativeSetFilterWithConfig(mNativeAddress, config, true, true);
     }
 
+    //config: The filter rule string. Pass null for config to clear all filters.
+    //shouldClearOlder: The last filter will be cleared if it's true.
+    //    There may be memory leaks if you pass false for 'shouldClearOlder' when you don't clear it by yourself.
+    //shouldProcess: This marks if the filter should be run right now.
+    //    The result will not change if you pass false for 'shouldProcess' until you call 'processingFilters'.
     public void setFilterWithConfig(String config, boolean shouldClearOlder, boolean shouldProcess) {
         nativeSetFilterWithConfig(mNativeAddress, config, shouldClearOlder, shouldProcess);
     }
@@ -58,8 +62,24 @@ public class CGEImageHandler {
         nativeSetFilterIntensity(mNativeAddress, intensity, true);
     }
 
+    //intensity: filter intensity.
+    //shouldProcess: This marks if the filter should be run right now.
+    //    The result will not change if you pass false for 'shouldProcess' until you call 'processingFilters'.
     public void setFilterIntensity(float intensity, boolean shouldProcess) {
         nativeSetFilterIntensity(mNativeAddress, intensity, shouldProcess);
+    }
+
+    //intensity: filter intensity.
+    //index: Only the intensity of the filter on the given index will be changed.
+    //shouldProcess: This marks if the filter should be run right now.
+    //    The result will not change if you pass false for 'shouldProcess' until you call 'processingFilters'.
+    //return value: marks if this function worked. (It will fail when the index is out of range.)
+    //    e.g. If you're running "@adjust contrast 0.5 @adjust brightness 1",
+    //       Pass 0 for index to set the intensity of "@adjust contrast 0.5", the return value is true.
+    //       Pass 1 for index to set the intensity of "@adjust brightness 1", the return value is true.
+    //       Otherwise the return value is false.
+    public boolean setFilterIntensityAtIndex(float intensity, int index, boolean shouldProcess) {
+        return nativeSetFilterIntensityAtIndex(mNativeAddress, intensity, index, shouldProcess);
     }
 
     public void drawResult() {
@@ -112,6 +132,7 @@ public class CGEImageHandler {
     protected native void nativeSetDrawerFlipScale(long holder, float x, float y);
     protected native boolean nativeSetFilterWithConfig(long holder, String config, boolean shouldCleanOlder, boolean shouldProcess);
     protected native void nativeSetFilterIntensity(long holder, float value, boolean shouldProcess);
+    protected native boolean nativeSetFilterIntensityAtIndex(long holder, float value, int index, boolean shouldProcess);
 
     protected native void nativeDrawResult(long holder);
     protected native void nativeBindTargetFBO(long holder);
