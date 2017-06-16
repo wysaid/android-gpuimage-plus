@@ -6,8 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.net.Uri;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,7 +26,7 @@ import org.wysaid.nativePort.CGEFrameRecorder;
 import org.wysaid.nativePort.CGENativeLibrary;
 import org.wysaid.view.CameraRecordGLSurfaceView;
 
-public class CameraDemoActivity extends ActionBarActivity {
+public class CameraDemoActivity extends AppCompatActivity {
 
     public static String lastVideoPathFileName = FileUtil.getPath() + "/lastVideoPath.txt";
 
