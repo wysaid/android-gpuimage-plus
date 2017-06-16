@@ -44,19 +44,19 @@
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:id="@+id/takeShotBtn"
-                android:text="截取画面"/>
+                android:text="TakeShot"/>
 
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:id="@+id/switchShapeBtn"
-                android:text="切换边框"/>
+                android:text="Border"/>
 
             <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:id="@+id/fitViewBtn"
-                android:text="适应屏幕"/>
+                android:text="FitScreen"/>
 
         </LinearLayout>
     </HorizontalScrollView>
