@@ -84,7 +84,7 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
     }
 
     protected final Object mSettingIntensityLock = new Object();
-    protected int mSettingIntensityCount = 2;
+    protected int mSettingIntensityCount = 1;
 
     //See: CGEImageHandler.setFilterIntensityAtIndex
     public void setFilterIntensityForIndex(final float intensity, final int index) {
