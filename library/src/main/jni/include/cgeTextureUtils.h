@@ -18,6 +18,7 @@ namespace CGE
 	protected:
 		TextureDrawer() : m_vertBuffer(0) {}
 		virtual bool init();
+        virtual bool initWithShaderString(CGEConstString vsh, CGEConstString fsh);
 	public:
 		
         virtual ~TextureDrawer();
@@ -172,6 +173,107 @@ namespace CGE
         
     private:
         bool init();
+    };
+    
+    ////////////////////////////////////////////////////////////
+
+    enum CGETextureDrawerOutputFormat {
+        CGETextureDrawerOutputFormat_Default, //RGBA
+        CGETextureDrawerOutputFormat_BGRA, //BGRA
+    };
+    
+    class TextureDrawerRGB2YUV420P : public TextureDrawer
+    {
+    public:
+        
+        CGE_COMMON_CREATE_FUNC_WITH_PARAM(TextureDrawerRGB2YUV420P, initWithOutputFormat, CGETextureDrawerOutputFormat, = CGETextureDrawerOutputFormat_Default);
+        
+    	void setOutputSize(int width, int height);
+        
+    protected:
+        bool initWithOutputFormat(CGETextureDrawerOutputFormat format);
+        
+        CGEConstString getFragmentShaderString();
+        CGEConstString getVertexShaderString();
+    };
+    
+    class TextureDrawerRGB2NV21 : public TextureDrawerRGB2YUV420P
+    {
+    public:
+        
+        CGE_COMMON_CREATE_FUNC_WITH_PARAM(TextureDrawerRGB2NV21, initWithOutputFormat, CGETextureDrawerOutputFormat, = CGETextureDrawerOutputFormat_Default);
+        
+    protected:
+        CGEConstString getFragmentShaderString();
+    };
+    
+    class TextureDrawerRGB2NV12 : public TextureDrawerRGB2YUV420P
+    {
+    public:
+        
+        CGE_COMMON_CREATE_FUNC_WITH_PARAM(TextureDrawerRGB2NV12, initWithOutputFormat, CGETextureDrawerOutputFormat, = CGETextureDrawerOutputFormat_Default);
+        
+    protected:
+        CGEConstString getFragmentShaderString();
+    };
+    
+    ////////////////////////////////////////////////////////////
+
+    class CGELerpBlurUtil
+    {
+        CGELerpBlurUtil();
+    public:
+        
+        ~CGELerpBlurUtil();
+        
+        enum { MAX_LERP_BLUR_INTENSITY = 8 };
+        
+        struct TextureCache
+        {
+            GLuint texID;
+            CGESizei size;
+        };
+        
+        void setBlurLevel(int value);
+        
+        void calcWithTexture(GLuint texture, int width, int height, GLuint target = 0, int targetWidth = 0, int targetHeight = 0);
+        
+        inline GLuint getResult() { return m_texCache->texID; }
+        
+        void drawTexture(GLuint texID);
+        
+        ///////////////////////////
+        
+        static inline CGELerpBlurUtil* create()
+        {
+            CGELerpBlurUtil* lerp = new CGELerpBlurUtil();
+            if(!lerp->init())
+            {
+                delete lerp;
+                lerp = nullptr;
+            }
+            return lerp;
+        }
+        
+        inline FrameBuffer& frameBuffer() { return m_framebuffer; }
+        inline TextureCache* texCache() { return m_texCache; }
+        
+    protected:
+        bool init();
+        void _genMipmaps(int width, int height);
+        void _clearMipmaps();
+        int _calcLevel(int len, int level);
+        
+    protected:
+        TextureCache m_texCache[MAX_LERP_BLUR_INTENSITY];
+        GLuint m_vertBuffer;
+        
+        int m_cacheTargetWidth, m_cacheTargetHeight;
+        int m_intensity;
+        bool m_isBaseChanged;
+        
+        ProgramObject m_program;
+        FrameBuffer m_framebuffer;
     };
 
 }

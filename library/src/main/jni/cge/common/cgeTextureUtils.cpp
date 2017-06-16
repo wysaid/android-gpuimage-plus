@@ -109,9 +109,6 @@ CGEConstString s_fshYUVConvert = CGE_SHADER_STRING_PRECISION_M
      vec3 rgb;
      yuv.x = texture2D(luminanceTexture, texCoord).r;
      yuv.yz = texture2D(chrominanceTexture, texCoord).rg - vec2(0.5, 0.5);
-//     rgb = mat3(1.0, 1.0, 1.0,
-//                0.0, -.21482, 2.12798,
-//                1.28033, -.38059, 0.0) * yuv;
      
      rgb = mat3(1.0, 1.0, 1.0,
                 0.0, -0.18732, 1.8556,
@@ -120,6 +117,265 @@ CGEConstString s_fshYUVConvert = CGE_SHADER_STRING_PRECISION_M
      gl_FragColor = vec4(rgb, 1.0);
  }
  );
+
+static CGEConstString s_vshRGB2YUV = CGE_SHADER_STRING(
+attribute vec2 vPosition;
+varying vec2 texCoord;
+uniform mat2 rotation;
+uniform vec2 flipScale;
+void main()
+{
+   gl_Position = vec4(vPosition, 0.0, 1.0);
+   gl_Position.y = (gl_Position.y + 1.0) * 8.0 / 3.0 - 1.0;
+   texCoord = flipScale * (vPosition / 2.0 * rotation) + 0.5;
+});
+
+// The original code came from the Internet, and it's optimized by WY here.
+CGEConstString s_fshRGB2YUV = CGE_SHADER_STRING_PRECISION_H
+(
+varying vec2 texCoord;
+uniform sampler2D rgbTexture;
+uniform vec2 imageSize;
+
+const vec3 ycoeff = vec3(0.21260134, 0.71520028, 0.07219838);
+const vec3 ucoeff = vec3(-0.11457283, -0.38542805, 0.5);
+const vec3 vcoeff = vec3(0.5, -0.4541502, -0.04584577);
+ 
+const vec2 yScale = vec2(4.0, 4.0);
+const vec2 uvScale = vec2(8.0, 8.0);
+ 
+void main(void)
+{
+    float uvlines = 0.0625 * imageSize.y,
+    uvlinesI = floor(uvlines), coordOffset, posStep;
+    
+    vec2 imageStep = 1.0 / imageSize,
+    uvPosOffset = vec2(uvlines - uvlinesI, uvlinesI * imageStep.y),
+    uMaxPos = uvPosOffset + vec2(0, 0.25),
+    vMaxPos = uvPosOffset + uMaxPos, basePos, samplingPos;
+
+    vec4 dstColor;
+    vec3 coeff;
+
+    if(texCoord.y < 0.25)
+    {
+        basePos = texCoord * yScale * imageSize;
+        float addY = floor(basePos.x * imageStep.x);
+        basePos.x -= addY * imageSize.x;
+        basePos.y += addY;
+        
+        coeff = ycoeff;
+        samplingPos = basePos * imageStep;
+        coordOffset = 0.0;
+        posStep = 1.0;
+    }
+    else if(texCoord.y < uMaxPos.y || (texCoord.y == uMaxPos.y && texCoord.x < uMaxPos.x))
+    {
+        basePos = vec2(texCoord.x, texCoord.y - 0.25) * uvScale * imageSize;
+        float addY = floor(basePos.x * imageStep.x);
+        basePos.x -= addY * imageSize.x;
+        basePos.y += addY;
+        basePos.y *= 2.0;
+        basePos -= clamp(uvScale * 0.5 - 2.0, vec2(0.0), uvScale);
+        basePos.y -= 2.0;
+        
+        coeff = ucoeff;
+        samplingPos = basePos * imageStep;
+        coordOffset = 0.5;
+        posStep = 2.0;
+    }
+    else if(texCoord.y < vMaxPos.y || (texCoord.y == vMaxPos.y && texCoord.x < vMaxPos.x))
+    {
+        
+        vec2 basePos = (texCoord - uMaxPos) * uvScale * imageSize;
+        float addY = floor(basePos.x * imageStep.x);
+        basePos.x -= addY * imageSize.x;
+        basePos.y += addY;
+        basePos.y *= 2.0;
+        basePos -= clamp(uvScale * 0.5 - 2.0, vec2(0.0), uvScale);
+        basePos.y -= 2.0;
+        
+        coeff = vcoeff;
+        samplingPos = basePos * imageStep;
+        coordOffset = 0.5;
+        posStep = 2.0;
+    }
+    
+    dstColor.r = dot(texture2D(rgbTexture, samplingPos).rgb, coeff);
+    dstColor.r += coordOffset;
+    
+    samplingPos.x += posStep * imageStep.x;
+    dstColor.g = dot(texture2D(rgbTexture, samplingPos).rgb, coeff);
+    dstColor.g += coordOffset;
+    
+    samplingPos.x += posStep * imageStep.x;
+    dstColor.b = dot(texture2D(rgbTexture, samplingPos).rgb, coeff);
+    dstColor.b += coordOffset;
+    
+    samplingPos.x += posStep * imageStep.x;
+    dstColor.a = dot(texture2D(rgbTexture, samplingPos).rgb, coeff);
+    dstColor.a += coordOffset;
+    
+    gl_FragColor = dstColor%s;
+}
+);
+
+CGEConstString s_fshRGB2NV21 = CGE_SHADER_STRING_PRECISION_H
+(
+ varying vec2 texCoord;
+ uniform sampler2D rgbTexture;
+ uniform vec2 imageSize;
+ 
+ const vec3 ycoeff = vec3(0.21260134, 0.71520028, 0.07219838);
+ const vec3 ucoeff = vec3(-0.11457283, -0.38542805, 0.5);
+ const vec3 vcoeff = vec3(0.5, -0.4541502, -0.04584577);
+ 
+ const vec2 yScale = vec2(4.0, 4.0);
+ const vec2 uvScale = vec2(4.0, 8.0);
+ 
+ void main(void)
+{
+    float uvlines = 0.0625*imageSize.y,
+    uvlinesI = floor(uvlines);
+    
+    vec2 uvPosOffset = vec2(uvlines-uvlinesI,uvlinesI/imageSize.y),
+    imageStep = 1.0 / imageSize;
+    
+    vec4 dstColor;
+    
+    if(texCoord.y < 0.25)
+    {
+        vec2 basePos = texCoord * yScale * imageSize;
+        
+        float addY = floor(basePos.x * imageStep.x);
+        
+        basePos.x -= addY * imageSize.x;
+        basePos.y += addY;
+        
+        basePos *= imageStep;
+        
+        float move = 1.0 * imageStep.x;
+        
+        dstColor.x = dot(texture2D(rgbTexture, basePos).rgb, ycoeff);
+        
+        basePos.x += move;
+        dstColor.y = dot(texture2D(rgbTexture, basePos).rgb, ycoeff);
+        
+        basePos.x += move;
+        dstColor.z = dot(texture2D(rgbTexture, basePos).rgb, ycoeff);
+        
+        basePos.x += move;
+        dstColor.w = dot(texture2D(rgbTexture, basePos).rgb, ycoeff);
+
+    }
+    else
+    {
+        vec2 basePos = (texCoord - 0.25) * uvScale * imageSize;
+        
+        float addY = floor(basePos.x * imageStep.x);
+        
+        basePos.x -= addY * imageSize.x;
+        basePos.y += addY * 2.0;
+        
+        
+        basePos *= imageStep;
+        basePos += 0.5 * imageStep.x;
+        
+        vec3 uvColor = texture2D(rgbTexture, basePos).rgb;
+        
+        dstColor.x = dot(uvColor, vcoeff);
+        dstColor.y = dot(uvColor, ucoeff);
+        
+        basePos.x += 2.0 * imageStep.x;
+        
+        uvColor = texture2D(rgbTexture, basePos).rgb;
+        
+        dstColor.z = dot(uvColor, vcoeff);
+        dstColor.w = dot(uvColor, ucoeff);
+        
+        dstColor += 0.5;
+    }
+    
+    gl_FragColor = dstColor%s;
+});
+
+CGEConstString s_fshRGB2NV12 = CGE_SHADER_STRING_PRECISION_H
+(
+ varying vec2 texCoord;
+ uniform sampler2D rgbTexture;
+ uniform vec2 imageSize;
+ 
+ const vec3 ycoeff = vec3(0.21260134, 0.71520028, 0.07219838);
+ const vec3 ucoeff = vec3(-0.11457283, -0.38542805, 0.5);
+ const vec3 vcoeff = vec3(0.5, -0.4541502, -0.04584577);
+ 
+ const vec2 yScale = vec2(4.0, 4.0);
+ const vec2 uvScale = vec2(4.0, 8.0);
+ 
+ void main(void)
+{
+    float uvlines = 0.0625*imageSize.y,
+    uvlinesI = floor(uvlines);
+    
+    vec2 uvPosOffset = vec2(uvlines-uvlinesI,uvlinesI/imageSize.y),
+    imageStep = 1.0 / imageSize;
+    
+    vec4 dstColor;
+    
+    if(texCoord.y < 0.25)
+    {
+        vec2 basePos = texCoord * yScale * imageSize;
+        
+        float addY = floor(basePos.x * imageStep.x);
+        
+        basePos.x -= addY * imageSize.x;
+        basePos.y += addY;
+        
+        basePos *= imageStep;
+        
+        float move = 1.0 * imageStep.x;
+        
+        dstColor.x = dot(texture2D(rgbTexture, basePos).rgb, ycoeff);
+        
+        basePos.x += move;
+        dstColor.y = dot(texture2D(rgbTexture, basePos).rgb, ycoeff);
+        
+        basePos.x += move;
+        dstColor.z = dot(texture2D(rgbTexture, basePos).rgb, ycoeff);
+        
+        basePos.x += move;
+        dstColor.w = dot(texture2D(rgbTexture, basePos).rgb, ycoeff);
+    }
+    else
+    {
+        vec2 basePos = (texCoord - 0.25) * uvScale * imageSize;
+        
+        float addY = floor(basePos.x * imageStep.x);
+        
+        basePos.x -= addY * imageSize.x;
+        basePos.y += addY * 2.0;
+        
+        
+        basePos *= imageStep;
+        basePos += 0.5 * imageStep.x;
+        
+        vec3 uvColor = texture2D(rgbTexture, basePos).rgb;
+        
+        dstColor.y = dot(uvColor, vcoeff);
+        dstColor.x = dot(uvColor, ucoeff);
+        
+        basePos.x += 2.0 * imageStep.x;
+        
+        uvColor = texture2D(rgbTexture, basePos).rgb;
+        
+        dstColor.w = dot(uvColor, vcoeff);
+        dstColor.z = dot(uvColor, ucoeff);
+        
+        dstColor += 0.5;
+    }
+    
+    gl_FragColor = dstColor%s;
+});
 
 namespace CGE
 {
@@ -141,31 +397,34 @@ namespace CGE
 
 	bool TextureDrawer::init()
 	{
-		glGenBuffers(1, &m_vertBuffer);
-		if(m_vertBuffer == 0)
-			return false;
-		glBindBuffer(GL_ARRAY_BUFFER, m_vertBuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(CGEGlobalConfig::sVertexDataCommon), CGEGlobalConfig::sVertexDataCommon, GL_STATIC_DRAW);
-
-//		CGE_LOG_INFO("TextureDrawer- program id: %d", m_program.programID());
-
-		m_program.bindAttribLocation("vPosition", 0);
-		if(!m_program.initWithShaderStrings(getVertexShaderString(), getFragmentShaderString()))
-		{
-			return false;
-		}
-
-		m_program.bind();
-		m_rotLoc = m_program.uniformLocation("rotation");
-		m_flipScaleLoc = m_program.uniformLocation("flipScale");
-		if(m_rotLoc < 0 || m_flipScaleLoc < 0)
-		{
-			CGE_LOG_ERROR("TextureDrawer program init error...");
-		}
-		setRotation(0.0f);
-		setFlipScale(1.0f, 1.0f);
-		return true;
-	}	
+        return initWithShaderString(getVertexShaderString(), getFragmentShaderString());
+	}
+    
+    bool TextureDrawer::initWithShaderString(CGEConstString vsh, CGEConstString fsh)
+    {
+        glGenBuffers(1, &m_vertBuffer);
+        if(m_vertBuffer == 0)
+            return false;
+        glBindBuffer(GL_ARRAY_BUFFER, m_vertBuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(CGEGlobalConfig::sVertexDataCommon), CGEGlobalConfig::sVertexDataCommon, GL_STATIC_DRAW);
+        
+        m_program.bindAttribLocation("vPosition", 0);
+        if(!m_program.initWithShaderStrings(vsh, fsh))
+        {
+            return false;
+        }
+        
+        m_program.bind();
+        m_rotLoc = m_program.uniformLocation("rotation");
+        m_flipScaleLoc = m_program.uniformLocation("flipScale");
+        if(m_rotLoc < 0 || m_flipScaleLoc < 0)
+        {
+            CGE_LOG_ERROR("TextureDrawer program init error...");
+        }
+        setRotation(0.0f);
+        setFlipScale(1.0f, 1.0f);
+        return true;
+    }
 
 	void TextureDrawer::drawTexture(GLuint src)
 	{
@@ -395,7 +654,206 @@ namespace CGE
         return s_vsh;
     }
     
+    //--------------------TextureDrawerRGB2YUV420P------------------------
     
+    CGEConstString TextureDrawerRGB2YUV420P::getVertexShaderString()
+    {
+        return s_vshRGB2YUV;
+    }
+    
+    CGEConstString TextureDrawerRGB2YUV420P::getFragmentShaderString()
+    {
+        return s_fshRGB2YUV;
+    }
+    
+    void TextureDrawerRGB2YUV420P::setOutputSize(int width, int height)
+    {
+    	m_program.bind();
+        m_program.sendUniformf("imageSize", width, height);
+    }
+
+    bool TextureDrawerRGB2YUV420P::initWithOutputFormat(CGETextureDrawerOutputFormat format)
+    {
+        CGEConstString fsh = getFragmentShaderString();
+        std::vector<char> vecData(strlen(fsh) + 256);
+        vecData[0] = '\0';
+        
+        sprintf(vecData.data(), fsh, format == CGETextureDrawerOutputFormat_Default ? "" : ".bgra");
+        
+        if(!TextureDrawer::initWithShaderString(getVertexShaderString(), vecData.data()))
+            return false;
+        
+        return true;
+    }
+    
+    //--------------------TextureDrawerRGB2NV21------------------------
+    
+    CGEConstString TextureDrawerRGB2NV21::getFragmentShaderString()
+    {
+        return s_fshRGB2NV21;
+    }
+    
+    //--------------------TextureDrawerRGB2NV12------------------------
+    
+    CGEConstString TextureDrawerRGB2NV12::getFragmentShaderString()
+    {
+        return s_fshRGB2NV12;
+    }
+    
+    //////////////////////////////////////
+    
+    CGELerpBlurUtil::CGELerpBlurUtil()
+    {
+        memset(m_texCache, 0, sizeof(MAX_LERP_BLUR_INTENSITY));
+        m_intensity = 0;
+        m_vertBuffer = 0;
+    }
+    
+    CGELerpBlurUtil::~CGELerpBlurUtil()
+    {
+        _clearMipmaps();
+        if(m_vertBuffer != 0)
+            glDeleteBuffers(1, &m_vertBuffer);
+    }
+    
+    bool CGELerpBlurUtil::init()
+    {
+        memset(m_texCache, 0, sizeof(MAX_LERP_BLUR_INTENSITY));
+        m_intensity = MAX_LERP_BLUR_INTENSITY;
+        m_program.bindAttribLocation(CGEImageFilterInterface::paramPositionIndexName, 0);
+        if(m_program.initWithShaderStrings(g_vshDefaultWithoutTexCoord, g_fshDefault))
+        {
+            m_isBaseChanged = true;
+            
+            m_vertBuffer = cgeGenCommonQuadArrayBuffer();
+            return true;
+        }
+        return false;
+    }
+    
+    void CGELerpBlurUtil::setBlurLevel(int value)
+    {
+        m_intensity = value;
+        if(m_intensity > MAX_LERP_BLUR_INTENSITY)
+            m_intensity = MAX_LERP_BLUR_INTENSITY;
+    }
+    
+    void CGELerpBlurUtil::_genMipmaps(int width, int height)
+    {
+        _clearMipmaps();
+        GLuint texIDs[MAX_LERP_BLUR_INTENSITY];
+        glGenTextures(MAX_LERP_BLUR_INTENSITY, texIDs);
+        
+        for(int i = 0; i != MAX_LERP_BLUR_INTENSITY; ++i)
+        {
+            CGESizei sz(_calcLevel(width, i), _calcLevel(height, i));
+            if(sz.width < 1)
+                sz.width = 1;
+            if(sz.height < 1)
+                sz.height = 1;
+            glBindTexture(GL_TEXTURE_2D, texIDs[i]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sz.width, sz.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            m_texCache[i].texID = texIDs[i];
+            m_texCache[i].size = sz;
+        }
+    }
+    
+    void CGELerpBlurUtil::calcWithTexture(GLuint texture, int width, int height, GLuint target, int targetWidth, int targetHeight)
+    {
+        m_program.bind();
+        glBindBuffer(GL_ARRAY_BUFFER, m_vertBuffer);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+        glActiveTexture(GL_TEXTURE0);
+        
+        glDisable(GL_BLEND);
+        
+        if(m_texCache[0].texID == 0 || m_cacheTargetWidth != width || m_cacheTargetHeight != height || m_isBaseChanged)
+        {
+            m_cacheTargetWidth = width;
+            m_cacheTargetHeight = height;
+            if(m_texCache[0].texID == 0)
+                _genMipmaps(width, height);
+            m_isBaseChanged = false;
+        }
+        
+        m_framebuffer.bindTexture2D(m_texCache[0].texID);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glViewport(0, 0, m_texCache[0].size.width, m_texCache[0].size.height);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        glFlush();
+        
+        //down scale
+        for(int i = 1; i < m_intensity; ++i)
+        {
+            TextureCache& texCache = m_texCache[i];
+            m_framebuffer.bindTexture2D(texCache.texID);
+            glViewport(0, 0, texCache.size.width, texCache.size.height);
+            
+            glBindTexture(GL_TEXTURE_2D, m_texCache[i - 1].texID);
+            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+            glFlush();
+        }
+        
+        //up scale
+        for(int i = m_intensity - 1; i > 0; --i)
+        {
+            TextureCache& texCache = m_texCache[i - 1];
+            m_framebuffer.bindTexture2D(texCache.texID);
+            glViewport(0, 0, texCache.size.width, texCache.size.height);
+            
+            glBindTexture(GL_TEXTURE_2D, m_texCache[i].texID);
+            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+            glFlush();
+        }
+        
+        if(target != 0)
+        {
+            m_framebuffer.bindTexture2D(target);
+            glViewport(0, 0, targetWidth, targetHeight);
+            glBindTexture(GL_TEXTURE_2D, m_texCache[0].texID);
+            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        }
+    }
+    
+    void CGELerpBlurUtil::drawTexture(GLuint texID)
+    {
+        m_program.bind();
+        glBindBuffer(GL_ARRAY_BUFFER, m_vertBuffer);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texID);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    }
+    
+    void CGELerpBlurUtil::_clearMipmaps()
+    {
+        if(m_texCache[0].texID != 0)
+        {
+            GLuint texIDs[MAX_LERP_BLUR_INTENSITY];
+            for(int i = 0; i != MAX_LERP_BLUR_INTENSITY; ++i)
+                texIDs[i] = m_texCache[i].texID;
+            glDeleteTextures(MAX_LERP_BLUR_INTENSITY, texIDs);
+            memset(m_texCache, 0, sizeof(MAX_LERP_BLUR_INTENSITY));
+            m_cacheTargetWidth = 0;
+            m_cacheTargetHeight = 0;
+        }
+    }
+    
+    int CGELerpBlurUtil::_calcLevel(int len, int level)
+    {
+        static float sLevelList[] = {
+            2, 3, 5, 7, 10, 14, 19, 26, 35
+        };
+        int ret = len / sLevelList[level];
+        return ret;
+//        return roundf(len / (level * 4.0));
+    }
 
 }
 
