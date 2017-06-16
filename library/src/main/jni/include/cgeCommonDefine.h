@@ -101,6 +101,19 @@ CGE_LOG_ERROR("create %s failed!", #cls); \
 return instance; \
 }
 
+#define CGE_COMMON_CREATE_FUNC_WITH_PARAM(cls, funcName, paramName, ...) \
+static inline cls* create(paramName param __VA_ARGS__) \
+{\
+cls* instance = new cls(); \
+if(!instance->funcName(param)) \
+{ \
+delete instance; \
+instance = nullptr; \
+CGE_LOG_ERROR("create %s failed!", #cls); \
+} \
+return instance; \
+}
+
 #define CGE_ARRAY_LEN(x) (sizeof(x) / sizeof(*x))
 
 #ifdef __cplusplus
@@ -157,6 +170,53 @@ const auto& ANYSIGN = ___cgeMakeBlockLimit(ARG); \
 #define _cgeMakeBlockLimit(ARG, VAR, LINE) __cgeMakeBlockLimit(ARG, VAR ## LINE)
 #define _cgeMakeBlockLimit_(ARG, VAR, LINE) _cgeMakeBlockLimit(ARG, VAR, LINE)
 #define cgeMakeBlockLimit(...) _cgeMakeBlockLimit_(__VA_ARGS__, _blockVar, __LINE__)
+
+namespace CGE
+{
+#ifndef CGE_MIN
+    
+    template<typename Type>
+    inline Type CGE_MIN(Type a, Type b)
+    {
+        return a < b ? a : b;
+    }
+    
+#endif
+    
+#ifndef CGE_MAX
+    
+    template<typename Type>
+    inline Type CGE_MAX(Type a, Type b)
+    {
+        return a > b ? a : b;
+    }
+    
+#endif
+    
+#ifndef CGE_MID
+    
+    template<typename Type>
+    inline Type CGE_MID(Type n, Type vMin, Type vMax)
+    {
+        if(n < vMin)
+            n = vMin;
+        else if(n > vMax)
+            n = vMax;
+        return n;
+    }
+    
+#endif
+    
+#ifndef CGE_MIX
+    
+    template<typename OpType, typename MixType>
+    inline auto CGE_MIX(OpType a, OpType b, MixType value) -> decltype(a - a * value + b * value)
+    {
+        return a - a * value + b * value;
+    }
+    
+#endif
+}
 
 
 extern "C" {

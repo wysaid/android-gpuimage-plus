@@ -8,7 +8,7 @@
 #define _CGESELECTIVECOLORADJUST_H_
 
 #include "cgeGLFunctions.h"
-#include "CGEImageFilter.h"
+#include "cgeImageFilter.h"
 
 namespace CGE
 {

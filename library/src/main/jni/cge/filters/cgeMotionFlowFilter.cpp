@@ -1,4 +1,4 @@
-/*
+﻿/*
  * cgeDynamicWaveFilter.cpp
  *
  *  Created on: 2016-8-12
@@ -8,6 +8,7 @@
 
 #include "cgeMotionFlowFilter.h"
 #include "cgeTextureUtils.h"
+#include <cmath>
 
 CGEConstString s_fsh = CGE_SHADER_STRING_PRECISION_L
 (
@@ -38,9 +39,9 @@ namespace CGE
     {
         if(m_frameTextures.size() != 0)
         {
-            std::vector<GLuint> v(m_frameTextures.begin(), m_frameTextures.end());
-            glDeleteTextures((int)v.size(), v.data());
+            glDeleteTextures((int)m_totalFrameTextures.size(), m_totalFrameTextures.data());
             m_frameTextures.clear();
+            m_totalFrameTextures.clear();
         }
     }
     
@@ -85,6 +86,7 @@ namespace CGE
             m_framebuffer.bindTexture2D(texID);
             m_drawer->drawTexture(texture);
             m_frameTextures.push_back(texID);
+            m_totalFrameTextures.push_back(texID);
         }
         else
         {

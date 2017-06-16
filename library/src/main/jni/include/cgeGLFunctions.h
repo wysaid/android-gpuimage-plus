@@ -76,7 +76,7 @@ namespace CGE
 	class SharedTexture
 	{
 	public:
-        SharedTexture() : m_textureID(0), m_refCount(nullptr), width(0), height(0) {}
+        SharedTexture(int w = 0, int h = 0) : m_textureID(0), m_refCount(nullptr), width(w), height(h) {}
         SharedTexture(GLuint textureID, int w, int h);
         
         SharedTexture(const SharedTexture& other) : m_textureID(0), m_refCount(nullptr)
@@ -88,7 +88,7 @@ namespace CGE
 
 		inline SharedTexture& operator =(const SharedTexture& other)
 		{
-			assert(this != &other && other.m_textureID != 0);
+			assert(this != &other && (other.m_refCount == nullptr || other.m_textureID != 0));
 
 			if(m_refCount != nullptr && --*m_refCount <= 0)
 			{
@@ -219,50 +219,6 @@ namespace CGE
         GLfloat height;
     };
     
-#ifndef CGE_MIN
-    
-    template<typename Type>
-    inline Type CGE_MIN(Type a, Type b)
-    {
-        return a < b ? a : b;
-    }
-    
-#endif
-    
-#ifndef CGE_MAX
-    
-    template<typename Type>
-    inline Type CGE_MAX(Type a, Type b)
-    {
-        return a > b ? a : b;
-    }
-    
-#endif
-    
-#ifndef CGE_MID
-    
-    template<typename Type>
-    inline Type CGE_MID(Type n, Type vMin, Type vMax)
-    {
-        if(n < vMin)
-            n = vMin;
-        else if(n > vMax)
-            n = vMax;
-        return n;
-    }
-    
-#endif
-
-#ifndef CGE_MIX
-
-	template<typename OpType, typename MixType>
-	inline auto CGE_MIX(OpType a, OpType b, MixType value) -> decltype(a - a * value + b * value)
-	{
-		return a - a * value + b * value;
-	}
-
-#endif
-    
     struct CGELuminance
     {
         enum { CalcPrecision = 16 };
@@ -293,6 +249,6 @@ namespace CGE
 #include <memory>
 #include "cgeShaderFunctions.h"
 #include "cgeImageHandler.h"
-#include "CGEImageFilter.h"
+#include "cgeImageFilter.h"
 
 #endif /* _CGEGLFUNCTIONS_H_ */

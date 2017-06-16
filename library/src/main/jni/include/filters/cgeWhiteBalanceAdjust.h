@@ -9,7 +9,7 @@
 #define _CGEWHITEBALANCE_H_
 
 #include "cgeGLFunctions.h"
-#include "CGEImageFilter.h"
+#include "cgeImageFilter.h"
 #include "cgeImageHandler.h"
 
 namespace CGE

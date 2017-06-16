@@ -14,7 +14,7 @@
 #elif defined(ANDROID_NDK)
 #include "cgePlatform_ANDROID.h"
 #elif defined(IOS_SDK)
-#include "cgePlatform_IOS.h"
+#include "cgePlatform_iOS.h"
 #elif defined(LIBCGE4QT_LIB)
 #include "cgePlatform_QT.h"
 #endif
@@ -43,7 +43,7 @@ namespace CGE
 
 		static InitArguments sInitArugment;
 	};
-
+    
 	//CGE 全局初始化函数。
 	bool cgeInitialize(int w = CGEGlobalConfig::viewWidth, int h = CGEGlobalConfig::viewHeight, CGEGlobalConfig::InitArguments arg = CGEGlobalConfig::CGE_INIT_DEFAULT);
 

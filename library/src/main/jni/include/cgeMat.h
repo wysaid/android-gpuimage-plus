@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 @Author: wysaid
 @Blog: blog.wysaid.org
 @Date: 2013-10-31
@@ -242,17 +242,17 @@ namespace CGE
 
 		inline void rotateX(float rad)
 		{
-			*this *= makeXRotation(rad); //´ıÓÅ»¯
+			*this *= makeXRotation(rad); //å¾…ä¼˜åŒ–
 		}
 
 		inline void rotateY(float rad)
 		{
-			*this *= makeYRotation(rad); //´ıÓÅ»¯
+			*this *= makeYRotation(rad); //å¾…ä¼˜åŒ–
 		}
 
 		inline void rotateZ(float rad)
 		{
-			*this *= makeZRotation(rad); //´ıÓÅ»¯
+			*this *= makeZRotation(rad); //å¾…ä¼˜åŒ–
 		}
 
 		inline void loadIdentity()
@@ -265,7 +265,7 @@ namespace CGE
 
 	struct Mat4
 	{
-		const static Mat4& makeIdentity()
+		const static inline Mat4& makeIdentity()
 		{
 			const static Mat4 sIdentity =  Mat4(1.0f, 0.0f, 0.0f, 0.0f,
 				0.0f, 1.0f, 0.0f, 0.0f,
@@ -809,7 +809,7 @@ namespace CGE
 				data[0][3] * m[3][0] + data[1][3] * m[3][1] + data[2][3] * m[3][2] + data[3][3] * m[3][3]);
 		}
 
-		//ÌØÊâÓÃ·¨£¬ ½«mat3 Ö±½Ó×ª»»Îªmat4 ²¢ÓëÖ®Ïà³Ë¡£
+		//ç‰¹æ®Šç”¨æ³•ï¼Œ å°†mat3 ç›´æ¥è½¬æ¢ä¸ºmat4 å¹¶ä¸ä¹‹ç›¸ä¹˜ã€‚
 		inline Mat4 operator*(const Mat3& m) const
 		{
 			return Mat4(data[0][0] * m[0][0] + data[1][0] * m[0][1] + data[2][0] * m[0][2],

@@ -10,7 +10,7 @@
 #define _CGEIMAGEHANDLER_H_
 
 #include "cgeGLFunctions.h"
-#include "CGEImageFilter.h"
+#include "cgeImageFilter.h"
 #include "cgeGlobal.h"
 
 namespace CGE

@@ -9,7 +9,6 @@
 #define _CGESHADOWHIGHLIGHT_H_
 
 #include "cgeGLFunctions.h"
-#include "CGEImageFilter.h"
 #include "cgeImageHandler.h"
 
 namespace CGE

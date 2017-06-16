@@ -1,4 +1,4 @@
-/*
+﻿/*
  * cgeDynamicWaveFilter.h
  *
  *  Created on: 2016-8-12
@@ -30,7 +30,7 @@ namespace CGE
         
     protected:
         
-        void pushFrame(GLuint texture);
+        virtual void pushFrame(GLuint texture);
         void clear();
         
     protected:
@@ -38,6 +38,7 @@ namespace CGE
         static CGEConstString paramAlphaName;
         
         std::list<GLuint> m_frameTextures;
+        std::vector<GLuint> m_totalFrameTextures;
         FrameBuffer m_framebuffer;
         TextureDrawer* m_drawer;
         int m_width, m_height;

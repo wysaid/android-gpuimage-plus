@@ -72,26 +72,6 @@ namespace CGE
 	}
 	);
 
-// 	CGEConstString g_vshTest = CGE_SHADER_STRING
-// 	(
-// 	attribute vec2 vPosition;
-// 	varying vec2 textureCoordinate;
-// 	void main()
-// 	{
-// 		gl_Position = vec4(vPosition, 0.0, 1.0);
-// 		textureCoordinate = vPosition;
-// 	}
-// 	);
-// 
-// 	CGEConstString g_fshTest = CGE_SHADER_STRING_PRECISION_M
-// 	(
-// 	varying vec2 textureCoordinate;
-// 	void main()
-// 	{
-// 		gl_FragColor = vec4(textureCoordinate, 0.0, 1.0);
-// 	}
-// 	);
-
 	//////////////////////////////////////////////////////////////////////////
 
 	static CGEConstString s_fshFastAdjust = CGE_SHADER_STRING_PRECISION_M

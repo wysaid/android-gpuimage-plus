@@ -1,4 +1,4 @@
-/*
+﻿/*
 @Author: wysaid
 @Blog: blog.wysaid.org
 @Date: 2013-10-31
@@ -17,6 +17,12 @@
 if(n < low) n = low;\
 else if(n > high) n = high;\
 }while(0)\
+
+#endif
+
+#ifdef __OBJC__
+
+#import <CoreGraphics/CoreGraphics.h>
 
 #endif
 
@@ -837,6 +843,14 @@ namespace CGE
 		inline Vec<Type, 4> subvec(int fst, int scd, int trd, int fth) const { return Vec<Type, 4>(m_data[fst], m_data[scd], m_data[trd], m_data[fth]); }
 
 
+#ifdef __OBJC__
+        
+        inline operator CGPoint() const { cgeStaticAssert(DIM == 2); return CGPointMake(m_data[0], m_data[1]); }
+        inline operator CGSize() const { cgeStaticAssert(DIM == 2); return CGSizeMake(m_data[0], m_data[1]); }
+        inline Vec& operator=(const CGPoint& p) { cgeStaticAssert(DIM == 2); m_data[0] = p.x; m_data[1] = p.y; }
+        
+#endif
+        
 	
 	private:
 		Type m_data[DIM];

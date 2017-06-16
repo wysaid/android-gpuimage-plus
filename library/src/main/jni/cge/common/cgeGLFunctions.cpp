@@ -260,7 +260,7 @@ namespace CGE
     
     void SharedTexture::forceRelease(bool bDelTexture)
     {
-        assert(*m_refCount == 1); // 使用 forceRelease 时 SharedTexture 必须保证只存在一个实例
+        assert(m_refCount == nullptr || *m_refCount == 1); // 使用 forceRelease 时 SharedTexture 必须保证只存在一个实例
         if(bDelTexture)
             glDeleteTextures(1, &m_textureID);
         m_textureID = 0;

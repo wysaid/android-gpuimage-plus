@@ -9,7 +9,7 @@
 #define _CGESATURATION_ADJUST_H_
 
 #include "cgeGLFunctions.h"
-#include "CGEImageFilter.h"
+#include "cgeImageFilter.h"
 #include "cgeImageHandler.h"
 #include "cgeCurveAdjust.h"
 

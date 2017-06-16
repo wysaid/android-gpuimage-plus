@@ -1,4 +1,4 @@
-/*
+﻿/*
 @Author: wysaid
 @Blog: blog.wysaid.org
 @Date: 2013-10-31

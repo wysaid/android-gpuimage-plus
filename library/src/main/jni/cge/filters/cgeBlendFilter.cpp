@@ -1,4 +1,4 @@
-/*
+ï»¿/*
  * cgeBlendFilter.cpp
  *
  *  Created on: 2015-2-13
@@ -317,8 +317,8 @@ static CGEConstString s_colorBurn = CGE_SHADER_STRING
 (
 vec3 blend(vec3 src1, vec3 src2, float alpha)
 {
-	/// plus 0.00003 to avoid dividing by float zero
-	return mix(src1, 1.0 - min((1.0 - src1) / (src2 + 0.00003), 1.0), alpha);
+	/// plus 0.001 to avoid dividing by float zero
+	return mix(src1, 1.0 - min((1.0 - src1) / (src2 + 0.001), 1.0), alpha);
 }
 );
 
@@ -670,40 +670,40 @@ vec3 blend(vec3 src1, vec3 src2, float alpha)
 }
 );
 
-// Ë³Ğò±ØĞëÓë CGETextureBlendMode ÀïÃæµÄÄ£Ê½Æ¥Åä£¬ ·ñÔò½«Ôì³ÉĞ§¹û²»ÕıÈ·
+// é¡ºåºå¿…é¡»ä¸ CGETextureBlendMode é‡Œé¢çš„æ¨¡å¼åŒ¹é…ï¼Œ å¦åˆ™å°†é€ æˆæ•ˆæœä¸æ­£ç¡®
 static const char* s_shaderEnum[] = 
 {
-	s_mix,              // 0 Õı³£
-	s_dissolve,         // 1 ÈÜ½â
+	s_mix,              // 0 æ­£å¸¸
+	s_dissolve,         // 1 æº¶è§£
 
-	s_darken,           // 2 ±ä°µ
-	s_multiply,         // 3 ÕıÆ¬µşµ×
-	s_colorBurn,        // 4 ÑÕÉ«¼ÓÉî
-	s_linearBurn,       // 5 ÏßĞÔ¼ÓÉî
-	s_darkerColor,      // 6 ÉîÉ«
+	s_darken,           // 2 å˜æš—
+	s_multiply,         // 3 æ­£ç‰‡å åº•
+	s_colorBurn,        // 4 é¢œè‰²åŠ æ·±
+	s_linearBurn,       // 5 çº¿æ€§åŠ æ·±
+	s_darkerColor,      // 6 æ·±è‰²
 
-	s_lighten,          // 7 ±äÁÁ
-	s_screen,           // 8 ÂËÉ«
-	s_colorDodge,       // 9 ÑÕÉ«¼õµ­
-	s_linearDodge,      // 10 ÏßĞÔ¼õµ­
-	s_lighterColor,     // 11 Ç³É«
+	s_lighten,          // 7 å˜äº®
+	s_screen,           // 8 æ»¤è‰²
+	s_colorDodge,       // 9 é¢œè‰²å‡æ·¡
+	s_linearDodge,      // 10 çº¿æ€§å‡æ·¡
+	s_lighterColor,     // 11 æµ…è‰²
 
-	s_overLay,          // 12 µş¼Ó
-	s_softLight,        // 13 Èá¹â
-	s_hardLight,        // 14 Ç¿¹â
-	s_vividLight,       // 15 ÁÁ¹â
-	s_linearLight,      // 16 ÏßĞÔ¹â
-	s_pinLight,         // 17 µã¹â
-	s_hardMix,          // 18 ÊµÉ«»ìºÏ
+	s_overLay,          // 12 å åŠ 
+	s_softLight,        // 13 æŸ”å…‰
+	s_hardLight,        // 14 å¼ºå…‰
+	s_vividLight,       // 15 äº®å…‰
+	s_linearLight,      // 16 çº¿æ€§å…‰
+	s_pinLight,         // 17 ç‚¹å…‰
+	s_hardMix,          // 18 å®è‰²æ··åˆ
 
-	s_difference,       // 19 ²îÖµ
-	s_exclude,          // 20 ÅÅ³ı
-	s_subtract,         // 21 ¼õÈ¥
-	s_divide,           // 22 »®·Ö
-	s_hue,              // 23 É«Ïà
-	s_saturation,       // 24 ±¥ºÍ¶È
-	s_color,            // 25 ÑÕÉ«
-	s_luminosity,       // 26 Ã÷¶È
+	s_difference,       // 19 å·®å€¼
+	s_exclude,          // 20 æ’é™¤
+	s_subtract,         // 21 å‡å»
+	s_divide,           // 22 åˆ’åˆ†
+	s_hue,              // 23 è‰²ç›¸
+	s_saturation,       // 24 é¥±å’Œåº¦
+	s_color,            // 25 é¢œè‰²
+	s_luminosity,       // 26 æ˜åº¦
 	
 	/////////////    Special blend mode below     //////////////
 	
@@ -722,7 +722,7 @@ namespace CGE
 	{
 		std::string s(modeName);
 
-		//ÒÀÕÕÃ¶¾ÙË³ĞòÁĞ¾Ù
+		//ä¾ç…§æšä¸¾é¡ºåºåˆ—ä¸¾
 
 		if(s == "mix")
 		{

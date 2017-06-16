@@ -1,4 +1,4 @@
-/*
+﻿/*
  * cgeFilters.h
  *
  *  Created on: 2014-11-11

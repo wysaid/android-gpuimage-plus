@@ -337,8 +337,8 @@ namespace CGE
 	{
 		if(m_programID != 0)
 		{
-			GLuint attachedShaders[32];
-			int numAttachedShaders;
+            GLuint attachedShaders[32] = {0};
+			int numAttachedShaders = 0;
 			glGetAttachedShaders(m_programID, 32, &numAttachedShaders, attachedShaders);
 			for(int i = 0; i < numAttachedShaders; ++i)
 			{
