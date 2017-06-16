@@ -39,7 +39,7 @@ uniform mat3 m3ColorConversion;
 void main()
 {
 	vec3 yuv;
-	yuv.x = texture2D(textureY, vTexCoord).r - (16.0 / 255.0);
+	yuv.x = texture2D(textureY, vTexCoord).r; //fix: use full range
 	yuv.y = texture2D(textureU, vTexCoord).r - 0.5;
 	yuv.z = texture2D(textureV, vTexCoord).r - 0.5;
 
