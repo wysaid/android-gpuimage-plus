@@ -27,18 +27,18 @@ public class MainActivity extends ActionBarActivity {
 
     public static final String effectConfigs[] = {
             "",
-            "@beautify face 1 480 640", //美颜效果
+            "@beautify face 1 480 640", //Beautify
             "@adjust lut edgy_amber.png",
             "@adjust lut filmstock.png",
             "@adjust lut foggy_night.png",
             "@adjust lut late_sunset.png",
             "@adjust lut soft_warming.png",
             "@adjust lut wildbird.png",
-            "#unpack @style cm mapping0.jpg 80 80 8 31", //字符画效果(ASCII art)
-            "#unpack @blur lerp 0.75", //可调节模糊强度
-            "@blur lerp 1", //可调节混合强度
-            "#unpack @dynamic wave 1", //可调节速度
-            "@dynamic wave 0.5",       //可调节混合
+            "#unpack @style cm mapping0.jpg 80 80 8 3", // ASCII art (字符画效果)
+            "#unpack @blur lerp 0.75", //can adjust blur intensity
+            "@blur lerp 1", //can adjust blur mix
+            "#unpack @dynamic wave 1", //can adjust speed
+            "@dynamic wave 0.5",       //can adjust wave mix
             "#unpack @style sketch 0.9",
             "#unpack @krblend sr hehe.jpg 100 ",
             "#unpack @krblend ol hehe.jpg 100",

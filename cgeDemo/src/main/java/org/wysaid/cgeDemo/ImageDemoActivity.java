@@ -20,7 +20,6 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
 import org.wysaid.common.Common;
-import org.wysaid.common.SharedContext;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.myUtils.MsgUtil;
 import org.wysaid.nativePort.CGEFaceTracker;
