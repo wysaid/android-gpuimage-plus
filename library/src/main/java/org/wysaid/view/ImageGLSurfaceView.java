@@ -96,7 +96,7 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
         synchronized (mSettingIntensityLock) {
 
             if(mSettingIntensityCount <= 0) {
-                Log.i(LOG_TAG,  "强度调整速度过快, 丢弃更新帧...");
+                Log.i(LOG_TAG,  "Too fast, skipping...");
                 return;
             }
             --mSettingIntensityCount;
@@ -129,7 +129,7 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
         synchronized (mSettingIntensityLock) {
 
             if(mSettingIntensityCount <= 0) {
-                Log.i(LOG_TAG,  "强度调整速度过快, 丢弃更新帧...");
+                Log.i(LOG_TAG,  "Too fast, skipping...");
                 return;
             }
             --mSettingIntensityCount;
@@ -181,7 +181,7 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
                     requestRender();
 
                 } else {
-                    Log.e(LOG_TAG, "setImageBitmap: 初始化 handler 失败!");
+                    Log.e(LOG_TAG, "setImageBitmap: init handler failed!");
                 }
             }
         });
@@ -306,7 +306,7 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
         {
             case DISPLAY_ASPECT_FILL:
             {
-                //保持比例撑满全部view(内容大于view)
+                //AspectFill
                 if(s > 1.0)
                 {
                     w = (int)(mViewHeight * scaling);
@@ -321,7 +321,7 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
             break;
             case DISPLAY_ASPECT_FIT:
             {
-                //保持比例撑满全部view(内容小于view)
+                //AspectFit
                 if(s < 1.0)
                 {
                     w = (int)(mViewHeight * scaling);
