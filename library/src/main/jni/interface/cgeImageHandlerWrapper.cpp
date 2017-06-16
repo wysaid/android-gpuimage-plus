@@ -132,12 +132,33 @@ JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEImageHandler_nativeSetF
 
 	auto&& filters = handler->peekFilters();
 
-	if(index < 0 || index >= filters.size())
+	if(index < 0 || filters.empty())
 	{
 		return false;
 	}
 
-	auto* filter = filters[index];
+	CGEImageFilterInterfaceAbstract* filter = nullptr;
+
+	if(filters.size() == 1)
+	{
+		auto* mutipleFilter = filters[0];
+		auto&& innerFilters = mutipleFilter->getFilters(false);
+
+		if(index >= innerFilters.size())
+		{
+			return false;
+		}
+
+		innerFilters[index];
+	}
+	else if(index < filters.size())
+	{
+		filter = filters[index];
+	}
+	else
+	{
+		return false;
+	}
 
 	assert(filter != nullptr); //impossible
 
