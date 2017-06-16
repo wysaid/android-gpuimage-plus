@@ -64,7 +64,7 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
 
-            MsgUtil.toastMsg(SimplePlayerDemoActivity.this, "正在准备播放视频 " + videoUri.getHost() + videoUri.getPath() + " 如果是网络视频， 可能需要一段时间的等待");
+            MsgUtil.toastMsg(SimplePlayerDemoActivity.this, "Preparing for " + videoUri.getHost() + videoUri.getPath() + " If the video is from the internet, you may wait a while...");
 
             videoView.setVideoUri(videoUri, new SimplePlayerGLSurfaceView.PlayPreparedCallback() {
                 @Override
@@ -72,7 +72,7 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
                     mPlayerView.post(new Runnable() {
                         @Override
                         public void run() {
-                            String msg = "开始播放 ";
+                            String msg = "Start playing ";
                             if(videoUri.getHost() != null)
                                 msg += videoUri.getHost();
                             if(videoUri.getPath() != null)
@@ -140,8 +140,14 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
                     @Override
                     public void takeShotOK(Bitmap bmp) {
                         if(bmp != null) {
-                            String s = ImageUtil.saveBitmap(bmp);
+                            final String s = ImageUtil.saveBitmap(bmp);
                             sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + s)));
+                            mPlayerView.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    MsgUtil.toastMsg(SimplePlayerDemoActivity.this, "file " + s + " saved!");
+                                }
+                            });
                         }
                         else {
                             Log.e(Common.LOG_TAG, "take shot failed!");
@@ -155,8 +161,8 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
 
         String[] filePaths = {
                 "android.resource://" + getPackageName() + "/" + R.raw.test,
-                "http://wge.wysaid.org/res/video/1.mp4",  //网络视频
-                "http://wysaid.org/p/test.mp4",   //网络视频
+                "http://wge.wysaid.org/res/video/1.mp4",  //video from internet
+                "http://wysaid.org/p/test.mp4",   //video from internet
         };
 
         {
@@ -188,7 +194,7 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
 
         for(int i = 0; i != filePaths.length; ++i) {
             MyVideoButton btn = new MyVideoButton(this);
-            btn.setText("视频" + i);
+            btn.setText("Video" + i);
             btn.videoUri = Uri.parse(filePaths[i]);
             btn.videoView = mPlayerView;
             btn.setOnClickListener(btn);
@@ -201,7 +207,7 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
 
         Button filterButton = new Button(this);
         menuLayout.addView(filterButton);
-        filterButton.setText("切换滤镜");
+        filterButton.setText("switch filter");
         filterButton.setOnClickListener(new View.OnClickListener() {
             private int filterIndex;
 
@@ -286,13 +292,13 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
         mPlayerView.setPlayerInitializeCallback(new SimplePlayerGLSurfaceView.PlayerInitializeCallback() {
             @Override
             public void initPlayer(final MediaPlayer player) {
-                //针对网络视频进行进度检查
+                //Check for remote video
                 player.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
                     @Override
                     public void onBufferingUpdate(MediaPlayer mp, int percent) {
                         Log.i(Common.LOG_TAG, "Buffer update: " + percent);
                         if(percent == 100) {
-                            Log.i(Common.LOG_TAG, "缓冲完毕!");
+                            Log.i(Common.LOG_TAG, "video is loaded!");
                             player.setOnBufferingUpdateListener(null);
                         }
                     }

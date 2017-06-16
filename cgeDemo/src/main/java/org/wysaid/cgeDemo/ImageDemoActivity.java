@@ -139,7 +139,7 @@ public class ImageDemoActivity extends AppCompatActivity {
 
                     } catch (Exception e) {
                         e.printStackTrace();
-                        MsgUtil.toastMsg(this, "Error: 未能打开图片");
+                        MsgUtil.toastMsg(this, "Error: Can not open image");
                     }
 
                 }
@@ -209,7 +209,7 @@ public class ImageDemoActivity extends AppCompatActivity {
 
     public void faceDetectTestCase(View view) {
 
-        Log.i(Common.LOG_TAG, "人脸检测中");
+        Log.i(Common.LOG_TAG, "Face detecting");
 
         _imageView.getResultBitmap(new ImageGLSurfaceView.QueryResultBitmapCallback() {
             @Override
@@ -221,7 +221,7 @@ public class ImageDemoActivity extends AppCompatActivity {
                         ImageUtil.FaceRects rects = ImageUtil.findFaceByBitmap(bmp, 8);
 
                         if (rects == null) {
-                            MsgUtil.toastMsg(ImageDemoActivity.this, "未知错误");
+                            MsgUtil.toastMsg(ImageDemoActivity.this, "unknown error");
                             return;
                         }
 
@@ -242,7 +242,7 @@ public class ImageDemoActivity extends AppCompatActivity {
                                 float eyeDis = face.eyesDistance();
                                 float halfEyeDis = eyeDis / 2.0f;
 
-                                content += String.format("准确率: %g, 人脸中心 %g, %g, 眼间距: %g\n", face.confidence(), pnt.x, pnt.y, eyeDis);
+                                content += String.format("Accuracy: %g, center %g, %g, eyeDis: %g\n", face.confidence(), pnt.x, pnt.y, eyeDis);
                                 canvas.drawRect((int) (pnt.x - eyeDis * 1.5f), (int) (pnt.y - eyeDis * 1.5f), (int) (pnt.x + eyeDis * 1.5f), (int) (pnt.y + eyeDis * 1.5f), paint);
 
                                 //眼睛中心
@@ -256,8 +256,8 @@ public class ImageDemoActivity extends AppCompatActivity {
                             MsgUtil.toastMsg(ImageDemoActivity.this, content);
                             _imageView.setImageBitmap(bmp);
                         } else {
-                            Log.i(Common.LOG_TAG, "未发现人脸");
-                            MsgUtil.toastMsg(ImageDemoActivity.this, "未发现人脸");
+                            Log.i(Common.LOG_TAG, "No face");
+                            MsgUtil.toastMsg(ImageDemoActivity.this, "No face");
                         }
                     }
                 });

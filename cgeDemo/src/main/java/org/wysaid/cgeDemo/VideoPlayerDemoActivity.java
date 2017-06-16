@@ -61,7 +61,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
 
-            MsgUtil.toastMsg(VideoPlayerDemoActivity.this, "正在准备播放视频 " + videoUri.getHost() + videoUri.getPath() + " 如果是网络视频， 可能需要一段时间的等待");
+            MsgUtil.toastMsg(VideoPlayerDemoActivity.this, "loading video: " + videoUri.getHost() + videoUri.getPath() + " If the video is from the internet, you may wait a while...");
 
             videoView.setVideoUri(videoUri, new VideoPlayerGLSurfaceView.PlayPreparedCallback() {
                 @Override
@@ -69,7 +69,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
                     mPlayerView.post(new Runnable() {
                         @Override
                         public void run() {
-                            MsgUtil.toastMsg(VideoPlayerDemoActivity.this, "开始播放 " + videoUri.getHost() + videoUri.getPath());
+                            MsgUtil.toastMsg(VideoPlayerDemoActivity.this, "Start playing " + videoUri.getHost() + videoUri.getPath());
                         }
                     });
 
@@ -108,7 +108,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
 //                                if(mPlayerView.isUsingMask()) {
 //                                    renderer.setMaskFlipScale(1.0f, -1.0f);
 //                                }
-                                Log.i(Common.LOG_TAG, "启用mask!");
+                                Log.i(Common.LOG_TAG, "enable mask!");
                             }
                         });
                     }
@@ -169,13 +169,13 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
 
         String[] filePaths = {
                 "android.resource://" + getPackageName() + "/" + R.raw.test,
-                "http://wge.wysaid.org/res/video/1.mp4",  //网络视频
-                "http://wysaid.org/p/test.mp4",   //网络视频
+                "http://wge.wysaid.org/res/video/1.mp4",
+                "http://wysaid.org/p/test.mp4",
         };
 
         for(int i = 0; i != filePaths.length; ++i) {
             MyVideoButton btn = new MyVideoButton(this);
-            btn.setText("视频" + i);
+            btn.setText("Video" + i);
             btn.videoUri = Uri.parse(filePaths[i]);
             btn.videoView = mPlayerView;
             btn.setOnClickListener(btn);
@@ -188,7 +188,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
 
         for(int i = 0; i != MainActivity.effectConfigs.length; ++i) {
             CameraDemoActivity.MyButtons button = new CameraDemoActivity.MyButtons(this, MainActivity.effectConfigs[i]);
-            button.setText("特效" + i);
+            button.setText("filter" + i);
             button.setOnClickListener(mFilterSwitchListener);
             menuLayout.addView(button);
         }
