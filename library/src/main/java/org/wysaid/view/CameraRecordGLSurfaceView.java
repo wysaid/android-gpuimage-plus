@@ -44,7 +44,7 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
         startRecording(filename, null);
     }
 
-    public synchronized void startRecording(final String filename, final StartRecordingCallback recordingCallback) {
+    public void startRecording(final String filename, final StartRecordingCallback recordingCallback) {
 
         queueEvent(new Runnable() {
             @Override
@@ -82,10 +82,15 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
     }
 
     public void endRecording() {
-        endRecording(null);
+        endRecording(null, true);
     }
 
-    public synchronized void endRecording(final EndRecordingCallback callback) {
+    public void endRecording(final EndRecordingCallback callback) {
+        endRecording(callback, true);
+    }
+
+    // The video may be invalid if "shouldSave" is false;
+    public void endRecording(final EndRecordingCallback callback, final boolean shouldSave) {
         Log.i(LOG_TAG, "notify quit...");
         synchronized (mRecordStateLock) {
             mShouldRecord = false;
@@ -102,7 +107,7 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
             @Override
             public void run() {
                 if (mFrameRecorder != null)
-                    mFrameRecorder.endRecording(true);
+                    mFrameRecorder.endRecording(shouldSave);
                 if (callback != null) {
                     callback.endRecordingOK();
                 }
@@ -249,7 +254,7 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
             }
             this.audioRecord.stop();
             this.audioRecord.release();
-            Log.e(LOG_TAG, "音频线程退出!");
+            Log.i(LOG_TAG, "Audio thread end!");
         }
 
     }
