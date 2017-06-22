@@ -62,14 +62,21 @@ public class CameraDemoActivity extends AppCompatActivity {
 
     class RecordListener implements View.OnClickListener {
 
-        boolean isRecording = false;
+        boolean isValid = true;
         String recordFilename;
 
         @Override
         public void onClick(View v) {
             Button btn = (Button)v;
-            isRecording = !isRecording;
-            if(isRecording)
+
+            if(!isValid) {
+                Log.e(LOG_TAG, "Please wait for the call...");
+                return;
+            }
+
+            isValid = false;
+
+            if(!mCameraView.isRecording())
             {
                 btn.setText("Recording");
                 Log.i(LOG_TAG, "Start recording...");
@@ -85,6 +92,8 @@ public class CameraDemoActivity extends AppCompatActivity {
                         } else {
                             showText("Start recording failed");
                         }
+
+                        isValid = true;
                     }
                 });
             }
@@ -98,6 +107,7 @@ public class CameraDemoActivity extends AppCompatActivity {
                     @Override
                     public void endRecordingOK() {
                         Log.i(LOG_TAG, "End recording OK");
+                        isValid = true;
                     }
                 });
             }
