@@ -148,6 +148,7 @@ tableParserHelper(vec, pstr + n, i - n); \
 		if(vecRGB.empty() && vecR.empty() && vecG.empty() && vecB.empty())
 		{
 			CGE_LOG_ERROR("curveParser - Empty Curve!!\n");
+			delete proc;
 			return nullptr;
 		}
 
@@ -179,6 +180,7 @@ tableParserHelper(vec, pstr + n, i - n); \
 			if(!proc->init())
 			{
 				CGE_LOG_ERROR("CGEDataParsingEngine::lomoWithCurveParser Create filter Failed!\n");
+				delete proc;
 				return nullptr;
 			}
 			CGE_LOG_INFO("lomoWithCurveParser - Curve With Texture is used!(Not error, everything is ok)\n");
@@ -1216,6 +1218,11 @@ do{\
 				filter->setDistanceNormalizationFactor(disFactor);
 				filter->setRepeatTimes(repeatTimes);
 			}
+			else
+			{
+				LOG_ERROR_PARAM(pstr);
+				delete filter;
+			}
 			
 		}
         else if(strcmp(buffer, "face") == 0)
@@ -1351,6 +1358,7 @@ do{\
                     break;
                 default:
                     CGE_LOG_ERROR("Error which should never happen, but just happened... biu biu...\n");
+                    delete filter;
                     break;
                 }
 			}

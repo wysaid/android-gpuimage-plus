@@ -573,7 +573,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
     }
 
     public interface TakeShotCallback {
-        //传入的bmp可以由接收者recycle
+        //You can recycle the bmp.
         void takeShotOK(Bitmap bmp);
     }
 
