@@ -9,7 +9,7 @@
 #ifndef CustomFilter_N_h
 #define CustomFilter_N_h
 
-#include "CustomFilter_0.h"
+#include "customFilter_0.h"
 
 class CustomFilter_1 : public CGE::CGEImageFilterInterface
 {
