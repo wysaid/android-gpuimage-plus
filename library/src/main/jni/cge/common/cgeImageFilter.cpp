@@ -5,7 +5,7 @@
 *      Author: Wang Yang
 */
 
-#include "CGEImageFilter.h"
+#include "cgeImageFilter.h"
 
 CGE_UNEXPECTED_ERR_MSG
 (
