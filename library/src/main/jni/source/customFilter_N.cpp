@@ -6,7 +6,7 @@
 //  Copyright © 2016年 wysaid. All rights reserved.
 //
 
-#include "CustomFilter_N.h"
+#include "customFilter_N.h"
 
 using namespace CGE;
 
