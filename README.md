@@ -20,6 +20,12 @@ cd folder/of/jni (android-gpuimage-plus/library/src/main/jni)
 #Try this if you failed to run the shell above
 export CGE_USE_VIDEO_MODULE=1
 $NDK/ndk-build
+
+#If you don't want anything except the image filter,
+#Do as below to build with only cge module
+#No ffmpeg, opencv or faceTracker.
+#And remove the loading part of ffmpeg&facetracker
+$NDK/ndk-build
 ```
 
 > You can find precompiled libs here: [android-gpuimage-plus-libs](https://github.com/wysaid/android-gpuimage-plus-libs) (The precompiled '.so' files are generated with NDK-r13b)
