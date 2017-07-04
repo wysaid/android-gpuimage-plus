@@ -434,11 +434,15 @@ namespace CGE
 			}
 			else
 			{
-				const int sz1 = sizeof(m_context->dstPicture.data) < sizeof(data.data) ? sizeof(m_context->dstPicture.data) : sizeof(data.data);
-				const int sz2 = sizeof(m_context->dstPicture.linesize) < sizeof(data.linesize) ? sizeof(m_context->dstPicture.linesize) : sizeof(data.linesize);
+				// const int sz1 = sizeof(m_context->dstPicture.data) < sizeof(data.data) ? sizeof(m_context->dstPicture.data) : sizeof(data.data);
+				// const int sz2 = sizeof(m_context->dstPicture.linesize) < sizeof(data.linesize) ? sizeof(m_context->dstPicture.linesize) : sizeof(data.linesize);
 
-				memcpy(m_context->dstPicture.data, data.data, sz1);
-				memcpy(m_context->dstPicture.linesize, data.linesize, sz2);
+				// memcpy(m_context->dstPicture.data, data.data, sz1);
+				// memcpy(m_context->dstPicture.linesize, data.linesize, sz2);
+
+				m_context->pVideoFrame->data[0] = (uint8_t*)data.data[0];
+                m_context->pVideoFrame->data[1] = (uint8_t*)data.data[1];
+                m_context->pVideoFrame->data[2] = (uint8_t*)data.data[2];
 			}
 
 			m_context->pVideoFrame->pts = data.pts;

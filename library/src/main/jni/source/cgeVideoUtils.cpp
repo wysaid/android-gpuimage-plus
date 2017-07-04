@@ -28,7 +28,7 @@ extern "C"
         if(outputFilename == nullptr || inputFilename == nullptr)
             return false;
         
-        CGESharedGLContext* glContext = CGESharedGLContext::create(2048, 2048); //Ensure an video resolution size of 2k.
+        CGESharedGLContext* glContext = CGESharedGLContext::create(2048, 2048); //Max video resolution size of 2k.
         
         if(glContext == nullptr)
         {
@@ -279,7 +279,7 @@ namespace CGE
 
                     glBindFramebuffer(GL_FRAMEBUFFER, 0);
                     glViewport(0, 0, videoWidth, videoHeight * 3 / 8);
-                    handler.drawResult();
+                    gpuEncoder->drawTexture(handler.getTargetTextureID());
                     glFinish();
 
                     glReadPixels(0, 0, videoWidth, videoHeight * 3 / 8, GL_RGBA, GL_UNSIGNED_BYTE, cacheBuffer);
