@@ -15,6 +15,9 @@
 #include "cgeSharedGLContext.h"
 #include "cgeMultipleEffects.h"
 #include "cgeBlendFilter.h"
+#include "cgeTextureUtils.h"
+
+#define USE_GPU_I420_ENCODING 1
 
 extern "C"
 {
@@ -25,7 +28,7 @@ extern "C"
         if(outputFilename == nullptr || inputFilename == nullptr)
             return false;
         
-        CGESharedGLContext* glContext = CGESharedGLContext::create(2048, 2048); //保证录制分辨率足够大 (2k)
+        CGESharedGLContext* glContext = CGESharedGLContext::create(2048, 2048); //Ensure an video resolution size of 2k.
         
         if(glContext == nullptr)
         {
@@ -106,10 +109,6 @@ namespace CGE
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_bufferTextures[0], 0);
         }
 
-        // inline void useImageFBO()
-        // {
-        //     CGEImageHandler::useImageFBO();
-        // }
     };
     
     // A simple-slow offscreen video rendering function.
@@ -142,7 +141,31 @@ namespace CGE
 
         CGE_LOG_INFO("The input audio sample-rate: %d", audioSampleRate);
 
+#if USE_GPU_I420_ENCODING
+
+        //The video height must be mutiple of 8 when using the gpu encoding.
+        if(videoHeight % 8 != 0)
+        {
+            videoHeight = (videoHeight & ~0x7u) + 8;
+        }
+
+        TextureDrawerRGB2YUV420P* gpuEncoder = TextureDrawerRGB2YUV420P::create();
+        gpuEncoder->setOutputSize(videoWidth, videoHeight);
+
+        cgeMakeBlockLimit([&](){
+
+            CGE_LOG_INFO("delete I420 gpu encoder");
+            delete gpuEncoder;
+        });
+
+        mp4Encoder.setRecordDataFormat(CGEVideoEncoderMP4::FMT_YUV420P);
+
+#else
+
         mp4Encoder.setRecordDataFormat(CGEVideoEncoderMP4::FMT_RGBA8888);
+
+#endif
+
         if(!mp4Encoder.init(outputFilename, ENCODE_FPS, videoWidth, videoHeight, !mute, 1650000, audioSampleRate))
         {
             CGE_LOG_ERROR("CGEVideoEncoderMP4 - start recording failed!");
@@ -197,7 +220,25 @@ namespace CGE
         }
         
         int videoPTS = -1;
-        
+        CGEVideoEncoderMP4::ImageData imageData = {0};
+        imageData.width = videoWidth;
+        imageData.height = videoHeight;
+
+#if USE_GPU_I420_ENCODING
+
+        imageData.linesize[0] = videoWidth * videoHeight;
+        imageData.linesize[1] = videoWidth * videoHeight >> 2;
+        imageData.linesize[2] = videoWidth * videoHeight >> 2;
+
+        imageData.data[0] = cacheBuffer;
+        imageData.data[1] = cacheBuffer + imageData.linesize[0];
+        imageData.data[2] = imageData.data[1] + imageData.linesize[1];
+
+#else
+        imageData.linesize[0] = videoWidth * 4;
+        imageData.data[0] = cacheBuffer;
+#endif
+
         CGE_LOG_INFO("Enter loop...\n");
         
         while(1)
@@ -234,7 +275,17 @@ namespace CGE
                     videoPlayer.render();
                     handler.processingFilters();
                     
-#if 1
+#if USE_GPU_I420_ENCODING
+
+                    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                    glViewport(0, 0, videoWidth, videoHeight * 3 / 8);
+                    handler.drawResult();
+                    glFinish();
+
+                    glReadPixels(0, 0, videoWidth, videoHeight * 3 / 8, GL_RGBA, GL_UNSIGNED_BYTE, cacheBuffer);
+
+#elif 1 //Maybe faster than calling 'handler.getOutputBufferData'
+
                     glBindFramebuffer(GL_FRAMEBUFFER, 0);
                     glViewport(0, 0, videoWidth, videoHeight);
                     handler.drawResult();
@@ -245,12 +296,7 @@ namespace CGE
                     
                     handler.getOutputBufferData(cacheBuffer, CGE_FORMAT_RGBA_INT8);
 #endif
-                    
-                    CGEVideoEncoderMP4::ImageData imageData;
-                    imageData.width = videoWidth;
-                    imageData.height = videoHeight;
-                    imageData.linesize[0] = videoWidth * 4;
-                    imageData.data[0] = cacheBuffer;
+
                     imageData.pts = videoPTS;
                     
                     if(!mp4Encoder.record(imageData))

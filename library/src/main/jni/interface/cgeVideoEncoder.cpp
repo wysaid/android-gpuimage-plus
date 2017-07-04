@@ -414,8 +414,6 @@ namespace CGE
 		AVPixelFormat pixFmt = (AVPixelFormat)m_recordDataFmt;
 		AVCodecContext *codecCtx = m_context->pVideoStream->codec;
 
-		// auto tm = getCurrentTimeMillis(), tm2 = tm;
-
 		if(data.data[0] != nullptr)
 		{
 			if(pixFmt != codecCtx->pix_fmt || data.width != codecCtx->width || data.height != codecCtx->height)
@@ -450,10 +448,6 @@ namespace CGE
 			//++m_context->pVideoFrame->pts;
 		}
 
-		// tm2 = getCurrentTimeMillis();
-		// CGE_LOG_ERROR("转换格式花费时间: %g", (tm2 - tm));
-		// tm = tm2;
-
 		if(m_context->pFormatCtx->oformat->flags & AVFMT_RAWPICTURE)
 		{
 			AVPacket& pkt = m_context->videoPacket;
@@ -483,21 +477,14 @@ namespace CGE
 			pkt.data = m_videoPacketBuffer;
 			pkt.size = m_videoPacketBufferSize;
 
-			//avcodec_encode_video2 为慢速操作
 			if(0 > avcodec_encode_video2(codecCtx, &pkt, data.data[0] == nullptr ? nullptr : m_context->pVideoFrame, &gotPacket))
 			{
 				CGE_LOG_ERROR("avcodec_encode_video2 error...\n");
 				return false;
 			}
 
-			// tm2 = getCurrentTimeMillis();
-			// CGE_LOG_ERROR("encode 花费时间: %g", (tm2 - tm));
-			// tm = tm2;
-
 			if(gotPacket && pkt.size)
 			{
-				// CGE_LOG_ERROR("PTS %d, %d\n", data.pts, pkt.pts);
-
 				if(pkt.pts != AV_NOPTS_VALUE)
 				{
 					pkt.pts = av_rescale_q(pkt.pts, codecCtx->time_base, m_context->pVideoStream->time_base);
@@ -512,12 +499,6 @@ namespace CGE
 				m_mutex.lock();
 				auto ret = av_interleaved_write_frame(m_context->pFormatCtx, &pkt);
 				m_mutex.unlock();
-
-				// av_free_packet(&pkt);
-
-				// tm2 = getCurrentTimeMillis();
-				// CGE_LOG_ERROR("av_interleaved_write_frame 花费时间: %g", (tm2 - tm));
-				// tm = tm2;	
 
 				if(0 > ret)
 				{

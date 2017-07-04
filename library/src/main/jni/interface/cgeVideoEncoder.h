@@ -19,6 +19,7 @@ namespace CGE
 {
 	struct CGEEncoderContextMP4;
 
+	// h264 video encoding, aac-FLTP single channel audio encoding
 	// 使用h264编码视频，FLTP浮点单声道音频的mp4 encoder
 	class CGEVideoEncoderMP4
 	{
@@ -47,15 +48,15 @@ namespace CGE
 		struct AudioSampleData
 		{
 			const unsigned short* data[8];
-			int nbSamples[8]; //声音帧大小
-			int channels; //声音包含几个通道
+			int nbSamples[8]; //Audio sample size
+			int channels; //Audio channel
 		};
 
 		bool init(const char* filename, int fps, int width, int height, bool hasAudio = true, int bitRate = 1650000, int audioSampleRate = 44100);
 
 		void setRecordDataFormat(RecordDataFormat fmt);
 
-		//两个record写入文件时将保证线程安全
+		//thread safe
 		bool record(const ImageData& data);
 		bool record(const AudioSampleData& data);
 
