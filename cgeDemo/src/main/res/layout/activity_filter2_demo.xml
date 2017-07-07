@@ -6,24 +6,20 @@
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
                 android:paddingTop="@dimen/activity_vertical_margin"
-                tools:context=".SimplePlayerDemoActivity">
+                tools:context=".ImageDemoActivity">
 
-    <FrameLayout
-        android:id="@+id/glviewFrameLayout"
+    <org.wysaid.view.ImageGLSurfaceView
+        android:id="@+id/mainImageView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
-
-        <org.wysaid.view.SimplePlayerGLSurfaceView
-            android:id="@+id/videoGLSurfaceView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-    </FrameLayout>
+        android:layout_height="match_parent"/>
 
     <SeekBar
         android:id="@+id/seekBar"
         android:layout_width="match_parent"
-        android:layout_height="60dp"/>
+        android:layout_height="80dp"
+        android:layout_alignParentTop="true"
+        android:layout_gravity="center_horizontal|top"
+        />
 
     <HorizontalScrollView
         android:layout_width="match_parent"
@@ -31,37 +27,44 @@
         android:layout_alignParentBottom="true">
 
         <LinearLayout
-            android:id="@+id/menuLinearLayout"
+            android:id="@+id/menuLayout"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_alignParentBottom="true">
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/galleryBtn"
                 android:layout_width="100dp"
-                android:layout_height="50dp"
-                android:layout_alignParentTop="true"
-                android:text="Gallery"/>
+                android:layout_height="match_parent"
+                android:onClick="galleryBtnClicked"
+                android:text="Gallery"
+                />
 
             <Button
-                android:id="@+id/takeShotBtn"
+                android:id="@+id/saveImageBtn"
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
-                android:text="TakeShot"/>
+                android:onClick="saveImageBtnClicked"
+                android:text="Save"
+                />
 
             <Button
-                android:id="@+id/switchShapeBtn"
+                android:id="@+id/switchDisplayModeBtn"
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
-                android:text="Border"/>
+                android:onClick="switchDisplayMode"
+                android:text="Switch"/>
 
             <Button
-                android:id="@+id/fitViewBtn"
+                android:id="@+id/resetBtn"
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
-                android:text="FitScreen"/>
+                android:onClick="resetBtnClicked"
+                android:text="reset"/>
+
 
         </LinearLayout>
+
     </HorizontalScrollView>
 
 </RelativeLayout>

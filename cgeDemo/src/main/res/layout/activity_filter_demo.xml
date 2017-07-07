@@ -1,21 +1,23 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context=".ImageDemoActivity">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                tools:context=".ImageDemoActivity">
 
     <org.wysaid.view.ImageGLSurfaceView
         android:id="@+id/mainImageView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"/>
 
     <SeekBar
+        android:id="@+id/seekBar"
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:layout_alignParentTop="true"
-        android:id="@+id/seekBar"
         android:layout_gravity="center_horizontal|top"
         />
 
@@ -26,43 +28,43 @@
 
         <LinearLayout
             android:id="@+id/menuLayout"
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="50dp">
+            android:layout_height="50dp"
+            android:orientation="horizontal">
 
             <Button
+                android:id="@+id/galleryBtn"
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
-                android:id="@+id/galleryBtn"
                 android:text="Gallery"
                 />
 
             <Button
+                android:id="@+id/saveSingleFrameBtn"
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
-                android:id="@+id/saveSingleFrameBtn"
                 android:text="Save"/>
 
             <Button
+                android:id="@+id/switchDisplayModeBtn"
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
-                android:id="@+id/switchDisplayModeBtn"
                 android:onClick="switchDisplayMode"
                 android:text="Switch"/>
 
             <Button
+                android:id="@+id/faceDetectionBtn"
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
-                android:id="@+id/faceDetectionBtn"
                 android:onClick="faceDetectTestCase"
                 android:text="FindFace"/>
 
             <Button
+                android:id="@+id/faceTrackerTestCase"
                 android:layout_width="150dp"
                 android:layout_height="50dp"
-                android:id="@+id/faceTrackerTestCase"
-                android:text="FaceKeyPoints"
                 android:onClick="faceTrackerTestCase"
+                android:text="FaceKeyPoints"
                 />
 
         </LinearLayout>

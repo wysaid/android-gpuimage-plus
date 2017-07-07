@@ -1,10 +1,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context=".CameraDemoActivity">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                tools:context=".CameraDemoActivity">
 
     <FrameLayout
         android:id="@+id/glviewFrameLayout"
@@ -15,14 +17,14 @@
         <org.wysaid.view.CameraRecordGLSurfaceView
             android:id="@+id/myGLSurfaceView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"/>
 
         <SeekBar
+            android:id="@+id/seekBar"
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:layout_alignParentTop="true"
-            android:id="@+id/seekBar"
-            android:layout_gravity="center_horizontal|top" />
+            android:layout_gravity="center_horizontal|top"/>
 
     </FrameLayout>
 
@@ -30,91 +32,92 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true">
+
         <LinearLayout
+            android:id="@+id/menuLinearLayout"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_alignParentBottom="true"
-            android:id="@+id/menuLinearLayout">
+            android:layout_alignParentBottom="true">
 
             <Button
-                android:layout_width="100dp"
-                android:layout_height="match_parent"
                 android:id="@+id/takePicBtn"
-                android:textAllCaps="false"
-                android:text="TakePicture"/>
-
-            <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
+                android:text="TakePicture"
+                android:textAllCaps="false"/>
+
+            <Button
                 android:id="@+id/takeShotBtn"
-                android:textAllCaps="false"
-                android:text="TakeShot"/>
-
-            <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
+                android:text="TakeShot"
+                android:textAllCaps="false"/>
+
+            <Button
                 android:id="@+id/pauseBtn"
-                android:textAllCaps="false"
-                android:text="Pause"/>
-
-            <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
+                android:text="Pause"
+                android:textAllCaps="false"/>
+
+            <Button
                 android:id="@+id/resumeBtn"
-                android:textAllCaps="false"
-                android:text="Resume"/>
-
-            <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
+                android:text="Resume"
+                android:textAllCaps="false"/>
+
+            <Button
                 android:id="@+id/switchCameraBtn"
-                android:textAllCaps="false"
-                android:text="Switch"/>
-
-            <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
+                android:text="Switch"
+                android:textAllCaps="false"/>
+
+            <Button
                 android:id="@+id/recordBtn"
-                android:textAllCaps="false"
-                android:text="Record"/>
-
-            <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
+                android:text="Record"
+                android:textAllCaps="false"/>
+
+            <Button
                 android:id="@+id/flashBtn"
-                android:textAllCaps="false"
-                android:text="Flash"/>
-
-            <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
+                android:text="Flash"
+                android:textAllCaps="false"/>
+
+            <Button
                 android:id="@+id/shapeBtn"
-                android:textAllCaps="false"
-                android:text="Style"/>
-
-            <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
+                android:text="Style"
+                android:textAllCaps="false"/>
+
+            <Button
                 android:id="@+id/fitViewBtn"
-                android:textAllCaps="false"
-                android:text="fitScreen"/>
-
-            <Button
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
+                android:text="fitScreen"
+                android:textAllCaps="false"/>
+
+            <Button
                 android:id="@+id/customFilterBtn"
-                android:textAllCaps="false"
-                android:text="Custom"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
                 android:onClick="customFilterClicked"
+                android:text="Custom"
+                android:textAllCaps="false"
                 />
 
             <Button
+                android:id="@+id/dynamicFilterBtn"
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
-                android:id="@+id/dynamicFilterBtn"
-                android:textAllCaps="false"
-                android:text="Dynamic"
                 android:onClick="dynamicFilterClicked"
+                android:text="Dynamic"
+                android:textAllCaps="false"
                 />
 
         </LinearLayout>

@@ -2,6 +2,7 @@
     <string name="app_name">CGE demo</string>
 
     <string name="action_settings">Settings</string>
+    <string name="title_activity_filter_demo2">FilterDemoActivity2</string>
     <string name="title_activity_filter_demo">FilterDemoActivity</string>
     <string name="title_activity_camera_demo">CameraDemoActivity</string>
     <string name="title_activity_video_player">VideoPlayerActivity</string>
