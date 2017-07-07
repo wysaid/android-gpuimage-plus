@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String effectConfigs[] = {
             "",
+            "@curve RGB(0,255)(255,0) @style cm mapping0.jpg 80 80 8 3", // ASCII art (字符画效果)
             "@beautify face 1 480 640", //Beautify
             "@adjust lut edgy_amber.png",
             "@adjust lut filmstock.png",
@@ -34,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
             "@adjust lut late_sunset.png",
             "@adjust lut soft_warming.png",
             "@adjust lut wildbird.png",
-            "@curve RGB(0,255)(255,0) @style cm mapping0.jpg 80 80 8 3", // ASCII art (字符画效果)
             "#unpack @blur lerp 0.75", //can adjust blur intensity
             "@blur lerp 1", //can adjust blur mix
             "#unpack @dynamic wave 1", //can adjust speed
