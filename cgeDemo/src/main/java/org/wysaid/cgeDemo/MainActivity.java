@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
             "@adjust lut late_sunset.png",
             "@adjust lut soft_warming.png",
             "@adjust lut wildbird.png",
-            "#unpack @style cm mapping0.jpg 80 80 8 3", // ASCII art (字符画效果)
+            "@curve RGB(0,255)(255,0) @style cm mapping0.jpg 80 80 8 3", // ASCII art (字符画效果)
             "#unpack @blur lerp 0.75", //can adjust blur intensity
             "@blur lerp 1", //can adjust blur mix
             "#unpack @dynamic wave 1", //can adjust speed

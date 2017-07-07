@@ -373,6 +373,7 @@ namespace CGE
 		std::vector<CGEImageFilterInterface*>::iterator iter = m_vecFilters.begin();
 		for(;;)
 		{
+			glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
 			(*iter)->render2Texture(handler, handler->getBufferTextureID(), vertexBufferID);
 			if(++iter != m_vecFilters.end())
 			{
@@ -384,6 +385,7 @@ namespace CGE
 		if(needMix)
 		{
 			handler->swapBufferFBO();
+			glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
 			m_mixFilter.render2Texture(handler, m_texCache, vertexBufferID);
 		}
 	}
