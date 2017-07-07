@@ -6,7 +6,7 @@
 1. Add demos for android version.
 2. Write some JNI wrapper for native code.
 3. Add some new filters like color mapping.
-4. Add real time camera filter.
+4. Add real time camera filter. (Preview, take picture, record video)
 4. Add real time video filter. (Preview and save)
 5. Add face landmark module. (By [FaceTracker](https://github.com/kylemcdonald/FaceTracker), not neccessary. )
 
