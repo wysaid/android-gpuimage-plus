@@ -1,6 +1,15 @@
 
 ====== Changelist =========
 
+# 2017-7 Version 2.4.6 #
+
+1. Add demos for android version.
+2. Write some JNI wrapper for native code.
+3. Add some new filters like color mapping.
+4. Add real time camera filter.
+4. Add real time video filter. (Preview and save)
+5. Add face landmark module. (By [FaceTracker](https://github.com/kylemcdonald/FaceTracker), not neccessary. )
+
 # 2015-5-13 Version 1.13.1 #
 
 Fix definition of ``CGE_CURVE_PRECISION``
