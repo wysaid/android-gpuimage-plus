@@ -149,7 +149,7 @@ JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEImageHandler_nativeSetF
 			return false;
 		}
 
-		innerFilters[index];
+		filter = innerFilters[index];
 	}
 	else if(index < filters.size())
 	{
