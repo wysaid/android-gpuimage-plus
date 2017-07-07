@@ -4,11 +4,11 @@ All source code are open now.
 
 ## Abstract ##
 
-1.  This repo is an "Android Studio Project", comprising "cgeDemo", "library" two sub-modules. Hundreds of built-in filters are available in the demo. 😋If you'd like to add your own filter, please take a look at the manual page. Or you can follow the demo code. The new custom filter should be written in C++.
+*  This repo is an "Android Studio Project", comprising "cgeDemo", "library" two sub-modules. Hundreds of built-in filters are available in the demo. 😋If you'd like to add your own filter, please take a look at the manual page. Or you can follow the demo code. The new custom filter should be written in C++.
 
-2. Demo and Library will be updated as needed. Welcome for your questions or PR.
+* Demo and Library will be updated as needed. Welcome for your questions or PR.
 
-3. To build with the jni part, pleasae try:
+* To build with the jni part, pleasae try:
 ```
 export NDK=path/of/your/ndk
 cd folder/of/jni (android-gpuimage-plus/library/src/main/jni)
@@ -32,7 +32,7 @@ $NDK/ndk-build
 
 Note that the generated file "libFaceTracker.so" is not necessary. So just remove this file if you don't want any feature of it.
 
-4. iOS version: [https://github.com/wysaid/ios-gpuimage-plus](https://github.com/wysaid/ios-gpuimage-plus "http://wysaid.org")
+* iOS version: [https://github.com/wysaid/ios-gpuimage-plus](https://github.com/wysaid/ios-gpuimage-plus "http://wysaid.org")
 
 ## Manual ##
 
