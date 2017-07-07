@@ -173,8 +173,8 @@ public class CameraDemoActivity extends AppCompatActivity {
 
         LinearLayout layout = (LinearLayout) findViewById(R.id.menuLinearLayout);
 
-        for(int i = 0; i != MainActivity.effectConfigs.length; ++i) {
-            MyButtons button = new MyButtons(this, MainActivity.effectConfigs[i]);
+        for(int i = 0; i != MainActivity.EFFECT_CONFIGS.length; ++i) {
+            MyButtons button = new MyButtons(this, MainActivity.EFFECT_CONFIGS[i]);
             button.setAllCaps(false);
             if(i == 0)
                 button.setText("None");

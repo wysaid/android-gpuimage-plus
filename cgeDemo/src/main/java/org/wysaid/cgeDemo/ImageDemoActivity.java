@@ -29,9 +29,9 @@ import java.io.InputStream;
 
 public class ImageDemoActivity extends AppCompatActivity {
 
-    private Bitmap _bitmap;
-    private ImageGLSurfaceView _imageView;
-    private String _currentConfig;
+    private Bitmap mBitmap;
+    private ImageGLSurfaceView mImageView;
+    private String mCurrentConfig;
 
     public static final int REQUEST_CODE_PICK_IMAGE = 1;
 
@@ -43,7 +43,7 @@ public class ImageDemoActivity extends AppCompatActivity {
         LinearLayout menuLayout = (LinearLayout) findViewById(R.id.menuLayout);
         menuLayout.setHorizontalScrollBarEnabled(true);
 
-        for(int i = 0; i != MainActivity.effectConfigs.length; ++i)
+        for(int i = 0; i != MainActivity.EFFECT_CONFIGS.length; ++i)
         {
             Button btn = new Button(this);
             btn.setText("filter" + i);
@@ -54,14 +54,14 @@ public class ImageDemoActivity extends AppCompatActivity {
         Button btn = (Button)findViewById(R.id.galleryBtn);
         btn.setOnClickListener(galleryBtnClickListener);
 
-        _imageView = (ImageGLSurfaceView) findViewById(R.id.mainImageView);
-        _bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bgview);
+        mImageView = (ImageGLSurfaceView) findViewById(R.id.mainImageView);
+        mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bgview);
 
-        _imageView.setSurfaceCreatedCallback(new ImageGLSurfaceView.OnSurfaceCreatedCallback() {
+        mImageView.setSurfaceCreatedCallback(new ImageGLSurfaceView.OnSurfaceCreatedCallback() {
             @Override
             public void surfaceCreated() {
-                _imageView.setImageBitmap(_bitmap);
-                _imageView.setFilterWithConfig(_currentConfig);
+                mImageView.setImageBitmap(mBitmap);
+                mImageView.setFilterWithConfig(mCurrentConfig);
             }
         });
 
@@ -70,7 +70,7 @@ public class ImageDemoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                _imageView.getResultBitmap(new ImageGLSurfaceView.QueryResultBitmapCallback() {
+                mImageView.getResultBitmap(new ImageGLSurfaceView.QueryResultBitmapCallback() {
                     @Override
                     public void get(final Bitmap bmp) {
                         String s = ImageUtil.saveBitmap(bmp);
@@ -80,14 +80,14 @@ public class ImageDemoActivity extends AppCompatActivity {
             }
         });
 
-        _imageView.setDisplayMode(ImageGLSurfaceView.DisplayMode.DISPLAY_ASPECT_FIT);
+        mImageView.setDisplayMode(ImageGLSurfaceView.DisplayMode.DISPLAY_ASPECT_FIT);
 
         SeekBar seekBar = (SeekBar)findViewById(R.id.seekBar);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 float intensity = progress / 100.0f;
-                _imageView.setFilterIntensity(intensity);
+                mImageView.setFilterIntensity(intensity);
             }
 
             @Override
@@ -130,12 +130,12 @@ public class ImageDemoActivity extends AppCompatActivity {
                         if(s > 1.0f) {
                             w /= s;
                             h /= s;
-                            _bitmap = Bitmap.createScaledBitmap(bmp, w, h, false);
+                            mBitmap = Bitmap.createScaledBitmap(bmp, w, h, false);
                         } else {
-                            _bitmap = bmp;
+                            mBitmap = bmp;
                         }
 
-                        _imageView.setImageBitmap(_bitmap);
+                        mImageView.setImageBitmap(mBitmap);
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -151,14 +151,14 @@ public class ImageDemoActivity extends AppCompatActivity {
         @Override
         public void onClick(final android.view.View view) {
 
-            _imageView.post(new Runnable() {
+            mImageView.post(new Runnable() {
                 @Override
                 public void run() {
                     Button btn = (Button)view;
                     String str = btn.getText().toString();
                     int index = Integer.parseInt(str.substring(6));
-                    _currentConfig = MainActivity.effectConfigs[index];
-                    _imageView.setFilterWithConfig(_currentConfig);
+                    mCurrentConfig = MainActivity.EFFECT_CONFIGS[index];
+                    mImageView.setFilterWithConfig(mCurrentConfig);
                 }
             });
         }
@@ -174,15 +174,15 @@ public class ImageDemoActivity extends AppCompatActivity {
     public void onPause() {
         Log.i(Common.LOG_TAG, "Filter Demo onPause...");
         super.onPause();
-        _imageView.release();
-        _imageView.onPause();
+        mImageView.release();
+        mImageView.onPause();
     }
 
     @Override
     public void onResume() {
         Log.i(Common.LOG_TAG, "Filter Demo onResume...");
         super.onResume();
-        _imageView.onResume();
+        mImageView.onResume();
     }
 
     @Override
@@ -211,11 +211,11 @@ public class ImageDemoActivity extends AppCompatActivity {
 
         Log.i(Common.LOG_TAG, "Face detecting");
 
-        _imageView.getResultBitmap(new ImageGLSurfaceView.QueryResultBitmapCallback() {
+        mImageView.getResultBitmap(new ImageGLSurfaceView.QueryResultBitmapCallback() {
             @Override
             public void get(final Bitmap bmp) {
 
-                _imageView.post(new Runnable() {
+                mImageView.post(new Runnable() {
                     @Override
                     public void run() {
                         ImageUtil.FaceRects rects = ImageUtil.findFaceByBitmap(bmp, 8);
@@ -254,7 +254,7 @@ public class ImageDemoActivity extends AppCompatActivity {
                             }
 
                             MsgUtil.toastMsg(ImageDemoActivity.this, content);
-                            _imageView.setImageBitmap(bmp);
+                            mImageView.setImageBitmap(bmp);
                         } else {
                             Log.i(Common.LOG_TAG, "No face");
                             MsgUtil.toastMsg(ImageDemoActivity.this, "No face");
@@ -274,7 +274,7 @@ public class ImageDemoActivity extends AppCompatActivity {
                 ImageGLSurfaceView.DisplayMode.DISPLAY_ASPECT_FIT,
         };
 
-        _imageView.setDisplayMode(modes[++displayIndex % modes.length]);
+        mImageView.setDisplayMode(modes[++displayIndex % modes.length]);
     }
 
     public void faceTrackerTestCase(View view) {
@@ -283,15 +283,15 @@ public class ImageDemoActivity extends AppCompatActivity {
 
         if(tracker != null) {
 
-            if(!_bitmap.isMutable()) {
-                _bitmap = _bitmap.copy(_bitmap.getConfig(), true);
+            if(!mBitmap.isMutable()) {
+                mBitmap = mBitmap.copy(mBitmap.getConfig(), true);
             }
 
-            CGEFaceTracker.FaceResultSimple result = tracker.detectFaceWithSimpleResult(_bitmap, true);
+            CGEFaceTracker.FaceResultSimple result = tracker.detectFaceWithSimpleResult(mBitmap, true);
 
             Log.i(Common.LOG_TAG, String.format("LeftEye: %g, %g, rightEye: %g, %g, nose: %g, %g, mouth: %g, %g, jaw: %g, %g", result.leftEyePos.x, result.leftEyePos.y, result.rightEyepos.x, result.rightEyepos.y, result.nosePos.x, result.nosePos.y, result.mouthPos.x, result.mouthPos.y, result.jawPos.x, result.jawPos.y));
 
-            Canvas cvs = new Canvas(_bitmap);
+            Canvas cvs = new Canvas(mBitmap);
             Paint paint = new Paint();
             paint.setStrokeWidth(3.0f);
             paint.setColor(0xffffffff);
@@ -302,7 +302,7 @@ public class ImageDemoActivity extends AppCompatActivity {
             cvs.drawCircle(result.jawPos.x, result.jawPos.y, 5, paint);
 
 
-            _imageView.setImageBitmap(_bitmap);
+            mImageView.setImageBitmap(mBitmap);
         }
 
         tracker.release();

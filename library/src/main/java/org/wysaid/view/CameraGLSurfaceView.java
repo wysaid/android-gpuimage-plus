@@ -12,7 +12,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
-import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.media.ExifInterface;
@@ -28,7 +27,6 @@ import org.wysaid.common.FrameBufferObject;
 import org.wysaid.nativePort.CGEFrameRecorder;
 import org.wysaid.nativePort.CGENativeLibrary;
 import org.wysaid.texUtils.TextureRenderer;
-import org.wysaid.texUtils.TextureRendererDrawOrigin;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -45,10 +43,10 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     public static final String LOG_TAG = Common.LOG_TAG;
 
-    public int maxTextureSize = 0;
+    public int mMaxTextureSize = 0;
 
-    public int viewWidth;
-    public int viewHeight;
+    public int mViewWidth;
+    public int mViewHeight;
 
     protected int mRecordWidth = 480;
     protected int mRecordHeight = 640;
@@ -62,20 +60,20 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         return mFrameRecorder;
     }
 
-    public int maxPreviewWidth = 1280;
-    public int maxPreviewHeight = 1280;
+    public int mMaxPreviewWidth = 1280;
+    public int mMaxPreviewHeight = 1280;
 
     //The max preview size. Change it to 1920+ if you want to preview with 1080P
     void setMaxPreviewSize(int w, int h) {
-        maxPreviewWidth = w;
-        maxPreviewHeight = h;
+        mMaxPreviewWidth = w;
+        mMaxPreviewHeight = h;
     }
 
     public class ClearColor {
         public float r, g, b, a;
     }
 
-    public ClearColor clearColor;
+    public ClearColor mClearColor;
 
     protected TextureRenderer.Viewport mDrawViewport = new TextureRenderer.Viewport();
 
@@ -105,15 +103,15 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     }
 
     public void setClearColor(float r, float g, float b, float a) {
-        clearColor.r = r;
-        clearColor.g = g;
-        clearColor.b = b;
-        clearColor.a = a;
+        mClearColor.r = r;
+        mClearColor.g = g;
+        mClearColor.b = b;
+        mClearColor.a = a;
         queueEvent(new Runnable() {
             @Override
             public void run() {
                 GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
-                GLES20.glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+                GLES20.glClearColor(mClearColor.r, mClearColor.g, mClearColor.b, mClearColor.a);
                 GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
             }
         });
@@ -132,8 +130,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     //这里的width和height表示竖屏尺寸
     //在onSurfaceCreated之前设置有效
     public void presetRecordingSize(int width, int height) {
-        if(width > maxPreviewWidth || height > maxPreviewHeight) {
-            float scaling = Math.min(maxPreviewWidth / (float)width, maxPreviewHeight / (float)height);
+        if(width > mMaxPreviewWidth || height > mMaxPreviewHeight) {
+            float scaling = Math.min(mMaxPreviewWidth / (float)width, mMaxPreviewHeight / (float)height);
             width = (int)(width * scaling);
             height = (int)(height * scaling);
         }
@@ -339,7 +337,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 //        setZOrderOnTop(true);
 //        setZOrderMediaOverlay(true);
 
-        clearColor = new ClearColor();
+        mClearColor = new ClearColor();
     }
 
     @Override
@@ -353,7 +351,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         int texSize[] = new int[1];
 
         GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, texSize, 0);
-        maxTextureSize = texSize[0];
+        mMaxTextureSize = texSize[0];
 
         mTextureID = Common.genSurfaceTextureID();
         mSurfaceTexture = new SurfaceTexture(mTextureID);
@@ -395,7 +393,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
             scaling = mRecordWidth / (float)mRecordHeight;
         }
 
-        float viewRatio = viewWidth / (float)viewHeight;
+        float viewRatio = mViewWidth / (float) mViewHeight;
         float s = scaling / viewRatio;
 
         int w, h;
@@ -403,27 +401,27 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         if(mFitFullView) {
             //撑满全部view(内容大于view)
             if(s > 1.0) {
-                w = (int)(viewHeight * scaling);
-                h = viewHeight;
+                w = (int)(mViewHeight * scaling);
+                h = mViewHeight;
             } else {
-                w = viewWidth;
-                h = (int)(viewWidth / scaling);
+                w = mViewWidth;
+                h = (int)(mViewWidth / scaling);
             }
         } else {
             //显示全部内容(内容小于view)
             if(s > 1.0) {
-                w = viewWidth;
-                h = (int)(viewWidth / scaling);
+                w = mViewWidth;
+                h = (int)(mViewWidth / scaling);
             } else {
-                h = viewHeight;
-                w = (int)(viewHeight * scaling);
+                h = mViewHeight;
+                w = (int)(mViewHeight * scaling);
             }
         }
 
         mDrawViewport.width = w;
         mDrawViewport.height = h;
-        mDrawViewport.x = (viewWidth - mDrawViewport.width) / 2;
-        mDrawViewport.y = (viewHeight - mDrawViewport.height) / 2;
+        mDrawViewport.x = (mViewWidth - mDrawViewport.width) / 2;
+        mDrawViewport.y = (mViewHeight - mDrawViewport.height) / 2;
         Log.i(LOG_TAG, String.format("View port: %d, %d, %d, %d", mDrawViewport.x, mDrawViewport.y, mDrawViewport.width, mDrawViewport.height));
     }
 
@@ -462,10 +460,10 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         Log.i(LOG_TAG, String.format("onSurfaceChanged: %d x %d", width, height));
 
-        GLES20.glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+        GLES20.glClearColor(mClearColor.r, mClearColor.g, mClearColor.b, mClearColor.a);
 
-        viewWidth = width;
-        viewHeight = height;
+        mViewWidth = width;
+        mViewHeight = height;
 
         calcViewport();
 
@@ -633,8 +631,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                     bufferTexID = Common.genBlankTextureID(mDrawViewport.width, mDrawViewport.height);
                     frameBufferObject.bindTexture(bufferTexID);
 
-                    int w = Math.min(mDrawViewport.width, viewWidth);
-                    int h = Math.min(mDrawViewport.height, viewHeight);
+                    int w = Math.min(mDrawViewport.width, mViewWidth);
+                    int h = Math.min(mDrawViewport.height, mViewHeight);
 
                     mFrameRecorder.setRenderFlipScale(1.0f, 1.0f);
                     mFrameRecorder.setMaskTextureRatio(mMaskAspectRatio);
@@ -743,9 +741,9 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 }
 
 
-                if(width > maxTextureSize || height > maxTextureSize) {
-                    float scaling = Math.max(width / (float) maxTextureSize, height / (float) maxTextureSize);
-                    Log.i(LOG_TAG, String.format("目标尺寸(%d x %d)超过当前设备OpenGL 能够处理的最大范围(%d x %d)， 现在将图片压缩至合理大小!", width, height, maxTextureSize, maxTextureSize));
+                if(width > mMaxTextureSize || height > mMaxTextureSize) {
+                    float scaling = Math.max(width / (float) mMaxTextureSize, height / (float) mMaxTextureSize);
+                    Log.i(LOG_TAG, String.format("目标尺寸(%d x %d)超过当前设备OpenGL 能够处理的最大范围(%d x %d)， 现在将图片压缩至合理大小!", width, height, mMaxTextureSize, mMaxTextureSize));
 
                     bmp = Bitmap.createScaledBitmap(bmp, (int)(width / scaling), (int)(height / scaling), false);
 

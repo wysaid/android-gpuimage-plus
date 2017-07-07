@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String LOG_TAG = "wysaid";
 
-    public static final String effectConfigs[] = {
+    public static final String EFFECT_CONFIGS[] = {
             "",
             "@curve RGB(0,255)(255,0) @style cm mapping0.jpg 80 80 8 3", // ASCII art (字符画效果)
             "@beautify face 1 480 640", //Beautify
@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
             "@adjust hsl 0.02 -0.31 -0.17 @curve R(0, 28)(23, 45)(117, 148)(135, 162)G(0, 8)(131, 152)(255, 255)B(0, 17)(58, 80)(132, 131)(127, 131)(255, 225)"
     };
 
-    public CGENativeLibrary.LoadImageCallback loadImageCallback = new CGENativeLibrary.LoadImageCallback() {
+    public CGENativeLibrary.LoadImageCallback mLoadImageCallback = new CGENativeLibrary.LoadImageCallback() {
 
         //Notice: the 'name' passed in is just what you write in the rule, e.g: 1.jpg
         //注意， 这里回传的name不包含任何路径名， 仅为具体的图片文件名如 1.jpg
@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
 
         //The second param will be passed as the second arg of the callback function.
         //第二个参数根据自身需要设置， 将作为 loadImage 第二个参数回传
-        CGENativeLibrary.setLoadImageCallback(loadImageCallback, null);
+        CGENativeLibrary.setLoadImageCallback(mLoadImageCallback, null);
     }
 
 //    @Override

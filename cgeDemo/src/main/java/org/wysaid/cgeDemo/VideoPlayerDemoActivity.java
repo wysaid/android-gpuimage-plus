@@ -186,8 +186,8 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
             }
         }
 
-        for(int i = 0; i != MainActivity.effectConfigs.length; ++i) {
-            CameraDemoActivity.MyButtons button = new CameraDemoActivity.MyButtons(this, MainActivity.effectConfigs[i]);
+        for(int i = 0; i != MainActivity.EFFECT_CONFIGS.length; ++i) {
+            CameraDemoActivity.MyButtons button = new CameraDemoActivity.MyButtons(this, MainActivity.EFFECT_CONFIGS[i]);
             button.setText("filter" + i);
             button.setOnClickListener(mFilterSwitchListener);
             menuLayout.addView(button);
