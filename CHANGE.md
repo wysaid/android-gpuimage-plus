@@ -10,6 +10,9 @@
 4. Add real time video filter. (Preview and save)
 5. Add face landmark module. (By [FaceTracker](https://github.com/kylemcdonald/FaceTracker), not neccessary. )
 
+/////  Other small fix.     ////////
+
+
 # 2015-5-13 Version 1.13.1 #
 
 Fix definition of ``CGE_CURVE_PRECISION``
