@@ -53,7 +53,7 @@ public class CGEImageHandler {
     //shouldClearOlder: The last filter will be cleared if it's true.
     //    There may be memory leaks if you pass false for 'shouldClearOlder' when you don't clear it by yourself.
     //shouldProcess: This marks if the filter should be run right now.
-    //    The result will not change if you pass false for 'shouldProcess' until you call 'processingFilters'.
+    //    The result will not change if you pass false for 'shouldProcess' until you call 'processFilters'.
     public void setFilterWithConfig(String config, boolean shouldClearOlder, boolean shouldProcess) {
         nativeSetFilterWithConfig(mNativeAddress, config, shouldClearOlder, shouldProcess);
     }
@@ -64,7 +64,7 @@ public class CGEImageHandler {
 
     //intensity: filter intensity.
     //shouldProcess: This marks if the filter should be run right now.
-    //    The result will not change if you pass false for 'shouldProcess' until you call 'processingFilters'.
+    //    The result will not change if you pass false for 'shouldProcess' until you call 'processFilters'.
     public void setFilterIntensity(float intensity, boolean shouldProcess) {
         nativeSetFilterIntensity(mNativeAddress, intensity, shouldProcess);
     }
@@ -72,7 +72,7 @@ public class CGEImageHandler {
     //intensity: filter intensity.
     //index: Only the intensity of the filter on the given index will be changed.
     //shouldProcess: This marks if the filter should be run right now.
-    //    The result will not change if you pass false for 'shouldProcess' until you call 'processingFilters'.
+    //    The result will not change if you pass false for 'shouldProcess' until you call 'processFilters'.
     //return value: marks if this function worked. (It will fail when the index is out of range.)
     //    e.g. If you're running "@adjust contrast 0.5 @adjust brightness 1",
     //       Pass 0 for index to set the intensity of "@adjust contrast 0.5", the return value is true.
@@ -106,7 +106,7 @@ public class CGEImageHandler {
         nativeRevertImage(mNativeAddress);
     }
 
-    public void processingFilters() {
+    public void processFilters() {
         nativeProcessingFilters(mNativeAddress);
     }
 

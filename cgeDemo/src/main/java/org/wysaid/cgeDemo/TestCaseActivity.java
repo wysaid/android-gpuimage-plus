@@ -160,7 +160,7 @@ public class TestCaseActivity extends AppCompatActivity {
 
                     final String filterConfig = MainActivity.EFFECT_CONFIGS[i];
                     handler.setFilterWithConfig(filterConfig);
-                    handler.processingFilters();
+                    handler.processFilters();
 
                     //To accelerate this, you can add a Bitmap arg for "getResultBitmap",
                     // and reuse the Bitmap instead of recycle it every time.
