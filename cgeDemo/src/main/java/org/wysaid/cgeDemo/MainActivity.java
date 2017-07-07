@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private static final DemoClassDescription mDemos[] = new DemoClassDescription[]{
-            new DemoClassDescription("ImageDemoActivity2", "Basic Image Filter Demo"),
+            new DemoClassDescription("BasicImageDemoActivity", "Basic Image Filter Demo"),
             new DemoClassDescription("ImageDemoActivity", "Advanced Image Filter Demo"),
             new DemoClassDescription("CameraDemoActivity", "Camera Filter Demo"),
             new DemoClassDescription("SimplePlayerDemoActivity", "Simple Player Demo"),

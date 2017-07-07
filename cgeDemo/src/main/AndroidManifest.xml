@@ -36,7 +36,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ImageDemoActivity2"
+            android:name=".BasicImageDemoActivity"
             android:label="@string/title_activity_filter_demo2"/>
         <activity
             android:name=".ImageDemoActivity"

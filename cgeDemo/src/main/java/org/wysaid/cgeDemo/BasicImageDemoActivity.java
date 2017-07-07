@@ -29,7 +29,7 @@ import java.io.InputStream;
 
 // For general photo editing scene.
 
-public class ImageDemoActivity2 extends AppCompatActivity {
+public class BasicImageDemoActivity extends AppCompatActivity {
 
     protected static final String BASIC_FILTER_CONFIG = "@adjust brightness 0 @adjust contrast 1 @adjust saturation 1 @adjust sharpen 0";
     protected static final String BASIC_FILTER_NAMES[] = {
@@ -99,9 +99,9 @@ public class ImageDemoActivity2 extends AppCompatActivity {
     public static class MyButton extends AppCompatButton implements View.OnClickListener {
 
         AdjustConfig mConfig;
-        ImageDemoActivity2 mImageDemoActivity;
+        BasicImageDemoActivity mImageDemoActivity;
 
-        public MyButton(ImageDemoActivity2 context, AdjustConfig config) {
+        public MyButton(BasicImageDemoActivity context, AdjustConfig config) {
             super(context);
             mImageDemoActivity = context;
             mConfig = config;
@@ -118,7 +118,7 @@ public class ImageDemoActivity2 extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_filter2_demo);
+        setContentView(R.layout.activity_basic_filter_demo);
 
         mImageView = (ImageGLSurfaceView) findViewById(R.id.mainImageView);
         mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bgview);
@@ -212,8 +212,14 @@ public class ImageDemoActivity2 extends AppCompatActivity {
         mImageView.getResultBitmap(new ImageGLSurfaceView.QueryResultBitmapCallback() {
             @Override
             public void get(Bitmap bmp) {
-                String s = ImageUtil.saveBitmap(bmp);
+                final String s = ImageUtil.saveBitmap(bmp);
                 sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + s)));
+                mImageView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        MsgUtil.toastMsg(BasicImageDemoActivity.this, "Image saved: " + s);
+                    }
+                });
             }
         });
     }
