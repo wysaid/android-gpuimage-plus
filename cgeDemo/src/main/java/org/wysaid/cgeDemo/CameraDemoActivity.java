@@ -37,6 +37,7 @@ public class CameraDemoActivity extends AppCompatActivity {
     public final static String LOG_TAG = CameraRecordGLSurfaceView.LOG_TAG;
 
     public static CameraDemoActivity mCurrentInstance = null;
+
     public static CameraDemoActivity getInstance() {
         return mCurrentInstance;
     }
@@ -67,17 +68,16 @@ public class CameraDemoActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
-            Button btn = (Button)v;
+            Button btn = (Button) v;
 
-            if(!isValid) {
+            if (!isValid) {
                 Log.e(LOG_TAG, "Please wait for the call...");
                 return;
             }
 
             isValid = false;
 
-            if(!mCameraView.isRecording())
-            {
+            if (!mCameraView.isRecording()) {
                 btn.setText("Recording");
                 Log.i(LOG_TAG, "Start recording...");
                 mCameraView.setClearColor(1.0f, 0.0f, 0.0f, 0.3f);
@@ -96,9 +96,7 @@ public class CameraDemoActivity extends AppCompatActivity {
                         isValid = true;
                     }
                 });
-            }
-            else
-            {
+            } else {
                 showText("Recorded as: " + recordFilename);
                 btn.setText("Recorded");
                 Log.i(LOG_TAG, "End recording...");
@@ -124,7 +122,7 @@ public class CameraDemoActivity extends AppCompatActivity {
         Button takePicBtn = (Button) findViewById(R.id.takePicBtn);
         Button takeShotBtn = (Button) findViewById(R.id.takeShotBtn);
         Button recordBtn = (Button) findViewById(R.id.recordBtn);
-        mCameraView = (CameraRecordGLSurfaceView)findViewById(R.id.myGLSurfaceView);
+        mCameraView = (CameraRecordGLSurfaceView) findViewById(R.id.myGLSurfaceView);
         mCameraView.presetCameraForward(false);
         SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
 
@@ -173,10 +171,10 @@ public class CameraDemoActivity extends AppCompatActivity {
 
         LinearLayout layout = (LinearLayout) findViewById(R.id.menuLinearLayout);
 
-        for(int i = 0; i != MainActivity.EFFECT_CONFIGS.length; ++i) {
+        for (int i = 0; i != MainActivity.EFFECT_CONFIGS.length; ++i) {
             MyButtons button = new MyButtons(this, MainActivity.EFFECT_CONFIGS[i]);
             button.setAllCaps(false);
-            if(i == 0)
+            if (i == 0)
                 button.setText("None");
             else
                 button.setText("Filter" + i);
@@ -204,7 +202,7 @@ public class CameraDemoActivity extends AppCompatActivity {
 
         mCurrentInstance = this;
 
-        Button shapeBtn = (Button)findViewById(R.id.shapeBtn);
+        Button shapeBtn = (Button) findViewById(R.id.shapeBtn);
         shapeBtn.setOnClickListener(new View.OnClickListener() {
             private boolean mIsUsingShape = false;
             Bitmap mBmp;
@@ -221,7 +219,7 @@ public class CameraDemoActivity extends AppCompatActivity {
                             @Override
                             public void setMaskOK(CGEFrameRecorder recorder) {
                                 //flip mask
-                                if(mCameraView.isUsingMask())
+                                if (mCameraView.isUsingMask())
                                     recorder.setMaskFlipScale(1.0f, -1.0f);
                             }
                         });
@@ -232,7 +230,7 @@ public class CameraDemoActivity extends AppCompatActivity {
             }
         });
 
-        Button switchBtn = (Button)findViewById(R.id.switchCameraBtn);
+        Button switchBtn = (Button) findViewById(R.id.switchCameraBtn);
         switchBtn.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -280,8 +278,8 @@ public class CameraDemoActivity extends AppCompatActivity {
             }
         });
 
-        Button pauseBtn = (Button)findViewById(R.id.pauseBtn);
-        Button resumeBtn = (Button)findViewById(R.id.resumeBtn);
+        Button pauseBtn = (Button) findViewById(R.id.pauseBtn);
+        Button resumeBtn = (Button) findViewById(R.id.resumeBtn);
 
         pauseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -297,9 +295,10 @@ public class CameraDemoActivity extends AppCompatActivity {
             }
         });
 
-        Button fitViewBtn = (Button)findViewById(R.id.fitViewBtn);
+        Button fitViewBtn = (Button) findViewById(R.id.fitViewBtn);
         fitViewBtn.setOnClickListener(new View.OnClickListener() {
             boolean shouldFit = false;
+
             @Override
             public void onClick(View v) {
                 shouldFit = !shouldFit;
@@ -344,13 +343,14 @@ public class CameraDemoActivity extends AppCompatActivity {
     private View.OnClickListener mFilterSwitchListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            MyButtons btn = (MyButtons)v;
+            MyButtons btn = (MyButtons) v;
             mCameraView.setFilterWithConfig(btn.filterConfig);
             mCurrentConfig = btn.filterConfig;
         }
     };
 
     int customFilterIndex = 0;
+
     public void customFilterClicked(View view) {
         ++customFilterIndex;
         customFilterIndex %= CGENativeLibrary.cgeGetCustomFilterNum();

@@ -43,15 +43,14 @@ public class ImageDemoActivity extends AppCompatActivity {
         LinearLayout menuLayout = (LinearLayout) findViewById(R.id.menuLayout);
         menuLayout.setHorizontalScrollBarEnabled(true);
 
-        for(int i = 0; i != MainActivity.EFFECT_CONFIGS.length; ++i)
-        {
+        for (int i = 0; i != MainActivity.EFFECT_CONFIGS.length; ++i) {
             Button btn = new Button(this);
             btn.setText("filter" + i);
             btn.setOnClickListener(buttonClickListener);
             menuLayout.addView(btn);
         }
 
-        Button btn = (Button)findViewById(R.id.galleryBtn);
+        Button btn = (Button) findViewById(R.id.galleryBtn);
         btn.setOnClickListener(galleryBtnClickListener);
 
         mImageView = (ImageGLSurfaceView) findViewById(R.id.mainImageView);
@@ -82,7 +81,7 @@ public class ImageDemoActivity extends AppCompatActivity {
 
         mImageView.setDisplayMode(ImageGLSurfaceView.DisplayMode.DISPLAY_ASPECT_FIT);
 
-        SeekBar seekBar = (SeekBar)findViewById(R.id.seekBar);
+        SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -102,10 +101,10 @@ public class ImageDemoActivity extends AppCompatActivity {
         });
     }
 
-    android.view.View.OnClickListener galleryBtnClickListener = new android.view.View.OnClickListener(){
+    android.view.View.OnClickListener galleryBtnClickListener = new android.view.View.OnClickListener() {
 
         @Override
-        public  void onClick(final android.view.View view) {
+        public void onClick(final android.view.View view) {
             Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
             photoPickerIntent.setType("image/*");
             startActivityForResult(photoPickerIntent, REQUEST_CODE_PICK_IMAGE);
@@ -113,11 +112,9 @@ public class ImageDemoActivity extends AppCompatActivity {
     };
 
     public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-        switch (requestCode)
-        {
+        switch (requestCode) {
             case REQUEST_CODE_PICK_IMAGE:
-                if(resultCode == RESULT_OK)
-                {
+                if (resultCode == RESULT_OK) {
                     try {
 
                         InputStream stream = getContentResolver().openInputStream(data.getData());
@@ -127,7 +124,7 @@ public class ImageDemoActivity extends AppCompatActivity {
                         int h = bmp.getHeight();
                         float s = Math.max(w / 2048.0f, h / 2048.0f);
 
-                        if(s > 1.0f) {
+                        if (s > 1.0f) {
                             w /= s;
                             h /= s;
                             mBitmap = Bitmap.createScaledBitmap(bmp, w, h, false);
@@ -143,7 +140,8 @@ public class ImageDemoActivity extends AppCompatActivity {
                     }
 
                 }
-            default:break;
+            default:
+                break;
         }
     }
 
@@ -154,7 +152,7 @@ public class ImageDemoActivity extends AppCompatActivity {
             mImageView.post(new Runnable() {
                 @Override
                 public void run() {
-                    Button btn = (Button)view;
+                    Button btn = (Button) view;
                     String str = btn.getText().toString();
                     int index = Integer.parseInt(str.substring(6));
                     mCurrentConfig = MainActivity.EFFECT_CONFIGS[index];
@@ -281,9 +279,9 @@ public class ImageDemoActivity extends AppCompatActivity {
 
         CGEFaceTracker tracker = CGEFaceTracker.createFaceTracker();
 
-        if(tracker != null) {
+        if (tracker != null) {
 
-            if(!mBitmap.isMutable()) {
+            if (!mBitmap.isMutable()) {
                 mBitmap = mBitmap.copy(mBitmap.getConfig(), true);
             }
 

@@ -42,8 +42,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
         }
 
         @Override
-        public boolean playFailed(MediaPlayer player, final int what, final int extra)
-        {
+        public boolean playFailed(MediaPlayer player, final int what, final int extra) {
             MsgUtil.toastMsg(VideoPlayerDemoActivity.this, String.format("Error occured! Stop playing, Err code: %d, %d", what, extra));
             return true;
         }
@@ -83,11 +82,11 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_player_demo);
-        mPlayerView = (VideoPlayerGLSurfaceView)findViewById(R.id.videoGLSurfaceView);
+        mPlayerView = (VideoPlayerGLSurfaceView) findViewById(R.id.videoGLSurfaceView);
         mPlayerView.setZOrderOnTop(false);
         mPlayerView.setZOrderMediaOverlay(true);
 
-        mShapeBtn = (Button)findViewById(R.id.switchShapeBtn);
+        mShapeBtn = (Button) findViewById(R.id.switchShapeBtn);
 
         mShapeBtn.setOnClickListener(new View.OnClickListener() {
 
@@ -97,11 +96,11 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 useMask = !useMask;
-                if(useMask) {
-                    if(bmp == null)
+                if (useMask) {
+                    if (bmp == null)
                         bmp = BitmapFactory.decodeResource(getResources(), R.drawable.mask1);
 
-                    if(bmp != null) {
+                    if (bmp != null) {
                         mPlayerView.setMaskBitmap(bmp, false, new VideoPlayerGLSurfaceView.SetMaskBitmapCallback() {
                             @Override
                             public void setMaskOK(CGEFrameRenderer renderer) {
@@ -119,7 +118,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
             }
         });
 
-        mTakeshotBtn = (Button)findViewById(R.id.takeShotBtn);
+        mTakeshotBtn = (Button) findViewById(R.id.takeShotBtn);
 
         mTakeshotBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,7 +126,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
                 mPlayerView.takeShot(new VideoPlayerGLSurfaceView.TakeShotCallback() {
                     @Override
                     public void takeShotOK(Bitmap bmp) {
-                        if(bmp != null) {
+                        if (bmp != null) {
                             String s = ImageUtil.saveBitmap(bmp);
                             VideoPlayerDemoActivity.this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + s)));
                         } else {
@@ -138,7 +137,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
             }
         });
 
-        LinearLayout menuLayout = (LinearLayout)findViewById(R.id.menuLinearLayout);
+        LinearLayout menuLayout = (LinearLayout) findViewById(R.id.menuLinearLayout);
 
         {
             Button btn = new Button(this);
@@ -150,7 +149,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
                 public void onClick(View v) {
 
                     String lastVideoFileName = FileUtil.getTextContent(CameraDemoActivity.lastVideoPathFileName);
-                    if(lastVideoFileName == null) {
+                    if (lastVideoFileName == null) {
                         MsgUtil.toastMsg(VideoPlayerDemoActivity.this, "No video is recorded, please record one in the 2nd case.");
                         return;
                     }
@@ -173,7 +172,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
                 "http://wysaid.org/p/test.mp4",
         };
 
-        for(int i = 0; i != filePaths.length; ++i) {
+        for (int i = 0; i != filePaths.length; ++i) {
             MyVideoButton btn = new MyVideoButton(this);
             btn.setText("Video" + i);
             btn.videoUri = Uri.parse(filePaths[i]);
@@ -181,24 +180,25 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
             btn.setOnClickListener(btn);
             menuLayout.addView(btn);
 
-            if(i == 0) {
+            if (i == 0) {
                 btn.onClick(btn);
             }
         }
 
-        for(int i = 0; i != MainActivity.EFFECT_CONFIGS.length; ++i) {
+        for (int i = 0; i != MainActivity.EFFECT_CONFIGS.length; ++i) {
             CameraDemoActivity.MyButtons button = new CameraDemoActivity.MyButtons(this, MainActivity.EFFECT_CONFIGS[i]);
             button.setText("filter" + i);
             button.setOnClickListener(mFilterSwitchListener);
             menuLayout.addView(button);
         }
 
-        mGalleryBtn = (Button)findViewById(R.id.galleryBtn);
+        mGalleryBtn = (Button) findViewById(R.id.galleryBtn);
         mGalleryBtn.setOnClickListener(galleryBtnClickListener);
 
-        Button fitViewBtn = (Button)findViewById(R.id.fitViewBtn);
+        Button fitViewBtn = (Button) findViewById(R.id.fitViewBtn);
         fitViewBtn.setOnClickListener(new View.OnClickListener() {
             boolean shouldFit = false;
+
             @Override
             public void onClick(View v) {
                 shouldFit = !shouldFit;
@@ -214,7 +214,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
                     @Override
                     public void onBufferingUpdate(MediaPlayer mp, int percent) {
                         Log.i(Common.LOG_TAG, "Buffer update: " + percent);
-                        if(percent == 100) {
+                        if (percent == 100) {
                             Log.i(Common.LOG_TAG, "缓冲完毕!");
                             player.setOnBufferingUpdateListener(null);
                         }
@@ -248,16 +248,16 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
     private View.OnClickListener mFilterSwitchListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            CameraDemoActivity.MyButtons btn = (CameraDemoActivity.MyButtons)v;
+            CameraDemoActivity.MyButtons btn = (CameraDemoActivity.MyButtons) v;
             mPlayerView.setFilterWithConfig(btn.filterConfig);
             mCurrentConfig = btn.filterConfig;
         }
     };
 
-    android.view.View.OnClickListener galleryBtnClickListener = new android.view.View.OnClickListener(){
+    android.view.View.OnClickListener galleryBtnClickListener = new android.view.View.OnClickListener() {
 
         @Override
-        public  void onClick(final android.view.View view) {
+        public void onClick(final android.view.View view) {
             Intent videoPickerIntent = new Intent(Intent.ACTION_GET_CONTENT);
             videoPickerIntent.setType("video/*");
             startActivityForResult(videoPickerIntent, REQUEST_CODE_PICK_VIDEO);
@@ -265,11 +265,9 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
     };
 
     public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-        switch (requestCode)
-        {
+        switch (requestCode) {
             case REQUEST_CODE_PICK_VIDEO:
-                if(resultCode == RESULT_OK)
-                {
+                if (resultCode == RESULT_OK) {
 
                     mPlayerView.setVideoUri(data.getData(), new VideoPlayerGLSurfaceView.PlayPreparedCallback() {
                         @Override
@@ -279,7 +277,8 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
                         }
                     }, playCompletionCallback);
                 }
-            default: break;
+            default:
+                break;
         }
     }
 

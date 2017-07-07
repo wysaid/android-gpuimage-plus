@@ -62,29 +62,29 @@ public class MainActivity extends AppCompatActivity {
             "@style min",
             "@style max",
             "@style haze 0.5 -0.14 1 0.8 1 ",
-            "@curve R(0, 0)(71, 74)(164, 165)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20"   ,//415
-            "@curve G(0, 0)(144, 166)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20"   ,//416
-            "@curve B(0, 0)(68, 72)(149, 184)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20"   ,//417
-            "@curve R(0, 0)(71, 74)(164, 165)(255, 255) @pixblend overlay 0.357 0.863 0.882 1 40"   ,//418
-            "@curve R(0, 0)(96, 61)(154, 177)(255, 255) @pixblend overlay 0.357 0.863 0.882 1 40"   ,//419
-            "@curve R(0, 0)(152, 183)(255, 255)G(0, 0)(161, 133)(255, 255) @pixblend overlay 0.357 0.863 0.882 1 40"   ,//420
+            "@curve R(0, 0)(71, 74)(164, 165)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20",//415
+            "@curve G(0, 0)(144, 166)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20",//416
+            "@curve B(0, 0)(68, 72)(149, 184)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20",//417
+            "@curve R(0, 0)(71, 74)(164, 165)(255, 255) @pixblend overlay 0.357 0.863 0.882 1 40",//418
+            "@curve R(0, 0)(96, 61)(154, 177)(255, 255) @pixblend overlay 0.357 0.863 0.882 1 40",//419
+            "@curve R(0, 0)(152, 183)(255, 255)G(0, 0)(161, 133)(255, 255) @pixblend overlay 0.357 0.863 0.882 1 40",//420
             "@curve R(0, 0)(149, 145)(255, 255)G(0, 0)(149, 145)(255, 255)B(0, 0)(149, 145)(255, 255) @pixblend colordodge 0.937 0.482 0.835 1 20",//421
-            "@curve G(0, 0)(101, 127)(255, 255) @pixblend colordodge 0.937 0.482 0.835 1 20"   ,//422
-            "@curve B(0, 0)(70, 87)(140, 191)(255, 255) @pixblend pinlight 0.247 0.49 0.894 1 20"   ,//423
-            "@adjust saturation 0.7 @pixblend screen 0.8112 0.243 1 1 40"   ,//425
-            "@adjust saturation 0.7 @pixblend screen 1 0.243 0.69 1 30"   ,//426
+            "@curve G(0, 0)(101, 127)(255, 255) @pixblend colordodge 0.937 0.482 0.835 1 20",//422
+            "@curve B(0, 0)(70, 87)(140, 191)(255, 255) @pixblend pinlight 0.247 0.49 0.894 1 20",//423
+            "@adjust saturation 0.7 @pixblend screen 0.8112 0.243 1 1 40",//425
+            "@adjust saturation 0.7 @pixblend screen 1 0.243 0.69 1 30",//426
 
-            "@curve R(0, 0)(71, 74)(164, 165)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20"   ,//415
-            "@curve G(0, 0)(144, 166)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20"   ,//416
-            "@curve B(0, 0)(68, 72)(149, 184)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20"   ,//417
-            "@curve R(0, 0)(71, 74)(164, 165)(255, 255) @pixblend overlay 0.357 0.863 0.882 1 40"   ,//418
-            "@curve R(0, 0)(96, 61)(154, 177)(255, 255) @pixblend overlay 0.357 0.863 0.882 1 40"   ,//419
-            "@curve R(0, 0)(152, 183)(255, 255)G(0, 0)(161, 133)(255, 255) @pixblend overlay 0.357 0.863 0.882 1 40"   ,//420
+            "@curve R(0, 0)(71, 74)(164, 165)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20",//415
+            "@curve G(0, 0)(144, 166)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20",//416
+            "@curve B(0, 0)(68, 72)(149, 184)(255, 255) @pixblend screen 0.94118 0.29 0.29 1 20",//417
+            "@curve R(0, 0)(71, 74)(164, 165)(255, 255) @pixblend overlay 0.357 0.863 0.882 1 40",//418
+            "@curve R(0, 0)(96, 61)(154, 177)(255, 255) @pixblend overlay 0.357 0.863 0.882 1 40",//419
+            "@curve R(0, 0)(152, 183)(255, 255)G(0, 0)(161, 133)(255, 255) @pixblend overlay 0.357 0.863 0.882 1 40",//420
             "@curve R(0, 0)(149, 145)(255, 255)G(0, 0)(149, 145)(255, 255)B(0, 0)(149, 145)(255, 255) @pixblend colordodge 0.937 0.482 0.835 1 20",//421
-            "@curve G(0, 0)(101, 127)(255, 255) @pixblend colordodge 0.937 0.482 0.835 1 20"   ,//422
-            "@curve B(0, 0)(70, 87)(140, 191)(255, 255) @pixblend pinlight 0.247 0.49 0.894 1 20"   ,//423
-            "@adjust saturation 0.7 @pixblend screen 0.8112 0.243 1 1 40"   ,//425
-            "@adjust saturation 0.7 @pixblend screen 1 0.243 0.69 1 30"   ,//426
+            "@curve G(0, 0)(101, 127)(255, 255) @pixblend colordodge 0.937 0.482 0.835 1 20",//422
+            "@curve B(0, 0)(70, 87)(140, 191)(255, 255) @pixblend pinlight 0.247 0.49 0.894 1 20",//423
+            "@adjust saturation 0.7 @pixblend screen 0.8112 0.243 1 1 40",//425
+            "@adjust saturation 0.7 @pixblend screen 1 0.243 0.69 1 30",//426
 
             "@curve R(0, 0)(117, 95)(155, 171)(179, 225)(255, 255)G(0, 0)(94, 66)(155, 176)(255, 255)B(0, 0)(48, 59)(141, 130)(255, 224)",//5
             "@curve R(0, 0)(69, 63)(105, 138)(151, 222)(255, 255)G(0, 0)(67, 51)(135, 191)(255, 255)B(0, 0)(86, 76)(150, 212)(255, 255)",//6
@@ -188,12 +188,14 @@ public class MainActivity extends AppCompatActivity {
 
     public class DemoButton extends Button implements View.OnClickListener {
         private DemoClassDescription mDemo;
+
         public void setDemo(DemoClassDescription demo) {
             mDemo = demo;
             setAllCaps(false);
             setText(mDemo.title);
             setOnClickListener(this);
         }
+
         DemoButton(Context context) {
             super(context);
         }
@@ -206,11 +208,11 @@ public class MainActivity extends AppCompatActivity {
                 cls = Class.forName("org.wysaid.cgeDemo." + mDemo.activityName);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
-                return ;
+                return;
             }
 
             try {
-                if(cls != null)
+                if (cls != null)
                     startActivity(new Intent(MainActivity.this, cls));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -226,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
 
         LinearLayout mLayout = (LinearLayout) findViewById(R.id.buttonLayout);
 
-        for(DemoClassDescription demo : mDemos) {
+        for (DemoClassDescription demo : mDemos) {
             DemoButton btn = new DemoButton(this);
             btn.setDemo(demo);
             mLayout.addView(btn);

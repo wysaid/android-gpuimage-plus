@@ -21,7 +21,7 @@ import javax.microedition.khronos.opengles.GL10;
  * Mail: admin@wysaid.org
  * blog: wysaid.org
  */
-public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
+public class ImageGLSurfaceView extends GLSurfaceView implements Renderer {
 
     public static final String LOG_TAG = Common.LOG_TAG;
 
@@ -66,7 +66,7 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
 
     public void setFilterWithConfig(final String config) {
 
-        if(mImageHandler == null)
+        if (mImageHandler == null)
             return;
 
         queueEvent(new Runnable() {
@@ -88,15 +88,15 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
 
     //See: CGEImageHandler.setFilterIntensityAtIndex
     public void setFilterIntensityForIndex(final float intensity, final int index) {
-        if(mImageHandler == null)
+        if (mImageHandler == null)
             return;
 
         mFilterIntensity = intensity;
 
         synchronized (mSettingIntensityLock) {
 
-            if(mSettingIntensityCount <= 0) {
-                Log.i(LOG_TAG,  "Too fast, skipping...");
+            if (mSettingIntensityCount <= 0) {
+                Log.i(LOG_TAG, "Too fast, skipping...");
                 return;
             }
             --mSettingIntensityCount;
@@ -121,15 +121,15 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
     }
 
     public void setFilterIntensity(final float intensity) {
-        if(mImageHandler == null)
+        if (mImageHandler == null)
             return;
 
         mFilterIntensity = intensity;
 
         synchronized (mSettingIntensityLock) {
 
-            if(mSettingIntensityCount <= 0) {
-                Log.i(LOG_TAG,  "Too fast, skipping...");
+            if (mSettingIntensityCount <= 0) {
+                Log.i(LOG_TAG, "Too fast, skipping...");
                 return;
             }
             --mSettingIntensityCount;
@@ -155,10 +155,10 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
 
     public void setImageBitmap(final Bitmap bmp) {
 
-        if(bmp == null)
+        if (bmp == null)
             return;
 
-        if(mImageHandler == null) {
+        if (mImageHandler == null) {
             Log.e(LOG_TAG, "Handler not initialized!");
             return;
         }
@@ -170,12 +170,12 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
             @Override
             public void run() {
 
-                if(mImageHandler == null) {
+                if (mImageHandler == null) {
                     Log.e(LOG_TAG, "set image after release!!");
                     return;
                 }
 
-                if(mImageHandler.initWidthBitmap(bmp)) {
+                if (mImageHandler.initWidthBitmap(bmp)) {
 
                     calcViewport();
                     requestRender();
@@ -193,7 +193,7 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
 
     public void getResultBitmap(final QueryResultBitmapCallback callback) {
 
-        if(callback == null)
+        if (callback == null)
             return;
 
         queueEvent(new Runnable() {
@@ -225,6 +225,7 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
     }
 
     protected OnSurfaceCreatedCallback mSurfaceCreatedCallback;
+
     public void setSurfaceCreatedCallback(OnSurfaceCreatedCallback callback) {
         mSurfaceCreatedCallback = callback;
     }
@@ -240,7 +241,7 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
 
         mImageHandler.setDrawerFlipScale(1.0f, -1.0f);
 
-        if(mSurfaceCreatedCallback != null) {
+        if (mSurfaceCreatedCallback != null) {
             mSurfaceCreatedCallback.surfaceCreated();
         }
     }
@@ -259,7 +260,7 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-        if(mImageHandler == null)
+        if (mImageHandler == null)
             return;
 
         GLES20.glViewport(mRenderViewport.x, mRenderViewport.y, mRenderViewport.width, mRenderViewport.height);
@@ -268,13 +269,13 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
 
     public void release() {
 
-        if(mImageHandler != null) {
+        if (mImageHandler != null) {
             queueEvent(new Runnable() {
                 @Override
                 public void run() {
                     Log.i(LOG_TAG, "ImageGLSurfaceView release...");
 
-                    if(mImageHandler != null) {
+                    if (mImageHandler != null) {
                         mImageHandler.release();
                         mImageHandler = null;
                     }
@@ -285,7 +286,7 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
 
     protected void calcViewport() {
 
-        if(mDisplayMode == DisplayMode.DISPLAY_SCALE_TO_FILL) {
+        if (mDisplayMode == DisplayMode.DISPLAY_SCALE_TO_FILL) {
             mRenderViewport.x = 0;
             mRenderViewport.y = 0;
             mRenderViewport.width = mViewWidth;
@@ -295,42 +296,33 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
 
         float scaling;
 
-        scaling = mImageWidth / (float)mImageHeight;
+        scaling = mImageWidth / (float) mImageHeight;
 
-        float viewRatio = mViewWidth / (float)mViewHeight;
+        float viewRatio = mViewWidth / (float) mViewHeight;
         float s = scaling / viewRatio;
 
         int w, h;
 
-        switch (mDisplayMode)
-        {
-            case DISPLAY_ASPECT_FILL:
-            {
+        switch (mDisplayMode) {
+            case DISPLAY_ASPECT_FILL: {
                 //AspectFill
-                if(s > 1.0)
-                {
-                    w = (int)(mViewHeight * scaling);
+                if (s > 1.0) {
+                    w = (int) (mViewHeight * scaling);
                     h = mViewHeight;
-                }
-                else
-                {
+                } else {
                     w = mViewWidth;
-                    h = (int)(mViewWidth / scaling);
+                    h = (int) (mViewWidth / scaling);
                 }
             }
             break;
-            case DISPLAY_ASPECT_FIT:
-            {
+            case DISPLAY_ASPECT_FIT: {
                 //AspectFit
-                if(s < 1.0)
-                {
-                    w = (int)(mViewHeight * scaling);
+                if (s < 1.0) {
+                    w = (int) (mViewHeight * scaling);
                     h = mViewHeight;
-                }
-                else
-                {
+                } else {
                     w = mViewWidth;
-                    h = (int)(mViewWidth / scaling);
+                    h = (int) (mViewWidth / scaling);
                 }
             }
             break;
@@ -339,7 +331,6 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer{
                 Log.i(LOG_TAG, "Error occured, please check the code...");
                 return;
         }
-
 
 
         mRenderViewport.width = w;

@@ -40,7 +40,7 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
         void startRecordingOver(boolean success);
     }
 
-    public void startRecording(final String filename){
+    public void startRecording(final String filename) {
         startRecording(filename, null);
     }
 
@@ -96,7 +96,7 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
             mShouldRecord = false;
         }
 
-        if(mFrameRecorder == null) {
+        if (mFrameRecorder == null) {
             Log.e(LOG_TAG, "Error: endRecording after release!!");
             return;
         }
@@ -130,9 +130,9 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
     public void stopPreview() {
 
         synchronized (mRecordStateLock) {
-            if(mShouldRecord) {
+            if (mShouldRecord) {
                 Log.e(LOG_TAG, "The camera is recording! cannot stop!");
-                return ;
+                return;
             }
         }
 
@@ -141,7 +141,7 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
 
     public void joinAudioRecording() {
 
-        if(mAudioThread != null) {
+        if (mAudioThread != null) {
             try {
                 mAudioThread.join();
                 mAudioThread = null;
@@ -163,26 +163,25 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
         ShortBuffer audioBuffer;
         StartRecordingCallback recordingCallback;
 
-        private AudioRecordRunnable(StartRecordingCallback callback)
-        {
+        private AudioRecordRunnable(StartRecordingCallback callback) {
             recordingCallback = callback;
             try {
                 bufferSize = AudioRecord.getMinBufferSize(sampleRate,
                         AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
                 Log.i(LOG_TAG, "audio min buffer size: " + bufferSize);
                 audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate,
-                        AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,bufferSize);
+                        AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
 //                audioData = new short[bufferSize];
                 audioBufferRef = ByteBuffer.allocateDirect(bufferSize * 2).order(ByteOrder.nativeOrder());
                 audioBuffer = audioBufferRef.asShortBuffer();
             } catch (Exception e) {
-                if(audioRecord != null){
+                if (audioRecord != null) {
                     audioRecord.release();
                     audioRecord = null;
                 }
             }
 
-            if(audioRecord == null && recordingCallback != null) {
+            if (audioRecord == null && recordingCallback != null) {
                 recordingCallback.startRecordingOver(false);
                 recordingCallback = null;
             }
@@ -192,21 +191,17 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
             this.isInitialized = false;
 
-            if(this.audioRecord == null) {
+            if (this.audioRecord == null) {
                 recordingCallback.startRecordingOver(false);
                 recordingCallback = null;
                 return;
             }
 
             //判断音频录制是否被初始化
-            while (this.audioRecord.getState() == 0)
-            {
-                try
-                {
+            while (this.audioRecord.getState() == 0) {
+                try {
                     Thread.sleep(100L);
-                }
-                catch (InterruptedException localInterruptedException)
-                {
+                } catch (InterruptedException localInterruptedException) {
                     localInterruptedException.printStackTrace();
                 }
             }
@@ -215,22 +210,22 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
             try {
                 this.audioRecord.startRecording();
             } catch (Exception e) {
-                if(recordingCallback != null) {
+                if (recordingCallback != null) {
                     recordingCallback.startRecordingOver(false);
                     recordingCallback = null;
                 }
                 return;
             }
 
-            if(this.audioRecord.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING) {
-                if(recordingCallback != null) {
+            if (this.audioRecord.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING) {
+                if (recordingCallback != null) {
                     recordingCallback.startRecordingOver(false);
                     recordingCallback = null;
                 }
                 return;
             }
 
-            if(recordingCallback != null) {
+            if (recordingCallback != null) {
                 recordingCallback.startRecordingOver(true);
                 recordingCallback = null;
             }
@@ -238,7 +233,7 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
 
             while (true) {
                 synchronized (mRecordStateLock) {
-                    if(!mShouldRecord) //&& mFrameRecorder.getVideoStreamtime() <= mFrameRecorder.getAudioStreamtime()
+                    if (!mShouldRecord) //&& mFrameRecorder.getVideoStreamtime() <= mFrameRecorder.getAudioStreamtime()
                         break;
                 }
 

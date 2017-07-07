@@ -39,9 +39,11 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
     private TextureRenderer.Viewport mRenderViewport = new TextureRenderer.Viewport();
     private float[] mTransformMatrix = new float[16];
     private boolean mIsUsingMask = false;
+
     public boolean isUsingMask() {
         return mIsUsingMask;
     }
+
     private float mMaskAspectRatio = 1.0f;
 
     private int mViewWidth = 1000;
@@ -62,7 +64,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
     public void setFitFullView(boolean fit) {
         mFitFullView = fit;
-        if(mFrameRenderer != null)
+        if (mFrameRenderer != null)
             calcViewport();
     }
 
@@ -115,7 +117,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         mPreparedCallback = preparedCallback;
         mPlayCompletionCallback = completionCallback;
 
-        if(mFrameRenderer != null) {
+        if (mFrameRenderer != null) {
 
             queueEvent(new Runnable() {
                 @Override
@@ -138,7 +140,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
             @Override
             public void run() {
 
-                if(mFrameRenderer != null) {
+                if (mFrameRenderer != null) {
                     mFrameRenderer.setFilterWidthConfig(config);
                 } else {
                     Log.e(LOG_TAG, "setFilterWithConfig after release!!");
@@ -151,7 +153,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         queueEvent(new Runnable() {
             @Override
             public void run() {
-                if(mFrameRenderer != null) {
+                if (mFrameRenderer != null) {
                     mFrameRenderer.setFilterIntensity(intensity);
                 } else {
                     Log.e(LOG_TAG, "setFilterIntensity after release!!");
@@ -206,7 +208,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
     }
 
     public synchronized MediaPlayer getPlayer() {
-        if(mPlayer == null) {
+        if (mPlayer == null) {
             Log.e(LOG_TAG, "Player is not initialized!");
         }
         return mPlayer;
@@ -223,10 +225,9 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
         assert callback != null : "无意义操作!";
 
-        if(mFrameRenderer == null) {
+        if (mFrameRenderer == null) {
             mOnCreateCallback = callback;
-        }
-        else {
+        } else {
             // 已经创建完毕， 直接执行
             queueEvent(new Runnable() {
                 @Override
@@ -260,7 +261,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glDisable(GLES20.GL_STENCIL_TEST);
 
-        if(mOnCreateCallback != null) {
+        if (mOnCreateCallback != null) {
             mOnCreateCallback.createOK();
         }
 
@@ -287,33 +288,33 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
         Log.i(LOG_TAG, "Video player view release...");
 
-        if(mPlayer != null) {
+        if (mPlayer != null) {
             queueEvent(new Runnable() {
                 @Override
                 public void run() {
 
                     Log.i(LOG_TAG, "Video player view release run...");
 
-                    if(mPlayer != null) {
+                    if (mPlayer != null) {
 
                         mPlayer.setSurface(null);
-                        if(mPlayer.isPlaying())
+                        if (mPlayer.isPlaying())
                             mPlayer.stop();
                         mPlayer.release();
                         mPlayer = null;
                     }
 
-                    if(mFrameRenderer != null) {
+                    if (mFrameRenderer != null) {
                         mFrameRenderer.release();
                         mFrameRenderer = null;
                     }
 
-                    if(mSurfaceTexture != null) {
+                    if (mSurfaceTexture != null) {
                         mSurfaceTexture.release();
                         mSurfaceTexture = null;
                     }
 
-                    if(mVideoTextureID != 0) {
+                    if (mVideoTextureID != 0) {
                         GLES20.glDeleteTextures(1, new int[]{mVideoTextureID}, 0);
                         mVideoTextureID = 0;
                     }
@@ -338,7 +339,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
     @Override
     public void onDrawFrame(GL10 gl) {
 
-        if(mSurfaceTexture == null || mFrameRenderer == null) {
+        if (mSurfaceTexture == null || mFrameRenderer == null) {
             return;
         }
 
@@ -370,7 +371,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
         requestRender();
 
-        if(mLastTimestamp2 == 0)
+        if (mLastTimestamp2 == 0)
             mLastTimestamp2 = System.currentTimeMillis();
 
         long currentTimestamp = System.currentTimeMillis();
@@ -378,7 +379,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
         ++mFramesCount2;
         mTimeCount2 += currentTimestamp - mLastTimestamp2;
         mLastTimestamp2 = currentTimestamp;
-        if(mTimeCount2 >= 1e3) {
+        if (mTimeCount2 >= 1e3) {
             Log.i(LOG_TAG, String.format("播放帧率: %d", mFramesCount2));
             mTimeCount2 -= 1e3;
             mFramesCount2 = 0;
@@ -388,34 +389,34 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
     private void calcViewport() {
         float scaling;
 
-        if(mIsUsingMask) {
+        if (mIsUsingMask) {
             scaling = mMaskAspectRatio;
         } else {
-            scaling = mVideoWidth / (float)mVideoHeight;
+            scaling = mVideoWidth / (float) mVideoHeight;
         }
 
-        float viewRatio = mViewWidth / (float)mViewHeight;
+        float viewRatio = mViewWidth / (float) mViewHeight;
         float s = scaling / viewRatio;
 
         int w, h;
 
-        if(mFitFullView) {
+        if (mFitFullView) {
             //撑满全部view(内容大于view)
-            if(s > 1.0) {
-                w = (int)(mViewHeight * scaling);
+            if (s > 1.0) {
+                w = (int) (mViewHeight * scaling);
                 h = mViewHeight;
             } else {
                 w = mViewWidth;
-                h = (int)(mViewWidth / scaling);
+                h = (int) (mViewWidth / scaling);
             }
         } else {
             //显示全部内容(内容小于view)
-            if(s > 1.0) {
+            if (s > 1.0) {
                 w = mViewWidth;
-                h = (int)(mViewWidth / scaling);
+                h = (int) (mViewWidth / scaling);
             } else {
                 h = mViewHeight;
-                w = (int)(mViewHeight * scaling);
+                w = (int) (mViewHeight * scaling);
             }
         }
 
@@ -445,12 +446,12 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
             e.printStackTrace();
             Log.e(LOG_TAG, "useUri failed");
 
-            if(mPlayCompletionCallback != null) {
+            if (mPlayCompletionCallback != null) {
                 this.post(new Runnable() {
                     @Override
                     public void run() {
-                        if(mPlayCompletionCallback != null) {
-                            if(!mPlayCompletionCallback.playFailed(mPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, MediaPlayer.MEDIA_ERROR_UNSUPPORTED))
+                        if (mPlayCompletionCallback != null) {
+                            if (!mPlayCompletionCallback.playFailed(mPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, MediaPlayer.MEDIA_ERROR_UNSUPPORTED))
                                 mPlayCompletionCallback.playComplete(mPlayer);
                         }
                     }
@@ -459,7 +460,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
             return;
         }
 
-        if(mPlayerInitCallback != null) {
+        if (mPlayerInitCallback != null) {
             mPlayerInitCallback.initPlayer(mPlayer);
         }
 
@@ -483,11 +484,11 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
                     @Override
                     public void run() {
 
-                        if(mFrameRenderer == null) {
+                        if (mFrameRenderer == null) {
                             mFrameRenderer = new CGEFrameRenderer();
                         }
 
-                        if(mFrameRenderer.init(mVideoWidth, mVideoHeight, mVideoWidth, mVideoHeight)) {
+                        if (mFrameRenderer.init(mVideoWidth, mVideoHeight, mVideoWidth, mVideoHeight)) {
                             //Keep right orientation for source texture blending
                             mFrameRenderer.setSrcFlipScale(1.0f, -1.0f);
                             mFrameRenderer.setRenderFlipScale(1.0f, -1.0f);
@@ -521,14 +522,14 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
         try {
             mPlayer.prepareAsync();
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.i(LOG_TAG, String.format("Error handled: %s, play failure handler would be called!", e.toString()));
-            if(mPlayCompletionCallback != null) {
+            if (mPlayCompletionCallback != null) {
                 this.post(new Runnable() {
                     @Override
                     public void run() {
-                        if(mPlayCompletionCallback != null) {
-                            if(!mPlayCompletionCallback.playFailed(mPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, MediaPlayer.MEDIA_ERROR_UNSUPPORTED))
+                        if (mPlayCompletionCallback != null) {
+                            if (!mPlayCompletionCallback.playFailed(mPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, MediaPlayer.MEDIA_ERROR_UNSUPPORTED))
                                 mPlayCompletionCallback.playComplete(mPlayer);
                         }
                     }
@@ -546,7 +547,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
     public synchronized void takeShot(final TakeShotCallback callback) {
         assert callback != null : "callback must not be null!";
 
-        if(mFrameRenderer == null) {
+        if (mFrameRenderer == null) {
             Log.e(LOG_TAG, "Drawer not initialized!");
             callback.takeShotOK(null);
             return;

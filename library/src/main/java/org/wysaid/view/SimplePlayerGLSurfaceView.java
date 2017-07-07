@@ -38,12 +38,12 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
 
     //setTextureRenderer 必须在OpenGL 线程调用!
     public void setTextureRenderer(TextureRenderer drawer) {
-        if(mDrawer == null) {
+        if (mDrawer == null) {
             Log.e(LOG_TAG, "Invalid Drawer!");
             return;
         }
 
-        if(mDrawer != drawer) {
+        if (mDrawer != drawer) {
             mDrawer.release();
             mDrawer = drawer;
             calcViewport();
@@ -53,9 +53,11 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
     private TextureRenderer.Viewport mRenderViewport = new TextureRenderer.Viewport();
     private float[] mTransformMatrix = new float[16];
     private boolean mIsUsingMask = false;
+
     public boolean isUsingMask() {
         return mIsUsingMask;
     }
+
     private float mMaskAspectRatio = 1.0f;
     private float mDrawerFlipScaleX = 1.0f;
     private float mDrawerFlipScaleY = 1.0f;
@@ -78,7 +80,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
 
     public void setFitFullView(boolean fit) {
         mFitFullView = fit;
-        if(mDrawer != null)
+        if (mDrawer != null)
             calcViewport();
     }
 
@@ -131,7 +133,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
         mPreparedCallback = preparedCallback;
         mPlayCompletionCallback = completionCallback;
 
-        if(mDrawer != null) {
+        if (mDrawer != null) {
 
             queueEvent(new Runnable() {
                 @Override
@@ -154,6 +156,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
     //否则调用 unsetMaskOK
     public interface SetMaskBitmapCallback {
         void setMaskOK(TextureRendererMask renderer);
+
         void unsetMaskOK(TextureRenderer renderer);
     }
 
@@ -163,7 +166,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
 
     public synchronized void setMaskBitmap(final Bitmap bmp, final boolean shouldRecycle, final SetMaskBitmapCallback callback) {
 
-        if(mDrawer == null) {
+        if (mDrawer == null) {
             Log.e(LOG_TAG, "setMaskBitmap after release!");
             return;
         }
@@ -172,16 +175,16 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
             @Override
             public void run() {
 
-                if(bmp == null) {
+                if (bmp == null) {
                     Log.i(LOG_TAG, "Cancel Mask Bitmap!");
 
                     setMaskTexture(0, 1.0f);
 
-                    if(callback != null) {
+                    if (callback != null) {
                         callback.unsetMaskOK(mDrawer);
                     }
 
-                    return ;
+                    return;
                 }
 
                 Log.i(LOG_TAG, "Use Mask Bitmap!");
@@ -197,10 +200,10 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
 
                 setMaskTexture(texID[0], bmp.getWidth() / (float) bmp.getHeight());
 
-                if(callback != null && mDrawer instanceof TextureRendererMask) {
-                    callback.setMaskOK((TextureRendererMask)mDrawer);
+                if (callback != null && mDrawer instanceof TextureRendererMask) {
+                    callback.setMaskOK((TextureRendererMask) mDrawer);
                 }
-                if(shouldRecycle)
+                if (shouldRecycle)
                     bmp.recycle();
 
             }
@@ -210,15 +213,14 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
     public synchronized void setMaskTexture(int texID, float aspectRatio) {
         Log.i(LOG_TAG, "setMaskTexture... ");
 
-        if(texID == 0) {
-            if(mDrawer instanceof TextureRendererMask) {
+        if (texID == 0) {
+            if (mDrawer instanceof TextureRendererMask) {
                 mDrawer.release();
                 mDrawer = TextureRendererDrawOrigin.create(true);
             }
             mIsUsingMask = false;
-        }
-        else {
-            if(!(mDrawer instanceof TextureRendererMask)) {
+        } else {
+            if (!(mDrawer instanceof TextureRendererMask)) {
                 mDrawer.release();
                 TextureRendererMask drawer = TextureRendererMask.create(true);
                 assert drawer != null : "Drawer Create Failed!";
@@ -233,7 +235,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
     }
 
     public synchronized MediaPlayer getPlayer() {
-        if(mPlayer == null) {
+        if (mPlayer == null) {
             Log.e(LOG_TAG, "Player is not initialized!");
         }
         return mPlayer;
@@ -250,10 +252,9 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
 
         assert callback != null : "无意义操作!";
 
-        if(mDrawer == null) {
+        if (mDrawer == null) {
             mOnCreateCallback = callback;
-        }
-        else {
+        } else {
             // 已经创建完毕， 直接执行
             queueEvent(new Runnable() {
                 @Override
@@ -288,11 +289,11 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
         GLES20.glDisable(GLES20.GL_STENCIL_TEST);
 
         mDrawer = TextureRendererDrawOrigin.create(true);
-        if(mDrawer == null) {
+        if (mDrawer == null) {
             Log.e(LOG_TAG, "Create Drawer Failed!");
             return;
         }
-        if(mOnCreateCallback != null) {
+        if (mOnCreateCallback != null) {
             mOnCreateCallback.createOK();
         }
 
@@ -319,33 +320,33 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
 
         Log.i(LOG_TAG, "Video player view release...");
 
-        if(mPlayer != null) {
+        if (mPlayer != null) {
             queueEvent(new Runnable() {
                 @Override
                 public void run() {
 
                     Log.i(LOG_TAG, "Video player view release run...");
 
-                    if(mPlayer != null) {
+                    if (mPlayer != null) {
 
                         mPlayer.setSurface(null);
-                        if(mPlayer.isPlaying())
+                        if (mPlayer.isPlaying())
                             mPlayer.stop();
                         mPlayer.release();
                         mPlayer = null;
                     }
 
-                    if(mDrawer != null) {
+                    if (mDrawer != null) {
                         mDrawer.release();
                         mDrawer = null;
                     }
 
-                    if(mSurfaceTexture != null) {
+                    if (mSurfaceTexture != null) {
                         mSurfaceTexture.release();
                         mSurfaceTexture = null;
                     }
 
-                    if(mVideoTextureID != 0) {
+                    if (mVideoTextureID != 0) {
                         GLES20.glDeleteTextures(1, new int[]{mVideoTextureID}, 0);
                         mVideoTextureID = 0;
                     }
@@ -370,7 +371,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
     @Override
     public void onDrawFrame(GL10 gl) {
 
-        if(mSurfaceTexture == null) {
+        if (mSurfaceTexture == null) {
             return;
         }
 
@@ -399,7 +400,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
         requestRender();
 
-        if(mLastTimestamp2 == 0)
+        if (mLastTimestamp2 == 0)
             mLastTimestamp2 = System.currentTimeMillis();
 
         long currentTimestamp = System.currentTimeMillis();
@@ -407,7 +408,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
         ++mFramesCount2;
         mTimeCount2 += currentTimestamp - mLastTimestamp2;
         mLastTimestamp2 = currentTimestamp;
-        if(mTimeCount2 >= 1e3) {
+        if (mTimeCount2 >= 1e3) {
             Log.i(LOG_TAG, String.format("播放帧率: %d", mFramesCount2));
             mTimeCount2 -= 1e3;
             mFramesCount2 = 0;
@@ -417,12 +418,12 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
     private void calcViewport() {
         float scaling;
 
-        if(mIsUsingMask) {
+        if (mIsUsingMask) {
             flushMaskAspectRatio();
             scaling = mMaskAspectRatio;
         } else {
             mDrawer.setFlipscale(mDrawerFlipScaleX, mDrawerFlipScaleY);
-            scaling = mVideoWidth / (float)mVideoHeight;
+            scaling = mVideoWidth / (float) mVideoHeight;
         }
 
         float viewRatio = mViewWidth / (float) mViewHeight;
@@ -430,23 +431,23 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
 
         int w, h;
 
-        if(mFitFullView) {
+        if (mFitFullView) {
             //撑满全部view(内容大于view)
-            if(s > 1.0) {
-                w = (int)(mViewHeight * scaling);
+            if (s > 1.0) {
+                w = (int) (mViewHeight * scaling);
                 h = mViewHeight;
             } else {
                 w = mViewWidth;
-                h = (int)(mViewWidth / scaling);
+                h = (int) (mViewWidth / scaling);
             }
         } else {
             //显示全部内容(内容小于view)
-            if(s > 1.0) {
+            if (s > 1.0) {
                 w = mViewWidth;
-                h = (int)(mViewWidth / scaling);
+                h = (int) (mViewWidth / scaling);
             } else {
                 h = mViewHeight;
-                w = (int)(mViewHeight * scaling);
+                w = (int) (mViewHeight * scaling);
             }
         }
 
@@ -479,12 +480,12 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
             e.printStackTrace();
             Log.e(LOG_TAG, "useUri failed");
 
-            if(mPlayCompletionCallback != null) {
+            if (mPlayCompletionCallback != null) {
                 this.post(new Runnable() {
                     @Override
                     public void run() {
-                        if(mPlayCompletionCallback != null) {
-                            if(!mPlayCompletionCallback.playFailed(mPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, MediaPlayer.MEDIA_ERROR_UNSUPPORTED))
+                        if (mPlayCompletionCallback != null) {
+                            if (!mPlayCompletionCallback.playFailed(mPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, MediaPlayer.MEDIA_ERROR_UNSUPPORTED))
                                 mPlayCompletionCallback.playComplete(mPlayer);
                         }
                     }
@@ -493,7 +494,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
             return;
         }
 
-        if(mPlayerInitCallback != null) {
+        if (mPlayerInitCallback != null) {
             mPlayerInitCallback.initPlayer(mPlayer);
         }
 
@@ -542,14 +543,14 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
 
         try {
             mPlayer.prepareAsync();
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.i(LOG_TAG, String.format("Error handled: %s, play failure handler would be called!", e.toString()));
-            if(mPlayCompletionCallback != null) {
+            if (mPlayCompletionCallback != null) {
                 this.post(new Runnable() {
                     @Override
                     public void run() {
-                        if(mPlayCompletionCallback != null) {
-                            if(!mPlayCompletionCallback.playFailed(mPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, MediaPlayer.MEDIA_ERROR_UNSUPPORTED))
+                        if (mPlayCompletionCallback != null) {
+                            if (!mPlayCompletionCallback.playFailed(mPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, MediaPlayer.MEDIA_ERROR_UNSUPPORTED))
                                 mPlayCompletionCallback.playComplete(mPlayer);
                         }
                     }
@@ -561,11 +562,11 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
 
     private void flushMaskAspectRatio() {
 
-        float dstRatio = mVideoWidth / (float)mVideoHeight;
+        float dstRatio = mVideoWidth / (float) mVideoHeight;
 
         float s = dstRatio / mMaskAspectRatio;
 
-        if(s > 1.0f) {
+        if (s > 1.0f) {
             mDrawer.setFlipscale(mDrawerFlipScaleX / s, mDrawerFlipScaleY);
         } else {
             mDrawer.setFlipscale(mDrawerFlipScaleX, s * mDrawerFlipScaleY);
@@ -580,7 +581,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
     public synchronized void takeShot(final TakeShotCallback callback) {
         assert callback != null : "callback must not be null!";
 
-        if(mDrawer == null) {
+        if (mDrawer == null) {
             Log.e(LOG_TAG, "Drawer not initialized!");
             callback.takeShotOK(null);
             return;

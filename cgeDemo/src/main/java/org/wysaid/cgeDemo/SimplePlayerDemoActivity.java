@@ -45,8 +45,7 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
         }
 
         @Override
-        public boolean playFailed(MediaPlayer player, final int what, final int extra)
-        {
+        public boolean playFailed(MediaPlayer player, final int what, final int extra) {
             MsgUtil.toastMsg(SimplePlayerDemoActivity.this, String.format("Error occured! Stop playing, Err code: %d, %d", what, extra));
             return true;
         }
@@ -73,9 +72,9 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             String msg = "Start playing ";
-                            if(videoUri.getHost() != null)
+                            if (videoUri.getHost() != null)
                                 msg += videoUri.getHost();
-                            if(videoUri.getPath() != null)
+                            if (videoUri.getPath() != null)
                                 msg += videoUri.getPath();
 
                             MsgUtil.toastMsg(SimplePlayerDemoActivity.this, msg);
@@ -92,10 +91,10 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_simple_player_demo);
-        mPlayerView = (SimplePlayerGLSurfaceView)findViewById(R.id.videoGLSurfaceView);
+        mPlayerView = (SimplePlayerGLSurfaceView) findViewById(R.id.videoGLSurfaceView);
 //        mPlayerView.setZOrderOnTop(false);
 
-        mShapeBtn = (Button)findViewById(R.id.switchShapeBtn);
+        mShapeBtn = (Button) findViewById(R.id.switchShapeBtn);
 
         mShapeBtn.setOnClickListener(new View.OnClickListener() {
 
@@ -105,15 +104,15 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 useMask = !useMask;
-                if(useMask) {
-                    if(bmp == null)
+                if (useMask) {
+                    if (bmp == null)
                         bmp = BitmapFactory.decodeResource(getResources(), R.drawable.mask1);
 
-                    if(bmp != null) {
+                    if (bmp != null) {
                         mPlayerView.setMaskBitmap(bmp, false, new SimplePlayerGLSurfaceView.SetMaskBitmapCallback() {
                             @Override
                             public void setMaskOK(TextureRendererMask renderer) {
-                                if(mPlayerView.isUsingMask()) {
+                                if (mPlayerView.isUsingMask()) {
                                     renderer.setMaskFlipscale(1.0f, -1.0f);
                                 }
                             }
@@ -131,7 +130,7 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
             }
         });
 
-        mTakeshotBtn = (Button)findViewById(R.id.takeShotBtn);
+        mTakeshotBtn = (Button) findViewById(R.id.takeShotBtn);
 
         mTakeshotBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,7 +138,7 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
                 mPlayerView.takeShot(new SimplePlayerGLSurfaceView.TakeShotCallback() {
                     @Override
                     public void takeShotOK(Bitmap bmp) {
-                        if(bmp != null) {
+                        if (bmp != null) {
                             final String s = ImageUtil.saveBitmap(bmp);
                             sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + s)));
                             mPlayerView.post(new Runnable() {
@@ -148,8 +147,7 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
                                     MsgUtil.toastMsg(SimplePlayerDemoActivity.this, "file " + s + " saved!");
                                 }
                             });
-                        }
-                        else {
+                        } else {
                             Log.e(Common.LOG_TAG, "take shot failed!");
                         }
                     }
@@ -157,7 +155,7 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
             }
         });
 
-        LinearLayout menuLayout = (LinearLayout)findViewById(R.id.menuLinearLayout);
+        LinearLayout menuLayout = (LinearLayout) findViewById(R.id.menuLinearLayout);
 
         String[] filePaths = {
                 "android.resource://" + getPackageName() + "/" + R.raw.test,
@@ -175,7 +173,7 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
                 public void onClick(View v) {
 
                     String lastVideoFileName = FileUtil.getTextContent(CameraDemoActivity.lastVideoPathFileName);
-                    if(lastVideoFileName == null) {
+                    if (lastVideoFileName == null) {
                         MsgUtil.toastMsg(SimplePlayerDemoActivity.this, "No video is recorded, please record one in the 2nd case.");
                         return;
                     }
@@ -192,7 +190,7 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
             });
         }
 
-        for(int i = 0; i != filePaths.length; ++i) {
+        for (int i = 0; i != filePaths.length; ++i) {
             MyVideoButton btn = new MyVideoButton(this);
             btn.setText("Video" + i);
             btn.videoUri = Uri.parse(filePaths[i]);
@@ -200,7 +198,7 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
             btn.setOnClickListener(btn);
             menuLayout.addView(btn);
 
-            if(i == 0) {
+            if (i == 0) {
                 btn.onClick(btn);
             }
         }
@@ -223,51 +221,48 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
                             case 0: //LerpBlur
                             {
                                 TextureRendererLerpBlur lerpBlurDrawer = TextureRendererLerpBlur.create(true);
-                                if(lerpBlurDrawer != null) {
+                                if (lerpBlurDrawer != null) {
                                     lerpBlurDrawer.setIntensity(16);
                                     drawer = lerpBlurDrawer;
                                 }
                             }
                             break;
 
-                            case 1:
-                            {
+                            case 1: {
                                 TextureRendererEdge edgeDrawer = TextureRendererEdge.create(true);
-                                if(edgeDrawer != null) {
+                                if (edgeDrawer != null) {
                                     drawer = edgeDrawer;
                                 }
                             }
                             break;
 
-                            case 2:
-                            {
+                            case 2: {
                                 TextureRendererEmboss embossDrawer = TextureRendererEmboss.create(true);
-                                if(embossDrawer != null) {
+                                if (embossDrawer != null) {
                                     drawer = embossDrawer;
                                 }
                             }
                             break;
 
-                            case 3:
-                            {
+                            case 3: {
                                 TextureRendererWave waveDrawer = TextureRendererWave.create(true);
-                                if(waveDrawer != null) {
+                                if (waveDrawer != null) {
                                     waveDrawer.setAutoMotion(0.4f);
                                     drawer = waveDrawer;
                                 }
                             }
                             break;
 
-                            case 4:
-                            {
+                            case 4: {
                                 TextureRendererDrawOrigin originDrawer = TextureRendererDrawOrigin.create(true);
-                                if(originDrawer != null) {
+                                if (originDrawer != null) {
                                     drawer = originDrawer;
                                 }
                             }
                             break;
 
-                            default:break;
+                            default:
+                                break;
                         }
 
                         mPlayerView.setTextureRenderer(drawer);
@@ -276,12 +271,13 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
             }
         });
 
-        mGalleryBtn = (Button)findViewById(R.id.galleryBtn);
+        mGalleryBtn = (Button) findViewById(R.id.galleryBtn);
         mGalleryBtn.setOnClickListener(galleryBtnClickListener);
 
-        Button fitViewBtn = (Button)findViewById(R.id.fitViewBtn);
+        Button fitViewBtn = (Button) findViewById(R.id.fitViewBtn);
         fitViewBtn.setOnClickListener(new View.OnClickListener() {
             boolean shouldFit = false;
+
             @Override
             public void onClick(View v) {
                 shouldFit = !shouldFit;
@@ -297,7 +293,7 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
                     @Override
                     public void onBufferingUpdate(MediaPlayer mp, int percent) {
                         Log.i(Common.LOG_TAG, "Buffer update: " + percent);
-                        if(percent == 100) {
+                        if (percent == 100) {
                             Log.i(Common.LOG_TAG, "video is loaded!");
                             player.setOnBufferingUpdateListener(null);
                         }
@@ -307,10 +303,10 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
         });
     }
 
-    android.view.View.OnClickListener galleryBtnClickListener = new android.view.View.OnClickListener(){
+    android.view.View.OnClickListener galleryBtnClickListener = new android.view.View.OnClickListener() {
 
         @Override
-        public  void onClick(final android.view.View view) {
+        public void onClick(final android.view.View view) {
             Intent videoPickerIntent = new Intent(Intent.ACTION_GET_CONTENT);
             videoPickerIntent.setType("video/*");
             startActivityForResult(videoPickerIntent, REQUEST_CODE_PICK_VIDEO);
@@ -318,11 +314,9 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
     };
 
     public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-        switch (requestCode)
-        {
+        switch (requestCode) {
             case REQUEST_CODE_PICK_VIDEO:
-                if(resultCode == RESULT_OK)
-                {
+                if (resultCode == RESULT_OK) {
 
                     mPlayerView.setVideoUri(data.getData(), new SimplePlayerGLSurfaceView.PlayPreparedCallback() {
                         @Override
@@ -332,7 +326,8 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
                         }
                     }, playCompletionCallback);
                 }
-            default: break;
+            default:
+                break;
         }
     }
 

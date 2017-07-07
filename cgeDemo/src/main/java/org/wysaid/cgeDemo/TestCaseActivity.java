@@ -38,7 +38,7 @@ public class TestCaseActivity extends AppCompatActivity {
 
     protected void threadSync() {
 
-        if(mThread != null && mThread.isAlive()) {
+        if (mThread != null && mThread.isAlive()) {
             mShouldStopThread = true;
 
             try {
@@ -74,7 +74,7 @@ public class TestCaseActivity extends AppCompatActivity {
 
                 String outputFilename = FileUtil.getPath() + "/blendVideo.mp4";
                 String inputFileName = FileUtil.getTextContent(CameraDemoActivity.lastVideoPathFileName);
-                if(inputFileName == null) {
+                if (inputFileName == null) {
                     showMsg("No video is recorded, please record one in the 2nd case.");
                     return;
                 }
@@ -119,7 +119,7 @@ public class TestCaseActivity extends AppCompatActivity {
                 int maxIndex = CGENativeLibrary.cgeGetCustomFilterNum();
                 SharedContext glContext = SharedContext.create();
                 glContext.makeCurrent();
-                for(int i = 0; i != maxIndex && !mShouldStopThread; ++i) {
+                for (int i = 0; i != maxIndex && !mShouldStopThread; ++i) {
                     //If a gl context is already binded, you should pass true for the last arg, or false otherwise.
                     //It's better to create a gl context manually, so that the cpp layer will not create it each time when the function is called.
                     //You can also use CGEImageHandler to do this. (Maybe faster)
@@ -156,7 +156,7 @@ public class TestCaseActivity extends AppCompatActivity {
                 CGEImageHandler handler = new CGEImageHandler();
                 handler.initWidthBitmap(src);
 
-                for(int i = 0; i != maxIndex && !mShouldStopThread; ++i) {
+                for (int i = 0; i != maxIndex && !mShouldStopThread; ++i) {
 
                     final String filterConfig = MainActivity.EFFECT_CONFIGS[i];
                     handler.setFilterWithConfig(filterConfig);
