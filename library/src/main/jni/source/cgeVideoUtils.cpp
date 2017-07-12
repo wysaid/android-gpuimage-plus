@@ -319,7 +319,7 @@ namespace CGE
             {
                 if(!mute)
                 {
-#if 1  //Set this to 0 if you need to convert more audio formats and this function can not give a right result.
+#if 1  //Set this to 0 when you need to convert more audio formats and this function can not give a right result.
                     AVFrame* pAudioFrame = decodeHandler->getCurrentAudioAVFrame();
                     if(pAudioFrame == nullptr)
                         continue;
