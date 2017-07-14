@@ -82,7 +82,7 @@ public class CGEFrameRenderer {
     //initialize the filters width config string
     public void setFilterWidthConfig(final String config) {
         if(mNativeAddress != 0)
-            nativeSetFilterWidthConfig(mNativeAddress, config);
+            nativeSetFilterWithConfig(mNativeAddress, config);
     }
 
     //set the mask rotation (radian)
@@ -166,7 +166,7 @@ public class CGEFrameRenderer {
     protected native void nativeSetSrcFlipScale(long holder, float x, float y);
     protected native void nativeSetRenderRotation(long holder, float rad);
     protected native void nativeSetRenderFlipScale(long holder, float x, float y);
-    protected native void nativeSetFilterWidthConfig(long holder, String config);
+    protected native void nativeSetFilterWithConfig(long holder, String config);
     protected native void nativeSetFilterIntensity(long holder, float value);
     protected native void nativeSetMaskRotation(long holder, float value);
     protected native void nativeSetMaskFlipScale(long holder, float x, float y);

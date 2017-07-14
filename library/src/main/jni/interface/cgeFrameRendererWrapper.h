@@ -80,10 +80,10 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRenderer_nativeSetRend
 
 /*
  * Class:     org_wysaid_nativePort_CGEFrameRenderer
- * Method:    nativeSetFilterWidthConfig
+ * Method:    nativeSetFilterWithConfig
  * Signature: (Ljava/nio/ByteBuffer;Ljava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRenderer_nativeSetFilterWidthConfig
+JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRenderer_nativeSetFilterWithConfig
   (JNIEnv *, jobject, jlong, jstring);
 
 /*
