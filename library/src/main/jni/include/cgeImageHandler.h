@@ -52,7 +52,8 @@ namespace CGE
 		void getOutputFBOSize(int &w, int &h) { w = m_dstImageSize.width; h = m_dstImageSize.height; }
 
         void copyTextureData(void* data, int w, int h, GLuint texID, GLenum dataFmt, GLenum channelFmt);
-
+        virtual void setFaceDetectKeyPoint(float* keyPoints) = 0;
+        virtual float* getFaceDetectKeyPoint() = 0;
 	protected:
 		virtual bool initImageFBO(const void* data, int w, int h, GLenum channelFmt, GLenum dataFmt, int channel);
 		virtual void clearImageFBO();
@@ -133,9 +134,10 @@ namespace CGE
 		void setResultDrawer(TextureDrawer* drawer);
 
         virtual void useImageFBO();
-
+        void setFaceDetectKeyPoint(float* keyPoints);
+        float* getFaceDetectKeyPoint();
 	protected:
-
+        float* m_keyPoints = nullptr;
 		bool m_bRevertEnabled;
 		std::vector<CGEImageFilterInterfaceAbstract*> m_vecFilters;
 

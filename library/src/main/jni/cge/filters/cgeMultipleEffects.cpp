@@ -238,7 +238,10 @@ namespace CGE
 
 			*pBuffer = '\0';
 
-			if(strcmp(buffer, "blend") == 0)
+			if (strcmp(buffer, "facedetect") == 0) {
+            	CGEDataParsingEngine::faceDetectParser(ptr, this);
+            }
+            else if(strcmp(buffer, "blend") == 0)
 			{
 				CGEDataParsingEngine::blendParser(ptr, this);
 			}

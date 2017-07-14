@@ -33,7 +33,7 @@ namespace CGE
 		static CGEImageFilterInterface* beautifyParser(const char* pstr, CGEMutipleEffectFilter* fatherFilter = nullptr);
 		static CGEImageFilterInterface* blurParser(const char* pstr, CGEMutipleEffectFilter* fatherFilter = nullptr);
 		static CGEImageFilterInterface* dynamicParser(const char* pstr, CGEMutipleEffectFilter* fatherFilter = nullptr);
-
+		static CGEImageFilterInterface* faceDetectParser(const char* pstr, CGEMutipleEffectFilter* fatherFilter = nullptr);
 	};
 
 }

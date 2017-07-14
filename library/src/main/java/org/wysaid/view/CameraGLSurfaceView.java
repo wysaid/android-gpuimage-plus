@@ -228,6 +228,32 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         return true;
     }
 
+    public synchronized void setFaceDetectPoints(final float[] keyPoints) {
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                if(mFrameRecorder != null) {
+                    mFrameRecorder.setFaceDetectPoints(keyPoints);
+                } else {
+                    Log.e(LOG_TAG, "setFaceDetectPoints");
+                }
+            }
+        });
+    }
+
+    public synchronized void clearFaceDetectPoints() {
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                if(mFrameRecorder != null) {
+                    mFrameRecorder.clearFaceDetectPoints();
+                } else {
+                    Log.e(LOG_TAG, "clearFaceDetectPoints");
+                }
+            }
+        });
+    }
+
     public synchronized void setFilterWithConfig(final String config) {
         queueEvent(new Runnable() {
             @Override

@@ -1,1 +1,1 @@
-include ':library', ':cgeDemo'
+include ':library', ':cgeDemo', 'stmobile'

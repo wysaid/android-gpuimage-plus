@@ -82,7 +82,7 @@ public class CGEFrameRenderer {
     //initialize the filters width config string
     public void setFilterWidthConfig(final String config) {
         if(mNativeAddress != 0)
-            nativeSetFilterWidthConfig(mNativeAddress, config);
+            nativeSetFilterWithConfig(mNativeAddress, config);
     }
 
     //set the mask rotation (radian)
@@ -95,7 +95,6 @@ public class CGEFrameRenderer {
     public void setMaskFlipScale(float x, float y) {
         if(mNativeAddress != 0)
             nativeSetMaskFlipScale(mNativeAddress, x, y);
-
     }
 
 
@@ -152,6 +151,14 @@ public class CGEFrameRenderer {
         nativeSetFilterWithAddr(mNativeAddress, nativeFilter);
     }
 
+    public void setFaceDetectPoints(float[] keyPoints) {
+        nativeSetFaceDetectPoints(mNativeAddress, keyPoints);
+    }
+
+    public void clearFaceDetectPoints() {
+        nativeClearFaceDetectPoints(mNativeAddress);
+    }
+
     /////////////////      protected         ///////////////////////
 
     protected native long nativeCreateRenderer();
@@ -166,7 +173,7 @@ public class CGEFrameRenderer {
     protected native void nativeSetSrcFlipScale(long holder, float x, float y);
     protected native void nativeSetRenderRotation(long holder, float rad);
     protected native void nativeSetRenderFlipScale(long holder, float x, float y);
-    protected native void nativeSetFilterWidthConfig(long holder, String config);
+    protected native void nativeSetFilterWithConfig(long holder, String config);
     protected native void nativeSetFilterIntensity(long holder, float value);
     protected native void nativeSetMaskRotation(long holder, float value);
     protected native void nativeSetMaskFlipScale(long holder, float x, float y);
@@ -188,4 +195,6 @@ public class CGEFrameRenderer {
 
     //特殊用法, 谨慎使用, 使用不当可能造成程序运行异常.
     protected native void nativeSetFilterWithAddr(long holder, long filter);
+    protected native void nativeSetFaceDetectPoints(long holder, float[] keyPoints);
+    protected native void nativeClearFaceDetectPoints(long holder);
 }

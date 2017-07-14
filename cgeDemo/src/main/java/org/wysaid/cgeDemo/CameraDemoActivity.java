@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PointF;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,12 +19,17 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
+import com.sensetime.stmobileapi.STMobileFaceAction;
+import com.sensetime.stmobileapi.STMobileMultiTrack106;
+import com.sensetime.stmobileapi.STUtils;
+
 import org.wysaid.camera.CameraInstance;
 import org.wysaid.myUtils.FileUtil;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.myUtils.MsgUtil;
 import org.wysaid.nativePort.CGEFrameRecorder;
 import org.wysaid.nativePort.CGENativeLibrary;
+import org.wysaid.stmobile.Accelerometer;
 import org.wysaid.view.CameraRecordGLSurfaceView;
 
 public class CameraDemoActivity extends AppCompatActivity {
@@ -338,12 +344,110 @@ public class CameraDemoActivity extends AppCompatActivity {
         });
 
         mCameraView.setPictureSize(600, 800, true);
+
+        Button faceDetectBtn = (Button) findViewById(R.id.face_detect_btn);
+        faceDetectBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CameraInstance.getInstance().getCameraDevice().setPreviewCallback(new Camera.PreviewCallback() {
+                    @Override
+                    public void onPreviewFrame(byte[] data, Camera camera) {
+                        if (mNV21Data == null) {
+                            mNV21Data = new byte[CameraInstance.getInstance().previewHeight() * CameraInstance.getInstance().previewWidth() * 2];
+                        }
+                        synchronized (mNV21Data) {
+                            System.arraycopy(data, 0, mNV21Data, 0, data.length);
+                            mIsNV21ready = true;
+                        }
+                    }
+                });
+                mCameraView.setFilterWithConfig("@facedetect");
+            }
+        });
+        mAcc = new Accelerometer(this);
+        mAcc.start();
+    }
+
+    private byte[] mNV21Data;
+    private boolean mIsFaceDetectThreadKilled = false;
+    private Thread mFaceDetectThread;
+    private boolean mIsNV21ready = false;
+    private Accelerometer mAcc;
+    private STMobileMultiTrack106 mTracker = null;
+    private static final int ST_MOBILE_TRACKING_ENABLE_FACE_ACTION = 0x00000020;
+    private byte[] tmp = null;
+
+    private void stopFaceDetectThread() {
+        mIsFaceDetectThreadKilled = true;
+        if (mFaceDetectThread != null) {
+            try {
+                mFaceDetectThread.join(1000);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
+        }
+    }
+
+    private void startFaceDetectThread() {
+        mIsFaceDetectThreadKilled = false;
+
+        mFaceDetectThread = new Thread() {
+            @Override
+            public void run() {
+                while (!mIsFaceDetectThreadKilled) {
+                    if (!mIsNV21ready) {
+                        continue;
+                    }
+                    if (tmp == null) {
+                        tmp = new byte[CameraInstance.getInstance().previewHeight() * CameraInstance.getInstance().previewWidth() * 2];
+                    }
+                    synchronized (mNV21Data) {
+                        System.arraycopy(mNV21Data, 0, tmp, 0, mNV21Data.length);
+                        mIsNV21ready = false;
+                    }
+                    boolean frontCamera = (CameraInstance.getInstance().getFacing() == Camera.CameraInfo.CAMERA_FACING_FRONT);
+                    int dir = Accelerometer.getDirection();
+                    /**
+                     * 请注意前置摄像头与后置摄像头旋转定义不同
+                     * 请注意不同手机摄像头旋转定义不同
+                     */
+                    if (frontCamera &&
+                            ((CameraInstance.getInstance().getCameraInfo().orientation == 270 && (dir & 1) == 1) ||
+                                    (CameraInstance.getInstance().getCameraInfo().orientation == 90 && (dir & 1) == 0))) {
+                        dir = (dir ^ 2);
+                    }
+                    STMobileFaceAction[] faceActions = mTracker.trackFaceAction(tmp, dir, CameraInstance.getInstance().previewWidth(), CameraInstance.getInstance().previewHeight());
+                    boolean rotate270 = CameraInstance.getInstance().getCameraInfo().orientation == 270;
+                    Log.e("xuezi", "rotate270" + rotate270);
+                    if (faceActions != null && faceActions.length > 0) {
+                        STMobileFaceAction r = faceActions[0];
+                        PointF[] points = r.getFace().getPointsArray();
+                        float[] pointArray = new float[212];
+                        for (int i = 0; i < points.length; i++) {
+                            if (rotate270) {
+                                points[i] = STUtils.RotateDeg270(points[i], CameraInstance.getInstance().previewWidth(), CameraInstance.getInstance().previewHeight(), frontCamera);
+                            } else {
+                                points[i] = STUtils.RotateDeg90(points[i], CameraInstance.getInstance().previewWidth(), CameraInstance.getInstance().previewHeight(), frontCamera);
+                            }
+                            pointArray[2*i] = points[i].x / CameraInstance.getInstance().previewHeight();
+                            pointArray[2*i+1] = points[i].y / CameraInstance.getInstance().previewWidth();
+                        }
+                        mCameraView.setFaceDetectPoints(pointArray);
+                    }
+                    else {
+                        mCameraView.clearFaceDetectPoints();
+                    }
+                }
+            }
+        };
+        mFaceDetectThread.start();
     }
 
     private View.OnClickListener mFilterSwitchListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            MyButtons btn = (MyButtons) v;
+            CameraInstance.getInstance().getCameraDevice().setPreviewCallback(null);
+            MyButtons btn = (MyButtons)v;
             mCameraView.setFilterWithConfig(btn.filterConfig);
             mCurrentConfig = btn.filterConfig;
         }
@@ -388,6 +492,13 @@ public class CameraDemoActivity extends AppCompatActivity {
         Log.i(LOG_TAG, "activity onPause...");
         mCameraView.release(null);
         mCameraView.onPause();
+        mAcc.stop();
+        stopFaceDetectThread();
+        if (mTracker != null) {
+            System.out.println("destroy tracker");
+            mTracker.destory();
+            mTracker = null;
+        }
     }
 
     @Override
@@ -395,6 +506,18 @@ public class CameraDemoActivity extends AppCompatActivity {
         super.onResume();
 
         mCameraView.onResume();
+        mAcc.start();
+        if (mTracker == null) {
+//            long start_init = System.currentTimeMillis();
+//			int config = 0; //default config
+            int config = ST_MOBILE_TRACKING_ENABLE_FACE_ACTION;
+            mTracker = new STMobileMultiTrack106(this, config);
+            int max = 1;
+            mTracker.setMaxDetectableFaces(max);
+//            long end_init = System.currentTimeMillis();
+//            Log.i("track106", "init cost "+(end_init - start_init) +" ms");
+        }
+        startFaceDetectThread();
     }
 
     @Override

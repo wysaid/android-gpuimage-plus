@@ -13,10 +13,12 @@
 #include "cgeFilterBasic.h"
 #include "cgeDynamicFilters.h"
 #include "cgeColorMappingFilter.h"
+#include "cgeFaceDetectFilter.h"
 
 #include <cstring>
 #include <cctype>
 #include <sstream>
+
 
 //为了加快处理速度，使用固定大小的buffer来存储Parser所需参数。
 //每个method后面的参数长度都不应该超过BUFFER_LEN。
@@ -74,13 +76,13 @@ tableParserHelper(vec, pstr + n, i - n); \
 				CGE_LOG_ERROR("CGEDataParsingEngine::curveParser Create Curve filter Failed!\n");
 				return nullptr;
 			}
-		}		
+		}
 
 		for(int i = 0; pstr[i] != '\0' && pstr[i] != '@';)
 		{
 			switch (pstr[i])
 			{
-			case 'R': case 'r':				
+			case 'R': case 'r':
 				if(toupper(pstr[i + 1]) == 'G' && toupper(pstr[i + 2]) == 'B')
 				{
 					vecRGB.clear();
@@ -101,7 +103,7 @@ tableParserHelper(vec, pstr + n, i - n); \
 					vecR.clear();
 					++i;
 					int n = i;
-					for(char c = toupper(pstr[i]); 
+					for(char c = toupper(pstr[i]);
 						c != '\0' && c != 'R' && c != 'G' && c != 'B' && c != '@'; c = toupper(pstr[i])) ++i;
 						tableParserHelper(vecR, pstr + n, i - n);
 					if(vecR.size() < 2)
@@ -125,7 +127,7 @@ tableParserHelper(vec, pstr + n, i - n); \
 				else
 				{
 					proc->pushPointsG(vecG.data(), vecG.size());
-				}				
+				}
 				break;
 			case 'B': case 'b':
 				vecB.clear();
@@ -138,9 +140,9 @@ tableParserHelper(vec, pstr + n, i - n); \
 				else
 				{
 					proc->pushPointsB(vecB.data(), vecB.size());
-				}				
+				}
 				break;
-			default:				
+			default:
 				++i;
 				break;
 			}
@@ -161,7 +163,7 @@ tableParserHelper(vec, pstr + n, i - n); \
 	{
 		using namespace std;
 		using namespace CGE;
-		
+
 		float vignetteStart, vignetteEnd, colorScaleLow, colorScaleRange, saturation;
 		int isLinear = 0;
 		while(*pstr != '\0' && !isdigit(*pstr)) ++pstr;
@@ -205,7 +207,7 @@ tableParserHelper(vec, pstr + n, i - n); \
 				{
 					++i;
 					int n = i;
-					for(char c = toupper(pstr[i]); 
+					for(char c = toupper(pstr[i]);
 						c != '\0' && c != 'R' && c != 'G' && c != 'B' && c != '@'; c = toupper(pstr[i])) ++i;
 						tableParserHelper(vecR, pstr + n, i - n);
 				}
@@ -248,7 +250,7 @@ tableParserHelper(vec, pstr + n, i - n); \
 		float vignetteStart, vignetteEnd, colorScaleLow, colorScaleRange, saturation;
 		int isLinear = 0;
 		while(*pstr != '\0' && !isdigit(*pstr)) ++pstr;
-		if(sscanf(pstr, "%f%*c%f%*c%f%*c%f%*c%f%*c%d", 
+		if(sscanf(pstr, "%f%*c%f%*c%f%*c%f%*c%f%*c%d",
 			&vignetteStart, &vignetteEnd, &colorScaleLow, &colorScaleRange, &saturation, &isLinear) < 5)
 		{
 			return nullptr;
@@ -263,6 +265,16 @@ tableParserHelper(vec, pstr + n, i - n); \
 		proc->setSaturation(saturation);
 
 		if(fatherFilter != nullptr) fatherFilter->addFilter(proc);
+		return proc;
+	}
+
+	CGEImageFilterInterface* CGEDataParsingEngine::faceDetectParser(const char* pstr, CGEMutipleEffectFilter* fatherFilter)
+	{
+		CGEFaceDetectFilter* proc = new CGEFaceDetectFilter;
+		proc->init();
+
+		if(fatherFilter != nullptr)
+            fatherFilter->addFilter(proc);
 		return proc;
 	}
 

@@ -28,6 +28,10 @@ public class CameraInstance {
 
     private Camera mCameraDevice;
     private Camera.Parameters mParams;
+    protected Camera.CameraInfo mCameraInfo = null;
+    public Camera.CameraInfo getCameraInfo() {
+        return mCameraInfo;
+    }
 
     public static final int DEFAULT_PREVIEW_RATE = 30;
 
@@ -96,6 +100,8 @@ public class CameraInstance {
                     if (cameraInfo.facing == facing) {
                         mDefaultCameraID = i;
                         mFacing = facing;
+                        mCameraInfo = cameraInfo;
+                        break;
                     }
                 }
             }
@@ -305,6 +311,7 @@ public class CameraInstance {
 
         Log.i(LOG_TAG, String.format("Camera Picture Size: %d x %d", szPic.width, szPic.height));
         Log.i(LOG_TAG, String.format("Camera Preview Size: %d x %d", szPrev.width, szPrev.height));
+
     }
 
     public synchronized void setFocusMode(String focusMode) {

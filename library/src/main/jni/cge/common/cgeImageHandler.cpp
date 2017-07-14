@@ -787,4 +787,11 @@ namespace CGE
 		return true;
 	}
 
+	void CGEImageHandler::setFaceDetectKeyPoint(float *keyPoints) {
+        m_keyPoints = keyPoints;
+    }
+
+    float* CGEImageHandler::getFaceDetectKeyPoint() {
+        return m_keyPoints;
+    }
 }

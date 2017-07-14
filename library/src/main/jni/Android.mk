@@ -84,6 +84,7 @@ LOCAL_SRC_FILES :=  \
 			$(CGE_SOURCE)/filters/cgeDynamicWaveFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeMotionFlowFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeColorMappingFilter.cpp \
+            $(CGE_SOURCE)/filters/cgeFaceDetectFilter.cpp \
 			$(CGE_SOURCE)/extends/cgeThread.cpp \
 			\
 			$(CGE_ROOT)/interface/cgeNativeLibrary.cpp \

@@ -120,7 +120,7 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRenderer_nativeSetRend
  * Method:    nativeSetFilterWidthConfig
  * Signature: (Ljava/nio/ByteBuffer;Ljava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRenderer_nativeSetFilterWidthConfig
+JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRenderer_nativeSetFilterWithConfig
   (JNIEnv *env, jobject obj, jlong addr, jstring config)
 {
 	static CGETexLoadArg texLoadArg;
@@ -254,7 +254,20 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRenderer_nativeSetFilt
 	renderer->setFilter((CGEImageFilterInterfaceAbstract*)filter);
 }
 
+JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRenderer_nativeSetFaceDetectPoints
+		(JNIEnv *env, jobject, jlong addr, jfloatArray keyPoints)
+{
+	CGEFrameRenderer* renderer = (CGEFrameRenderer*)addr;
+	float* nativeKeyPoints = env->GetFloatArrayElements(keyPoints, JNI_FALSE);
+	renderer->getImageHandler()->setFaceDetectKeyPoint(nativeKeyPoints);
+}
 
+JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRenderer_nativeClearFaceDetectPoints
+		(JNIEnv *env, jobject, jlong addr)
+{
+	CGEFrameRenderer* renderer = (CGEFrameRenderer*)addr;
+	renderer->getImageHandler()->setFaceDetectKeyPoint(nullptr);
+}
 }
 
 
