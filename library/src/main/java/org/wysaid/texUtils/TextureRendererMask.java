@@ -63,7 +63,7 @@ public class TextureRendererMask extends TextureRendererDrawOrigin {
 
     @Override
     public boolean init(boolean isExternalOES) {
-        if(setProgramDefualt(getVertexShaderString(), getFragmentShaderString(), isExternalOES)) {
+        if(setProgramDefault(getVertexShaderString(), getFragmentShaderString(), isExternalOES)) {
             mProgram.bind();
             mMaskRotLoc = mProgram.getUniformLoc(MASK_ROTATION_NAME);
             mMaskFlipscaleLoc = mProgram.getUniformLoc(MASK_FLIPSCALE_NAME);

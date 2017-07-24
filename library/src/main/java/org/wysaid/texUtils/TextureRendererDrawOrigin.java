@@ -37,7 +37,7 @@ public class TextureRendererDrawOrigin extends TextureRenderer {
 
     @Override
     public boolean init(boolean isExternalOES) {
-        return setProgramDefualt(getVertexShaderString(), getFragmentShaderString(), isExternalOES);
+        return setProgramDefault(getVertexShaderString(), getFragmentShaderString(), isExternalOES);
     }
 
 //    @Override

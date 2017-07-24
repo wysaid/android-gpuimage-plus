@@ -42,7 +42,7 @@ public class TextureRendererWave extends TextureRendererDrawOrigin {
 
     @Override
     public boolean init(boolean isExternalOES) {
-        if(setProgramDefualt(vshDrawDefault, fshWave, isExternalOES)) {
+        if(setProgramDefault(vshDrawDefault, fshWave, isExternalOES)) {
             mProgram.bind();
             mMotionLoc = mProgram.getUniformLoc("motion");
             return true;

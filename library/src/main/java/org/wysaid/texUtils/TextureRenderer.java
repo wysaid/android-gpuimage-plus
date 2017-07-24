@@ -115,7 +115,7 @@ public abstract class TextureRenderer {
         GLES20.glUniformMatrix4fv(mTransformLoc, 1, false, matrix, 0);
     }
 
-    protected boolean setProgramDefualt(String vsh, String fsh, boolean isExternalOES) {
+    protected boolean setProgramDefault(String vsh, String fsh, boolean isExternalOES) {
         TEXTURE_2D_BINDABLE = isExternalOES ? GLES11Ext.GL_TEXTURE_EXTERNAL_OES : GLES20.GL_TEXTURE_2D;
         mProgram = new ProgramObject();
         mProgram.bindAttribLocation(POSITION_NAME, 0);
