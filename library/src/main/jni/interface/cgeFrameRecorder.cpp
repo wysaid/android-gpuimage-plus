@@ -98,7 +98,7 @@ namespace CGE
 
 				if(cache.buffer == nullptr)
 				{
-					CGE_LOG_ERROR("Fatal Error: 内存不足， 申请内存失败!");
+					CGE_LOG_ERROR("Fatal Error: Not enough memory!");
 				}
 
 				m_totalCaches.push_back(cache);
@@ -149,7 +149,7 @@ namespace CGE
 
 	void ImageDataWriteThread::runTask()
 	{
-		assert(m_task != nullptr); //必须预设好task
+		assert(m_task != nullptr); //task should not be nullptr
 
 		while(1)
 		{
@@ -191,12 +191,12 @@ namespace CGE
 			m_cacheDrawer->drawTexture(m_frameHandler->getBufferTextureID());
 			// m_cacheDrawer->drawTexture(m_frameHandler.getTargetTextureID());
 			glFinish();
-			// CGE_LOG_ERROR("draw texture 时间: %g", (getCurrentTimeMillis() - tm));
+			// CGE_LOG_ERROR("draw texture time: %g", (getCurrentTimeMillis() - tm));
 			m_resultMutex.unlock();
 
 			glReadPixels(0, 0, m_dstSize.width, m_dstSize.height, GL_RGBA, GL_UNSIGNED_BYTE, bufferCache.buffer);
 
-			// CGE_LOG_ERROR("录制readpixel时间: %g", (getCurrentTimeMillis() - tm));
+			// CGE_LOG_ERROR("readpixel time: %g", (getCurrentTimeMillis() - tm));
 			bufferCache.pts = (long)pts;
 			m_recordImageThread->putData4Read(bufferCache);
 
@@ -250,7 +250,7 @@ namespace CGE
 
 	void CGEFrameRecorder::runProc()
 	{	
-		//processingFilters 将可能改变 targetTextureID和bufferTextureID, lock 以保证其他线程使用
+		//processingFilters may change targetTextureID&bufferTextureID, lock to ensure safety.
 		std::unique_lock<std::mutex> uniqueLock(m_resultMutex);
 
 		if(m_globalFilter != nullptr)
@@ -263,10 +263,10 @@ namespace CGE
 		if(isRecordingStarted() && !m_isRecordingPaused)
 		{
 
-			//第一帧必然记录
+			//The first frame must be recorded.
 			if(m_recordingTimestamp == 0.0)
 			{
-				m_recordingTimestamp = 0.0001; //设置为 0.0001 ms, 表示已经开始
+				m_recordingTimestamp = 0.0001; //set to 0.0001 ms, stands for started.
 				m_lastRecordingTime = getCurrentTimeMillis();
 				CGE_LOG_INFO("first frame...");
 			}
@@ -292,7 +292,7 @@ namespace CGE
 			}
 			else
 			{
-				// CGE_LOG_INFO("帧速合适的很...");
+				// CGE_LOG_INFO("fine speed...");
 				if(m_currentPTS == ptsInFact)
 					m_currentPTS = ptsInFact + 1;
 				else
@@ -324,11 +324,11 @@ namespace CGE
 
 					m_frameHandler->useImageFBO();
 
-					// CGE_LOG_ERROR("draw texture 时间: %g", (getCurrentTimeMillis() - tm));
+					// CGE_LOG_ERROR("draw texture time: %g", (getCurrentTimeMillis() - tm));
 
 					glReadPixels(0, 0, m_dstSize.width, m_dstSize.height, GL_RGBA, GL_UNSIGNED_BYTE, bufferCache.buffer);
 
-					// CGE_LOG_ERROR("录制readpixel时间: %g", (getCurrentTimeMillis() - tm));
+					// CGE_LOG_ERROR("readpixel time: %g", (getCurrentTimeMillis() - tm));
 					bufferCache.pts = m_currentPTS;
 					m_recordImageThread->putData4Read(bufferCache);
 				}
@@ -364,7 +364,7 @@ namespace CGE
 		CGE_LOG_INFO("encoder created!");
 
 		if(m_offscreenContext == nullptr || m_recordThread == nullptr)
-			_createOffscreenContext(); //offscreen context 将从另一个线程创建 
+			_createOffscreenContext(); //offscreen context will be created from another thread.
 
 		int bufferLen = m_dstSize.width * m_dstSize.height * 4;
 
@@ -415,7 +415,7 @@ namespace CGE
 
 		CGE_LOG_INFO("Waiting for the recording threads...");
 
-		//等待录制结束
+		//wait for recoding over.
 		while((m_recordThread != nullptr && m_recordThread->isActive()) || (m_recordImageThread != nullptr && m_recordImageThread->isActive())) 
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
@@ -450,7 +450,7 @@ namespace CGE
 
 	void CGEFrameRecorder::pauseRecording()
 	{
-		//暂时不提供
+		//Not provided by now.
 		// m_isRecordingPaused = true;
 		CGE_LOG_ERROR("Pause function is not completed by now!!");
 	}
@@ -517,7 +517,7 @@ namespace CGE
 			}
 			else
 			{
-				CGE_LOG_ERROR("创建 OpenGL 子线程失败, 当前设备在录制视频时可能性能较差!");
+				CGE_LOG_ERROR("Create OpenGL child thread failed! The device may be too old!");
 			}
 		}));
 
@@ -525,14 +525,13 @@ namespace CGE
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 		//创建shared context失败， 将不使用OpenGL子线程
+		//OpenGL Child thread will not be used.
 		if(m_offscreenContext == nullptr)
 		{
 			m_recordThread->quit();
 			m_recordThread = nullptr;
 		}
 	}
-
-	//人脸跟踪相关
 
 	void CGEFrameRecorder::setGlobalFilter(const char* config, CGETextureLoadFun texLoadFunc, void* loadArg)
 	{
