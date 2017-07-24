@@ -166,7 +166,8 @@ namespace CGE
 
 #endif
 
-        if(!mp4Encoder.init(outputFilename, ENCODE_FPS, videoWidth, videoHeight, !mute, 1650000, audioSampleRate))
+        AVDictionary* metaData = decodeHandler->getOptions();
+        if(!mp4Encoder.init(outputFilename, ENCODE_FPS, videoWidth, videoHeight, !mute, 1650000, audioSampleRate, metaData))
         {
             CGE_LOG_ERROR("CGEVideoEncoderMP4 - start recording failed!");
             return false;

@@ -409,6 +409,11 @@ namespace CGE
 	{
 		return (m_context && m_context->pAudioStream) ? m_context->pAudioStream->codec->sample_rate : 0;
 	}
+
+	AVDictionary* CGEVideoDecodeHandler::getOptions()
+	{
+		return (m_context && m_context->pVideoStream) ? m_context->pFormatCtx->metadata : nullptr;
+	}
 }
 
 #endif

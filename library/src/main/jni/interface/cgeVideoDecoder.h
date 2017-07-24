@@ -12,6 +12,7 @@
 #include "cgeCommonDefine.h"
 
 struct AVFrame;
+struct AVDictionary;
 class CGEVideoDecodeContext;
 
 namespace CGE
@@ -253,6 +254,8 @@ namespace CGE
 		double getCurrentTimestamp();
 
 		int getAudioSampleRate();
+
+		AVDictionary* getOptions();
 
 	protected:
 		CGEVideoDecodeContext* m_context;
