@@ -522,11 +522,11 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         if (mSurfaceTexture == null || !cameraInstance().isPreviewing()) {
             //防止双缓冲情况下最后几帧抖动
-            if (mFrameRecorder != null) {
-                GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
-                GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-                mFrameRecorder.render(mDrawViewport.x, mDrawViewport.y, mDrawViewport.width, mDrawViewport.height);
-            }
+//            if (mFrameRecorder != null) {
+//                GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+//                GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+//                mFrameRecorder.render(mDrawViewport.x, mDrawViewport.y, mDrawViewport.width, mDrawViewport.height);
+//            }
 
             return;
         }

@@ -17,11 +17,11 @@ public class TextureRendererDrawOrigin extends TextureRenderer {
             "}";
 
     //初始化默认的顶点序列等。
-    TextureRendererDrawOrigin() {
+    protected TextureRendererDrawOrigin() {
         defaultInitialize();
     }
 
-    TextureRendererDrawOrigin(boolean noDefaultInitialize) {
+    protected TextureRendererDrawOrigin(boolean noDefaultInitialize) {
         if(!noDefaultInitialize)
             defaultInitialize();
     }
