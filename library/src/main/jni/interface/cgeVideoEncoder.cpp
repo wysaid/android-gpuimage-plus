@@ -210,7 +210,7 @@ namespace CGE
 			av_free(m_audioPacketBuffer);
 	}
 
-	bool CGEVideoEncoderMP4::init(const char* filename, int fps, int width, int height, bool hasAudio, int bitRate, int audioSampleRate)
+	bool CGEVideoEncoderMP4::init(const char* filename, int fps, int width, int height, bool hasAudio, int bitRate, int audioSampleRate, AVDictionary* options)
 	{
 		m_hasAudio = hasAudio;
 
@@ -294,7 +294,7 @@ namespace CGE
 
 		CGE_LOG_INFO("avio_open OK!");
 
-		if(0 > avformat_write_header(m_context->pFormatCtx, nullptr))
+		if(0 > avformat_write_header(m_context->pFormatCtx, &options))
 		{
 			CGE_LOG_ERROR("avformat_write_header failed...");
 			return false;
