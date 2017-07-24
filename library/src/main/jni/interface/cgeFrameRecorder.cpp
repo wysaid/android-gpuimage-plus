@@ -282,12 +282,12 @@ namespace CGE
 
 			if(ptsInFact < m_currentPTS)
 			{
-				CGE_LOG_INFO("帧速过快， 丢弃帧...");
+				CGE_LOG_INFO("too fast, drop frame...");
 				return ;
 			}
 			else if(ptsInFact > m_currentPTS + 3)
 			{
-				CGE_LOG_INFO("帧速较慢， 填补帧...");
+				CGE_LOG_INFO("too slow, jump frame...");
 				m_currentPTS = ptsInFact;
 			}
 			else
