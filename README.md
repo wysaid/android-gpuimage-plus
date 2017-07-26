@@ -1,6 +1,5 @@
 # Android-GPUImage-Plus
 Image, Camera And Video Filters Based On OpenGL.
-All source code are open now.
 
 ## Abstract ##
 
