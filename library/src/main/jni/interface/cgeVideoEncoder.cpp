@@ -294,7 +294,7 @@ namespace CGE
 
 		CGE_LOG_INFO("avio_open OK!");
 
-		if(0 > avformat_write_header(m_context->pFormatCtx, &options))
+		if(0 > avformat_write_header(m_context->pFormatCtx, options == nullptr ? nullptr : &options))
 		{
 			CGE_LOG_ERROR("avformat_write_header failed...");
 			return false;
