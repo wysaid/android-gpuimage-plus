@@ -9,3 +9,4 @@ target/
 tmp
 objs/
 obj/
+*.so

@@ -12,10 +12,6 @@
 typedef enum CustomFilterType
 {
     CGE_CUSTOM_FILTER_0,
-    CGE_CUSTOM_FILTER_1,
-    CGE_CUSTOM_FILTER_2,
-    CGE_CUSTOM_FILTER_3,
-    CGE_CUSTOM_FILTER_4,
     CGE_CUSTOM_FILTER_TOTAL_NUMBER
 } CustomFilterType;
 

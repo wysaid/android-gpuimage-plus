@@ -18,11 +18,13 @@ class CustomFilter_0 : public CGE::CGEImageFilterInterface
 public:
     
     bool init();
-    
+    void setIntensity(float value); //Range: [0, 1]
+
     void render2Texture(CGE::CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
     
 protected:
     GLint mStepLoc;
+	static CGEConstString paramIntensity;
 };
 
 #endif
