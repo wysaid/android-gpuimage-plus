@@ -25,6 +25,14 @@ $NDK/ndk-build
 #No ffmpeg, opencv or faceTracker.
 #And remove the loading part of ffmpeg&facetracker
 $NDK/ndk-build
+
+#For Window user, you should include the `.cmd` extension to `ndk-build` like this:
+cd your_path_to\android-gpuimage-plus-master\library\src\main\jni
+your_path_to_ndk\ndk-bundle\ndk-build.cmd
+
+#Also remember to comment out these line in NativeLibraryLoader
+//System.loadLibrary("ffmpeg");
+//CGEFFmpegNativeLibrary.avRegisterAll();
 ```
 
 > You can find precompiled libs here: [android-gpuimage-plus-libs](https://github.com/wysaid/android-gpuimage-plus-libs) (The precompiled '.so' files are generated with NDK-r13b)
