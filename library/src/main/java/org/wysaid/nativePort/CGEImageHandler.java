@@ -33,6 +33,10 @@ public class CGEImageHandler {
         return nativeInitWithBitmap(mNativeAddress, bmp);
     }
 
+    public boolean initWithSize(int width, int height) {
+        return nativeInitWithSize(mNativeAddress, width, height);
+    }
+
     public Bitmap getResultBitmap() {
         return nativeGetResultBitmap(mNativeAddress);
     }
@@ -126,6 +130,7 @@ public class CGEImageHandler {
 
     protected native long nativeCreateHandler();
     protected native boolean nativeInitWithBitmap(long holder, Bitmap bmp);
+    protected native boolean nativeInitWithSize(long holder, int width, int height);
     protected native Bitmap nativeGetResultBitmap(long holder);
 
     protected native void nativeSetDrawerRotation(long holder, float rad);

@@ -32,6 +32,13 @@ JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEImageHandler_nativeInit
 	return handler->initWithBitmap(env, bmp, true); //use revision.
 }
 
+JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEImageHandler_nativeInitWithSize
+  (JNIEnv *, jobject, jlong addr, jint width, jint height)
+{
+	CGEImageHandlerAndroid* handler = (CGEImageHandlerAndroid*)addr;
+	return handler->initWithRawBufferData(nullptr, width, height, CGE_FORMAT_RGBA_INT8);
+}
+
 JNIEXPORT jobject JNICALL Java_org_wysaid_nativePort_CGEImageHandler_nativeGetResultBitmap
   (JNIEnv *env, jobject, jlong addr)
 {

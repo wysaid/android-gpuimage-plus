@@ -22,6 +22,9 @@ JNIEXPORT jlong JNICALL Java_org_wysaid_nativePort_CGEImageHandler_nativeCreateH
 JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEImageHandler_nativeInitWithBitmap
   (JNIEnv *, jobject, jlong, jobject);
 
+JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEImageHandler_nativeInitWithSize
+  (JNIEnv *, jobject, jlong, jint, jint);
+
 JNIEXPORT jobject JNICALL Java_org_wysaid_nativePort_CGEImageHandler_nativeGetResultBitmap
   (JNIEnv *, jobject, jlong);
 
