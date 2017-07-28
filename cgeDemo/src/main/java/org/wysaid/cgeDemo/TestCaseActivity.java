@@ -154,7 +154,7 @@ public class TestCaseActivity extends AppCompatActivity {
                 //You can also use "NativeLibrary.filterImage_MultipleEffects" like the function "testCaseCustomFilter".
                 //But when you use a CGEImageHandler, you can do the filter faster, because the handler will not be created for every filter.
                 CGEImageHandler handler = new CGEImageHandler();
-                handler.initWidthBitmap(src);
+                handler.initWithBitmap(src);
 
                 for (int i = 0; i != maxIndex && !mShouldStopThread; ++i) {
 

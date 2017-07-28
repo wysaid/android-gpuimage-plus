@@ -181,7 +181,7 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer {
                     return;
                 }
 
-                if (mImageHandler.initWidthBitmap(bmp)) {
+                if (mImageHandler.initWithBitmap(bmp)) {
 
                     calcViewport();
                     requestRender();

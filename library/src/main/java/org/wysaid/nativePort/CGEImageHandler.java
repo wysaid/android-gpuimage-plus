@@ -22,7 +22,7 @@ public class CGEImageHandler {
         mNativeAddress = nativeCreateHandler();
     }
 
-    public boolean initWidthBitmap(Bitmap bmp) {
+    public boolean initWithBitmap(Bitmap bmp) {
         if(bmp == null)
             return false;
 
