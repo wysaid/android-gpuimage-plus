@@ -163,9 +163,15 @@ public class CGENativeLibrary {
     public static native long cgeCreateBlendFilter(int blendMode, int texID, int texWidth, int texHeight, int blendFilterType, float intensity);
 
     ////////////////////////////////////
-    // 自定义滤镜范例， 请参考 jni/source 目录下的 customFilter.
-    public static native Bitmap cgeFilterImageWithCustomFilter(Bitmap bmp, int index, float intensity, boolean hasContext);
-    public static native long cgeCreateCustomNativeFilter(int index, float intensity);
+    // demo for custom filter， see more at `customFilter` of `jni/source`.
+    // `hasContext` marks if the function is called width gl context already bind. (Extra gl context may be created if `hasContext` is false)
+    // `intensity`:  0 for origin, 1 for most. (It can be more than 1 when `useWrapper` is true)
+    // `useWrapper` marks if you want to use a wrapper. (The wrapper will receive the intensity, and do interpolation between the origin and the result when it's true)
+    public static native Bitmap cgeFilterImageWithCustomFilter(Bitmap bmp, int index, float intensity, boolean hasContext, boolean useWrapper);
+    // `index` marks which you want from your custom filter list.
+    // `intensity`:  0 for origin, 1 for most. (It can be more than 1 when `useWrapper` is true)
+    // `useWrapper` marks if you want to use a wrapper. (The wrapper will receive the intensity, and do interpolation between the origin and the result when it's true)
+    public static native long cgeCreateCustomNativeFilter(int index, float intensity, boolean useWrapper);
     public static native int cgeGetCustomFilterNum();
 
 }

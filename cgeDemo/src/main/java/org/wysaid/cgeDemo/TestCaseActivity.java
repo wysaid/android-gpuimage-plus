@@ -123,7 +123,7 @@ public class TestCaseActivity extends AppCompatActivity {
                     //If a gl context is already binded, you should pass true for the last arg, or false otherwise.
                     //It's better to create a gl context manually, so that the cpp layer will not create it each time when the function is called.
                     //You can also use CGEImageHandler to do this. (Maybe faster)
-                    Bitmap dst = CGENativeLibrary.cgeFilterImageWithCustomFilter(src, i, 1.0f, true);
+                    Bitmap dst = CGENativeLibrary.cgeFilterImageWithCustomFilter(src, i, 1.0f, true, true);
                     String s = ImageUtil.saveBitmap(dst);
                     dst.recycle();
 

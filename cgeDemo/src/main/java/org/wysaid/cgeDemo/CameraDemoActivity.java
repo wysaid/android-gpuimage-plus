@@ -357,7 +357,7 @@ public class CameraDemoActivity extends AppCompatActivity {
         mCameraView.queueEvent(new Runnable() {
             @Override
             public void run() {
-                long customFilter = CGENativeLibrary.cgeCreateCustomNativeFilter(customFilterIndex, 1.0f);
+                long customFilter = CGENativeLibrary.cgeCreateCustomNativeFilter(customFilterIndex, 1.0f, true);
                 mCameraView.getRecorder().setNativeFilter(customFilter);
             }
         });

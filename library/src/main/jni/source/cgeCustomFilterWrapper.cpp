@@ -16,7 +16,7 @@
 extern "C"
 {
 	JNIEXPORT jobject JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterImageWithCustomFilter
-	(JNIEnv *env, jclass cls, jobject bmp, jint index, jfloat intensity, jboolean hasContext)
+	(JNIEnv *env, jclass cls, jobject bmp, jint index, jfloat intensity, jboolean hasContext, jboolean useWrapper)
 	{
 		if(index < 0 || index >= CGE_CUSTOM_FILTER_TOTAL_NUMBER)
 		{
@@ -24,11 +24,11 @@ extern "C"
 			return bmp;
 		}
 
-		return cgeFilterImage_CustomFilters(env, bmp, (CustomFilterType)index, intensity, hasContext);
+		return cgeFilterImage_CustomFilters(env, bmp, (CustomFilterType)index, intensity, hasContext, useWrapper);
 	}
 
 	JNIEXPORT jlong JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeCreateCustomNativeFilter
-	(JNIEnv *env, jclass cls, jint index, jfloat intensity)
+	(JNIEnv *env, jclass cls, jint index, jfloat intensity, jboolean useWrapper)
 	{
 		if(index < 0 || index >= CGE_CUSTOM_FILTER_TOTAL_NUMBER)
 		{
@@ -36,7 +36,7 @@ extern "C"
 			return 0;
 		}
 
-		return (jlong)cgeCreateCustomFilter((CustomFilterType)index, intensity);
+		return (jlong)cgeCreateCustomFilter((CustomFilterType)index, intensity, useWrapper);
 	}
 
 	JNIEXPORT jlong JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeGetCustomFilterNum
