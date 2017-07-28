@@ -12,13 +12,13 @@ using namespace CGE;
 
 static CGEConstString s_fsh = CGE_SHADER_STRING_PRECISION_H
 (
- varying vec2 textureCoordinate;
- uniform sampler2D inputImageTexture;
- uniform vec2 vSteps;
- uniform float intensity;
+varying vec2 textureCoordinate;
+uniform sampler2D inputImageTexture;
+uniform vec2 vSteps;
+uniform float intensity;
 
 
- void main(void)
+void main(void)
 {
     vec4 originalColor = texture2D(inputImageTexture, textureCoordinate);
     vec4 invertedColor = vec4(((intensity * 0.2 + 0.5) - originalColor.rgb), originalColor.w);
@@ -56,9 +56,10 @@ void CustomFilter_0::render2Texture(CGEImageHandlerInterface* handler, GLuint sr
 CGEConstString CustomFilter_0::paramIntensity = "intensity";
 
 void CustomFilter_0::setIntensity(float value)
-	{
-		m_program.bind();
-		m_program.sendUniformf(paramIntensity, value);
-	}
+{
+    CGE_LOG_ERROR("setIntensity %g", value);
+    m_program.bind();
+    m_program.sendUniformf(paramIntensity, value);
+}
 
 
