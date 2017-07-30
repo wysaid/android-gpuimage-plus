@@ -21,7 +21,7 @@ uniform float intensity;
 void main(void)
 {
     vec4 originalColor = texture2D(inputImageTexture, textureCoordinate);
-    vec4 invertedColor = vec4(((intensity * 0.2 + 0.5) - originalColor.rgb), originalColor.w);
+    vec4 invertedColor = vec4(((intensity * 0.5 + 0.5) - originalColor.rgb), originalColor.w);
     gl_FragColor = invertedColor;
 });
 
