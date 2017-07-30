@@ -43,6 +43,7 @@ LOCAL_SRC_FILES :=  \
 			$(CGEEXT_ROOT)/cgeCustomFilterWrapper.cpp \
 			$(CGEEXT_ROOT)/customHelper.cpp \
 			$(CGEEXT_ROOT)/customFilter_0.cpp \
+			$(CGEEXT_ROOT)/customFilter_N.cpp \
 
 
 LOCAL_CPPFLAGS := -frtti -std=gnu++11

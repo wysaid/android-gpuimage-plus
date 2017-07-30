@@ -179,7 +179,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private static final DemoClassDescription mDemos[] = new DemoClassDescription[]{
-            new DemoClassDescription("CameraDemoActivity", "Camera Filter Demo")
+            new DemoClassDescription("BasicImageDemoActivity", "Basic Image Filter Demo"),
+            new DemoClassDescription("ImageDemoActivity", "Advanced Image Filter Demo"),
+            new DemoClassDescription("CameraDemoActivity", "Camera Filter Demo"),
+            new DemoClassDescription("SimplePlayerDemoActivity", "Simple Player Demo"),
+            new DemoClassDescription("VideoPlayerDemoActivity", "Video Player Demo"),
+            new DemoClassDescription("TestCaseActivity", "Test Cases")
     };
 
     public class DemoButton extends Button implements View.OnClickListener {
