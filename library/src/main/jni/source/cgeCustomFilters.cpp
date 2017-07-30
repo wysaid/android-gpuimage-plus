@@ -17,12 +17,11 @@ using namespace CGE;
 
 extern "C"
 {
-    void* cgeCreateCustomFilter(CustomFilterType type, float intensity)
+    void* cgeCreateCustomFilter(CustomFilterType type, float intensity, bool useWrapper)
     {
         if(type < 0 || type >= CGE_CUSTOM_FILTER_TOTAL_NUMBER)
             return nullptr;
         
-        CGEMutipleEffectFilter* filter = nullptr;       
         CGEImageFilterInterface* customFilter = cgeCreateCustomFilterByType(type);
         
         if(customFilter == nullptr)
@@ -31,7 +30,13 @@ extern "C"
             return nullptr;
         }
         
-        filter = new CGEMutipleEffectFilter();
+        if(!useWrapper)
+        {
+            customFilter->setIntensity(intensity);
+            return customFilter;
+        }
+
+        CGEMutipleEffectFilter* filter = new CGEMutipleEffectFilter();
         filter->setTextureLoadFunction(cgeGlobalTextureLoadFunc, nullptr);
         filter->initCustomize();
         filter->addFilter(customFilter);
@@ -41,7 +46,7 @@ extern "C"
     }
     
 
-    jobject cgeFilterImage_CustomFilters(JNIEnv *env, jobject bmp, CustomFilterType type, float intensity, jboolean hasContext)
+    jobject cgeFilterImage_CustomFilters(JNIEnv *env, jobject bmp, CustomFilterType type, float intensity, jboolean hasContext, bool useWrapper)
     {
         if(type < 0 || type >= CGE_CUSTOM_FILTER_TOTAL_NUMBER || intensity == 0.0f || bmp == nullptr)
             return bmp;
@@ -99,21 +104,15 @@ extern "C"
             handler.initWithRawBufferData(row, w, h, CGE_FORMAT_RGBA_INT8, false);
             AndroidBitmap_unlockPixels(env, bmp);
 
-            CGEImageFilterInterface* customFilter = cgeCreateCustomFilterByType(type);
+            auto customFilter = (CGEImageFilterInterface*)cgeCreateCustomFilter(type, intensity, useWrapper);
 
             if(customFilter == nullptr)
             {
                 CGE_LOG_ERROR("create Custom filter failed!");;
                 return nullptr;
             }
-            
-            auto* filter = new CGEMutipleEffectFilter();
-            filter->setTextureLoadFunction(cgeGlobalTextureLoadFunc, nullptr);
-            filter->initCustomize();
-            filter->addFilter(customFilter);
-            filter->setIntensity(intensity);
 
-            handler.addImageFilter(filter);
+            handler.addImageFilter(customFilter);
             handler.processingFilters();
 
             jmethodID createBitmapFunction = env->GetStaticMethodID(bitmapCls, "createBitmap", "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;");
