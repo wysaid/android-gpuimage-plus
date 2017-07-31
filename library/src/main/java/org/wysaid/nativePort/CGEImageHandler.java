@@ -55,7 +55,7 @@ public class CGEImageHandler {
 
     //config: The filter rule string. Pass null for config to clear all filters.
     //shouldClearOlder: The last filter will be cleared if it's true.
-    //    There may be memory leaks if you pass false for 'shouldClearOlder' when you don't clear it by yourself.
+    //    There may be memory leaks if you pass false for 'shouldClearOlder' and you have not cleared it by yourself.
     //shouldProcess: This marks if the filter should be run right now.
     //    The result will not change if you pass false for 'shouldProcess' until you call 'processFilters'.
     public void setFilterWithConfig(String config, boolean shouldClearOlder, boolean shouldProcess) {
