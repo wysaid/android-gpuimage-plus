@@ -51,13 +51,16 @@ extern "C"
 			return 0;
 		}
 
+		GLint width = env->GetIntField(result, texWidthFieldID);
+		GLint height = env->GetIntField(result, texHeightFieldID);
+
 		if(w != nullptr)
-			*w = env->GetIntField(result, texWidthFieldID);
+			*w = width;
 		if(h != nullptr)
-			*h = env->GetIntField(result, texHeightFieldID);
+			*h = height;
 		jint texID = env->GetIntField(result, textureFieldID);
 
-		CGE_LOG_INFO("cgeGlobalTextureLoadFunc loadImage success - srcName: %s, texID: %d, texWidth: %d, texHeight: %d", sourceName, texID, *w, *h);
+		CGE_LOG_INFO("cgeGlobalTextureLoadFunc loadImage success - srcName: %s, texID: %d, texWidth: %d, texHeight: %d", sourceName, texID, width, height);
 
 		return texID;
 	};
