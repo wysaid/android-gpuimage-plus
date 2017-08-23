@@ -1,6 +1,8 @@
 # Android-GPUImage-Plus
 Image, Camera And Video Filters Based On OpenGL.
 
+Maven: [Github](https://github.com/wysaid/android-gpuimage-plus-maven), [BinTray](https://bintray.com/wangyang/maven/gpuimage-plus)  (Will upload to jcenter soon)
+
 ## Abstract ##
 
 *  This repo is an Android Studio Project, comprising "cgeDemo", "library" two sub-modules. Hundreds of built-in filters are available in the demo. 😋If you'd like to add your own filter, please take a look at the manual page. Or you can follow the demo code. The new custom filter should be written in C++.
