@@ -5,10 +5,10 @@ import android.util.Log;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * @Author: wangyang
- * @Mail: admin@wysaid.org
- * @Date: 2017/6/16
- * @Description:
+ * Author: wangyang
+ * Mail: admin@wysaid.org
+ * Date: 2017/6/16
+ * Description:
  */
 
 public class ConcurrentQueueHelper {

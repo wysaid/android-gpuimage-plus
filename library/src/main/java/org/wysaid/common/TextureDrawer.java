@@ -7,7 +7,7 @@ import java.nio.FloatBuffer;
 
 /**
  * Created by wangyang on 15/8/8.
- * A simple direct drawer with flip, scale & rotate
+ * A simple direct drawer with flip, scale, rotate
  */
 public class TextureDrawer {
 
