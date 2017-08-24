@@ -1,7 +1,22 @@
 # Android-GPUImage-Plus
 Image, Camera And Video Filters Based On OpenGL.
 
-Maven: [Github](https://github.com/wysaid/android-gpuimage-plus-maven), [BinTray](https://bintray.com/wangyang/maven/gpuimage-plus)  (Will upload to jcenter soon)
+## Gradle dependency ##
+
+```
+repositories {
+    jcenter()
+}
+
+//Choose Only one of them
+dependencies {
+    //All arch: armeabi, armeabi-v7a, arm64-v8a, mips, x86
+    compile 'org.wysaid:gpuimage-plus:2.4.6'
+    
+    //Only armeabi-v7a
+    compile 'org.wysaid:gpuimage-plus:2.4.6-armv7a'
+}
+```
 
 ## Abstract ##
 
