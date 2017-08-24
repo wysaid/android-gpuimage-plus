@@ -8,7 +8,7 @@ repositories {
     jcenter()
 }
 
-//Choose Only one of them
+//Choose only one of them
 dependencies {
     //All arch: armeabi, armeabi-v7a, arm64-v8a, mips, x86
     compile 'org.wysaid:gpuimage-plus:2.4.6'
