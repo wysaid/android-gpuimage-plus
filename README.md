@@ -15,8 +15,14 @@ dependencies {
     //All arch: armeabi, armeabi-v7a, arm64-v8a, mips, x86
     compile 'org.wysaid:gpuimage-plus:2.4.6'
     
-    //Only armeabi-v7a
-    compile 'org.wysaid:gpuimage-plus:2.4.6-armv7a'
+    //Only armeabi-v7a 
+    compile 'org.wysaid:gpuimage-plus:2.4.6-armv7a' //Recommended
+
+    //Pure graphics lib with no ffmpeg. (all arch for branch 'min')
+    compile 'org.wysaid:gpuimage-plus:2.4.6-min'
+
+    //Pure graphics lib with no ffmpeg. (arch armv7a for branch 'min')
+    compile 'org.wysaid:gpuimage-plus:2.4.6-min-armv7a' //Recommended
 }
 ```
 
