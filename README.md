@@ -29,7 +29,7 @@ dependencies {
 export NDK=path/of/your/ndk
 cd folder/of/jni (android-gpuimage-plus/library/src/main/jni)
 
-#This will make all arch: armeabi, armeabi-v7a arm64-v8a, x86
+#This will make all arch: armeabi, armeabi-v7a arm64-v8a, x86, mips
 ./buildJNI
 #Or use "sh buildJNI"
 
