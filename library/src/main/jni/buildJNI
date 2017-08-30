@@ -31,23 +31,7 @@ echo "force rebuild!"
 
 fi
 
-if [ "${i}" == "--no-face" ] || [ "${i}" == "-nf" ]; then
-
-NO_FACE=1
-
-echo "disable face module!"
-
-fi
-
 done
-
-if [[ "$NO_FACE" == "" ]]; then
-
-export CGE_USE_FACE_MODULE=1
-
-fi
-
-export CGE_USE_VIDEO_MODULE=1
 
 echo "The NDK dir is: ${NDK}, If the shell can not run normally, you should set the NDK variable to your local ndk-dir"
 

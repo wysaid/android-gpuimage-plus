@@ -18,15 +18,6 @@
         >
 
         <Button
-            android:id="@+id/testCase1Btn"
-            android:layout_width="250dp"
-            android:layout_height="50dp"
-            android:onClick="testCaseOffscreenVideoRendering"
-            android:text="OffscreenVideoRendering"
-            android:textAllCaps="false"
-            />
-
-        <Button
             android:id="@+id/testCase2Btn"
             android:layout_width="250dp"
             android:layout_height="50dp"

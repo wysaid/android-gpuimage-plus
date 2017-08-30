@@ -76,7 +76,6 @@ public class ImageUtil extends FileUtil {
             return null;
         }
 
-
         if(newBitmap != bmp) {
             newBitmap.recycle();
         }

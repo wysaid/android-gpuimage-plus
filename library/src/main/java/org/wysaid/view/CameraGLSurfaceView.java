@@ -24,7 +24,7 @@ import android.view.SurfaceHolder;
 import org.wysaid.camera.CameraInstance;
 import org.wysaid.common.Common;
 import org.wysaid.common.FrameBufferObject;
-import org.wysaid.nativePort.CGEFrameRecorder;
+import org.wysaid.nativePort.CGEFrameRenderer;
 import org.wysaid.nativePort.CGENativeLibrary;
 import org.wysaid.texUtils.TextureRenderer;
 
@@ -54,9 +54,9 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     protected SurfaceTexture mSurfaceTexture;
     protected int mTextureID;
 
-    protected CGEFrameRecorder mFrameRecorder;
+    protected CGEFrameRenderer mFrameRecorder;
 
-    public CGEFrameRecorder getRecorder() {
+    public CGEFrameRenderer getRecorder() {
         return mFrameRecorder;
     }
 
@@ -256,7 +256,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     }
 
     public interface SetMaskBitmapCallback {
-        void setMaskOK(CGEFrameRecorder recorder);
+        void setMaskOK(CGEFrameRenderer recorder);
     }
 
     public void setMaskBitmap(final Bitmap bmp, final boolean shouldRecycle) {
@@ -356,7 +356,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         mSurfaceTexture = new SurfaceTexture(mTextureID);
         mSurfaceTexture.setOnFrameAvailableListener(this);
 
-        mFrameRecorder = new CGEFrameRecorder();
+        mFrameRecorder = new CGEFrameRenderer();
         mIsTransformMatrixSet = false;
         if (!mFrameRecorder.init(mRecordWidth, mRecordHeight, mRecordWidth, mRecordHeight)) {
             Log.e(LOG_TAG, "Frame Recorder init failed!");

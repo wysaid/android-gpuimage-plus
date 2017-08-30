@@ -22,7 +22,6 @@ import android.widget.SeekBar;
 import org.wysaid.common.Common;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.myUtils.MsgUtil;
-import org.wysaid.nativePort.CGEFaceTracker;
 import org.wysaid.view.ImageGLSurfaceView;
 
 import java.io.InputStream;
@@ -273,36 +272,5 @@ public class ImageDemoActivity extends AppCompatActivity {
         };
 
         mImageView.setDisplayMode(modes[++displayIndex % modes.length]);
-    }
-
-    public void faceTrackerTestCase(View view) {
-
-        CGEFaceTracker tracker = CGEFaceTracker.createFaceTracker();
-
-        if (tracker != null) {
-
-            if (!mBitmap.isMutable()) {
-                mBitmap = mBitmap.copy(mBitmap.getConfig(), true);
-            }
-
-            CGEFaceTracker.FaceResultSimple result = tracker.detectFaceWithSimpleResult(mBitmap, true);
-
-            Log.i(Common.LOG_TAG, String.format("LeftEye: %g, %g, rightEye: %g, %g, nose: %g, %g, mouth: %g, %g, jaw: %g, %g", result.leftEyePos.x, result.leftEyePos.y, result.rightEyepos.x, result.rightEyepos.y, result.nosePos.x, result.nosePos.y, result.mouthPos.x, result.mouthPos.y, result.jawPos.x, result.jawPos.y));
-
-            Canvas cvs = new Canvas(mBitmap);
-            Paint paint = new Paint();
-            paint.setStrokeWidth(3.0f);
-            paint.setColor(0xffffffff);
-            cvs.drawCircle(result.leftEyePos.x, result.leftEyePos.y, 5, paint);
-            cvs.drawCircle(result.rightEyepos.x, result.rightEyepos.y, 5, paint);
-            cvs.drawCircle(result.nosePos.x, result.nosePos.y, 5, paint);
-            cvs.drawCircle(result.mouthPos.x, result.mouthPos.y, 5, paint);
-            cvs.drawCircle(result.jawPos.x, result.jawPos.y, 5, paint);
-
-
-            mImageView.setImageBitmap(mBitmap);
-        }
-
-        tracker.release();
     }
 }
