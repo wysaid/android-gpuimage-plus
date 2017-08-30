@@ -1,5 +1,5 @@
 # Android-GPUImage-Plus
-Image, Camera And Video Filters Based On OpenGL.
+Image, Camera And Video Filters Based On OpenGL (ES2.0).
 
 ## Gradle dependency ##
 
