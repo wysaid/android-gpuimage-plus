@@ -1,6 +1,8 @@
 # Android-GPUImage-Plus
 Image, Camera And Video Filters Based On OpenGL (ES2.0).
 
+>To get pure lib without ffmpeg(No feature of video recording), please checkout the branch [min](https://github.com/wysaid/android-gpuimage-plus/tree/min). The whole jni module will be less than 600KB.
+
 ## Gradle dependency ##
 
 ```
