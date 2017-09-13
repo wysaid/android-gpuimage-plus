@@ -238,12 +238,12 @@ namespace CGE
 
 		if(m_context->pOutputFmt->video_codec != AV_CODEC_ID_NONE)
 		{
-			m_context->pVideoStream = addStream(m_context->pFormatCtx, &m_context->pVideoCodec, m_context->pOutputFmt->video_codec, fps, width, height, bitRate);
+			m_context->pVideoStream = addStream(m_context->pFormatCtx, &m_context->pVideoCodec, m_context->pOutputFmt->video_codec, fps, width, height, bitRate, audioSampleRate);
 		}
 
 		if(m_hasAudio && m_context->pOutputFmt->audio_codec != AV_CODEC_ID_NONE)
 		{
-			m_context->pAudioStream = addStream(m_context->pFormatCtx, &m_context->pAudioCodec, m_context->pOutputFmt->audio_codec, fps, width, height, bitRate);
+			m_context->pAudioStream = addStream(m_context->pFormatCtx, &m_context->pAudioCodec, m_context->pOutputFmt->audio_codec, fps, width, height, bitRate, audioSampleRate);
 		}
 
 		if(m_videoPacketBuffer != nullptr)
