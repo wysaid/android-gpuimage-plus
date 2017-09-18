@@ -24,20 +24,6 @@ LOCAL_C_INCLUDES := \
 #### CGE Library native source  ###########
 
 LOCAL_SRC_FILES :=  \
-			$(CGE_ROOT)/interface/cgeNativeLibrary.cpp \
-			$(CGE_ROOT)/interface/cgeFFmpegNativeLibrary.cpp \
-			$(CGE_ROOT)/interface/cgeSharedGLContext.cpp \
-			$(CGE_ROOT)/interface/cgeFrameRenderer.cpp \
-			$(CGE_ROOT)/interface/cgeFrameRendererWrapper.cpp \
-			$(CGE_ROOT)/interface/cgeFrameRecorder.cpp \
-			$(CGE_ROOT)/interface/cgeFrameRecorderWrapper.cpp \
-			$(CGE_ROOT)/interface/cgeVideoEncoder.cpp \
-			$(CGE_ROOT)/interface/cgeUtilFunctions.cpp \
-			$(CGE_ROOT)/interface/cgeVideoDecoder.cpp \
-			$(CGE_ROOT)/interface/cgeVideoPlayer.cpp \
-			$(CGE_ROOT)/interface/cgeImageHandlerAndroid.cpp \
-			$(CGE_ROOT)/interface/cgeImageHandlerWrapper.cpp \
-			\
 			$(CGEEXT_ROOT)/cgeVideoUtils.cpp \
 			$(CGEEXT_ROOT)/cgeCustomFilters.cpp \
 			$(CGEEXT_ROOT)/cgeCustomFilterWrapper.cpp \
