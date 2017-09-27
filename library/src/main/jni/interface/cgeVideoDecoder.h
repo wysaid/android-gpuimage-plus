@@ -257,6 +257,8 @@ namespace CGE
 
 		AVDictionary* getOptions();
 
+		const char *getRotate();
+
 	protected:
 		CGEVideoDecodeContext* m_context;
 		int m_width, m_height;
@@ -267,7 +269,9 @@ namespace CGE
 		double m_currentTimestamp;
 
 	private:
-		unsigned char* m_bufferPtr; //视频帧缓冲
+		unsigned char* m_bufferPtr; //视频帧缓冲\
+
+		const char* extractMetadataInternal(const char *key);
 	};
 }
 
