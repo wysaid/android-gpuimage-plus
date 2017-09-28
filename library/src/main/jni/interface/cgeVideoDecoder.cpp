@@ -414,6 +414,33 @@ namespace CGE
 	{
 		return (m_context && m_context->pVideoStream) ? m_context->pFormatCtx->metadata : nullptr;
 	}
+
+    const char *CGEVideoDecodeHandler::getRotate() {
+        return extractMetadataInternal("rotate");
+    }
+
+    const char *CGEVideoDecodeHandler::extractMetadataInternal(const char* key) {
+        char* value = NULL;
+        AVFormatContext *ic = m_context->pFormatCtx;
+        AVStream *video_st = m_context->pVideoStream;
+        AVStream *audio_st = m_context->pAudioStream;
+        
+        if (!ic) {
+            return value;
+        }
+        
+        if (key) {
+            if (av_dict_get(ic->metadata, key, NULL, AV_DICT_MATCH_CASE)) {
+                value = av_dict_get(ic->metadata, key, NULL, AV_DICT_MATCH_CASE)->value;
+            } else if (audio_st && av_dict_get(audio_st->metadata, key, NULL, AV_DICT_MATCH_CASE)) {
+                value = av_dict_get(audio_st->metadata, key, NULL, AV_DICT_MATCH_CASE)->value;
+            } else if (video_st && av_dict_get(video_st->metadata, key, NULL, AV_DICT_MATCH_CASE)) {
+                value = av_dict_get(video_st->metadata, key, NULL, AV_DICT_MATCH_CASE)->value;
+            }
+        }
+        
+        return value;   
+    }
 }
 
 #endif

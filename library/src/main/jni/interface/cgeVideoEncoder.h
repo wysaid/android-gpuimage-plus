@@ -53,7 +53,7 @@ namespace CGE
 			int channels; //Audio channel
 		};
 
-		bool init(const char* filename, int fps, int width, int height, bool hasAudio = true, int bitRate = 1650000, int audioSampleRate = 44100, AVDictionary* options = nullptr);
+		bool init(const char* filename, const char* rotate, int fps, int width, int height, bool hasAudio = true, int bitRate = 1650000, int audioSampleRate = 44100, AVDictionary* options = nullptr);
 
 		void setRecordDataFormat(RecordDataFormat fmt);
 

@@ -16,7 +16,7 @@
 
 
 static AVStream *addStream(AVFormatContext *oc, AVCodec **codec,
-                            enum AVCodecID codec_id, int frameRate, int width = -1, int height = -1, int bitRate = 1650000, int audioSampleRate = 44100)
+                            enum AVCodecID codec_id, int frameRate, int width = -1, int height = -1, int bitRate = 1650000, int audioSampleRate = 44100, const char *rotate = "0")
 {
     AVCodecContext *c;
     AVStream *st;
@@ -35,6 +35,8 @@ static AVStream *addStream(AVFormatContext *oc, AVCodec **codec,
     }
     st->id = oc->nb_streams-1;
     c = st->codec;
+
+    if(rotate != nullptr) av_dict_set(&st->metadata, "rotate", rotate, 0);
 
     switch ((*codec)->type) {
     case AVMEDIA_TYPE_AUDIO:
@@ -210,7 +212,7 @@ namespace CGE
 			av_free(m_audioPacketBuffer);
 	}
 
-	bool CGEVideoEncoderMP4::init(const char* filename, int fps, int width, int height, bool hasAudio, int bitRate, int audioSampleRate, AVDictionary* options)
+	bool CGEVideoEncoderMP4::init(const char* filename, const char* rotate, int fps, int width, int height, bool hasAudio, int bitRate, int audioSampleRate, AVDictionary* options)
 	{
 		m_hasAudio = hasAudio;
 
@@ -238,12 +240,12 @@ namespace CGE
 
 		if(m_context->pOutputFmt->video_codec != AV_CODEC_ID_NONE)
 		{
-			m_context->pVideoStream = addStream(m_context->pFormatCtx, &m_context->pVideoCodec, m_context->pOutputFmt->video_codec, fps, width, height, bitRate, audioSampleRate);
+			m_context->pVideoStream = addStream(m_context->pFormatCtx, &m_context->pVideoCodec, m_context->pOutputFmt->video_codec, fps, width, height, bitRate, audioSampleRate, rotate);
 		}
 
 		if(m_hasAudio && m_context->pOutputFmt->audio_codec != AV_CODEC_ID_NONE)
 		{
-			m_context->pAudioStream = addStream(m_context->pFormatCtx, &m_context->pAudioCodec, m_context->pOutputFmt->audio_codec, fps, width, height, bitRate, audioSampleRate);
+			m_context->pAudioStream = addStream(m_context->pFormatCtx, &m_context->pAudioCodec, m_context->pOutputFmt->audio_codec, fps, width, height, bitRate, audioSampleRate, rotate);
 		}
 
 		if(m_videoPacketBuffer != nullptr)
