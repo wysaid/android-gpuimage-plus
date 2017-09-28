@@ -17,7 +17,7 @@
 #include "cgeBlendFilter.h"
 #include "cgeTextureUtils.h"
 
-#define USE_GPU_I420_ENCODING 1
+#define USE_GPU_I420_ENCODING 0 //Maybe faster when set to 1
 
 extern "C"
 {
