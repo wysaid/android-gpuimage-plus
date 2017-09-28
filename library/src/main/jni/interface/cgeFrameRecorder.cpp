@@ -353,7 +353,7 @@ namespace CGE
 		delete m_encoder;
 		m_encoder = new CGEVideoEncoderMP4();
 		m_encoder->setRecordDataFormat(CGEVideoEncoderMP4::FMT_RGBA8888);
-		if(!m_encoder->init(filename, "0", fps, m_dstSize.width, m_dstSize.height, true, bitRate))
+		if(!m_encoder->init(filename, fps, m_dstSize.width, m_dstSize.height, true, bitRate))
 		{
 			delete m_encoder;
 			m_encoder = nullptr;

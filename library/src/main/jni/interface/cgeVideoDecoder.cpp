@@ -415,7 +415,7 @@ namespace CGE
 		return (m_context && m_context->pVideoStream) ? m_context->pFormatCtx->metadata : nullptr;
 	}
 
-    const char *CGEVideoDecodeHandler::getRotate() {
+    const char *CGEVideoDecodeHandler::getRotation() {
         return extractMetadataInternal("rotate");
     }
 
