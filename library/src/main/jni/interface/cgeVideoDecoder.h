@@ -269,7 +269,7 @@ namespace CGE
 		double m_currentTimestamp;
 
 	private:
-		unsigned char* m_bufferPtr; //视频帧缓冲
+		unsigned char* m_bufferPtr; //Video frame buffer cache
 
 		const char* extractMetadataInternal(const char *key);
 	};
