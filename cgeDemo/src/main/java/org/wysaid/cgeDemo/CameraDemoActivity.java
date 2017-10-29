@@ -337,7 +337,6 @@ public class CameraDemoActivity extends AppCompatActivity {
             }
         });
 
-        mCameraView.setPictureSize(600, 800, true);
     }
 
     private View.OnClickListener mFilterSwitchListener = new View.OnClickListener() {

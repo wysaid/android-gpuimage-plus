@@ -10,6 +10,7 @@
 #define _cgeFaceTrackerWrapper_h_
 
 #include <jni.h>
+#include "cgeFaceTracker.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,21 +28,22 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFaceTracker_nativeRelease
 JNIEXPORT jfloatArray JNICALL Java_org_wysaid_nativePort_CGEFaceTracker_nativeDetectFaceWithSimpleResult
   (JNIEnv *, jobject, jlong, jobject, jboolean);
 
+JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEFaceTracker_nativeDetectFaceWithBuffer
+  (JNIEnv *, jobject, jlong, jobject, jint, jint, jint, jint, jobject);
+
 #ifdef __cplusplus
 }
 #endif
 
 namespace CGE
 {
-	class CGEFaceTracker;
-
 	class CGEFaceTrackerWrapper
 	{
 	public:
 		CGEFaceTrackerWrapper();
 		~CGEFaceTrackerWrapper();
 
-		bool trackContinuousImage(void* grayBuffer, int w, int h, int stride, bool drawFeature = false);
+		bool trackContinuousImage(void* buffer, int w, int h, int channel, int stride);
 
 		bool trackImage(void* buffer, int w, int h, int stride, int channel, bool drawFeature = false);
 
@@ -49,6 +51,7 @@ namespace CGE
 
 	private:
 		CGEFaceTracker* m_tracker;
+		cv::Mat m_cacheImage;
 		bool m_hasFace;
 	};
 

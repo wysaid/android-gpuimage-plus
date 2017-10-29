@@ -424,6 +424,10 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         Log.i(LOG_TAG, String.format("View port: %d, %d, %d, %d", mDrawViewport.x, mDrawViewport.y, mDrawViewport.width, mDrawViewport.height));
     }
 
+    protected void onRelease() {
+
+    }
+
     public interface ReleaseOKCallback {
 
         void releaseOK();
@@ -438,6 +442,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 public void run() {
 
                     if (mFrameRecorder != null) {
+
+                        onRelease();
                         mFrameRecorder.release();
                         mFrameRecorder = null;
                         GLES20.glDeleteTextures(1, new int[]{mTextureID}, 0);
@@ -515,7 +521,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         requestRender();
     }
 
-    private float[] _transformMatrix = new float[16];
+    protected float[] mTransformMatrix = new float[16];
 
     @Override
     public void onDrawFrame(GL10 gl) {
@@ -533,16 +539,19 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         mSurfaceTexture.updateTexImage();
 
-        mSurfaceTexture.getTransformMatrix(_transformMatrix);
-        mFrameRecorder.update(mTextureID, _transformMatrix);
+        mSurfaceTexture.getTransformMatrix(mTransformMatrix);
+        mFrameRecorder.update(mTextureID, mTransformMatrix);
 
         mFrameRecorder.runProc();
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
-
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-        GLES20.glEnable(GLES20.GL_BLEND);
+        if(mIsUsingMask) {
+            GLES20.glEnable(GLES20.GL_BLEND);
+            GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        }
+
         mFrameRecorder.render(mDrawViewport.x, mDrawViewport.y, mDrawViewport.width, mDrawViewport.height);
         GLES20.glDisable(GLES20.GL_BLEND);
     }

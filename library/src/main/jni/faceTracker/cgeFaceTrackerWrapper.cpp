@@ -7,7 +7,6 @@
 */
 
 #include "cgeFaceTrackerWrapper.h"
-#include "cgeFaceTracker.h"
 #include "cgeCommonDefine.h"
 
 using namespace CGE;
@@ -119,6 +118,25 @@ extern "C"
 		return nullptr;
 	}
 
+	/////////////////////////
+
+	JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEFaceTracker_nativeDetectFaceWithBuffer(JNIEnv *env, jobject, jlong addr, jobject imgBuffer, jint w, jint h, jint channel, jint bytesPerRow, jobject keyPointBuffer)
+	{
+		CGEFaceTrackerWrapper* tracker = (CGEFaceTrackerWrapper*)addr;
+		unsigned short* imgData = (unsigned short*)env->GetDirectBufferAddress(imgBuffer);
+		bool suc = tracker->trackContinuousImage(imgData, w, h, channel, bytesPerRow);
+
+		if(suc)
+		{
+			auto* t = tracker->getTracker();
+			const auto& result = t->getPointList();
+			float* keyPointData = (float*)env->GetDirectBufferAddress(keyPointBuffer);
+			memcpy(keyPointData, result.data(), result.size() * sizeof(result[0]));
+		}
+
+		return suc;
+	}
+
 }
 
 namespace CGE
@@ -134,34 +152,20 @@ namespace CGE
 		delete m_tracker;
 	}
 
-	bool CGEFaceTrackerWrapper::trackContinuousImage(void* grayBuffer, int w, int h, int stride, bool drawFeature)
-	{		
-		cv::Mat img(w, h, CV_8UC1, grayBuffer, stride);
-		
-		if(!m_tracker->updateFace(img))
+	bool CGEFaceTrackerWrapper::trackContinuousImage(void* buffer, int w, int h, int channel, int stride)
+	{
+		if(channel == 1)
 		{
-			CGE_LOG_INFO("No face...");
-			m_hasFace = false;
+			cv::Mat img(w, h, CV_8UC1, buffer, stride);
+			m_hasFace = m_tracker->updateFace(img);
 		}
 		else
 		{
-			if(drawFeature)
-			{
-				// m_tracker->drawMeshes(img, 3, CV_RGB(0, 255, 0));
-
-				m_tracker->drawFeature(img, CGE_FACE_LEFT_EYEBROW, 3, false);
-				m_tracker->drawFeature(img, CGE_FACE_RIGHT_EYEBROW, 3, false);
-				m_tracker->drawFeature(img, CGE_FACE_LEFT_EYE);
-				m_tracker->drawFeature(img, CGE_FACE_RIGHT_EYE);
-
-				m_tracker->drawFeature(img, CGE_FACE_OUTER_MOUTH);
-				m_tracker->drawFeature(img, CGE_FACE_INNER_MOUTH);
-				m_tracker->drawFeature(img, CGE_FACE_NOSE_BRIDGE, 3, false);
-				m_tracker->drawFeature(img, CGE_FACE_NOSE_BASE);
-			}
-
-			m_hasFace = true;
-			CGE_LOG_INFO("Find face...");
+			int flag0 = (channel == 3) ? CV_8UC3 : CV_8UC4;
+			int flag1 = (channel == 3) ? cv::COLOR_BGR2GRAY : cv::COLOR_BGRA2GRAY;
+			cv::Mat img(w, h, flag0, buffer, stride);
+			cv::cvtColor(img, m_cacheImage, flag1);
+			m_hasFace = m_tracker->updateFace(m_cacheImage);
 		}
 
 		return m_hasFace;
@@ -172,7 +176,7 @@ namespace CGE
 		long cvType = channel == 1 ? CV_8UC1 : CV_8UC4;
 
 		cv::Mat img(h, w, cvType, buffer, stride);
-		cv::Mat grayImg;
+		cv::Mat& grayImg = m_cacheImage;
 
 		if(cvType != CV_8UC1)
 		{

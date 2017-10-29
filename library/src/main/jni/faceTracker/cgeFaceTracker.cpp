@@ -9,7 +9,7 @@
 #include "cgeFaceTracker.h"
 #include "cgeCommonDefine.h"
 
-#define FACETRACKER_DEFAULT_IMAGE_SIZE 192
+#define FACETRACKER_DEFAULT_IMAGE_SIZE 240
 
 namespace CGE
 {
@@ -133,7 +133,7 @@ namespace CGE
             if(m_tmpWindowSize == nullptr)
                 m_tmpWindowSize = m_currentWindowSize;
             
-            CGE_LOG_INFO("😂使用低精度测试2次失败， 跃迁到最大精度检测\n");
+            CGE_LOG_INFO("Jump to max precision\n");
             m_currentWindowSize = &m_maxWindowSize;
             
             m_failCount = 0;
@@ -166,7 +166,7 @@ namespace CGE
         {
             m_currentWindowSize = m_tmpWindowSize;
             m_tmpWindowSize = nullptr;
-            CGE_LOG_INFO("😅总算检测到人脸， 退回原始精度\n");
+            CGE_LOG_INFO("face detected\n");
         }
         
         m_failCount = 0;

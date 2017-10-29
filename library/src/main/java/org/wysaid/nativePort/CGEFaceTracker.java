@@ -3,6 +3,10 @@ package org.wysaid.nativePort;
 import android.graphics.Bitmap;
 import android.graphics.PointF;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+
 /**
  * Created by wysaid on 16/2/23.
  * Mail: admin@wysaid.org
@@ -123,6 +127,32 @@ public class CGEFaceTracker {
         return faceResultSimple;
     }
 
+    /////////// for video frames
+
+    public static class FaceResult {
+        // 66 key points.
+        public FloatBuffer faceKeyPoints = ByteBuffer.allocateDirect(66 * 8).order(ByteOrder.nativeOrder()).asFloatBuffer();
+    }
+
+    protected FaceResult mFaceResult = new FaceResult();
+
+    public FaceResult getFaceResult() {
+        return mFaceResult;
+    }
+
+    //recommended
+    public boolean detectFaceWithGrayBuffer(ByteBuffer buffer, int width, int height, int bytesPerRow) {
+        return nativeDetectFaceWithBuffer(mNativeAddress, buffer, width, height, 1, bytesPerRow, mFaceResult.faceKeyPoints);
+    }
+
+    public boolean detectFaceWithBGRABuffer(ByteBuffer buffer, int width, int height, int bytesPerRow) {
+        return nativeDetectFaceWithBuffer(mNativeAddress, buffer, width, height, 4, bytesPerRow, mFaceResult.faceKeyPoints);
+    }
+
+    public boolean detectFaceWithBGRBuffer(ByteBuffer buffer, int width, int height, int bytesPerRow) {
+        return nativeDetectFaceWithBuffer(mNativeAddress, buffer, width, height, 3, bytesPerRow, mFaceResult.faceKeyPoints);
+    }
+
     ////////////////////////////////////////
 
     //static
@@ -132,6 +162,8 @@ public class CGEFaceTracker {
     protected native long nativeCreateFaceTracker();
     protected native void nativeRelease(long addr);
     protected native float[] nativeDetectFaceWithSimpleResult(long addr, Bitmap bmp, boolean drawFeature);
+
+    protected native boolean nativeDetectFaceWithBuffer(long addr, ByteBuffer buffer, int w, int h, int channel, int bytesPerRow, FloatBuffer outputBuffer);
 
 
 }
