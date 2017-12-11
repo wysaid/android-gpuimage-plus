@@ -541,7 +541,7 @@ namespace CGE
 	{
 		if(proc == nullptr)
 		{
-			CGE_LOG_ERROR("CGEImageHandler: a null filter is sended. Skipping...\n");
+			CGE_LOG_ERROR("CGEImageHandler: a null filter is sent. Skipping...\n");
 			return;
 		}
 		if(!proc->isWrapper())
