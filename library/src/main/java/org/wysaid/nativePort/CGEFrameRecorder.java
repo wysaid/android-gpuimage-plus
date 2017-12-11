@@ -95,6 +95,26 @@ public class CGEFrameRecorder extends CGEFrameRenderer {
             nativeRecordAudioFrame(mNativeAddress, audioBuffer, bufferLen);
     }
 
+    public void setGlobalFilter(String config) {
+        if(mNativeAddress != 0)
+            nativeSetGlobalFilter(mNativeAddress, config);
+    }
+
+    public void setBeautifyFilter() {
+        if(mNativeAddress != 0)
+            nativeSetBeautifyFilter(mNativeAddress);
+    }
+
+    public void setGlobalFilterIntensity(float intensity) {
+        if(mNativeAddress != 0)
+            nativeSetGlobalFilterIntensity(mNativeAddress, intensity);
+    }
+
+    public void isGlobalFilterEnabled() {
+        if(mNativeAddress != 0)
+            nativeIsGlobalFilterEnabled(mNativeAddress);
+    }
+
     /////////////////      private         ///////////////////////
 
     private native long nativeCreateRecorder();
@@ -116,4 +136,8 @@ public class CGEFrameRecorder extends CGEFrameRenderer {
     private native void nativeRecordImageFrame(long holder);
     private native void nativeRecordAudioFrame(long holder, ShortBuffer audioBuffer, int bufferLen);
 
+    private native void nativeSetGlobalFilter(long holder, String config);
+    private native void nativeSetBeautifyFilter(long holder);
+    private native void nativeSetGlobalFilterIntensity(long holder, float intensity);
+    private native void nativeIsGlobalFilterEnabled(long holder);
 }
