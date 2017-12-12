@@ -1,4 +1,4 @@
-﻿/*
+/*
 * cgeSharpenBlurAdjust.cpp
 *
 *  Created on: 2013-12-26
@@ -248,24 +248,20 @@ namespace CGE
 		m_program.bind();
 		m_program.sendUniformf(paramSamplerStepName, 1.0f / sz.width, 1.0f / sz.height);
 
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray(0);
+        
+        glActiveTexture(GL_TEXTURE0);
+        
 		//Pass one
-		handler->setAsTarget();
-		{
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-			glEnableVertexAttribArray(0);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, srcTexture);
-			m_program.sendUniformf(paramBlurNormalName, 0.0f, 1.0f);
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-		}
+        handler->setAsTarget();
+        glBindTexture(GL_TEXTURE_2D, srcTexture);
+        m_program.sendUniformf(paramBlurNormalName, 0.0f, 1.0f);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        
 		//Pass Two
 		handler->swapBufferFBO();
-		handler->setAsTarget();
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-		glEnableVertexAttribArray(0);
-		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, handler->getBufferTextureID());
-		m_program.sendUniformi(paramInputImageName, 1);
 		m_program.sendUniformf(paramBlurNormalName, 1.0f, 0.0f);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
@@ -304,28 +300,22 @@ namespace CGE
 		m_program.sendUniformf(paramSamplerStepName, 1.0f / sz.width, 1.0f / sz.height);
 
         glActiveTexture(GL_TEXTURE0);
-
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+        
 		//Pass one
-		handler->setAsTarget();
-		{
-            glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-			glBindTexture(GL_TEXTURE_2D, handler->getBufferTextureID());
-			m_program.sendUniformf(paramBlurNormalName, 0.0f, 1.0f);
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-		}
+        handler->setAsTarget();
+        glBindTexture(GL_TEXTURE_2D, handler->getBufferTextureID());
+        m_program.sendUniformf(paramBlurNormalName, 0.0f, 1.0f);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
 		//Pass Two
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dstTexture, 0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-		glEnableVertexAttribArray(0);
 		glBindTexture(GL_TEXTURE_2D, handler->getTargetTextureID());
 		m_program.sendUniformf(paramBlurNormalName, 1.0f, 0.0f);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
-
-
-
+    
 	void CGEBlurFastFilter::setSamplerScale(int value)
 	{
 		if(m_bUseFixedRadius)
