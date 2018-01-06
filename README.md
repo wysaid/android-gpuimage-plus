@@ -60,7 +60,7 @@ your_path_to_ndk\ndk-bundle\ndk-build.cmd
 //CGEFFmpegNativeLibrary.avRegisterAll();
 ```
 
-> You can find precompiled libs here: [android-gpuimage-plus-libs](https://github.com/wysaid/android-gpuimage-plus-libs) (The precompiled '.so' files are generated with NDK-r13b)
+> You can find precompiled libs here: [android-gpuimage-plus-libs](https://github.com/wysaid/android-gpuimage-plus-libs) (The precompiled '.so' files are generated with NDK-r16b)
 
 Note that the generated file "libFaceTracker.so" is not necessary. So just remove this file if you don't want any feature of it.
 
