@@ -125,6 +125,9 @@ public class CGEImageHandler {
         }
     }
 
+    public void setFilterWithAddres(long filter) {
+        nativeSetFilterWithAddress(mNativeAddress, filter);
+    }
 
     /////////////////      protected         ///////////////////////
 
@@ -136,6 +139,7 @@ public class CGEImageHandler {
     protected native void nativeSetDrawerRotation(long holder, float rad);
     protected native void nativeSetDrawerFlipScale(long holder, float x, float y);
     protected native boolean nativeSetFilterWithConfig(long holder, String config, boolean shouldCleanOlder, boolean shouldProcess);
+    protected native void nativeSetFilterWithAddress(long holder, long filter);
     protected native void nativeSetFilterIntensity(long holder, float value, boolean shouldProcess);
     protected native boolean nativeSetFilterIntensityAtIndex(long holder, float value, int index, boolean shouldProcess);
 
