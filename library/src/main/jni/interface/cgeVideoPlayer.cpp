@@ -49,18 +49,20 @@ void main()
 }
 );
 
+//The two matrix is from: https://developer.apple.com/library/content/samplecode/GLCameraRipple/Listings/GLCameraRipple_Shaders_Shader_fsh.html#//apple_ref/doc/uid/DTS40011222-GLCameraRipple_Shaders_Shader_fsh-DontLinkElementID_9
+
 // BT.601, which is the standard for SDTV.
 static const GLfloat s_colorConversion601[] = {
-	1.164,  1.164, 1.164,
-	0.0, -0.392, 2.017,
-	1.596, -0.813,   0.0,
+    1, 1, 1,
+    0, -0.34413, 1.772,
+    1.402, -.71414, 0
 };
 
 // BT.709, which is the standard for HDTV.
 static const GLfloat s_colorConversion709[] = {
-	1.164,  1.164, 1.164,
-	0.0, -0.213, 2.112,
-	1.793, -0.533,   0.0,
+	1, 1, 1,
+	0, -0.18732, 1.8556,
+	1.57481, -0.46813, 0.0,
 };
 
 namespace CGE

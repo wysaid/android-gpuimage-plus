@@ -23,6 +23,14 @@ echo "release mode enabled!"
 
 fi
 
+if [ "${i}" == "-d" ] || [ "${i}" == "--debug" ]; then
+
+export CGE_DEBUG_MODE=1
+
+echo "debug mode enabled!"
+
+fi
+
 if [ "${i}" == "-b" ] || [ "${i}" == "-B" ]; then
 
 BUILD_ARG=-B
@@ -31,11 +39,19 @@ echo "force rebuild!"
 
 fi
 
-if [ "${i}" == "--no-face" ] || [ "${i}" == "-nf" ]; then
+if [ "${i}" == "--noface" ] || [ "${i}" == "-n" ]; then
 
 NO_FACE=1
 
 echo "disable face module!"
+
+fi
+
+if [ "${i}" == "--leaktest" ] || [ "${i}" == "-lt" ] || [ "${i}" == "--lt" ]; then
+
+export CGE_USE_LEAK_TEST=1
+
+echo "leak test enabled!"
 
 fi
 

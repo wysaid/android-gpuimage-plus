@@ -312,7 +312,7 @@ namespace CGE
 				if(m_recordThread->isActive() && m_recordThread->totalWorks() != 0)
 					return;
 
-				m_recordThread->run(CGEThreadPool::Work(m_recordingWork, (void*)m_currentPTS));
+				m_recordThread->run(CGEThreadPool::Work(m_recordingWork, (void*)(size_t)m_currentPTS));
 			}
 			else
 			{
