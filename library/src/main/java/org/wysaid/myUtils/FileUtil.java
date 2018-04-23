@@ -55,7 +55,7 @@ public class FileUtil {
 
         if(!file.exists()) {
             if(!file.mkdirs()) {
-                Log.e(LOG_TAG, "在pakage目录创建CGE临时目录失败!");
+                Log.e(LOG_TAG, "Create package dir of CGE failed!");
                 return null;
             }
 
