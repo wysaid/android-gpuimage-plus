@@ -217,7 +217,8 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer {
         super(context, attrs);
 
         setEGLContextClientVersion(2);
-        setEGLConfigChooser(8, 8, 8, 8, 8, 0);
+        setZOrderOnTop(true);
+        setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         getHolder().setFormat(PixelFormat.RGBA_8888);
         setRenderer(this);
         setRenderMode(RENDERMODE_WHEN_DIRTY);
