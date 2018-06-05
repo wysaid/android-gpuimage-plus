@@ -20,7 +20,6 @@ import android.util.Log;
 import org.wysaid.camera.CameraInstance;
 import org.wysaid.common.Common;
 import org.wysaid.common.FrameBufferObject;
-import org.wysaid.nativePort.CGEFrameRecorder;
 import org.wysaid.nativePort.CGEFrameRenderer;
 import org.wysaid.nativePort.CGENativeLibrary;
 
@@ -40,10 +39,10 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
     protected SurfaceTexture mSurfaceTexture;
     protected int mTextureID;
     protected boolean mIsTransformMatrixSet = false;
-    protected CGEFrameRecorder mFrameRecorder;
+    protected CGEFrameRenderer mFrameRenderer;
 
-    public CGEFrameRecorder getRecorder() {
-        return mFrameRecorder;
+    public CGEFrameRenderer getRecorder() {
+        return mFrameRenderer;
     }
 
 
@@ -52,8 +51,8 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
             @Override
             public void run() {
 
-                if (mFrameRecorder != null) {
-                    mFrameRecorder.setFilterWidthConfig(config);
+                if (mFrameRenderer != null) {
+                    mFrameRenderer.setFilterWidthConfig(config);
                 } else {
                     Log.e(LOG_TAG, "setFilterWithConfig after release!!");
                 }
@@ -65,8 +64,8 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
         queueEvent(new Runnable() {
             @Override
             public void run() {
-                if (mFrameRecorder != null) {
-                    mFrameRecorder.setFilterIntensity(intensity);
+                if (mFrameRenderer != null) {
+                    mFrameRenderer.setFilterIntensity(intensity);
                 } else {
                     Log.e(LOG_TAG, "setFilterIntensity after release!!");
                 }
@@ -76,7 +75,7 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
 
     //定制一些初始化操作
     public void setOnCreateCallback(final OnCreateCallback callback) {
-        if (mFrameRecorder == null || callback == null) {
+        if (mFrameRenderer == null || callback == null) {
             mOnCreateCallback = callback;
         } else {
             // Already created, just run.
@@ -95,15 +94,15 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        mFrameRecorder = new CGEFrameRecorder();
+        mFrameRenderer = new CGEFrameRenderer();
         mIsTransformMatrixSet = false;
-        if (!mFrameRecorder.init(mRecordWidth, mRecordHeight, mRecordWidth, mRecordHeight)) {
+        if (!mFrameRenderer.init(mRecordWidth, mRecordHeight, mRecordWidth, mRecordHeight)) {
             Log.e(LOG_TAG, "Frame Recorder init failed!");
         }
 
-        mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
-        mFrameRecorder.setSrcFlipScale(1.0f, -1.0f);
-        mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
+        mFrameRenderer.setSrcRotation((float) (Math.PI / 2.0));
+        mFrameRenderer.setSrcFlipScale(1.0f, -1.0f);
+        mFrameRenderer.setRenderFlipScale(1.0f, -1.0f);
 
         mTextureID = Common.genSurfaceTextureID();
         mSurfaceTexture = new SurfaceTexture(mTextureID);
@@ -124,9 +123,9 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
             mTextureID = 0;
         }
 
-        if(mFrameRecorder != null) {
-            mFrameRecorder.release();
-            mFrameRecorder = null;
+        if(mFrameRenderer != null) {
+            mFrameRenderer.release();
+            mFrameRenderer = null;
         }
     }
 
@@ -142,7 +141,7 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
 
     public void resumePreview() {
 
-        if (mFrameRecorder == null) {
+        if (mFrameRenderer == null) {
             Log.e(LOG_TAG, "resumePreview after release!!");
             return;
         }
@@ -161,7 +160,7 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
 
         if (!cameraInstance().isPreviewing()) {
             cameraInstance().startPreview(mSurfaceTexture);
-            mFrameRecorder.srcResize(cameraInstance().previewHeight(), cameraInstance().previewWidth());
+            mFrameRenderer.srcResize(cameraInstance().previewHeight(), cameraInstance().previewWidth());
         }
 
         requestRender();
@@ -179,15 +178,15 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
         mSurfaceTexture.updateTexImage();
 
         mSurfaceTexture.getTransformMatrix(mTransformMatrix);
-        mFrameRecorder.update(mTextureID, mTransformMatrix);
+        mFrameRenderer.update(mTextureID, mTransformMatrix);
 
-        mFrameRecorder.runProc();
+        mFrameRenderer.runProc();
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         GLES20.glClearColor(0,0,0,0);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-        mFrameRecorder.render(mDrawViewport.x, mDrawViewport.y, mDrawViewport.width, mDrawViewport.height);
+        mFrameRenderer.render(mDrawViewport.x, mDrawViewport.y, mDrawViewport.width, mDrawViewport.height);
     }
 
 //    protected long mTimeCount2 = 0;
@@ -217,9 +216,9 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
     @Override
     protected void onSwitchCamera() {
         super.onSwitchCamera();
-        if(mFrameRecorder != null) {
-            mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
-            mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
+        if(mFrameRenderer != null) {
+            mFrameRenderer.setSrcRotation((float) (Math.PI / 2.0));
+            mFrameRenderer.setRenderFlipScale(1.0f, -1.0f);
         }
     }
 
@@ -227,7 +226,7 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
     public void takeShot(final TakePictureCallback callback) {
         assert callback != null : "callback must not be null!";
 
-        if (mFrameRecorder == null) {
+        if (mFrameRenderer == null) {
             Log.e(LOG_TAG, "Recorder not initialized!");
             callback.takePictureOK(null);
             return;
@@ -245,7 +244,7 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
                 bufferTexID = Common.genBlankTextureID(mRecordWidth, mRecordHeight);
                 frameBufferObject.bindTexture(bufferTexID);
                 GLES20.glViewport(0, 0, mRecordWidth, mRecordHeight);
-                mFrameRecorder.drawCache();
+                mFrameRenderer.drawCache();
                 buffer = IntBuffer.allocate(mRecordWidth * mRecordHeight);
                 GLES20.glReadPixels(0, 0, mRecordWidth, mRecordHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, buffer);
                 bmp = Bitmap.createBitmap(mRecordWidth, mRecordHeight, Bitmap.Config.ARGB_8888);

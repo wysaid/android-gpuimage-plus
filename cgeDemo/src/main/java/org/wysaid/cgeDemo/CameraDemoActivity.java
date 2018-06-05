@@ -3,7 +3,6 @@ package org.wysaid.cgeDemo;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,7 +10,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -26,6 +24,7 @@ import org.wysaid.myUtils.MsgUtil;
 import org.wysaid.nativePort.CGEFrameRenderer;
 import org.wysaid.nativePort.CGENativeLibrary;
 import org.wysaid.view.CameraGLSurfaceView;
+import org.wysaid.view.CameraGLSurfaceViewWithTexture;
 
 public class CameraDemoActivity extends AppCompatActivity {
 
@@ -33,7 +32,7 @@ public class CameraDemoActivity extends AppCompatActivity {
 
     private String mCurrentConfig;
 
-    private CameraGLSurfaceView mCameraView;
+    private CameraGLSurfaceViewWithTexture mCameraView;
 
     public final static String LOG_TAG = Common.LOG_TAG;
 
@@ -70,7 +69,7 @@ public class CameraDemoActivity extends AppCompatActivity {
 //        lastVideoPathFileName = FileUtil.getPathInPackage(CameraDemoActivity.this, true) + "/lastVideoPath.txt";
         Button takePicBtn = (Button) findViewById(R.id.takePicBtn);
         Button takeShotBtn = (Button) findViewById(R.id.takeShotBtn);
-        mCameraView = (CameraGLSurfaceView) findViewById(R.id.myGLSurfaceView);
+        mCameraView = (CameraGLSurfaceViewWithTexture) findViewById(R.id.myGLSurfaceView);
         mCameraView.presetCameraForward(false);
         SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
 
@@ -111,7 +110,7 @@ public class CameraDemoActivity extends AppCompatActivity {
                         } else
                             showText("Take Shot failed!");
                     }
-                }, false);
+                });
             }
         });
 
@@ -147,34 +146,6 @@ public class CameraDemoActivity extends AppCompatActivity {
         });
 
         mCurrentInstance = this;
-
-        Button shapeBtn = (Button) findViewById(R.id.shapeBtn);
-        shapeBtn.setOnClickListener(new View.OnClickListener() {
-            private boolean mIsUsingShape = false;
-            Bitmap mBmp;
-
-            @Override
-            public void onClick(View v) {
-                mIsUsingShape = !mIsUsingShape;
-                if (mIsUsingShape) {
-                    if (mBmp == null) {
-                        mBmp = BitmapFactory.decodeResource(getResources(), R.drawable.mask1);
-                    }
-                    if (mBmp != null)
-                        mCameraView.setMaskBitmap(mBmp, false, new CameraGLSurfaceView.SetMaskBitmapCallback() {
-                            @Override
-                            public void setMaskOK(CGEFrameRenderer renderer) {
-                                //flip mask
-                                if (mCameraView.isUsingMask())
-                                    renderer.setMaskFlipScale(1.0f, -1.0f);
-                            }
-                        });
-                } else {
-                    mCameraView.setMaskBitmap(null, false);
-                }
-
-            }
-        });
 
         Button switchBtn = (Button) findViewById(R.id.switchCameraBtn);
         switchBtn.setOnClickListener(new View.OnClickListener() {

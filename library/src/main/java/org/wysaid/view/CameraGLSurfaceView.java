@@ -18,7 +18,10 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Created by wangyang on 15/7/17.
+ * @Author: wangyang
+ * @Mail: admin@wysaid.org
+ * @Date: 10/04/2018
+ * @Description:
  */
 
 public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer {
@@ -91,18 +94,14 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         return true;
     }
 
-    protected int mMaxPreviewWidth = 1280;
-    protected int mMaxPreviewHeight = 1280;
+    public int mMaxPreviewWidth = 1280;
+    public int mMaxPreviewHeight = 1280;
 
     public static class Viewport {
          public int x, y, width, height;
     }
 
-    protected Viewport mDrawViewport = new Viewport();
-
-    public Viewport getDrawViewport() {
-        return mDrawViewport;
-    }
+    public Viewport mDrawViewport = new Viewport();
 
     //The max preview size. Change it to 1920+ if you want to preview with 1080P
     void setMaxPreviewSize(int w, int h) {

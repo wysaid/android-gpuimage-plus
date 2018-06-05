@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         >
 
-        <org.wysaid.view.CameraGLSurfaceView
+        <org.wysaid.view.CameraGLSurfaceViewWithTexture
             android:id="@+id/myGLSurfaceView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
@@ -23,7 +23,6 @@
             android:id="@+id/seekBar"
             android:layout_width="match_parent"
             android:layout_height="80dp"
-            android:layout_alignParentTop="true"
             android:layout_gravity="center_horizontal|top"/>
 
     </FrameLayout>
@@ -79,13 +78,6 @@
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:text="Flash"
-                android:textAllCaps="false"/>
-
-            <Button
-                android:id="@+id/shapeBtn"
-                android:layout_width="100dp"
-                android:layout_height="match_parent"
-                android:text="Style"
                 android:textAllCaps="false"/>
 
             <Button
