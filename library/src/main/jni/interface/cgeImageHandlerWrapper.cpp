@@ -62,6 +62,15 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEImageHandler_nativeSetDrawe
 	drawer->setFlipScale(x, y);
 }
 
+JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEImageHandler_nativeSetFilterWithAddress
+  (JNIEnv *, jobject, jlong addr, jlong filter)
+{
+	CGEImageHandlerAndroid* handler = (CGEImageHandlerAndroid*)addr;
+	handler->clearImageFilters(true);
+	handler->revertToKeptResult();
+	handler->addImageFilter((CGEImageFilterInterfaceAbstract *)filter);
+}
+
 JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEImageHandler_nativeSetFilterWithConfig
   (JNIEnv *env, jobject, jlong addr, jstring config, jboolean shouldCleanOlder, jboolean shouldProcess)
 {	
