@@ -109,7 +109,7 @@ public class FaceTrackingDemo implements TrackingCameraGLSurfaceView.TrackingPro
         boolean ret = mTracker.detectFaceWithBGRABuffer(mImageCacheBuffer, mWidth, mHeight, mWidth * 4);
         if (ret) {
             //The processTracking & render function is in the same thread for this demo.
-            //So no sync code is write.
+            //So no sync code here.
             mFaceResult = mTracker.getFaceResult();
         } else {
             mFaceResult = null;

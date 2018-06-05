@@ -19,7 +19,7 @@ import java.nio.ShortBuffer;
 /**
  * Created by wangyang on 15/7/17.
  */
-public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
+public class CameraRecordGLSurfaceView extends CameraGLSurfaceViewWithTexture {
 
     public CameraRecordGLSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -116,14 +116,13 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceView {
     }
 
     @Override
-    public synchronized void release(final ReleaseOKCallback callback) {
-
+    protected void onRelease() {
         synchronized (mRecordStateLock) {
             mShouldRecord = false;
         }
 
         joinAudioRecording();
-        super.release(callback);
+        super.onRelease();
     }
 
     @Override

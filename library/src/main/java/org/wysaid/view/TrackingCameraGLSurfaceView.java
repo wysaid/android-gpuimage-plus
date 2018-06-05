@@ -89,10 +89,10 @@ public class TrackingCameraGLSurfaceView extends CameraRecordGLSurfaceView {
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-        if(mIsUsingMask) {
-            GLES20.glEnable(GLES20.GL_BLEND);
-            GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-        }
+//        if(mIsUsingMask) {
+//            GLES20.glEnable(GLES20.GL_BLEND);
+//            GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+//        }
 
         mFrameRecorder.render(mDrawViewport.x, mDrawViewport.y, mDrawViewport.width, mDrawViewport.height);
         GLES20.glDisable(GLES20.GL_BLEND);

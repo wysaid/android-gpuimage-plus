@@ -3,15 +3,17 @@ package org.wysaid.common;
 import android.opengl.GLES20;
 import android.util.Log;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 /**
  * Created by wangyang on 15/8/8.
- * A simple direct drawer with flip, scale, rotate
+ * A simple direct drawer with flip, scale & rotate
  */
 public class TextureDrawer {
 
-    private static final String vsh = "" +
+    protected static final String vshDrawer = "" +
             "attribute vec2 vPosition;\n"+
             "varying vec2 texCoord;\n"+
             "uniform mat2 rotation;\n"+
@@ -22,7 +24,7 @@ public class TextureDrawer {
             "   texCoord = flipScale * (vPosition / 2.0 * rotation) + 0.5;\n"+
             "}";
 
-    private static final String fsh = "" +
+    protected static final String fshDrawer = "" +
             "precision mediump float;\n" +
             "varying vec2 texCoord;\n" +
             "uniform sampler2D inputImageTexture;\n" +
@@ -34,15 +36,20 @@ public class TextureDrawer {
     public static final float[] vertices = {-1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f};
     public static final int DRAW_FUNCTION = GLES20.GL_TRIANGLE_FAN;
 
-    private ProgramObject mProgram;
-    private int mVertBuffer;
-    private int mRotLoc, mFlipScaleLoc;
+    protected ProgramObject mProgram;
+    protected int mVertBuffer;
+    protected int mRotLoc, mFlipScaleLoc;
 
-    private TextureDrawer() {
+    public ProgramObject getProgram() {
+        return mProgram;
     }
 
-    protected boolean init() {
+    protected TextureDrawer() {
+    }
+
+    protected boolean init(final String vsh, final String fsh) {
         mProgram = new ProgramObject();
+        mProgram.bindAttribLocation("vPosition", 0);
         if(!mProgram.init(vsh, fsh)) {
             mProgram.release();
             mProgram = null;
@@ -59,7 +66,7 @@ public class TextureDrawer {
         mVertBuffer = vertBuffer[0];
 
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertBuffer);
-        FloatBuffer buffer = FloatBuffer.allocate(vertices.length);
+        FloatBuffer buffer = ByteBuffer.allocateDirect(vertices.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
         buffer.put(vertices).position(0);
 
         GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, 32, buffer, GLES20.GL_STATIC_DRAW);
@@ -71,7 +78,7 @@ public class TextureDrawer {
 
     public static TextureDrawer create() {
         TextureDrawer drawer = new TextureDrawer();
-        if(!drawer.init())
+        if(!drawer.init(vshDrawer, fshDrawer))
         {
             Log.e(Common.LOG_TAG, "TextureDrawer create failed!");
             drawer.release();
@@ -81,9 +88,11 @@ public class TextureDrawer {
     }
 
     public void release() {
-        mProgram.release();
+        if(mProgram != null) {
+            mProgram.release();
+            mProgram = null;
+        }
         GLES20.glDeleteBuffers(1, new int[]{mVertBuffer}, 0);
-        mProgram = null;
         mVertBuffer = 0;
     }
 
