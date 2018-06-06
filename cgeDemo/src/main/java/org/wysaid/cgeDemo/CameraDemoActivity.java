@@ -215,12 +215,8 @@ public class CameraDemoActivity extends AppCompatActivity {
 
         mCameraView.setOnCreateCallback(new CameraGLSurfaceView.OnCreateCallback() {
             @Override
-            public void createOver(boolean success) {
-                if (success) {
-                    Log.i(LOG_TAG, "view create OK");
-                } else {
-                    Log.e(LOG_TAG, "view create failed!");
-                }
+            public void createOver() {
+                Log.i(LOG_TAG, "view onCreate");
             }
         });
 

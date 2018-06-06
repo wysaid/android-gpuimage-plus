@@ -35,4 +35,4 @@ done
 
 echo "The NDK dir is: ${NDK}, If the shell can not run normally, you should set the NDK variable to your local ndk-dir"
 
-$NDK/ndk-build ${BUILD_ARG}
+$NDK/ndk-build ${BUILD_ARG} -j8
