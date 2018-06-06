@@ -1,6 +1,12 @@
 
 ====== Changelist =========
 
+# 2018-6 Version 2.5.0 #
+
+1. Add class `org.wysaid.view.CameraGLSurfaceViewWithBuffer` to do camera preview with buffer.
+2. Remove some useless functions.
+3. Bug fix for face detection demo.
+
 # 2017-7 Version 2.4.6 #
 
 1. Add demos for android version.
