@@ -83,7 +83,7 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
             queueEvent(new Runnable() {
                 @Override
                 public void run() {
-                    callback.createOver(cameraInstance().getCameraDevice() != null);
+                    callback.createOver();
                 }
             });
         }
@@ -95,8 +95,6 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        super.onSurfaceCreated(gl, config);
-
         mFrameRecorder = new CGEFrameRecorder();
         mIsTransformMatrixSet = false;
         if (!mFrameRecorder.init(mRecordWidth, mRecordHeight, mRecordWidth, mRecordHeight)) {
@@ -110,6 +108,8 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
         mTextureID = Common.genSurfaceTextureID();
         mSurfaceTexture = new SurfaceTexture(mTextureID);
         mSurfaceTexture.setOnFrameAvailableListener(this);
+
+        super.onSurfaceCreated(gl, config);
     }
 
     protected void onRelease() {

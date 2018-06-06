@@ -18,10 +18,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * @Author: wangyang
- * @Mail: admin@wysaid.org
- * @Date: 10/04/2018
- * @Description:
+ * Created by wangyang on 15/7/17.
  */
 
 public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer {
@@ -42,8 +39,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     public int mMaxTextureSize = 0;
 
-    public int mViewWidth;
-    public int mViewHeight;
+    protected int mViewWidth;
+    protected int mViewHeight;
 
     protected int mRecordWidth = 480;
     protected int mRecordHeight = 640;
@@ -94,14 +91,18 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         return true;
     }
 
-    public int mMaxPreviewWidth = 1280;
-    public int mMaxPreviewHeight = 1280;
+    protected int mMaxPreviewWidth = 1280;
+    protected int mMaxPreviewHeight = 1280;
 
     public static class Viewport {
          public int x, y, width, height;
     }
 
-    public Viewport mDrawViewport = new Viewport();
+    protected Viewport mDrawViewport = new Viewport();
+
+    public Viewport getDrawViewport() {
+        return mDrawViewport;
+    }
 
     //The max preview size. Change it to 1920+ if you want to preview with 1080P
     void setMaxPreviewSize(int w, int h) {
@@ -201,7 +202,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     }
 
     public interface OnCreateCallback {
-        void createOver(boolean success);
+        void createOver();
     }
 
     protected OnCreateCallback mOnCreateCallback;
@@ -224,19 +225,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, texSize, 0);
         mMaxTextureSize = texSize[0];
 
-        requestRender();
-
-//        if (!cameraInstance().isCameraOpened()) {
-//
-//            int facing = mIsCameraBackForward ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
-//
-//            if (!cameraInstance().tryOpenCamera(null, facing)) {
-//                Log.e(LOG_TAG, "相机启动失败!!");
-//            }
-//        }
-
         if (mOnCreateCallback != null) {
-            mOnCreateCallback.createOver(cameraInstance().getCameraDevice() != null);
+            mOnCreateCallback.createOver();
         }
     }
 

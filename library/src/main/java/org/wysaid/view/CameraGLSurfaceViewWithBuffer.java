@@ -31,17 +31,18 @@ public class CameraGLSurfaceViewWithBuffer extends CameraGLSurfaceView implement
     protected byte[] mPreviewBuffer0;
     protected byte[] mPreviewBuffer1;
     protected TextureDrawerNV12ToRGB mYUVDrawer;
-//    TextureDrawer mTextureDrawer;
     protected int mTextureY, mTextureUV;
     protected int mTextureWidth, mTextureHeight;
     protected ByteBuffer mBufferY, mBufferUV;
     protected int mYSize, mUVSize;
     protected int mBufferSize;
     protected SurfaceTexture mSurfaceTexture;
-//    protected int mTextureID;
+    protected boolean mBufferUpdated = false;
+    protected final int[] mBufferUpdateLock = new int[0];
 
     public CameraGLSurfaceViewWithBuffer(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setRenderMode(RENDERMODE_CONTINUOUSLY);
     }
 
     @Override
@@ -100,12 +101,22 @@ public class CameraGLSurfaceViewWithBuffer extends CameraGLSurfaceView implement
     }
 
     protected void updateTextures() {
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureY);
-        GLES20.glTexSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, mTextureWidth, mTextureHeight, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, mBufferY.position(0));
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureUV);
-        GLES20.glTexSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, mTextureWidth / 2, mTextureHeight / 2, GLES20.GL_LUMINANCE_ALPHA, GLES20.GL_UNSIGNED_BYTE, mBufferUV.position(0));
+        if(mBufferUpdated) {
+            synchronized (mBufferUpdateLock) {
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureY);
+                GLES20.glTexSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, mTextureWidth, mTextureHeight, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, mBufferY.position(0));
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureUV);
+                GLES20.glTexSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, mTextureWidth / 2, mTextureHeight / 2, GLES20.GL_LUMINANCE_ALPHA, GLES20.GL_UNSIGNED_BYTE, mBufferUV.position(0));
+                mBufferUpdated = false;
+            }
+        } else {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureY);
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureUV);
+        }
     }
 
     @Override
@@ -199,28 +210,35 @@ public class CameraGLSurfaceViewWithBuffer extends CameraGLSurfaceView implement
         }
     }
 
-    @Override
-    public void onDrawFrame(GL10 gl) {
-
+    public void drawCurrentFrame() {
         if(mYUVDrawer == null) {
             return;
         }
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
-        updateTextures();
         GLES20.glClearColor(0,0,0,1);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         GLES20.glViewport(mDrawViewport.x, mDrawViewport.y, mDrawViewport.width, mDrawViewport.height);
+        updateTextures();
         mYUVDrawer.drawTextures();
     }
 
     @Override
+    public void onDrawFrame(GL10 gl) {
+        drawCurrentFrame();
+    }
+
+    @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        mBufferY.position(0);
-        mBufferUV.position(0);
-        mBufferY.put(data, 0, mYSize);
-        mBufferUV.put(data, mYSize, mUVSize);
+
+        synchronized (mBufferUpdateLock) {
+            mBufferY.position(0);
+            mBufferUV.position(0);
+            mBufferY.put(data, 0, mYSize);
+            mBufferUV.put(data, mYSize, mUVSize);
+            mBufferUpdated = true;
+        }
+
         camera.addCallbackBuffer(data);
-        requestRender();
     }
 }

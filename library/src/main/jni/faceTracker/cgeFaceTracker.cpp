@@ -9,7 +9,7 @@
 #include "cgeFaceTracker.h"
 #include "cgeCommonDefine.h"
 
-#define FACETRACKER_DEFAULT_IMAGE_SIZE 240
+#define FACETRACKER_DEFAULT_IMAGE_SIZE 320
 
 namespace CGE
 {
@@ -102,13 +102,12 @@ namespace CGE
         {
             m_faceImageSize.width = faceImage.cols;
             m_faceImageSize.height = faceImage.rows;
+            m_imageScaling = m_maxImageSize > 0 ? (m_maxImageSize / (float)MIN(m_faceImageSize.width, m_faceImageSize.height)) : 1.0f;
             
-            if(m_maxImageSize > 0)
+            if(m_imageScaling < 1)
             {
-                m_imageScaling = m_maxImageSize / (float)MIN(m_faceImageSize.width, m_faceImageSize.height);
                 m_scaledImageSize.width = m_faceImageSize.width * m_imageScaling;
                 m_scaledImageSize.height = m_faceImageSize.height * m_imageScaling;
-//                m_cacheImage.create(m_scaledImageSize.height, m_scaledImageSize.width, CV_8UC1);
             }
             else
             {
@@ -116,18 +115,9 @@ namespace CGE
             }
         }
         
-        cv::Mat usingMat;
-        
-        if(m_faceImageSize != m_scaledImageSize)
-        {
-            cv::resize(faceImage, m_cacheImage, m_scaledImageSize);
-            usingMat = m_cacheImage;
-        }
-        else
-        {
-            usingMat = faceImage;
-        }
-        
+
+        cv::resize(faceImage, m_cacheImage, m_scaledImageSize);
+
         if(m_failCount > 2 && m_currentWindowSize != &m_maxWindowSize)
         {
             if(m_tmpWindowSize == nullptr)
@@ -139,14 +129,14 @@ namespace CGE
             m_failCount = 0;
         }
         
-        if(m_sucCount > 15) //隔一段时间强制刷新
+        if(m_sucCount > 60) // force update
         {
             checkStatus = true;
             iteration = 10;
-            tolerance = 0.001;
+            tolerance = 0.01;
         }
         
-        if(_tracker.Track(usingMat, *m_currentWindowSize, framePerDetection, iteration, clamp, tolerance, checkStatus) != 0)
+        if(_tracker.Track(m_cacheImage, *m_currentWindowSize, framePerDetection, iteration, clamp, tolerance, checkStatus) != 0)
         {
             _tracker.FrameReset();
             

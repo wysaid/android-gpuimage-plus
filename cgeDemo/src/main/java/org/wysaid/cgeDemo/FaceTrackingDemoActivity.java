@@ -26,11 +26,9 @@ public class FaceTrackingDemoActivity extends AppCompatActivity {
 
         mCameraView.setOnCreateCallback(new CameraGLSurfaceView.OnCreateCallback() {
             @Override
-            public void createOver(boolean success) {
-                if(success) {
-                    FaceTrackingDemo demo = new FaceTrackingDemo();
-                    mCameraView.setTrackingProc(demo);
-                }
+            public void createOver() {
+                FaceTrackingDemo demo = new FaceTrackingDemo();
+                mCameraView.setTrackingProc(demo);
             }
         });
     }
