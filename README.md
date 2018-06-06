@@ -13,16 +13,16 @@ repositories {
 //Choose only one of them
 dependencies {
     //All arch: armeabi, armeabi-v7a, arm64-v8a, mips, x86
-    compile 'org.wysaid:gpuimage-plus:2.4.6'
+    compile 'org.wysaid:gpuimage-plus:2.5.0'
     
     //Only armeabi-v7a 
-    compile 'org.wysaid:gpuimage-plus:2.4.6-armv7a' //Recommended
+    compile 'org.wysaid:gpuimage-plus:2.5.0-armv7a' //Recommended
 
     //Pure graphics lib without ffmpeg. (all arch for branch 'min')
-    compile 'org.wysaid:gpuimage-plus:2.4.6-min'
+    compile 'org.wysaid:gpuimage-plus:2.5.0-min'
 
     //Pure graphics lib without ffmpeg. (arch armv7a for branch 'min')
-    compile 'org.wysaid:gpuimage-plus:2.4.6-min-armv7a' //Recommended
+    compile 'org.wysaid:gpuimage-plus:2.5.0-min-armv7a' //Recommended
 }
 ```
 
@@ -60,7 +60,7 @@ your_path_to_ndk\ndk-bundle\ndk-build.cmd
 //CGEFFmpegNativeLibrary.avRegisterAll();
 ```
 
-> You can find precompiled libs here: [android-gpuimage-plus-libs](https://github.com/wysaid/android-gpuimage-plus-libs) (The precompiled '.so' files are generated with NDK-r13b)
+> You can find precompiled libs here: [android-gpuimage-plus-libs](https://github.com/wysaid/android-gpuimage-plus-libs) (The precompiled '.so' files are generated with NDK-r16b)
 
 Note that the generated file "libFaceTracker.so" is not necessary. So just remove this file if you don't want any feature of it.
 

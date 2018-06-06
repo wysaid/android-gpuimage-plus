@@ -210,7 +210,7 @@ namespace CGE
 			av_free(m_audioPacketBuffer);
 	}
 
-	bool CGEVideoEncoderMP4::init(const char* filename, int fps, int width, int height, bool hasAudio, int bitRate, int audioSampleRate, AVDictionary* options)
+	bool CGEVideoEncoderMP4::init(const char* filename, int fps, int width, int height, bool hasAudio, int bitRate, int audioSampleRate, AVDictionary* options, const char* rotation)
 	{
 		m_hasAudio = hasAudio;
 
@@ -238,12 +238,15 @@ namespace CGE
 
 		if(m_context->pOutputFmt->video_codec != AV_CODEC_ID_NONE)
 		{
-			m_context->pVideoStream = addStream(m_context->pFormatCtx, &m_context->pVideoCodec, m_context->pOutputFmt->video_codec, fps, width, height, bitRate);
+			m_context->pVideoStream = addStream(m_context->pFormatCtx, &m_context->pVideoCodec, m_context->pOutputFmt->video_codec, fps, width, height, bitRate, audioSampleRate);
+
+			if(m_context->pVideoStream != nullptr && rotation != nullptr)
+				av_dict_set(&m_context->pVideoStream->metadata, "rotate", rotation, 0);
 		}
 
 		if(m_hasAudio && m_context->pOutputFmt->audio_codec != AV_CODEC_ID_NONE)
 		{
-			m_context->pAudioStream = addStream(m_context->pFormatCtx, &m_context->pAudioCodec, m_context->pOutputFmt->audio_codec, fps, width, height, bitRate);
+			m_context->pAudioStream = addStream(m_context->pFormatCtx, &m_context->pAudioCodec, m_context->pOutputFmt->audio_codec, fps, width, height, bitRate, audioSampleRate);
 		}
 
 		if(m_videoPacketBuffer != nullptr)

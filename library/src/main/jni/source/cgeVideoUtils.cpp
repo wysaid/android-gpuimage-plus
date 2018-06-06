@@ -17,7 +17,7 @@
 #include "cgeBlendFilter.h"
 #include "cgeTextureUtils.h"
 
-#define USE_GPU_I420_ENCODING 1
+#define USE_GPU_I420_ENCODING 0 //Maybe faster when set to 1
 
 extern "C"
 {
@@ -171,7 +171,7 @@ namespace CGE
 #else
         AVDictionary* metaData = nullptr;
 #endif
-        if(!mp4Encoder.init(outputFilename, ENCODE_FPS, videoWidth, videoHeight, !mute, 1650000, audioSampleRate, metaData))
+        if(!mp4Encoder.init(outputFilename, ENCODE_FPS, videoWidth, videoHeight, !mute, 1650000, audioSampleRate, metaData, decodeHandler->getRotation()))
         {
             CGE_LOG_ERROR("CGEVideoEncoderMP4 - start recording failed!");
             return false;
