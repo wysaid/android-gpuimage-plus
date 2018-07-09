@@ -31,7 +31,7 @@ extern "C" {
 JNIEXPORT jobject JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterImage_1MultipleEffects
   (JNIEnv *env, jclass cls, jobject bmp, jstring config, jfloat intensity)
 {
-    static CGETexLoadArg texLoadArg;
+    CGETexLoadArg texLoadArg;
     texLoadArg.env = env;
     texLoadArg.cls = cls;
 
@@ -128,7 +128,7 @@ JNIEXPORT jobject JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterI
 JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterImage_1MultipleEffectsWriteBack
   (JNIEnv *env, jclass cls, jobject bmp, jstring config, jfloat intensity)
 {
-    static CGETexLoadArg texLoadArg;
+    CGETexLoadArg texLoadArg;
     texLoadArg.env = env;
     texLoadArg.cls = cls;
 
@@ -201,7 +201,7 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterImag
 JNIEXPORT jlong JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeCreateFilterWithConfig
   (JNIEnv *env, jclass, jstring config)
 {
-    static CGETexLoadArg texLoadArg;
+    CGETexLoadArg texLoadArg;
     texLoadArg.env = env;
     texLoadArg.cls = env->FindClass("org/wysaid/nativePort/CGENativeLibrary");
 
