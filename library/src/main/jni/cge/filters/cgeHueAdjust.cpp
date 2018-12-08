@@ -56,4 +56,9 @@ namespace CGE
 		m_program.sendUniformf(paramName, value);
 	}
 
+	void CGEHueAdjustFilter::setIntensity(float intensity)
+	{
+		setHue(intensity);
+	}
+
 }
