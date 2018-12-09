@@ -7,7 +7,7 @@ Image, Camera And Video Filters Based On OpenGL (ES2.0).
 
 See the `image deform demo`.
 
-![](screenshots/4.gif) ![](screenshots/5.gif)
+![](screenshots/6.gif) ![](screenshots/5.gif)
 
 ## Gradle dependency ##
 
