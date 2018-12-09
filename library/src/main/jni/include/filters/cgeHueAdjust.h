@@ -19,6 +19,8 @@ namespace CGE
 		//Range: [0, 2π]
 		void setHue(float value);
 
+		void setIntensity(float intensity);
+
 		bool init();
 
 	protected:

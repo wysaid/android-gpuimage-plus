@@ -5,12 +5,7 @@ package org.wysaid.nativePort;
  */
 public class NativeLibraryLoader {
 
-    private static boolean mLibraryLoaded = false;
-
     public static void load() {
-        if (mLibraryLoaded)
-            return;
-        mLibraryLoaded = true;
         System.loadLibrary("CGE");
         //User defined mothods, not required. (including offscreen video rendering)
         System.loadLibrary("CGEExt");

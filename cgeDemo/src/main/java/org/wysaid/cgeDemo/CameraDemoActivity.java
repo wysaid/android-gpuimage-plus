@@ -71,7 +71,7 @@ public class CameraDemoActivity extends AppCompatActivity {
         Button takeShotBtn = (Button) findViewById(R.id.takeShotBtn);
         mCameraView = (CameraGLSurfaceViewWithTexture) findViewById(R.id.myGLSurfaceView);
         mCameraView.presetCameraForward(false);
-        SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
+        SeekBar seekBar = (SeekBar) findViewById(R.id.globalRestoreSeekBar);
 
         takePicBtn.setOnClickListener(new View.OnClickListener() {
             @Override

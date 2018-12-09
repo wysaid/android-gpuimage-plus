@@ -99,7 +99,7 @@ FOUNDATION_EXPORT const unsigned char cgeVersionString[];
 #import <cge/cgeHazeFilter.h>
 #import <cge/cgeHueAdjust.h>
 #import <cge/cgeLerpblurFilter.h>
-#import <cge/cgeLiquidationFilter.h>
+#import <cge/CGELiquifyFilter.h>
 #import <cge/cgeLookupFilter.h>
 #import <cge/cgeMarscaraFilter.h>
 #import <cge/cgeMaxValueFilter.h>

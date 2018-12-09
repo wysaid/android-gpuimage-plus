@@ -223,7 +223,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
             }
         });
 
-        SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
+        SeekBar seekBar = (SeekBar) findViewById(R.id.globalRestoreSeekBar);
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override

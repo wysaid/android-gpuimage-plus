@@ -53,9 +53,9 @@ namespace CGE
 		COMMON_FUNC(CGEMosaicBlurFilter);
 	}
 	
-	CGELiquidationFilter* getLiquidationFilter(float ratio, float stride)
+	CGELiquifyFilter* getLiquidationFilter(float ratio, float stride)
 	{
-		CGELiquidationFilter* proc = new CGELiquidationFilter;
+		CGELiquifyFilter* proc = new CGELiquifyFilter;
 		if(!proc->initWithMesh(ratio, stride))
 		{
 			delete proc;
@@ -64,9 +64,9 @@ namespace CGE
 		return proc;
 	}
 
-	CGELiquidationFilter* getLiquidationFilter(float width, float height, float stride)
+	CGELiquifyFilter* getLiquidationFilter(float width, float height, float stride)
 	{
-		CGELiquidationFilter* proc = new CGELiquidationFilter;
+		CGELiquifyFilter* proc = new CGELiquifyFilter;
 		if(!proc->initWithMesh(width, height, stride))
 		{
 			delete proc;
