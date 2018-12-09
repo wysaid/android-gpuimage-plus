@@ -21,6 +21,8 @@ namespace CGE
 		//Range: >= 1.
 		void setDotSize(float value);
 
+		void setIntensity(float value);
+
 		void render2Texture(CGE::CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
 
 	protected:

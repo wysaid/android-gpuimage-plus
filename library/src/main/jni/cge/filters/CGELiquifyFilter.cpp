@@ -6,7 +6,7 @@
 *        Mail: admin@wysaid.org
 */
 
-#include "cgeLiquidationFilter.h"
+#include "CGELiquifyFilter.h"
 #include "cgeMat.h"
 
 static CGEConstString s_vshDeform = CGE_SHADER_STRING
@@ -42,7 +42,6 @@ uniform sampler2D inputImageTexture;
 void main()
 {
 	gl_FragColor.rgb = 1.0 - texture2D(inputImageTexture, textureCoordinate).rgb;
-	gl_FragColor.a = 1.0;
 }
 );
 
@@ -51,9 +50,9 @@ void main()
 namespace CGE
 {
 
-	CGEConstString CGELiquidationFilter::paramTextureVertexName = "vTexture";
+	CGEConstString CGELiquifyFilter::paramTextureVertexName = "vTexture";
 
-	CGELiquidationFilter::CGELiquidationFilter() : m_meshVBO(0), m_meshIndexVBO(0), m_textureVBO(0), m_currentMeshIndex(0), m_doingRestore(false)
+	CGELiquifyFilter::CGELiquifyFilter() : m_meshVBO(0), m_meshIndexVBO(0), m_textureVBO(0), m_currentMeshIndex(0), m_doingRestore(false)
 	{
 #ifdef CGE_DEFORM_SHOW_MESH
 		m_program.bindAttribLocation(paramTextureVertexName, 1);
@@ -71,7 +70,7 @@ namespace CGE
 		setUndoSteps(10);
 	}
 
-	CGELiquidationFilter::~CGELiquidationFilter()
+	CGELiquifyFilter::~CGELiquifyFilter()
 	{
 		
 		glDeleteBuffers(1, &m_meshVBO);
@@ -79,12 +78,12 @@ namespace CGE
 		glDeleteBuffers(1, &m_textureVBO);
 	}
 
-	bool CGELiquidationFilter::initWithMesh(float width, float height, float stride)
+	bool CGELiquifyFilter::initWithMesh(float width, float height, float stride)
 	{
 		return initWithMesh(width / height, stride / CGE_MAX(width, height));
 	}
 
-	bool CGELiquidationFilter::initWithMesh(float ratio, float stride)
+	bool CGELiquifyFilter::initWithMesh(float ratio, float stride)
 	{
 		if(!initShadersFromString(s_vshDeform, s_fshDeform))
 			return false;
@@ -130,7 +129,7 @@ namespace CGE
 		return initBuffers();
 	}
 
-	void CGELiquidationFilter::restoreMesh()
+	void CGELiquifyFilter::restoreMesh()
 	{
 		if(m_mesh.size() != m_meshSize.width * m_meshSize.height || m_mesh.empty())
 		{
@@ -157,7 +156,7 @@ namespace CGE
 		updateBuffers();
 	}
 
-	void CGELiquidationFilter::restoreMeshWithIntensity(float intensity)
+	void CGELiquifyFilter::restoreMeshWithIntensity(float intensity)
 	{
 		if(m_mesh.size() != m_meshSize.width * m_meshSize.height || m_mesh.empty())
 		{
@@ -196,7 +195,7 @@ namespace CGE
 		m_doingRestore = true;
 	}
 
-	bool CGELiquidationFilter::initBuffers()
+	bool CGELiquifyFilter::initBuffers()
 	{
 		glDeleteBuffers(1, &m_meshVBO);
 		glGenBuffers(1, &m_meshVBO);
@@ -272,7 +271,7 @@ namespace CGE
 		return true;
 	}
 
-	bool CGELiquidationFilter::updateBuffers()
+	bool CGELiquifyFilter::updateBuffers()
 	{
 		if(m_meshVBO != 0)
 		{
@@ -284,7 +283,7 @@ namespace CGE
 		return false;
 	}
 
-	void CGELiquidationFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID)
+	void CGELiquifyFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID)
 	{
 		if(m_meshVBO == 0 || m_mesh.empty())
 		{
@@ -333,7 +332,7 @@ namespace CGE
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
-	void CGELiquidationFilter::forwardDeformMesh(Vec2f start, Vec2f end, float w, float h, float radius, float intensity)
+	void CGELiquifyFilter::forwardDeformMesh(Vec2f start, Vec2f end, float w, float h, float radius, float intensity)
 	{
 		m_doingRestore = false;
 
@@ -379,7 +378,7 @@ namespace CGE
 		);
 	}
 
-	void CGELiquidationFilter::pushLeftDeformMesh(Vec2f start, Vec2f end, float w, float h, float radius, float intensity, float angle)
+	void CGELiquifyFilter::pushLeftDeformMesh(Vec2f start, Vec2f end, float w, float h, float radius, float intensity, float angle)
 	{
 		
 
@@ -432,7 +431,7 @@ namespace CGE
 		);
 	}
 
-	void CGELiquidationFilter::restoreMeshWithPoint(Vec2f pnt, float w, float h, float radius, float intensity)
+	void CGELiquifyFilter::restoreMeshWithPoint(Vec2f pnt, float w, float h, float radius, float intensity)
 	{
 		
 
@@ -473,7 +472,7 @@ namespace CGE
 		);
 	}
 
-	void CGELiquidationFilter::bloatMeshWithPoint(Vec2f pnt, float w, float h, float radius, float intensity)
+	void CGELiquifyFilter::bloatMeshWithPoint(Vec2f pnt, float w, float h, float radius, float intensity)
 	{
 		
 
@@ -509,7 +508,7 @@ namespace CGE
 		);
 	}
 
-	void CGELiquidationFilter::wrinkleMeshWithPoint(Vec2f pnt, float w, float h, float radius, float intensity)
+	void CGELiquifyFilter::wrinkleMeshWithPoint(Vec2f pnt, float w, float h, float radius, float intensity)
 	{
 		
 
@@ -545,7 +544,7 @@ namespace CGE
 		);
 	}
 
-	void CGELiquidationFilter::setUndoSteps(unsigned n)
+	void CGELiquifyFilter::setUndoSteps(unsigned n)
 	{
 		m_undoSteps = n;
 		if(n == 0)
@@ -557,17 +556,17 @@ namespace CGE
 		}
 	}
 
-	bool CGELiquidationFilter::canUndo()
+	bool CGELiquifyFilter::canUndo()
 	{
 		return !m_vecMeshes.empty() && m_currentMeshIndex > 0;
 	}
 
-	bool CGELiquidationFilter::canRedo()
+	bool CGELiquifyFilter::canRedo()
 	{
 		return !m_vecMeshes.empty() && m_currentMeshIndex < m_vecMeshes.size() - 1;
 	}
 
-	bool CGELiquidationFilter::undo()
+	bool CGELiquifyFilter::undo()
 	{
 		if(!canUndo())
 			return false;
@@ -580,7 +579,7 @@ namespace CGE
 		return true;
 	}
 
-	bool CGELiquidationFilter::redo()
+	bool CGELiquifyFilter::redo()
 	{
 		if(!canRedo())
 			return false;
@@ -592,7 +591,7 @@ namespace CGE
 		return true;
 	}
 
-	bool CGELiquidationFilter::pushMesh()
+	bool CGELiquifyFilter::pushMesh()
 	{
 		if(m_undoSteps <= 0)
 			return false;
@@ -824,7 +823,7 @@ namespace CGE
 		);
 	}
 
-	void CGELiquidationFilter::showMesh(bool bShow)
+	void CGELiquifyFilter::showMesh(bool bShow)
 	{
 #ifdef CGE_DEFORM_SHOW_MESH
 		m_bShowMesh = bShow;

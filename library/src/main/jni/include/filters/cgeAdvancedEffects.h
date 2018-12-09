@@ -13,7 +13,7 @@
 #include "cgeRandomBlurFilter.h"
 #include "cgeBilateralBlurFilter.h"
 #include "cgeMosaicBlurFilter.h"
-#include "cgeLiquidationFilter.h"
+#include "CGELiquifyFilter.h"
 #include "cgeHalftoneFilter.h"
 #include "cgePolarPixellateFilter.h"
 #include "cgePolkaDotFilter.h"
@@ -33,8 +33,8 @@ namespace CGE
 	CGEBilateralBlurFilter* createBilateralBlurFilter();
     CGEBilateralBlurBetterFilter* createBilateralBlurBetterFilter();
 	CGEMosaicBlurFilter* createMosaicBlurFilter();
-	CGELiquidationFilter* getLiquidationFilter(float ratio, float stride);
-	CGELiquidationFilter* getLiquidationFilter(float width, float height , float stride);
+	CGELiquifyFilter* getLiquidationFilter(float ratio, float stride);
+	CGELiquifyFilter* getLiquidationFilter(float width, float height , float stride);
 
 	CGELiquidationNicerFilter* getLiquidationNicerFilter(float ratio, float stride);
 	CGELiquidationNicerFilter* getLiquidationNicerFilter(float width, float height , float stride);

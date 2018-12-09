@@ -133,7 +133,7 @@ public class BasicImageDemoActivity extends AppCompatActivity {
 
         mImageView.setDisplayMode(ImageGLSurfaceView.DisplayMode.DISPLAY_ASPECT_FIT);
 
-        mSeekBar = (SeekBar) findViewById(R.id.seekBar);
+        mSeekBar = (SeekBar) findViewById(R.id.globalRestoreSeekBar);
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {

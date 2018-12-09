@@ -52,6 +52,11 @@ namespace CGE
 		m_dotSize = value;
 	}
 
+	void CGEHalftoneFilter::setIntensity(float value)
+	{
+		setDotSize(value);
+	}
+
 	void CGEHalftoneFilter::render2Texture(CGE::CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID)
 	{
 		handler->setAsTarget();

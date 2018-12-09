@@ -17,11 +17,11 @@
 namespace CGE
 {
 
-	class CGELiquidationFilter : public CGEImageFilterInterface
+	class CGELiquifyFilter : public CGEImageFilterInterface
 	{
 	public:
-		CGELiquidationFilter();
-		~CGELiquidationFilter();
+		CGELiquifyFilter();
+		~CGELiquifyFilter();
 
 		//'ratio': imageWidth / imageHeight.
 		//'stride' range: (0.001, 0.2]. The mesh would be larger as stride is smaller and the result would be more accurate but may take longer time for processing.
@@ -81,11 +81,11 @@ namespace CGE
 #endif
 	};
 
-	class CGELiquidationNicerFilter : public CGELiquidationFilter
+	class CGELiquidationNicerFilter : public CGELiquifyFilter
 	{
 	public:
-		void forwardDeformMesh(Vec2f start, Vec2f end, float w, float h, float radius, float intensity);//see in 'CGELiquidationFilter'
-		virtual void pushLeftDeformMesh(Vec2f start, Vec2f end, float w, float h, float radius, float intensity, float angle = 3.14159f / 2.0f);//see in 'CGELiquidationFilter'
+		void forwardDeformMesh(Vec2f start, Vec2f end, float w, float h, float radius, float intensity);//see in 'CGELiquifyFilter'
+		virtual void pushLeftDeformMesh(Vec2f start, Vec2f end, float w, float h, float radius, float intensity, float angle = 3.14159f / 2.0f);//see in 'CGELiquifyFilter'
 	};
 
 }

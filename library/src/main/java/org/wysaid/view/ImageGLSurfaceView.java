@@ -39,6 +39,11 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer {
     }
 
     protected TextureRenderer.Viewport mRenderViewport = new TextureRenderer.Viewport();
+
+    public TextureRenderer.Viewport getRenderViewport() {
+        return mRenderViewport;
+    }
+
     protected int mImageWidth;
     protected int mImageHeight;
     protected int mViewWidth;
@@ -149,6 +154,63 @@ public class ImageGLSurfaceView extends GLSurfaceView implements Renderer {
                     Log.e(LOG_TAG, "set intensity after release!!");
                 } else {
                     mImageHandler.setFilterIntensity(mFilterIntensity, true);
+                    requestRender();
+                }
+
+                synchronized (mSettingIntensityLock) {
+                    ++mSettingIntensityCount;
+                }
+            }
+        });
+    }
+
+    public void flush(final boolean runFilter, final Runnable runnable) {
+        if (mImageHandler == null || runnable == null)
+            return;
+
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                if (mImageHandler == null) {
+                    Log.e(LOG_TAG, "flush after release!!");
+                } else {
+                    runnable.run();
+                    if(runFilter) {
+                        mImageHandler.revertImage();
+                        mImageHandler.processFilters();
+                    }
+                    requestRender();
+                }
+            }
+        });
+    }
+
+    // The runnable may be skipped when busy.
+    public void lazyFlush(final boolean runFilter, final Runnable runnable) {
+        if (mImageHandler == null || runnable == null)
+            return;
+
+        synchronized (mSettingIntensityLock) {
+
+            if (mSettingIntensityCount <= 0) {
+                Log.i(LOG_TAG, "Too fast, skipping...");
+                return;
+            }
+            --mSettingIntensityCount;
+        }
+
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+
+                if (mImageHandler == null) {
+                    Log.e(LOG_TAG, "flush after release!!");
+                } else {
+                    if(runFilter) {
+                        mImageHandler.revertImage();
+                        mImageHandler.processFilters();
+                    }
+                    runnable.run();
                     requestRender();
                 }
 

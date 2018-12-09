@@ -73,7 +73,7 @@ LOCAL_SRC_FILES :=  \
 			$(CGE_SOURCE)/filters/cgeEdgeFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeEmbossFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeCrosshatchFilter.cpp \
-			$(CGE_SOURCE)/filters/cgeLiquidationFilter.cpp \
+			$(CGE_SOURCE)/filters/CGELiquifyFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeRandomBlurFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeMinValueFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeMaxValueFilter.cpp \
@@ -99,6 +99,7 @@ LOCAL_SRC_FILES :=  \
 			$(CGE_ROOT)/interface/cgeVideoPlayer.cpp \
 			$(CGE_ROOT)/interface/cgeImageHandlerAndroid.cpp \
 			$(CGE_ROOT)/interface/cgeImageHandlerWrapper.cpp \
+			$(CGE_ROOT)/interface/cgeDeformFilterWrapper.cpp \
 
 
 LOCAL_CPPFLAGS := -frtti -std=gnu++11

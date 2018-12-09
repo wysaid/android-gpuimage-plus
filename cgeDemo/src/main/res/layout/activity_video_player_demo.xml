@@ -22,7 +22,7 @@
     </FrameLayout>
 
     <SeekBar
-        android:id="@+id/seekBar"
+        android:id="@+id/globalRestoreSeekBar"
         android:layout_width="match_parent"
         android:layout_height="60dp"/>
 
