@@ -18,7 +18,7 @@ namespace CGE
     cv::Mat CGEFaceTracker::_conModel;
     bool CGEFaceTracker::_isTrackerOK = false;
     
-    CGEFaceTracker::CGEFaceTracker() : m_currentWindowSize(&m_minWindowSize), m_faceImageSize(0, 0), m_scaledImageSize(0, 0), m_maxImageSize(FACETRACKER_DEFAULT_IMAGE_SIZE), m_imageScaling(1.0f),  m_pointListIndex(0), m_failCount(0), m_tmpWindowSize(nullptr), m_sucCount(0)
+    CGEFaceTracker::CGEFaceTracker() : m_currentWindowSize(&m_midWindowSize), m_faceImageSize(0, 0), m_scaledImageSize(0, 0), m_maxImageSize(FACETRACKER_DEFAULT_IMAGE_SIZE), m_imageScaling(1.0f),  m_pointListIndex(0), m_failCount(0), m_tmpWindowSize(nullptr), m_sucCount(0)
     {
         int maxWindowSizes[] = {
             19, 17, 15, 13, 11, 9, 7
