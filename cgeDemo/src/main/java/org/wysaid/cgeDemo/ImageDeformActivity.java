@@ -6,10 +6,12 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.SeekBar;
 
+import org.wysaid.common.Common;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.myUtils.MsgUtil;
 import org.wysaid.nativePort.CGEDeformFilterWrapper;
@@ -85,8 +87,10 @@ public class ImageDeformActivity extends AppCompatActivity {
                 mImageView.lazyFlush(true, new Runnable() {
                     @Override
                     public void run() {
-                        float intensity = progress / 100.0f;
-                        mDeformWrapper.restoreWithIntensity(intensity);
+                        if(mDeformWrapper != null) {
+                            float intensity = progress / 100.0f;
+                            mDeformWrapper.restoreWithIntensity(intensity);
+                        }
                     }
                 });
             }
@@ -112,6 +116,10 @@ public class ImageDeformActivity extends AppCompatActivity {
         @Override
         public boolean onTouch(View v, final MotionEvent event) {
 
+            if(mDeformWrapper == null) {
+                return false;
+            }
+
             TextureRenderer.Viewport viewport = mImageView.getRenderViewport();
             final float w = viewport.width;
             final float h = viewport.height;
@@ -123,6 +131,9 @@ public class ImageDeformActivity extends AppCompatActivity {
                     mIsMoving = true;
                     mLastX = x;
                     mLastY = y;
+                    if(!mDeformWrapper.canUndo()) {
+                        mDeformWrapper.pushDeformStep();
+                    }
                     return true;
                 case MotionEvent.ACTION_MOVE:
                     break;
@@ -133,7 +144,10 @@ public class ImageDeformActivity extends AppCompatActivity {
                         mImageView.queueEvent(new Runnable() {
                             @Override
                             public void run() {
-                                mDeformWrapper.pushDeformStep();
+                                if(mImageView != null) {
+                                    mDeformWrapper.pushDeformStep();
+                                    Log.i(Common.LOG_TAG, "Init undo status...");
+                                }
                             }
                         });
                     }
@@ -153,6 +167,8 @@ public class ImageDeformActivity extends AppCompatActivity {
             mImageView.lazyFlush(true, new Runnable() {
                 @Override
                 public void run() {
+                    if(mDeformWrapper == null)
+                        return ;
                     switch (mDeformMode) {
                         case Restore:
                             mDeformWrapper.restoreWithPoint(x, y, w, h, mTouchRadius, mTouchIntensaity);

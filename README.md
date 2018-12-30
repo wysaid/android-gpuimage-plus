@@ -174,9 +174,11 @@ __Or to do with a [CGEImageHandler](https://github.com/wysaid/android-gpuimage-p
 
 ### 3. Filter Rule String ###
 
-En: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-En](https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-En "http://wysaid.org")
+Doc: <https://github.com/wysaid/android-gpuimage-plus/wiki>
 
-Ch: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule](https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule "http://wysaid.org")
+En: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(EN)](https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(EN) "http://wysaid.org")
+
+Ch: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(ZH)](https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(ZH) "http://wysaid.org")
 
 ## Tool ##
 
