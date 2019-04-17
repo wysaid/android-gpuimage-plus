@@ -18,21 +18,6 @@
 
 namespace CGE
 {
-	class CGEFastFrameHandler : public CGEImageHandler
-	{
-	public:
-
-		void processingFilters();
-
-		void swapBufferFBO();
-
-		inline void useImageFBO()
-		{
-			CGEImageHandler::useImageFBO();
-		}
-	};
-
-
 	class CGEFrameRenderer
 	{
 	public:
@@ -89,7 +74,7 @@ namespace CGE
 		void setMaskRotation(float rad);
 		void setMaskFlipScale(float x, float y);
 
-		inline CGEFastFrameHandler* getImageHandler() { return m_frameHandler; }
+		inline CGEImageHandler* getImageHandler() { return m_frameHandler; }
 		
 		inline void bindImageFBO() { m_frameHandler->useImageFBO(); }
 
@@ -100,7 +85,7 @@ namespace CGE
 
 	protected:
 
-		CGEFastFrameHandler* m_frameHandler;
+		CGEImageHandler* m_frameHandler;
 		//主要用于重绘external_OES类型texture
 		TextureDrawer *m_textureDrawer;
 		TextureDrawer4ExtOES *m_textureDrawerExtOES;

@@ -35,11 +35,14 @@
 #if defined(DEBUG) || defined(_DEBUG) || defined(_CGE_LOGS_)
 #define  CGE_LOG_INFO(...)  __android_log_print(ANDROID_LOG_INFO, CGE_LOG_TAG, __VA_ARGS__)
 #define  CGE_LOG_ERROR(...)  __android_log_print(ANDROID_LOG_ERROR, CGE_LOG_TAG, __VA_ARGS__)
- #define CGE_LOG_CODE(...) __VA_ARGS__
+#define CGE_LOG_CODE(...) __VA_ARGS__
+#define CGEAssert assert
 #else
-#define  CGE_LOG_INFO(...)
-#define  CGE_LOG_ERROR(...)
- #define CGE_LOG_CODE(...)
+#define CGE_LOG_INFO(...)
+#define CGE_LOG_ERROR(...)
+#define CGE_LOG_CODE(...)
+#include <assert.h>
+#define CGEAssert assert
 #endif
 
 #if defined(_CGE_GENERAL_ERROR_TEST_) && _CGE_GENERAL_ERROR_TEST_

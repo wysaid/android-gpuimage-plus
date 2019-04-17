@@ -248,6 +248,7 @@ namespace CGE
 		m_program.bind();
 		m_program.sendUniformf(paramSamplerStepName, 1.0f / sz.width, 1.0f / sz.height);
 
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
         glEnableVertexAttribArray(0);
         
@@ -261,6 +262,7 @@ namespace CGE
         
 		//Pass Two
 		handler->swapBufferFBO();
+		handler->setAsTarget();
 		glBindTexture(GL_TEXTURE_2D, handler->getBufferTextureID());
 		m_program.sendUniformf(paramBlurNormalName, 1.0f, 0.0f);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -300,6 +302,7 @@ namespace CGE
 		m_program.sendUniformf(paramSamplerStepName, 1.0f / sz.width, 1.0f / sz.height);
 
         glActiveTexture(GL_TEXTURE0);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
         

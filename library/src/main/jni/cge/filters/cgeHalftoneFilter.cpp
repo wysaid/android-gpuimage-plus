@@ -61,6 +61,8 @@ namespace CGE
 	{
 		handler->setAsTarget();
 		m_program.bind();
+		
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(0);
 		glActiveTexture(GL_TEXTURE0);

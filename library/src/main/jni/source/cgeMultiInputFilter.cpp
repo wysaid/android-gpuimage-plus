@@ -34,7 +34,7 @@ namespace CGE
         {
             for(int i = 0; i != m_inputTextures.size(); ++i)
             {
-                assert(m_inputTextures.size() == m_inputTextureLocations.size());
+                CGEAssert(m_inputTextures.size() == m_inputTextureLocations.size());
 
                 glActiveTexture(GL_TEXTURE1 + i);
                 glBindTexture(GL_TEXTURE_2D, m_inputTextures[i]);

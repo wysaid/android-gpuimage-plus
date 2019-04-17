@@ -12,18 +12,6 @@
 #include "cgeCommonDefine.h"
 #include <cassert>
 
-#if defined(_CGE_DISABLE_GLOBALCONTEXT_) && _CGE_DISABLE_GLOBALCONTEXT_
-
-#define CGE_ENABLE_GLOBAL_GLCONTEXT(...)
-#define CGE_DISABLE_GLOBAL_GLCONTEXT(...)
-
-#else
-
-#define CGE_ENABLE_GLOBAL_GLCONTEXT(...) cgeEnableGlobalGLContext()
-#define CGE_DISABLE_GLOBAL_GLCONTEXT(...) cgeDisableGlobalGLContext()
-
-#endif
-
 namespace CGE
 {
 #if !(defined(_CGE_DISABLE_GLOBALCONTEXT_) && _CGE_DISABLE_GLOBALCONTEXT_)
@@ -88,7 +76,7 @@ namespace CGE
 
 		inline SharedTexture& operator =(const SharedTexture& other)
 		{
-			assert(this != &other && (other.m_refCount == nullptr || other.m_textureID != 0));
+			CGEAssert(this != &other && (other.m_refCount == nullptr || other.m_textureID != 0));
 
 			if(m_refCount != nullptr && --*m_refCount <= 0)
 			{

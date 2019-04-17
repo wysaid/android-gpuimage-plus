@@ -477,7 +477,7 @@ namespace CGE
 
 	void TextureDrawerExt::drawTexture2Texture(GLuint src, GLuint dst)
 	{
-		assert(src != 0 && dst != 0);
+		CGEAssert(src != 0 && dst != 0);
 		m_framebuffer.bindTexture2D(dst);
 		TextureDrawer::drawTexture(src);
 	}

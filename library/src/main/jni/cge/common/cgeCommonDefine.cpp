@@ -288,7 +288,7 @@ extern "C"
     
     GLuint cgeGenTextureWithBuffer(const void* bufferData, GLint w, GLint h, GLenum channelFmt, GLenum dataFmt, GLint channel, GLint bindID, GLenum texFilter, GLenum texWrap)
     {
-        assert(w != 0 && h != 0);
+        CGEAssert(w != 0 && h != 0);
         GLuint tex;
         static const GLenum eArrs[] = { GL_LUMINANCE, GL_LUMINANCE_ALPHA, GL_RGB, GL_RGBA};
         if(channel <= 0 || channel > 4)

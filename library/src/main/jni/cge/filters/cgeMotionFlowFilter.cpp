@@ -62,7 +62,7 @@ namespace CGE
     {
         clear();
         
-        assert(frames > 0);
+        CGEAssert(frames > 0);
         
         if(frames <= 0)
             return;
@@ -115,7 +115,8 @@ namespace CGE
         glClear(GL_COLOR_BUFFER_BIT);
         
         m_program.bind();
-        
+
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
         

@@ -102,7 +102,7 @@ CGE_SHADER_STRING(
 
 static void normalize(GLfloat* x, GLfloat* y)
 {
-	assert(*x != 0.0f || *y != 0.0f);
+	CGEAssert(*x != 0.0f || *y != 0.0f);
 	GLfloat len = sqrtf(*x**x+*y**y);
 	*x /= len;
 	*y /= len;
@@ -110,7 +110,7 @@ static void normalize(GLfloat* x, GLfloat* y)
  
 // static void getNormalizedOrthogonalityVector(float x, float y, float* fx, float* fy)
 // {
-// 	assert(x != 0.0f || y != 0.0f);
+// 	CGEAssert(x != 0.0f || y != 0.0f);
 // 	GLfloat len = sqrtf(x*x+y*y);
 // 	*fx = sqrt(y*y / len);
 // 	*fy = sqrt(x*x / len);

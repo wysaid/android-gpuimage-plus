@@ -56,6 +56,7 @@ namespace CGE
 		handler->setAsTarget();
 		m_program.bind();
 
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 		
@@ -347,7 +348,7 @@ namespace CGE
              if(m_isWrapper)
              {
                  CGE_LOG_ERROR("Invalid usage!! A wrapper should not be directly rendered!\n");
-                 assert(0);
+                 CGEAssert(0);
              }
             )
             
@@ -373,7 +374,6 @@ namespace CGE
 		std::vector<CGEImageFilterInterface*>::iterator iter = m_vecFilters.begin();
 		for(;;)
 		{
-			glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
 			(*iter)->render2Texture(handler, handler->getBufferTextureID(), vertexBufferID);
 			if(++iter != m_vecFilters.end())
 			{
@@ -385,7 +385,6 @@ namespace CGE
 		if(needMix)
 		{
 			handler->swapBufferFBO();
-			glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
 			m_mixFilter.render2Texture(handler, m_texCache, vertexBufferID);
 		}
 	}

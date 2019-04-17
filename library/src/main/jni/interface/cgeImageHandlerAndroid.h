@@ -23,10 +23,6 @@ namespace CGE
 
 		jobject getResultBitmap(JNIEnv* env);
 
-		void processingFilters();
-
-		void swapBufferFBO();
-
 	protected:
 
 	};

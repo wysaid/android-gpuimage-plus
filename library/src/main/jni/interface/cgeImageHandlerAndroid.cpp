@@ -11,40 +11,6 @@
 
 namespace CGE
 {
-	void CGEImageHandlerAndroid::processingFilters()
-	{
-		if(m_vecFilters.empty() || m_bufferTextures[0] == 0)
-		{
-			glFlush();
-			return;
-		}
-
-		glDisable(GL_BLEND);
-		assert(m_vertexArrayBuffer != 0);
-
-		glViewport(0, 0, m_dstImageSize.width, m_dstImageSize.height);
-
-		for(std::vector<CGEImageFilterInterfaceAbstract*>::iterator iter = m_vecFilters.begin();
-            iter < m_vecFilters.end(); ++iter)
-        {
-            swapBufferFBO();
-            glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffer);
-            (*iter)->render2Texture(this, m_bufferTextures[1], m_vertexArrayBuffer);
-            glFlush();
-        }
-        glFinish();
-        // glFlush();
-	}
-
-	void CGEImageHandlerAndroid::swapBufferFBO()
-	{
-		useImageFBO();
-		std::swap(m_bufferTextures[0], m_bufferTextures[1]);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_bufferTextures[0], 0);
-
-		//为了效率， 高帧率绘制期间不检测错误.
-	}
-
 	CGEImageHandlerAndroid::CGEImageHandlerAndroid()
 	{
 		CGE_LOG_INFO("CGEImageHandlerAndroid created!\n");

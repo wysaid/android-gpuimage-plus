@@ -72,45 +72,6 @@ extern "C"
 
 namespace CGE
 {
-
-    //A wrapper that Disables All Error Checking.
-    class FastFrameHandler : public CGEImageHandler
-    {
-    public:
-
-        void processingFilters()
-        {
-            if(m_vecFilters.empty() || m_bufferTextures[0] == 0)
-            {
-                glFlush();
-                return;
-            }
-
-            glDisable(GL_BLEND);
-            assert(m_vertexArrayBuffer != 0);
-
-            glViewport(0, 0, m_dstImageSize.width, m_dstImageSize.height);
-
-            for(auto& filter : m_vecFilters)
-            {
-                swapBufferFBO();
-                glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffer);
-                filter->render2Texture(this, m_bufferTextures[1], m_vertexArrayBuffer);
-                glFlush();
-            }
-
-            glFinish();
-        }
-
-        void swapBufferFBO()
-        {
-            useImageFBO();
-            std::swap(m_bufferTextures[0], m_bufferTextures[1]);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_bufferTextures[0], 0);
-        }
-
-    };
-    
     // A simple-slow offscreen video rendering function.
     bool cgeGenerateVideoWithFilter(const char* outputFilename, const char* inputFilename, const char* filterConfig, float filterIntensity, GLuint texID, CGETextureBlendMode blendMode, float blendIntensity, bool mute, CGETexLoadArg* loadArg)
     {
@@ -179,7 +140,7 @@ namespace CGE
         
         CGE_LOG_INFO("encoder created!");
         
-        FastFrameHandler handler;
+        CGEImageHandler handler;
         CGEBlendFilter* blendFilter = nullptr;
         
         if(texID != 0 && blendIntensity != 0.0f)

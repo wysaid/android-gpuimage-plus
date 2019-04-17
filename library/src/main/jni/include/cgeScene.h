@@ -114,7 +114,7 @@ namespace CGE
 		//注意， 这里设置的是观察方向， 不可为0
 		inline void setLookdirXY(const Vec2f& v)
 		{
-			assert(v[0] || v[1]);
+			CGEAssert(v[0] || v[1]);
 			m_lookDir = v * (m_dirLen / v.length());
 		}
 
@@ -127,7 +127,7 @@ namespace CGE
 		//同上， 场景漫游中， 不允许朝"正"上方观看（仰头无法形成平角
 		inline void setLookdir(const Vec3f& v)
 		{
-			assert(v[0] || v[1]);
+			CGEAssert(v[0] || v[1]);
 			m_lookDir[0] = v[0];
 			m_lookDir[1] = v[1];
 			m_lookDir.normalize();
@@ -224,7 +224,7 @@ namespace CGE
 		//注意， 这里设置的是观察方向， 不可为0
 		inline void setLookdirXZ(const Vec2f& v)
 		{
-			assert(v[0] || v[1]);
+			CGEAssert(v[0] || v[1]);
 			m_lookDir = v * (m_dirLen / v.length());
 		}
 
@@ -237,7 +237,7 @@ namespace CGE
 		//同上， 场景漫游中， 不允许朝"正"上方观看（仰头无法形成平角
 		inline void setLookdir(const Vec3f& v)
 		{
-			assert(v[0] || v[2]);
+			CGEAssert(v[0] || v[2]);
 			m_lookDir[0] = v[0];
 			m_lookDir[1] = v[2];
 			m_lookDir.normalize();

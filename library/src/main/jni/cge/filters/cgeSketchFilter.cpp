@@ -80,6 +80,7 @@ namespace CGE
 		}
 
 		handler->setAsTarget();
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
 		
 		glActiveTexture(GL_TEXTURE0);
 

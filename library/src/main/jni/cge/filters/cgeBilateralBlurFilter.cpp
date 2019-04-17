@@ -199,7 +199,7 @@ namespace CGE
 
 	void CGEBilateralWrapperFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID)
 	{
-		assert(m_proc != nullptr); // Filter 尚未初始化成功
+		CGEAssert(m_proc != nullptr); // Filter 尚未初始化成功
 
 		float blurScale = 200.0f * powf(0.5f, m_blurScale / 50.0f);
 

@@ -73,7 +73,7 @@ namespace CGE
 
 		void render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID)
 		{
-			assert(m_mappingAreas.size() > 0 && m_cacheBufferData.size() >= m_texUnitResolution.width * m_texUnitResolution.height && m_texVertBufferData.size() >= m_texUnitResolution.width * m_texUnitResolution.height * 6);
+			CGEAssert(m_mappingAreas.size() > 0 && m_cacheBufferData.size() >= m_texUnitResolution.width * m_texUnitResolution.height && m_texVertBufferData.size() >= m_texUnitResolution.width * m_texUnitResolution.height * 6);
 
 			handler->setAsTarget();
 			glViewport(0, 0, m_texUnitResolution.width, m_texUnitResolution.height);

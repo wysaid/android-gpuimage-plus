@@ -1,4 +1,4 @@
-﻿/*
+/*
 * cgeImageHandler.cpp
 *
 *  Created on: 2013-12-13
@@ -9,8 +9,6 @@
 #include "cgeImageHandler.h"
 #include "cgeTextureUtils.h"
 
-#include <cassert>
-
 CGE_UNEXPECTED_ERR_MSG
 (
  static int sHandlerCount = 0;
@@ -18,12 +16,8 @@ CGE_UNEXPECTED_ERR_MSG
 
 namespace CGE
 {
-	CGEImageHandlerInterface::CGEImageHandlerInterface() : m_srcTexture(0), m_dstFrameBuffer(0), m_vertexArrayBuffer(0)
+	CGEImageHandlerInterface::CGEImageHandlerInterface()
 	{
-		m_dstImageSize.set(0, 0);
-		m_bufferTextures[0] = 0;
-		m_bufferTextures[1] = 0;
-        
         CGE_UNEXPECTED_ERR_MSG
         (
          CGE_LOG_KEEP("Handler create, total: %d\n", ++sHandlerCount);
@@ -32,12 +26,21 @@ namespace CGE
 
 	CGEImageHandlerInterface::~CGEImageHandlerInterface()
 	{
-		CGE_ENABLE_GLOBAL_GLCONTEXT();
-		glDeleteTextures(1, &m_srcTexture);
+		
+		if(m_srcTexture != 0)
+		{
+			glDeleteTextures(1, &m_srcTexture);
+			m_srcTexture = 0;
+		}
+
+		if(m_vertexArrayBuffer != 0)
+		{
+			glDeleteBuffers(1, &m_vertexArrayBuffer);
+			m_vertexArrayBuffer = 0;
+		}
+
 		clearImageFBO();
-		glDeleteBuffers(1, &m_vertexArrayBuffer);
-        m_vertexArrayBuffer = 0;
-        
+
         CGE_UNEXPECTED_ERR_MSG
         (
          CGE_LOG_KEEP("Handler release, remain: %d\n", --sHandlerCount);
@@ -46,13 +49,16 @@ namespace CGE
 
 	GLuint CGEImageHandlerInterface::getResultTextureAndClearHandler()
 	{
-		CGE_ENABLE_GLOBAL_GLCONTEXT();
+		
 		glFinish();
 		GLuint texID = m_bufferTextures[0];
 		m_bufferTextures[0] = 0;
 		clearImageFBO();
-		glDeleteTextures(1, &m_srcTexture);
-        m_srcTexture = 0;
+        if(m_srcTexture != 0)
+        {
+            glDeleteTextures(1, &m_srcTexture);
+            m_srcTexture = 0;
+        }
 		return texID;
 	}
 
@@ -68,18 +74,20 @@ namespace CGE
 
     void CGEImageHandlerInterface::copyTextureData(void* data, int w, int h, GLuint texID, GLenum dataFmt, GLenum channelFmt)
     {
-        assert(texID != 0); //Invalid Texture ID
+        CGEAssert(texID != 0); //Invalid Texture ID
 
-        CGE_ENABLE_GLOBAL_GLCONTEXT();
-
-        glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer[0]);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texID, 0);
         glFinish();
 		if(channelFmt != GL_RGBA)
 			glPixelStorei(GL_PACK_ALIGNMENT, 1);
         glReadPixels(0, 0, w, h, channelFmt, dataFmt, data);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_bufferTextures[0], 0);
+        
+        CGE_LOG_CODE
+        (
         cgeCheckGLError("CGEImageHandlerInterface::copyTextureData");
+        )
     }
 
 	bool CGEImageHandlerInterface::initImageFBO(const void* data, int w, int h, GLenum channelFmt, GLenum dataFmt, int channel)
@@ -95,9 +103,9 @@ namespace CGE
 		m_bufferTextures[1] = cgeGenTextureWithBuffer(nullptr, w, h, channelFmt, dataFmt, channel);
 
 		CGE_LOG_INFO("FBO buffer texture id: %d and %d\n", m_bufferTextures[0], m_bufferTextures[1]);
-
-		glGenFramebuffers(1, &m_dstFrameBuffer);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer);
+        
+		glGenFramebuffers(2, m_dstFrameBuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer[0]);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_bufferTextures[0], 0);
 		if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		{
@@ -106,24 +114,43 @@ namespace CGE
 			cgeCheckGLError("CGEImageHandlerInterface::initImageFBO");
 			return false;
 		}
-		CGE_LOG_INFO("FBO Framebuffer id: %d\n", m_dstFrameBuffer);
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer[1]);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_bufferTextures[1], 0);
+        
+        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        {
+            clearImageFBO();
+            CGE_LOG_ERROR("Image Handler initImageFBO failed! %x\n", glCheckFramebufferStatus(GL_FRAMEBUFFER));
+            cgeCheckGLError("CGEImageHandlerInterface::initImageFBO");
+            return false;
+        }
+        
+		CGE_LOG_INFO("FBO Framebuffer id: %d, %d\n", m_dstFrameBuffer[0], m_dstFrameBuffer[1]);
 		return true;
 	}
 
 	void CGEImageHandlerInterface::clearImageFBO()
 	{
-		CGE_ENABLE_GLOBAL_GLCONTEXT();
+		
 		glBindTexture(GL_TEXTURE_2D, 0);
-		glDeleteTextures(2, m_bufferTextures);
-		m_bufferTextures[0] = 0;
-		m_bufferTextures[1] = 0;
-		glDeleteFramebuffers(1, &m_dstFrameBuffer);
-		m_dstFrameBuffer = 0;	
+
+		if(m_bufferTextures[0] != 0 || m_bufferTextures[1] != 0)
+		{
+			glDeleteTextures(2, m_bufferTextures);
+			m_bufferTextures[0] = m_bufferTextures[1] = 0;
+		}
+
+        if(m_dstFrameBuffer[0] != 0 || m_dstFrameBuffer[1] != 0)
+        {
+            glDeleteFramebuffers(2, m_dstFrameBuffer);
+            m_dstFrameBuffer[0] = m_dstFrameBuffer[1] = 0;
+        }
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 
-	CGEImageHandler::CGEImageHandler() : m_bRevertEnabled(false), m_drawer(nullptr), m_resultDrawer(nullptr)
+	CGEImageHandler::CGEImageHandler() : m_drawer(nullptr), m_resultDrawer(nullptr)
 #ifdef _CGE_USE_ES_API_3_0_
 		,m_pixelPackBuffer(0), m_pixelPackBufferSize(0)
 #endif
@@ -131,7 +158,7 @@ namespace CGE
 
 	CGEImageHandler::~CGEImageHandler()
 	{
-		CGE_ENABLE_GLOBAL_GLCONTEXT();
+		
 		clearImageFilters();
 		delete m_drawer;
 		delete m_resultDrawer;
@@ -144,7 +171,7 @@ namespace CGE
 
 	bool CGEImageHandler::initWithRawBufferData(const void* imgData, GLint w, GLint h, CGEBufferFormat format, bool bEnableReversion)
 	{
-		CGE_ENABLE_GLOBAL_GLCONTEXT();
+		
 		int channel;
 		GLenum dataFmt, channelFmt;
 		cgeGetDataAndChannelByFormat(format, &dataFmt, &channelFmt, &channel);
@@ -156,8 +183,7 @@ namespace CGE
 		CGE_LOG_INFO("Image Handler Init With RawBufferData %d x %d, %d channel\n", w, h, channel);
 
 		glDeleteTextures(1, &m_srcTexture); //Delete last texture to avoid reinit error.
-		m_bRevertEnabled = bEnableReversion;
-		if(m_bRevertEnabled)
+		if(bEnableReversion)
 		{
 			m_srcTexture = cgeGenTextureWithBuffer(bufferdata, w, h, channelFmt, dataFmt, channel);
 			CGE_LOG_INFO("Input Image Texture id %d\n", m_srcTexture);
@@ -180,18 +206,21 @@ namespace CGE
 		if(!(w == m_dstImageSize.width && h == m_dstImageSize.height && channel == 4))
 			return false;
 
-		CGE_ENABLE_GLOBAL_GLCONTEXT();
+		
 
 		glBindTexture(GL_TEXTURE_2D, m_bufferTextures[0]);
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, channelFmt, dataFmt, data);
 		return true;
 	}
 
-	bool CGEImageHandler::initWithTexture(GLuint textureID, GLint w, GLint h, CGEBufferFormat format, bool bEnableReversion)
+	bool CGEImageHandler::initWithTexture(GLuint textureID, GLint w, GLint h, CGEBufferFormat format, bool shouldKeepInput)
 	{
 		if(textureID == 0 || w < 1 || h < 1)
 			return false;
 
+        if(m_srcTexture != 0)
+            glDeleteTextures(1, &m_srcTexture);
+        
 		m_srcTexture = textureID;
 		m_dstImageSize.set(w, h);
 
@@ -201,13 +230,24 @@ namespace CGE
 
 		initImageFBO(nullptr, w, h, channelFmt, dataFmt, channel);
 		
-		m_bRevertEnabled = true;
 		revertToKeptResult(false);
-		m_bRevertEnabled = bEnableReversion;
 
-		if(!m_bRevertEnabled)
+		if(!shouldKeepInput)
 			m_srcTexture = 0;
 		return true;
+	}
+
+	bool CGEImageHandler::updateTexture(GLuint textureID, int w, int h)
+	{
+		if(m_bufferTextures[0] != 0 && textureID != 0 && w == m_dstImageSize.width && h == m_dstImageSize.height)
+		{
+			GLuint srcTexture = m_srcTexture;
+			m_srcTexture = textureID;
+			revertToKeptResult(false);
+			m_srcTexture = srcTexture;
+			return true;
+		}
+		return false;
 	}
 
 #ifdef _CGE_USE_ES_API_3_0_
@@ -270,7 +310,7 @@ namespace CGE
 			return nullptr;
 		}
 
-		CGE_ENABLE_GLOBAL_GLCONTEXT();
+		
 		useImageFBO();
 		glFinish();
 
@@ -302,7 +342,7 @@ namespace CGE
 			CGE_LOG_ERROR("%s\n", nullptr == data ? "data is NULL" : (channel == 4 ? "Handler is not initialized!" : "Channel must be 4!") );
 			return false;
 		}
-		CGE_ENABLE_GLOBAL_GLCONTEXT();
+		
 		setAsTarget();
 		glFinish();
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -362,56 +402,6 @@ namespace CGE
 
 #endif
 
-	void CGEImageHandler::setAsTarget()
-	{
-		CGE_ENABLE_GLOBAL_GLCONTEXT();
-        glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer);
-		glViewport(0, 0, m_dstImageSize.width, m_dstImageSize.height);
-		CGE_LOG_CODE(if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		{
-            CGE_LOG_ERROR("CGEImageHandler::setAsTarget failed!\n");
-		});
-	}
-
-	void CGEImageHandler::useImageFBO()
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer);
-	}
-
-	size_t CGEImageHandler::getOutputBufferLen(size_t channel)
-	{
-		if(m_bufferTextures[0] == 0 || m_dstFrameBuffer == 0)
-			return 0;
-		return m_dstImageSize.width * m_dstImageSize.height * channel;
-	}
-
-	size_t CGEImageHandler::getOutputBufferBytesPerRow(size_t channel)
-	{
-		if(m_bufferTextures[0] == 0 || m_dstFrameBuffer == 0)
-			return 0;
-		return m_dstImageSize.width * channel;
-	}
-
-	void CGEImageHandler::swapBufferFBO()
-	{
-		useImageFBO();
-		std::swap(m_bufferTextures[0], m_bufferTextures[1]);
-
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_bufferTextures[0], 0);
-        
-        CGE_LOG_CODE
-        (
-         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-         {
-             CGE_LOG_ERROR("Image Handler swapBufferFBO failed!\n");
-         }
-         else
-         {
-             CGE_LOG_INFO("Swapping buffer FBO...\n");
-         }
-        )
-	}
-
 	bool CGEImageHandler::copyTexture(GLuint dst, GLuint src)
 	{
 		if(m_drawer == nullptr)
@@ -432,8 +422,9 @@ namespace CGE
 		if(hasDepth)
 			glDisable(GL_DEPTH_TEST);
 
-		useImageFBO();
-		glFlush();
+        glFlush();
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer[0]);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst, 0);
 		glViewport(0, 0, m_dstImageSize.width, m_dstImageSize.height);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -455,8 +446,8 @@ namespace CGE
 
 	bool CGEImageHandler::copyTexture(GLuint dst, GLuint src, int xOffset, int yOffset, int x, int y, int w, int h)
 	{
-		assert(dst != 0 && src != 0);
-		useImageFBO();
+		CGEAssert(dst != 0 && src != 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer[0]);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, src, 0);
 		glBindTexture(GL_TEXTURE_2D, dst);
 		glFinish();
@@ -495,21 +486,20 @@ namespace CGE
 
 	GLuint CGEImageHandler::copyLastResultTexture(GLuint texID)
 	{
-		if(m_bufferTextures[1] == 0 || m_dstFrameBuffer == 0)
+		if(m_bufferTextures[1] == 0 || m_dstFrameBuffer[1] == 0)
 			return texID;
-		CGE_ENABLE_GLOBAL_GLCONTEXT();
+		
 
 		if(texID == 0)
 			texID = cgeGenTextureWithBuffer(nullptr, m_dstImageSize.width, m_dstImageSize.height, GL_RGBA, GL_UNSIGNED_BYTE);
 
 		if(!copyTexture(texID, m_bufferTextures[1]))
 		{
-			useImageFBO();
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_bufferTextures[1], 0);
+            glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer[1]);
 			glBindTexture(GL_TEXTURE_2D, texID);
 			glFinish();
 			glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_dstImageSize.width, m_dstImageSize.height);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_bufferTextures[0], 0);
+			glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer[0]);
 		}
 
 		return texID;
@@ -517,21 +507,19 @@ namespace CGE
 
 	GLuint CGEImageHandler::copyResultTexture(GLuint texID)
 	{
-		if(m_bufferTextures[1] == 0 || m_dstFrameBuffer == 0)
+		if(m_bufferTextures[0] == 0 || m_dstFrameBuffer[0] == 0)
 			return texID;
-		CGE_ENABLE_GLOBAL_GLCONTEXT();
+		
 
 		if(texID == 0)
 			texID = cgeGenTextureWithBuffer(nullptr, m_dstImageSize.width, m_dstImageSize.height, GL_RGBA, GL_UNSIGNED_BYTE);
 
 		if(!copyTexture(texID, m_bufferTextures[0]))
 		{
-			useImageFBO();
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_bufferTextures[0], 0);
+            glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer[0]);
 			glBindTexture(GL_TEXTURE_2D, texID);
 			glFinish();
 			glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_dstImageSize.width, m_dstImageSize.height);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_bufferTextures[0], 0);
 		}
 
 		return texID;
@@ -541,7 +529,7 @@ namespace CGE
 	{
 		if(proc == nullptr)
 		{
-			CGE_LOG_ERROR("CGEImageHandler: a null filter is sent. Skipping...\n");
+			CGE_LOG_ERROR("CGEImageHandler: a null filter is sended. Skipping...\n");
 			return;
 		}
 		if(!proc->isWrapper())
@@ -562,7 +550,7 @@ namespace CGE
 	{	
 		if(bDelMem)
 		{
-			CGE_ENABLE_GLOBAL_GLCONTEXT();
+			
 			for(std::vector<CGEImageFilterInterfaceAbstract*>::iterator iter = m_vecFilters.begin();
 				iter != m_vecFilters.end(); ++iter)
 			{
@@ -580,26 +568,16 @@ namespace CGE
 			return;
 		}
 
-		CGE_ENABLE_GLOBAL_GLCONTEXT();
-		assert(m_vertexArrayBuffer != 0);
+		
+		CGEAssert(m_vertexArrayBuffer != 0);
 
         glDisable(GL_BLEND);
-
-        CGE_LOG_CODE(int index = 0;);
-        CGE_LOG_CODE(clock_t total = clock(););
-        for(std::vector<CGEImageFilterInterfaceAbstract*>::iterator iter = m_vecFilters.begin();
-            iter < m_vecFilters.end(); ++iter)
+        
+        for(auto* filter : m_vecFilters)
         {
             swapBufferFBO();
-            CGE_LOG_CODE(clock_t t = clock();)
-            CGE_LOG_INFO("####Start Processing step %d...\n", ++index);
-			glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffer);
-            (*iter)->render2Texture(this, m_bufferTextures[1], m_vertexArrayBuffer);
-            glFlush();
-            CGE_LOG_INFO("####Processing step %d finished. Time: %gs .\n", index, float(clock() - t) / CLOCKS_PER_SEC);
+            filter->render2Texture(this, m_bufferTextures[1], m_vertexArrayBuffer);
         }
-		glFinish();
-        CGE_LOG_INFO("####Finished Processing All! Total time: %gs \n", float(clock() - total) / CLOCKS_PER_SEC);
     }
 
 	bool CGEImageHandler::processingWithFilter(GLint index)
@@ -614,36 +592,31 @@ namespace CGE
 		if(proc == nullptr)
 			return false;
 
-		CGE_ENABLE_GLOBAL_GLCONTEXT();
-		assert(m_vertexArrayBuffer != 0);
+		
+		CGEAssert(m_vertexArrayBuffer != 0);
 
 		glDisable(GL_BLEND);
-		glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffer);
 		swapBufferFBO();
-
-//		CGE_LOG_CODE(clock_t t = clock());
-//		CGE_LOG_INFO("####Start Processing...");
 		proc->render2Texture(this, m_bufferTextures[1], m_vertexArrayBuffer);
-		glFlush();
-//		CGE_LOG_INFO("####Finished Processing! Time: %gs \n", float(clock() - t) / CLOCKS_PER_SEC);
 		return true;
 	}
 
 	void CGEImageHandler::disableReversion()
 	{
-		CGE_ENABLE_GLOBAL_GLCONTEXT();
-		glDeleteTextures(1, &m_srcTexture);
-		m_srcTexture = 0;
-		m_bRevertEnabled = false;
+		if(m_srcTexture != 0)
+        {
+            glDeleteTextures(1, &m_srcTexture);
+            m_srcTexture = 0;
+        }
+		
 		CGE_LOG_INFO("Reversion isdisabled");
 	}
 
 	bool CGEImageHandler::keepCurrentResult()
 	{
-		if(!m_bRevertEnabled ||	m_bufferTextures[0] == 0 || m_dstFrameBuffer == 0)
+		if(m_srcTexture == 0 || m_bufferTextures[0] == 0 || m_dstFrameBuffer[0] == 0)
 			return false;
-
-		CGE_ENABLE_GLOBAL_GLCONTEXT();
+		
 		useImageFBO();
 
 		glBindTexture(GL_TEXTURE_2D, m_srcTexture);
@@ -654,45 +627,32 @@ namespace CGE
 
 	bool CGEImageHandler::revertToKeptResult(bool bRevert2Target)
 	{
-		if(!m_bRevertEnabled ||	m_bufferTextures[0] == 0 || m_dstFrameBuffer == 0)
+		if(m_srcTexture == 0 ||	m_bufferTextures[0] == 0 || m_dstFrameBuffer[0] == 0)
 			return false;
 
-		CGE_ENABLE_GLOBAL_GLCONTEXT();
-		useImageFBO();
-
+		
 		if(m_drawer == nullptr)
 		{
 			m_drawer = TextureDrawer::create();
-		}
-
-		if(m_drawer == nullptr)
-		{
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_srcTexture, 0);
-			if(bRevert2Target)
-			{
-				glBindTexture(GL_TEXTURE_2D, m_bufferTextures[1]);
-
-				// glCopyTexSubImage2D 会block cpu
-				glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_dstImageSize.width, m_dstImageSize.height);
-				glFlush();
-			}
-			glBindTexture(GL_TEXTURE_2D, m_bufferTextures[0]);
-			glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_dstImageSize.width, m_dstImageSize.height);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_bufferTextures[0], 0);
-		}
-		else
-		{
-			glViewport(0, 0, m_dstImageSize.width, m_dstImageSize.height);
-			if(bRevert2Target)
-			{
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_bufferTextures[1], 0);
-				m_drawer->drawTexture(m_srcTexture);
-			}
-
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_bufferTextures[0], 0);
-			m_drawer->drawTexture(m_srcTexture);
-		}
-
+            if(m_drawer == nullptr)
+            {
+                return false;
+            }
+        }
+        
+        useImageFBO();
+        
+        glViewport(0, 0, m_dstImageSize.width, m_dstImageSize.height);
+        
+        if(bRevert2Target)
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer[1]);
+            m_drawer->drawTexture(m_srcTexture);
+        }
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer[0]);
+        m_drawer->drawTexture(m_srcTexture);
+        
 		return true;
 	}
 
@@ -716,7 +676,7 @@ namespace CGE
 	{
 		if(!m_vecFilters.empty())
 		{
-			CGE_ENABLE_GLOBAL_GLCONTEXT();
+			
 			std::vector<CGEImageFilterInterfaceAbstract*>::iterator iter = m_vecFilters.end()-1;
 			delete *iter;
 			m_vecFilters.erase(iter);
@@ -742,7 +702,7 @@ namespace CGE
 			{
 				if(bDelMem)
 				{
-					CGE_ENABLE_GLOBAL_GLCONTEXT();
+					
 					delete *iter;
 				}
 				m_vecFilters.erase(iter);
@@ -758,7 +718,7 @@ namespace CGE
 			return false;
 		if(bDelMem)
 		{
-			CGE_ENABLE_GLOBAL_GLCONTEXT();
+			
 			delete m_vecFilters[index];
 		}
 		m_vecFilters.erase(m_vecFilters.begin() + index);
@@ -772,7 +732,7 @@ namespace CGE
 		std::vector<CGEImageFilterInterfaceAbstract*>::iterator iter = m_vecFilters.begin() + index;
 		if(bDelMem)
 		{
-			CGE_ENABLE_GLOBAL_GLCONTEXT();
+			
 			delete *iter;
 		}
 		*iter = proc;

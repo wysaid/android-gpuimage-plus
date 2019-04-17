@@ -1,4 +1,4 @@
-﻿/*
+/*
 * cgeImageHandler.h
 *
 *  Created on: 2013-12-13
@@ -24,32 +24,40 @@ namespace CGE
 	public:
 		CGEImageHandlerInterface();
 		virtual ~CGEImageHandlerInterface();
-		
-		//调用本函数获取handler本次处理最终结果（handler在调用后将失效，需重新init)
+
+		inline void setAsTarget()
+        {
+            CGEAssert(m_dstFrameBuffer[0] != 0);
+            glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer[0]);
+            glViewport(0, 0, m_dstImageSize.width, m_dstImageSize.height);
+        }
+        
+        //This should only be called by the image processing classes. Do check that carefully.
+		inline void swapBufferFBO()
+        {
+            std::swap(m_bufferTextures[0], m_bufferTextures[1]);
+            std::swap(m_dstFrameBuffer[0], m_dstFrameBuffer[1]);
+        }
+
+        virtual void processingFilters() = 0;
+
+		// The handler will be invalid, you must init it after this call
 		virtual GLuint getResultTextureAndClearHandler();
-		virtual size_t getOutputBufferLen(size_t channel = 4); //if 0 is returned , it means the handler is not successfully initialized.
-		virtual size_t getOutputBufferBytesPerRow(size_t channel = 4);
-		inline const GLfloat* getPosVertices() const
-		{	
-			return CGEGlobalConfig::sVertexDataCommon;
-		};
-
-		virtual void processingFilters() = 0;
-		virtual void setAsTarget() = 0;
-		virtual void swapBufferFBO() = 0; //This should only be called by the image processing classes. Do check that carefully.
-
+        virtual size_t getOutputBufferLen(size_t channel = 4); //if 0 is returned , it means the handler is not successfully initialized.
+        virtual size_t getOutputBufferBytesPerRow(size_t channel = 4);
+        
 		//The return value would be a new texture if 0 is passed in.
 		virtual GLuint copyLastResultTexture(GLuint dstTex = 0) { return 0; }
 		virtual GLuint copyResultTexture(GLuint dstTex = 0) { return 0; }
 
 		//You should not modify the textures given below outside the handler.(Read-Only)
 		//But once if you need to do that, remember to change their values.
-		GLuint& getSourceTextureID() { return m_srcTexture; }
-		GLuint& getTargetTextureID() { return m_bufferTextures[0]; }
-		GLuint& getBufferTextureID() { return m_bufferTextures[1]; }
-		const CGESizei& getOutputFBOSize() const { return m_dstImageSize; }
-		GLuint& getFrameBufferID() { return m_dstFrameBuffer; }
-		void getOutputFBOSize(int &w, int &h) { w = m_dstImageSize.width; h = m_dstImageSize.height; }
+		inline GLuint getSourceTextureID() { return m_srcTexture; }
+		inline GLuint getTargetTextureID() { return m_bufferTextures[0]; }
+		inline GLuint getBufferTextureID() { return m_bufferTextures[1]; }
+		inline const CGESizei& getOutputFBOSize() const { return m_dstImageSize; }
+		inline GLuint getOutputFrameBufferID() { return m_dstFrameBuffer[0]; }
+        inline GLuint getInputFrameBufferID() { return m_dstFrameBuffer[1]; }
 
         void copyTextureData(void* data, int w, int h, GLuint texID, GLenum dataFmt, GLenum channelFmt);
 
@@ -58,11 +66,11 @@ namespace CGE
 		virtual void clearImageFBO();
 
 	protected:
-		GLuint m_srcTexture;
-		CGESizei m_dstImageSize;
-		GLuint m_bufferTextures[2];
-		GLuint m_dstFrameBuffer;
-		GLuint m_vertexArrayBuffer;
+		GLuint m_srcTexture = 0;
+		CGESizei m_dstImageSize = {0, 0};
+		GLuint m_bufferTextures[2] = {0, 0};
+		GLuint m_dstFrameBuffer[2] = {0, 0};
+		GLuint m_vertexArrayBuffer = 0;
 	};
 
 
@@ -72,18 +80,17 @@ namespace CGE
 		explicit CGEImageHandler(const CGEImageHandler&) {}
 	public:
 		CGEImageHandler();
-		virtual ~CGEImageHandler();
+		~CGEImageHandler() override;
 
 		bool initWithRawBufferData(const void* data, GLint w, GLint h, CGEBufferFormat format, bool bEnableReversion = true);
 		bool updateData(const void* data, int w, int h, CGEBufferFormat format);
 
-		bool initWithTexture(GLuint textureID, GLint w, GLint h, CGEBufferFormat format, bool bEnableReversion = false);
+        // The input 'textureID' will be used & released by the handler if 'shouldKeepInput == true'
+		bool initWithTexture(GLuint textureID, GLint w, GLint h, CGEBufferFormat format, bool shouldKeepInput = false);
+        bool updateTexture(GLuint textureID, int w, int h);
 
 		bool getOutputBufferData(void* data, CGEBufferFormat format);
-		size_t getOutputBufferLen(size_t channel);
-		size_t getOutputBufferBytesPerRow(size_t channel);
 
-		void setAsTarget();
 		void addImageFilter(CGEImageFilterInterfaceAbstract* proc);
 		void popImageFilter();
 		void clearImageFilters(bool bDelMem = true);
@@ -99,23 +106,22 @@ namespace CGE
 		void peekFilters(std::vector<CGEImageFilterInterfaceAbstract*>* vTrans);
 		std::vector<CGEImageFilterInterfaceAbstract*>& peekFilters() { return m_vecFilters; }
 
-		void processingFilters();
+		void processingFilters() override;
 
-		//使用当前存储的filter里面某个特定的进行滤镜
 		//The last filter of all would be used if the index is -1
 		bool processingWithFilter(GLint index);
 
-		//使用未加入的滤镜进行单独处理。
+		//Process with specified filter.
 		bool processingWithFilter(CGEImageFilterInterfaceAbstract* proc);
 
 		virtual void disableReversion();
-		bool reversionEnabled() { return m_bRevertEnabled; }
 		bool keepCurrentResult();
-		virtual bool revertToKeptResult(bool bRevert2Target = false);
-		virtual void swapBufferFBO(); //This should only be called by the image processing classes. Do check that carefully.
-		virtual GLuint copyLastResultTexture(GLuint dstTex = 0);
-		virtual GLuint copyResultTexture(GLuint dstTex = 0);
 
+        // Both buffers will be revert if pass true
+		virtual bool revertToKeptResult(bool bRevertAllBuffer = false);
+		virtual GLuint copyLastResultTexture(GLuint dstTex = 0) override;
+		virtual GLuint copyResultTexture(GLuint dstTex = 0) override;
+        
 #ifdef _CGE_USE_ES_API_3_0_
 
 		const void* mapOutputBuffer(CGEBufferFormat fmt);
@@ -123,8 +129,7 @@ namespace CGE
 
 #endif
 
-		//辅助方法
-		bool copyTexture(GLuint dst, GLuint src); //使用handler内部图像尺寸
+		bool copyTexture(GLuint dst, GLuint src);
 		bool copyTexture(GLuint dst, GLuint src, int x, int y, int w, int h);
 		bool copyTexture(GLuint dst, GLuint src, int xOffset, int yOffset, int x, int y, int w, int h);
 
@@ -132,11 +137,9 @@ namespace CGE
 		TextureDrawer* getResultDrawer();
 		void setResultDrawer(TextureDrawer* drawer);
 
-        virtual void useImageFBO();
+        inline void useImageFBO() { glBindFramebuffer(GL_FRAMEBUFFER, m_dstFrameBuffer[0]); }
 
 	protected:
-
-		bool m_bRevertEnabled;
 		std::vector<CGEImageFilterInterfaceAbstract*> m_vecFilters;
 
 		TextureDrawer *m_drawer, *m_resultDrawer;
