@@ -1,0 +1,19 @@
+#!/bin/sh
+
+if [[ "$NDK_STANDALONE_TOOLCHAIN" == "" ]]; then
+
+if [[ "$NDK" == "" ]]; then
+echo "You should set the NDK variable to your ndk-dir!"
+exit
+fi
+
+export NDK_STANDALONE_TOOLCHAIN=$NDK/ndk-build-toolchain
+
+if [[ ! -d "$NDK_STANDALONE_TOOLCHAIN" ]]; then
+
+$NDK/build/tools/make-standalone-toolchain.sh --toolchain=arm-linux-android-clang3.6 --arch=arm --platform=android-26 --install-dir=$NDK_STANDALONE_TOOLCHAIN --stl=libc++
+
+fi
+
+fi
+echo "NDK_STANDALONE_TOOLCHAIN=$NDK_STANDALONE_TOOLCHAIN"
