@@ -183,6 +183,7 @@ public class MainActivity extends AppCompatActivity {
             new DemoClassDescription("ImageDemoActivity", "Advanced Image Filter Demo"),
             new DemoClassDescription("ImageDeformActivity", "Image Deform Demo"),
             new DemoClassDescription("CameraDemoActivity", "Camera Filter Demo"),
+            new DemoClassDescription("MultiInputActivity", "Multi Input Demo"),
             new DemoClassDescription("SimplePlayerDemoActivity", "Simple Player Demo"),
             new DemoClassDescription("VideoPlayerDemoActivity", "Video Player Demo"),
             new DemoClassDescription("FaceTrackingDemoActivity", "Face Tracking Demo"),

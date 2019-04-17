@@ -30,6 +30,7 @@ LOCAL_SRC_FILES :=  \
 			$(CGEEXT_ROOT)/customHelper.cpp \
 			$(CGEEXT_ROOT)/customFilter_0.cpp \
 			$(CGEEXT_ROOT)/customFilter_N.cpp \
+			$(CGEEXT_ROOT)/cgeMultiInputFilter.cpp \
 
 
 LOCAL_CPPFLAGS := -frtti -std=gnu++11
