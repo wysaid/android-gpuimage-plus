@@ -49,12 +49,9 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".SimplePlayerDemoActivity"
-            android:label="@string/title_activity_video_player" />
-        <activity android:name=".VideoPlayerDemoActivity" />
-        <activity android:name=".TestCaseActivity" />
-        <activity
-            android:name=".FaceTrackingDemoActivity"
-            android:label="@string/title_activity_face_tracker_demo" />
+            android:label="@string/title_activity_video_player"/>
+        <activity android:name=".VideoPlayerDemoActivity"/>
+        <activity android:name=".TestCaseActivity"/>
     </application>
 
 </manifest>

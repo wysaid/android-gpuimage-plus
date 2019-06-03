@@ -9,13 +9,13 @@ import android.util.AttributeSet;
 
 import org.wysaid.common.Common;
 import org.wysaid.nativePort.CGEMultiInputFilterWrapper;
-import org.wysaid.view.CameraRecordGLSurfaceView;
+import org.wysaid.view.CameraGLSurfaceViewWithTexture;
 
 import java.io.InputStream;
 
 import javax.microedition.khronos.opengles.GL10;
 
-public class MultiInputDemo extends CameraRecordGLSurfaceView {
+public class MultiInputDemo extends CameraGLSurfaceViewWithTexture {
     public MultiInputDemo(Context context, AttributeSet attrs) {
         super(context, attrs);
         mAssetManager = context.getAssets();
@@ -148,7 +148,7 @@ public class MultiInputDemo extends CameraRecordGLSurfaceView {
                 initResourceList();
                 mWrapper = CGEMultiInputFilterWrapper.create(VSH, FSH);
                 if(mWrapper != null) {
-                    mFrameRecorder.setNativeFilter(mWrapper.getNativeAddress());
+                    mFrameRenderer.setNativeFilter(mWrapper.getNativeAddress());
                 }
             }
         });

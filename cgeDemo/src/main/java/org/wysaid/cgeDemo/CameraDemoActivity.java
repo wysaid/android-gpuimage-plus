@@ -17,11 +17,14 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
 import org.wysaid.camera.CameraInstance;
+import org.wysaid.common.Common;
 import org.wysaid.myUtils.FileUtil;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.myUtils.MsgUtil;
+import org.wysaid.nativePort.CGEFrameRenderer;
 import org.wysaid.nativePort.CGENativeLibrary;
-import org.wysaid.view.CameraRecordGLSurfaceView;
+import org.wysaid.view.CameraGLSurfaceView;
+import org.wysaid.view.CameraGLSurfaceViewWithTexture;
 
 public class CameraDemoActivity extends AppCompatActivity {
 
@@ -29,9 +32,9 @@ public class CameraDemoActivity extends AppCompatActivity {
 
     private String mCurrentConfig;
 
-    private CameraRecordGLSurfaceView mCameraView;
+    private CameraGLSurfaceViewWithTexture mCameraView;
 
-    public final static String LOG_TAG = CameraRecordGLSurfaceView.LOG_TAG;
+    public final static String LOG_TAG = Common.LOG_TAG;
 
     public static CameraDemoActivity mCurrentInstance = null;
 
@@ -58,56 +61,6 @@ public class CameraDemoActivity extends AppCompatActivity {
         }
     }
 
-    class RecordListener implements View.OnClickListener {
-
-        boolean isValid = true;
-        String recordFilename;
-
-        @Override
-        public void onClick(View v) {
-            Button btn = (Button) v;
-
-            if (!isValid) {
-                Log.e(LOG_TAG, "Please wait for the call...");
-                return;
-            }
-
-            isValid = false;
-
-            if (!mCameraView.isRecording()) {
-                btn.setText("Recording");
-                Log.i(LOG_TAG, "Start recording...");
-                recordFilename = ImageUtil.getPath() + "/rec_" + System.currentTimeMillis() + ".mp4";
-//                recordFilename = ImageUtil.getPath(CameraDemoActivity.this, false) + "/rec_1.mp4";
-                mCameraView.startRecording(recordFilename, new CameraRecordGLSurfaceView.StartRecordingCallback() {
-                    @Override
-                    public void startRecordingOver(boolean success) {
-                        if (success) {
-                            showText("Start recording OK");
-                            FileUtil.saveTextContent(recordFilename, lastVideoPathFileName);
-                        } else {
-                            showText("Start recording failed");
-                        }
-
-                        isValid = true;
-                    }
-                });
-            } else {
-                showText("Recorded as: " + recordFilename);
-                btn.setText("Recorded");
-                Log.i(LOG_TAG, "End recording...");
-                mCameraView.endRecording(new CameraRecordGLSurfaceView.EndRecordingCallback() {
-                    @Override
-                    public void endRecordingOK() {
-                        Log.i(LOG_TAG, "End recording OK");
-                        isValid = true;
-                    }
-                });
-            }
-
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,8 +69,7 @@ public class CameraDemoActivity extends AppCompatActivity {
 //        lastVideoPathFileName = FileUtil.getPathInPackage(CameraDemoActivity.this, true) + "/lastVideoPath.txt";
         Button takePicBtn = (Button) findViewById(R.id.takePicBtn);
         Button takeShotBtn = (Button) findViewById(R.id.takeShotBtn);
-        Button recordBtn = (Button) findViewById(R.id.recordBtn);
-        mCameraView = (CameraRecordGLSurfaceView) findViewById(R.id.myGLSurfaceView);
+        mCameraView = (CameraGLSurfaceViewWithTexture) findViewById(R.id.myGLSurfaceView);
         mCameraView.presetCameraForward(false);
         SeekBar seekBar = (SeekBar) findViewById(R.id.globalRestoreSeekBar);
 
@@ -126,7 +78,7 @@ public class CameraDemoActivity extends AppCompatActivity {
             public void onClick(View v) {
                 showText("Taking Picture...");
 
-                mCameraView.takePicture(new CameraRecordGLSurfaceView.TakePictureCallback() {
+                mCameraView.takePicture(new CameraGLSurfaceView.TakePictureCallback() {
                     @Override
                     public void takePictureOK(Bitmap bmp) {
                         if (bmp != null) {
@@ -147,7 +99,7 @@ public class CameraDemoActivity extends AppCompatActivity {
             public void onClick(View v) {
                 showText("Taking Shot...");
 
-                mCameraView.takeShot(new CameraRecordGLSurfaceView.TakePictureCallback() {
+                mCameraView.takeShot(new CameraGLSurfaceView.TakePictureCallback() {
                     @Override
                     public void takePictureOK(Bitmap bmp) {
                         if (bmp != null) {
@@ -161,8 +113,6 @@ public class CameraDemoActivity extends AppCompatActivity {
                 });
             }
         });
-
-        recordBtn.setOnClickListener(new RecordListener());
 
         LinearLayout layout = (LinearLayout) findViewById(R.id.menuLinearLayout);
 
@@ -234,7 +184,7 @@ public class CameraDemoActivity extends AppCompatActivity {
         mCameraView.setZOrderOnTop(false);
         mCameraView.setZOrderMediaOverlay(true);
 
-        mCameraView.setOnCreateCallback(new CameraRecordGLSurfaceView.OnCreateCallback() {
+        mCameraView.setOnCreateCallback(new CameraGLSurfaceView.OnCreateCallback() {
             @Override
             public void createOver() {
                 Log.i(LOG_TAG, "view onCreate");
@@ -300,6 +250,7 @@ public class CameraDemoActivity extends AppCompatActivity {
             }
         });
 
+        mCameraView.setPictureSize(600, 800, true);
     }
 
     private View.OnClickListener mFilterSwitchListener = new View.OnClickListener() {

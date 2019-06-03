@@ -16,7 +16,6 @@ import org.wysaid.common.SharedContext;
 import org.wysaid.myUtils.FileUtil;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.myUtils.MsgUtil;
-import org.wysaid.nativePort.CGEFFmpegNativeLibrary;
 import org.wysaid.nativePort.CGEImageHandler;
 import org.wysaid.nativePort.CGENativeLibrary;
 
@@ -60,51 +59,6 @@ public class TestCaseActivity extends AppCompatActivity {
                 MsgUtil.toastMsg(TestCaseActivity.this, msg, Toast.LENGTH_SHORT);
             }
         });
-    }
-
-    public void testCaseOffscreenVideoRendering(View view) {
-
-        threadSync();
-
-        mThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                Log.i(LOG_TAG, "Test case 1 clicked!\n");
-
-                String outputFilename = FileUtil.getPath() + "/blendVideo.mp4";
-                String inputFileName = FileUtil.getTextContent(CameraDemoActivity.lastVideoPathFileName);
-                if (inputFileName == null) {
-                    showMsg("No video is recorded, please record one in the 2nd case.");
-                    return;
-                }
-
-                Bitmap bmp;
-
-                try {
-                    AssetManager am = getAssets();
-                    InputStream is;
-
-                    is = am.open("logo.png");
-
-                    bmp = BitmapFactory.decodeStream(is);
-
-                } catch (IOException e) {
-                    Log.e(LOG_TAG, "Can not open blend image file!");
-                    bmp = null;
-                }
-
-                //bmp is used for watermark, (just pass null if you don't want that)
-                //and ususally the blend mode is CGE_BLEND_ADDREV for watermarks.
-                CGEFFmpegNativeLibrary.generateVideoWithFilter(outputFilename, inputFileName, "@adjust lut late_sunset.png", 1.0f, bmp, CGENativeLibrary.TextureBlendMode.CGE_BLEND_ADDREV, 1.0f, false);
-
-                showMsg("Done! The file is generated at: " + outputFilename);
-                Log.i(LOG_TAG, "Done! The file is generated at: " + outputFilename);
-                sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + outputFilename)));
-            }
-        });
-
-        mThread.start();
     }
 
     public void testCaseCustomFilter(View view) {

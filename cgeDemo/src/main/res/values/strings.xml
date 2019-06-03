@@ -7,5 +7,4 @@
     <string name="title_activity_camera_demo">CameraDemoActivity</string>
     <string name="title_activity_video_player">VideoPlayerActivity</string>
     <string name="title_activity_image_deform">ImageDeformActivity</string>
-    <string name="title_activity_face_tracker_demo">FaceTrackerDemo</string>
 </resources>

@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         >
 
-        <org.wysaid.view.CameraRecordGLSurfaceView
+        <org.wysaid.view.CameraGLSurfaceViewWithTexture
             android:id="@+id/myGLSurfaceView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
@@ -71,13 +71,6 @@
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:text="Switch"
-                android:textAllCaps="false"/>
-
-            <Button
-                android:id="@+id/recordBtn"
-                android:layout_width="100dp"
-                android:layout_height="match_parent"
-                android:text="Record"
                 android:textAllCaps="false"/>
 
             <Button

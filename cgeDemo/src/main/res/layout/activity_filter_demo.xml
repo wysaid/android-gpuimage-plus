@@ -62,14 +62,6 @@
                 android:onClick="faceDetectTestCase"
                 android:text="FindFace"/>
 
-            <Button
-                android:id="@+id/faceTrackerTestCase"
-                android:layout_width="150dp"
-                android:layout_height="50dp"
-                android:onClick="faceTrackerTestCase"
-                android:text="FaceKeyPoints"
-                />
-
         </LinearLayout>
 
     </HorizontalScrollView>

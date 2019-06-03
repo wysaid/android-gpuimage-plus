@@ -6,10 +6,9 @@ package org.wysaid.nativePort;
 public class NativeLibraryLoader {
 
     public static void load() {
-        System.loadLibrary("ffmpeg");
         System.loadLibrary("CGE");
+        //User defined mothods, not required. (including offscreen video rendering)
         System.loadLibrary("CGEExt");
-        CGEFFmpegNativeLibrary.avRegisterAll();
     }
 
 }

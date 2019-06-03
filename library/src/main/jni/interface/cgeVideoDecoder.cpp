@@ -135,7 +135,7 @@ namespace CGE
 
 		if(m_context->audioStreamIndex == -1)
 		{
-			CGE_LOG_INFO("未找到音频流, 视频将处于静音状态...\n");
+			CGE_LOG_INFO("No audio stream, the video will be silent...\n");
 		}
 
 		//////////////////////////////////////////////////////////////////////////
@@ -153,7 +153,7 @@ namespace CGE
 
 			if(m_context->pAudioCodec == nullptr || avcodec_open2(m_context->pAudioCodecCtx, m_context->pAudioCodec, nullptr) < 0)
 			{
-				CGE_LOG_ERROR("音频解码失败! 静音处理...\n");
+				CGE_LOG_ERROR("Decoding audio failed, the video will be silent\n");
 				m_context->audioStreamIndex = -1;
 				m_context->pAudioCodec = nullptr;
 				m_context->pAudioCodecCtx = nullptr;

@@ -23,14 +23,6 @@ echo "release mode enabled!"
 
 fi
 
-if [ "${i}" == "-d" ] || [ "${i}" == "--debug" ]; then
-
-export CGE_DEBUG_MODE=1
-
-echo "debug mode enabled!"
-
-fi
-
 if [ "${i}" == "-b" ] || [ "${i}" == "-B" ]; then
 
 BUILD_ARG=-B
@@ -39,31 +31,7 @@ echo "force rebuild!"
 
 fi
 
-if [ "${i}" == "--noface" ] || [ "${i}" == "-n" ]; then
-
-NO_FACE=1
-
-echo "disable face module!"
-
-fi
-
-if [ "${i}" == "--leaktest" ] || [ "${i}" == "-lt" ] || [ "${i}" == "--lt" ]; then
-
-export CGE_USE_LEAK_TEST=1
-
-echo "leak test enabled!"
-
-fi
-
 done
-
-if [[ "$NO_FACE" == "" ]]; then
-
-export CGE_USE_FACE_MODULE=1
-
-fi
-
-export CGE_USE_VIDEO_MODULE=1
 
 echo "The NDK dir is: ${NDK}, If the shell can not run normally, you should set the NDK variable to your local ndk-dir"
 
