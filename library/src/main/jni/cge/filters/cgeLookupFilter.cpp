@@ -24,11 +24,22 @@ void main()
 
 	float blue = color.b * 63.0;
 	vec2 coord1;
-	coord1.y = floor(blue / 8.0);
+	coord1.y = floor(floor(blue) / 8.0);
 	coord1.x = floor(blue) - (coord1.y * 8.0);
 	
-	coord1 = coord1 * stepDis + halfPixel + (stepDis - perPixel) * color.xy;
-	gl_FragColor.rgb = texture2D(lookupTexture, coord1).rgb;
+    vec2 coord2;
+    coord2.y = floor(ceil(blue) / 8.0);
+    coord2.x = ceil(blue) - (coord2.y * 8.0);
+    
+    vec2 stepsCalc = halfPixel + (stepDis - perPixel) * color.xy;
+    
+	coord1 = coord1 * stepDis + stepsCalc;
+    coord2 = coord2 * stepDis + stepsCalc;
+    
+    vec3 lutColor1 = texture2D(lookupTexture, coord1).rgb;
+    vec3 lutColor2 = texture2D(lookupTexture, coord2).rgb;
+    
+	gl_FragColor.rgb = mix(lutColor1, lutColor2, fract(blue));
 	gl_FragColor.a = color.a;
 }
 );
