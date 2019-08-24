@@ -35,4 +35,9 @@ done
 
 echo "The NDK dir is: ${NDK}, If the shell can not run normally, you should set the NDK variable to your local ndk-dir"
 
-$NDK/ndk-build ${BUILD_ARG} -j8
+THREADS=`getconf _NPROCESSORS_ONLN`
+if [[ -z "$THREADS" ]] || [[ "$THREADS" -eq "0" ]]; then
+    THREADS=8
+fi
+
+$NDK/ndk-build ${BUILD_ARG} -j${THREADS}
