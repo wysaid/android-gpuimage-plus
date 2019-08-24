@@ -12,7 +12,7 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * Author: wangyang
  * Mail: admin@wysaid.org
- * Data: 2017/10/29
+ * Date: 2017/10/29
  * Description:
  */
 
