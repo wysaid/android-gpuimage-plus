@@ -19,7 +19,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * uthor: wangyang
+ * Author: wangyang
  * Mail: admin@wysaid.org
  * Date: 10/04/2018
  * Description:

@@ -1,8 +1,8 @@
 ﻿/*
-@Author: wysaid
-@Blog: blog.wysaid.org
-@Date: 2013-10-31
-@Description: Provide some cpu math algorithms like glsl shaders.
+Author: wysaid
+Blog: blog.wysaid.org
+Data: 2013-10-31
+Description: Provide some cpu math algorithms like glsl shaders.
 */
 
 #ifndef _CGE_VEC_H_

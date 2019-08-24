@@ -1,5 +1,5 @@
 # Android-GPUImage-Plus
-Image, Camera And Video Filters Based On OpenGL (ES2.0).
+Image, Camera And Video Filters Based On OpenGL
 
 >To get pure lib without ffmpeg(No feature of video recording), please checkout the branch [min](https://github.com/wysaid/android-gpuimage-plus/tree/min). The whole jni module will be less than 600KB.
 
@@ -18,17 +18,11 @@ repositories {
 
 //Choose only one of them
 dependencies {
-    //All arch: armeabi, armeabi-v7a, arm64-v8a, mips, x86
+    //All arch: armeabi, armeabi-v7a, arm64-v8a, x86
     compile 'org.wysaid:gpuimage-plus:2.6.1'
-    
-    //Only armeabi-v7a 
-    compile 'org.wysaid:gpuimage-plus:2.6.1-armv7a' //Recommended
 
     //Pure graphics lib without ffmpeg. (all arch for branch 'min')
     compile 'org.wysaid:gpuimage-plus:2.6.1-min'
-
-    //Pure graphics lib without ffmpeg. (arch armv7a for branch 'min')
-    compile 'org.wysaid:gpuimage-plus:2.6.1-min-armv7a' //Recommended
 }
 ```
 

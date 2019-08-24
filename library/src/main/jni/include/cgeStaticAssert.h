@@ -1,7 +1,7 @@
 ﻿/*
-@Author: wysaid
-@Blog: blog.wysaid.org
-@Date: 2013-10-31
+Author: wysaid
+Blog: blog.wysaid.org
+Data: 2013-10-31
 */
 
 #ifndef _CGE_STATICASSERT_H_
