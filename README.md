@@ -19,10 +19,10 @@ repositories {
 //Choose only one of them
 dependencies {
     //All arch: armeabi, armeabi-v7a, arm64-v8a, x86
-    compile 'org.wysaid:gpuimage-plus:2.6.1'
+    compile 'org.wysaid:gpuimage-plus:2.6.3'
 
     //Pure graphics lib without ffmpeg. (all arch for branch 'min')
-    compile 'org.wysaid:gpuimage-plus:2.6.1-min'
+    compile 'org.wysaid:gpuimage-plus:2.6.3-min'
 }
 ```
 
