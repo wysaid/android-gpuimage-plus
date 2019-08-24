@@ -5,10 +5,10 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 
 /**
- * @Author: wangyang
- * @Mail: admin@wysaid.org
- * @Date: 2019/04/17
- * @Description:
+ * Author: wangyang
+ * Mail: admin@wysaid.org
+ * Data: 2019/04/17
+ * Description:
  */
 
 // A demo for multi input.

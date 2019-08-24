@@ -19,10 +19,10 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * @Author: wangyang
- * @Mail: admin@wysaid.org
- * @Date: 10/04/2018
- * @Description:
+ * Author: wangyang
+ * Mail: admin@wysaid.org
+ * Data: 10/04/2018
+ * Description:
  */
 
 // Preview with buffer.

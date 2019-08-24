@@ -5,10 +5,10 @@ import android.util.Log;
 import org.wysaid.common.Common;
 
 /**
- * @Author: wangyang
- * @Mail: admin@wysaid.org
- * @Date: 2018/12/09
- * @Description:
+ * Author: wangyang
+ * Mail: admin@wysaid.org
+ * Data: 2018/12/09
+ * Description:
  */
 
 public class CGEDeformFilterWrapper {

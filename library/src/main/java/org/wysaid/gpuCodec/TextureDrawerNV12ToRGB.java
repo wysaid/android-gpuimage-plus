@@ -5,10 +5,10 @@ import android.util.Log;
 import org.wysaid.common.Common;
 
 /**
- * @Author: wangyang
- * @Mail: admin@wysaid.org
- * @Date: 2017/5/3
- * @Description:
+ * Author: wangyang
+ * Mail: admin@wysaid.org
+ * Data: 2017/5/3
+ * Description:
  */
 
 public class TextureDrawerNV12ToRGB extends TextureDrawerNV21ToRGB {
