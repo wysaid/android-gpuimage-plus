@@ -11,7 +11,7 @@ export NDK_STANDALONE_TOOLCHAIN=$NDK/ndk-build-toolchain
 
 if [[ ! -d "$NDK_STANDALONE_TOOLCHAIN" ]]; then
 
-$NDK/build/tools/make-standalone-toolchain.sh --toolchain=arm-linux-android-clang3.6 --arch=arm --platform=android-26 --install-dir=$NDK_STANDALONE_TOOLCHAIN --stl=libc++
+$NDK/build/tools/make-standalone-toolchain.sh --toolchain=arm-linux-android-clang3.6 --arch=arm --platform=android-16 --install-dir=$NDK_STANDALONE_TOOLCHAIN --stl=libc++
 
 fi
 

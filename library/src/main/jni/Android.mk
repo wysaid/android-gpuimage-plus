@@ -73,7 +73,7 @@ LOCAL_SRC_FILES :=  \
 			$(CGE_SOURCE)/filters/cgeEdgeFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeEmbossFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeCrosshatchFilter.cpp \
-			$(CGE_SOURCE)/filters/CGELiquifyFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeLiquifyFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeRandomBlurFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeMinValueFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeMaxValueFilter.cpp \
