@@ -102,8 +102,8 @@ LOCAL_SRC_FILES :=  \
 			$(CGE_ROOT)/interface/cgeDeformFilterWrapper.cpp \
 
 
-LOCAL_CPPFLAGS := -frtti -std=gnu++11
-LOCAL_LDLIBS :=  -llog -lEGL -lGLESv2 -ljnigraphics -latomic
+LOCAL_CPPFLAGS := -frtti -std=c++11
+LOCAL_LDLIBS :=  -llog -lEGL -lGLESv2 -ljnigraphics
 
 # 'CGE_USE_VIDEO_MODULE' determines if the project should compile with ffmpeg.
 
