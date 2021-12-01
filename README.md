@@ -26,6 +26,8 @@ dependencies {
 }
 ```
 
+> Use other ffmpeg-library, see: https://github.com/wysaid/FFmpeg-Android.git
+
 ## Abstract ##
 
 *  This repo is an Android Studio Project, comprising "cgeDemo", "library" two sub-modules. Hundreds of built-in filters are available in the demo. 😋If you'd like to add your own filter, please take a look at the manual page. Or you can follow the demo code. The new custom filter should be written in C++.
