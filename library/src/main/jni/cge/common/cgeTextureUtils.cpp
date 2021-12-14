@@ -704,7 +704,7 @@ namespace CGE
     
     CGELerpBlurUtil::CGELerpBlurUtil()
     {
-        memset(m_texCache, 0, sizeof(MAX_LERP_BLUR_INTENSITY));
+        memset(m_texCache, 0, sizeof(m_texCache));
         m_intensity = 0;
         m_vertBuffer = 0;
     }
@@ -718,7 +718,7 @@ namespace CGE
     
     bool CGELerpBlurUtil::init()
     {
-        memset(m_texCache, 0, sizeof(MAX_LERP_BLUR_INTENSITY));
+        memset(m_texCache, 0, sizeof(m_texCache));
         m_intensity = MAX_LERP_BLUR_INTENSITY;
         m_program.bindAttribLocation(CGEImageFilterInterface::paramPositionIndexName, 0);
         if(m_program.initWithShaderStrings(g_vshDefaultWithoutTexCoord, g_fshDefault))
@@ -839,7 +839,7 @@ namespace CGE
             for(int i = 0; i != MAX_LERP_BLUR_INTENSITY; ++i)
                 texIDs[i] = m_texCache[i].texID;
             glDeleteTextures(MAX_LERP_BLUR_INTENSITY, texIDs);
-            memset(m_texCache, 0, sizeof(MAX_LERP_BLUR_INTENSITY));
+            memset(m_texCache, 0, sizeof(m_texCache));
             m_cacheTargetWidth = 0;
             m_cacheTargetHeight = 0;
         }

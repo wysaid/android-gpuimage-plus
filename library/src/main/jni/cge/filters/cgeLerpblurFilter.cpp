@@ -27,7 +27,7 @@ namespace CGE
 
 	bool CGELerpblurFilter::init()
 	{
-		memset(m_texCache, 0, sizeof(MAX_LERP_BLUR_INTENSITY));
+		memset(m_texCache, 0, sizeof(m_texCache));
 		m_intensity = 0;
 		if(initShadersFromString(g_vshDefaultWithoutTexCoord, s_fshScale))
 		{
@@ -117,7 +117,7 @@ namespace CGE
 		for(int i = 0; i != MAX_LERP_BLUR_INTENSITY; ++i)
 			texIDs[i] = m_texCache[i].texID;
 		glDeleteTextures(MAX_LERP_BLUR_INTENSITY, texIDs);
-		memset(m_texCache, 0, sizeof(MAX_LERP_BLUR_INTENSITY));
+		memset(m_texCache, 0, sizeof(m_texCache));
 		m_cacheTargetSize.set(0, 0);
 	}
 
