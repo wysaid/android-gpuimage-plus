@@ -1,7 +1,7 @@
 
-APP_ABI := armeabi-v7a arm64-v8a x86 
+# APP_ABI := armeabi-v7a arm64-v8a x86 
 # armeabi & mips are deprecated
-#APP_ABI :=  armeabi-v7a
+APP_ABI :=  all
 
 APP_PLATFORM := android-16
 
