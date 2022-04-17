@@ -13,7 +13,7 @@
 #include "cgeRandomBlurFilter.h"
 #include "cgeBilateralBlurFilter.h"
 #include "cgeMosaicBlurFilter.h"
-#include "CGELiquifyFilter.h"
+#include "cgeLiquifyFilter.h"
 #include "cgeHalftoneFilter.h"
 #include "cgePolarPixellateFilter.h"
 #include "cgePolkaDotFilter.h"
