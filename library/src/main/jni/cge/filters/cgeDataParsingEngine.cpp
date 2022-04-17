@@ -574,7 +574,9 @@ do{\
 		else if(strcmp(buffer, "lut") == 0)
 		{
 			char lutName[128];
-			if(sscanf(pstr, "%127s", lutName) != 1)
+			float intensity = 1.0f;
+			int paramCount = sscanf(pstr, "%127s%f", lutName, &intensity);
+			if(paramCount < 1)
 			{
 				LOG_ERROR_PARAM(pstr);
 				return nullptr;
@@ -586,6 +588,11 @@ do{\
 			{
 				filter->setLookupTexture(tex);
 				proc = filter;
+
+				if(paramCount == 2)
+				{ // has intensity
+					filter->setIntensity(intensity);
+				}
 			}
 			else
 			{

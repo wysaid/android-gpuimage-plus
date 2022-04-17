@@ -13,24 +13,27 @@
 
 namespace CGE
 {
-	class CGELookupFilter : public CGEImageFilterInterface
-	{
-	public:
-		CGELookupFilter();
-		~CGELookupFilter();
+class CGELookupFilter : public CGEImageFilterInterface
+{
+public:
+    CGELookupFilter();
+    ~CGELookupFilter();
 
-		bool init();
+    bool init();
 
-		inline void setLookupTexture(GLuint tex) { m_lookupTexture = tex; };
+    inline void setLookupTexture(GLuint tex) { m_lookupTexture = tex; };
 
-		void render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
+    void render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
 
-		inline GLuint& lookupTexture() { return m_lookupTexture; }
+    inline GLuint& lookupTexture() { return m_lookupTexture; }
 
-	protected: 
-		GLuint m_lookupTexture;
-	};
+    void setIntensity(float intensity);
 
-}
+protected:
+    GLuint m_lookupTexture = 0;
+    float m_intensity = 1.0f;
+};
+
+} // namespace CGE
 
 #endif
