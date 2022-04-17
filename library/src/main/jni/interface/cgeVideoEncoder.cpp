@@ -119,7 +119,7 @@ namespace CGE
 
 			if(pAudioFrame)
 			{
-				avcodec_free_frame(&pAudioFrame);
+				av_frame_free(&pAudioFrame);
 				pAudioFrame = nullptr;
 			}
 
@@ -536,7 +536,7 @@ namespace CGE
 
 			if(m_context->pAudioFrame == nullptr)
 			{
-				m_context->pAudioFrame = avcodec_alloc_frame();
+				m_context->pAudioFrame = av_frame_alloc();
 			}
 
 			AVFrame* pAudioFrame = m_context->pAudioFrame;

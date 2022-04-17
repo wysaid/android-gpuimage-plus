@@ -7,7 +7,7 @@
 */
 
 #include <cgeDeformFilterWrapper.h>
-#include <CGELiquifyFilter.h>
+#include <cgeLiquifyFilter.h>
 
 using namespace CGE;
 

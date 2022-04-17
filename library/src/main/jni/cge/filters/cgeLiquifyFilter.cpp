@@ -6,7 +6,7 @@
 *        Mail: admin@wysaid.org
 */
 
-#include "CGELiquifyFilter.h"
+#include "cgeLiquifyFilter.h"
 #include "cgeMat.h"
 
 static CGEConstString s_vshDeform = CGE_SHADER_STRING
