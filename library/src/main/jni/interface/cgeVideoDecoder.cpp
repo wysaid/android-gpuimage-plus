@@ -185,11 +185,11 @@ namespace CGE
 			return false; //申请frame 失败.
 		}
 
-		int numBytes = avpicture_get_size(PIX_FMT_RGBA, m_context->pVideoCodecCtx->width,
+		int numBytes = avpicture_get_size(AV_PIX_FMT_RGBA, m_context->pVideoCodecCtx->width,
 			m_context->pVideoCodecCtx->height);  
 		m_bufferPtr = (uint8_t *)av_malloc(numBytes * sizeof(uint8_t)); 
 
-		avpicture_fill((AVPicture *)m_context->pVideoFrameRGB, m_bufferPtr, PIX_FMT_RGBA, m_context->pVideoCodecCtx->width, m_context->pVideoCodecCtx->height);  
+		avpicture_fill((AVPicture *)m_context->pVideoFrameRGB, m_bufferPtr, AV_PIX_FMT_RGBA, m_context->pVideoCodecCtx->width, m_context->pVideoCodecCtx->height);  
 		return true;
 	}
 
@@ -381,7 +381,7 @@ namespace CGE
 	CGEVideoFrameBufferData CGEVideoDecodeHandler::getCurrentVideoFrameRGB()
 	{
 		
-		SwsContext* img_convert_ctx = sws_getContext(m_context->pVideoCodecCtx->width, m_context->pVideoCodecCtx->height, m_context->pVideoCodecCtx->pix_fmt, m_context->pVideoCodecCtx->width, m_context->pVideoCodecCtx->height, PIX_FMT_RGBA, m_samplingStyle, nullptr, nullptr, nullptr);  
+		SwsContext* img_convert_ctx = sws_getContext(m_context->pVideoCodecCtx->width, m_context->pVideoCodecCtx->height, m_context->pVideoCodecCtx->pix_fmt, m_context->pVideoCodecCtx->width, m_context->pVideoCodecCtx->height, AV_PIX_FMT_RGBA, m_samplingStyle, nullptr, nullptr, nullptr);  
 		// Convert the image from its native format to RGB  
 		sws_scale(img_convert_ctx, m_context->pVideoFrame->data, m_context->pVideoFrame->linesize, 0, m_height, m_context->pVideoFrameRGB->data, m_context->pVideoFrameRGB->linesize);
 
