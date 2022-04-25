@@ -77,6 +77,8 @@ void CGELookupFilter::setIntensity(float intensity)
     {
         m_intensity = 0;
     }
+    m_program.bind();
+    m_program.sendUniformf("intensity", m_intensity);
 }
 
 void CGELookupFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID)
