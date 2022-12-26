@@ -14,29 +14,29 @@
 
 namespace CGE
 {
-	class CGEAdvancedEffectOneStepFilterHelper : public CGEImageFilterInterface
-	{
-	public:
-		CGEAdvancedEffectOneStepFilterHelper(){}
-		~CGEAdvancedEffectOneStepFilterHelper(){}
-		virtual void render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
+class CGEAdvancedEffectOneStepFilterHelper : public CGEImageFilterInterface
+{
+public:
+    CGEAdvancedEffectOneStepFilterHelper() {}
+    ~CGEAdvancedEffectOneStepFilterHelper() {}
+    virtual void render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
 
-	protected:
-		static CGEConstString paramStepsName;
-	};
+protected:
+    static CGEConstString paramStepsName;
+};
 
-	class CGEAdvancedEffectTwoStepFilterHelper : public CGEImageFilterInterface
-	{
-	public:
-		CGEAdvancedEffectTwoStepFilterHelper() {}
-		~CGEAdvancedEffectTwoStepFilterHelper() {}
+class CGEAdvancedEffectTwoStepFilterHelper : public CGEImageFilterInterface
+{
+public:
+    CGEAdvancedEffectTwoStepFilterHelper() {}
+    ~CGEAdvancedEffectTwoStepFilterHelper() {}
 
-		virtual void render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
+    virtual void render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
 
-	protected:
-		static CGEConstString paramStepsName;
-	};
+protected:
+    static CGEConstString paramStepsName;
+};
 
-}
+} // namespace CGE
 
 #endif

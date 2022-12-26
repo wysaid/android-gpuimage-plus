@@ -4,7 +4,7 @@
  *  Created on: 2013-12-26
  *      Author: Wang Yang
  *        Mail: admin@wysaid.org
-*/
+ */
 
 #ifndef _CGESHARPENBLUR_ADJUST_H_
 #define _CGESHARPENBLUR_ADJUST_H_
@@ -15,155 +15,153 @@
 
 namespace CGE
 {
-	class CGESharpenBlurFilter : public CGEImageFilterInterface
-	{
-	public:
-		CGESharpenBlurFilter() {}
-		~CGESharpenBlurFilter(){}
+class CGESharpenBlurFilter : public CGEImageFilterInterface
+{
+public:
+    CGESharpenBlurFilter() {}
+    ~CGESharpenBlurFilter() {}
 
-		//<0: edge
-		//0: the max blur
-		//1: the original image
-		//>1: sharpen
-		virtual void setIntensity(float value);
+    //<0: edge
+    // 0: the max blur
+    // 1: the original image
+    //>1: sharpen
+    virtual void setIntensity(float value);
 
-		//the two methods below are only some wrapping from 'setIntensity' .
-		virtual void setBlurIntensity(float value); //range: 0.0 ~ 1.0
-		virtual void setSharpenIntensity(float value); //range: 0.0 ~ 10.0
+    // the two methods below are only some wrapping from 'setIntensity' .
+    virtual void setBlurIntensity(float value);    // range: 0.0 ~ 1.0
+    virtual void setSharpenIntensity(float value); // range: 0.0 ~ 10.0
 
-		//////////////////////////////////////////////
-		
-		// Be sure to know: the filter would be slower as the samplerScale become greater. 
-		//Please test the max-value before release.
-		virtual void setSamplerScale(int value); //range 0.0 ~ 30.0
-		
-		virtual void setSamplerLimit(int value);
-		
-		virtual bool init();
+    //////////////////////////////////////////////
 
-		virtual void render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
+    // Be sure to know: the filter would be slower as the samplerScale become greater.
+    // Please test the max-value before release.
+    virtual void setSamplerScale(int value); // range 0.0 ~ 30.0
 
-	protected:
-		static CGEConstString paramIntensity;
-		static CGEConstString paramSamplerRadius;
-		static CGEConstString paramSamplerScale;
-		static CGEConstString paramSamplerStepName;
-		//The length of blurNorm must be 1.
-		static CGEConstString paramBlurNormalName;
+    virtual void setSamplerLimit(int value);
 
-	protected:
-		int m_samplerLimit;
-		int m_samplerScale;
-	};
+    virtual bool init();
 
+    virtual void render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
 
-	//Special usage. The "dstTexture" in function "render2Texture" is the texture to be rendered!
-	//Don't use this class unless you know what I said.
-	class CGEBlurFastFilter : public CGESharpenBlurFilter
-	{
-	public:
-		CGEBlurFastFilter() : m_bUseFixedRadius(false) {}
-		~CGEBlurFastFilter() {}
+protected:
+    static CGEConstString paramIntensity;
+    static CGEConstString paramSamplerRadius;
+    static CGEConstString paramSamplerScale;
+    static CGEConstString paramSamplerStepName;
+    // The length of blurNorm must be 1.
+    static CGEConstString paramBlurNormalName;
 
-		bool initWithoutFixedRadius(bool noFixed = true);
-		//Warning: see the description above the class.
-		void render2Texture(CGEImageHandlerInterface* handler, GLuint dstTexture, GLuint vertexBufferID);
+protected:
+    int m_samplerLimit;
+    int m_samplerScale;
+};
 
-		void setSamplerScale(int value);
+// Special usage. The "dstTexture" in function "render2Texture" is the texture to be rendered!
+// Don't use this class unless you know what I said.
+class CGEBlurFastFilter : public CGESharpenBlurFilter
+{
+public:
+    CGEBlurFastFilter() :
+        m_bUseFixedRadius(false) {}
+    ~CGEBlurFastFilter() {}
 
-	protected:
-		virtual bool init() {return false;}
-		virtual void setIntensity(float) {}
+    bool initWithoutFixedRadius(bool noFixed = true);
+    // Warning: see the description above the class.
+    void render2Texture(CGEImageHandlerInterface* handler, GLuint dstTexture, GLuint vertexBufferID);
 
-	private:
-		bool m_bUseFixedRadius;
-	};
+    void setSamplerScale(int value);
 
-	//This filter would generate a cache of the nearly-processed blurred image.
-	class CGESharpenBlurFastFilter : public CGEImageFilterInterface
-	{
-	public:
-		CGESharpenBlurFastFilter() : m_texture(0), m_samplerScaleValue(0) {}
-		~CGESharpenBlurFastFilter() { glDeleteTextures(1, &m_texture); }
+protected:
+    virtual bool init() { return false; }
+    virtual void setIntensity(float) {}
 
-		//<0: edge
-		//0: the max blurring
-		//1: the original image
-		//>1: sharpen
-		void setIntensity(float value);
+private:
+    bool m_bUseFixedRadius;
+};
 
-		//the two methods below are only some wrapping from 'setIntensity' .
-		void setBlurIntensity(float value); //range: 0.0 ~ 1.0
-		void setSharpenIntensity(float value); //range: 0.0 ~ 10.0
+// This filter would generate a cache of the nearly-processed blurred image.
+class CGESharpenBlurFastFilter : public CGEImageFilterInterface
+{
+public:
+    CGESharpenBlurFastFilter() :
+        m_texture(0), m_samplerScaleValue(0) {}
+    ~CGESharpenBlurFastFilter() { glDeleteTextures(1, &m_texture); }
 
-		//////////////////////////////////////////////
+    //<0: edge
+    // 0: the max blurring
+    // 1: the original image
+    //>1: sharpen
+    void setIntensity(float value);
 
-		// Be sure to know: the filter would be slower as the samplerScale become greater. 
-		//Please test the max-value before release.
-		void setSamplerScale(int value); //range 0 ~ 30
+    // the two methods below are only some wrapping from 'setIntensity' .
+    void setBlurIntensity(float value);    // range: 0.0 ~ 1.0
+    void setSharpenIntensity(float value); // range: 0.0 ~ 10.0
 
-		void setSamplerLimit(int value); //Less than (or equal to) sampler scale.
+    //////////////////////////////////////////////
 
-		virtual bool init();
+    // Be sure to know: the filter would be slower as the samplerScale become greater.
+    // Please test the max-value before release.
+    void setSamplerScale(int value); // range 0 ~ 30
 
-		void render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
+    void setSamplerLimit(int value); // Less than (or equal to) sampler scale.
 
-		void flush();
+    virtual bool init();
 
-	protected:
-		static CGEConstString paramIntensity;
-		static CGEConstString paramBlurredTexName;
+    void render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
 
-	protected:
-		GLuint m_texture;
-		CGEBlurFastFilter m_blurProc;
-		int m_samplerScaleValue;
-	};
+    void flush();
 
-	class CGESharpenBlurFastWithFixedBlurRadiusFilter : public CGESharpenBlurFastFilter
-	{
-	public:
-		bool init();
-	};
+protected:
+    static CGEConstString paramIntensity;
+    static CGEConstString paramBlurredTexName;
 
-	class CGESharpenBlurSimpleFilter : public CGEImageFilterInterface
-	{
-	public:
-		CGESharpenBlurSimpleFilter() {}
-		~CGESharpenBlurSimpleFilter() {}
-		//<0: edge
-		//0: the max blur
-		//1: the original image
-		//>1: sharpen
-		void setIntensity(float value);
+protected:
+    GLuint m_texture;
+    CGEBlurFastFilter m_blurProc;
+    int m_samplerScaleValue;
+};
 
-		//the two methods below are only some wrapping from 'setIntensity' .
-		void setBlurIntensity(float value); //range: 0.0 ~ 1.0
-		void setSharpenIntensity(float value); //range: 0.0 ~ 10.0
+class CGESharpenBlurFastWithFixedBlurRadiusFilter : public CGESharpenBlurFastFilter
+{
+public:
+    bool init();
+};
 
-		//////////////////////////////////////////////
+class CGESharpenBlurSimpleFilter : public CGEImageFilterInterface
+{
+public:
+    CGESharpenBlurSimpleFilter() {}
+    ~CGESharpenBlurSimpleFilter() {}
+    //<0: edge
+    // 0: the max blur
+    // 1: the original image
+    //>1: sharpen
+    void setIntensity(float value);
 
-		// Be sure to know: the filter would be slower as the samplerScale become greater. 
-		//Please test the max-value before release.
-		void setSamplerScale(float value); //range 0.0 ~ 30.0
+    // the two methods below are only some wrapping from 'setIntensity' .
+    void setBlurIntensity(float value);    // range: 0.0 ~ 1.0
+    void setSharpenIntensity(float value); // range: 0.0 ~ 10.0
 
-		bool init();
+    //////////////////////////////////////////////
 
-	protected:
-		static CGEConstString paramIntensity;
-		static CGEConstString paramSamplerScale;
-		static CGEConstString paramSamplerStepName;
+    // Be sure to know: the filter would be slower as the samplerScale become greater.
+    // Please test the max-value before release.
+    void setSamplerScale(float value); // range 0.0 ~ 30.0
 
-	};
+    bool init();
 
-	class CGESharpenBlurSimpleBetterFilter : public CGESharpenBlurSimpleFilter
-	{
-	public:
+protected:
+    static CGEConstString paramIntensity;
+    static CGEConstString paramSamplerScale;
+    static CGEConstString paramSamplerStepName;
+};
 
-		bool init();
+class CGESharpenBlurSimpleBetterFilter : public CGESharpenBlurSimpleFilter
+{
+public:
+    bool init();
+};
 
-	};
-
-}
+} // namespace CGE
 
 #endif

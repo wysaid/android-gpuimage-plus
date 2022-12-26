@@ -14,29 +14,29 @@
 
 namespace CGE
 {
-	class CGEMonochromeFilter : public CGEImageFilterInterface
-	{
-	public:
-		CGEMonochromeFilter(){}
-		~CGEMonochromeFilter(){}
+class CGEMonochromeFilter : public CGEImageFilterInterface
+{
+public:
+    CGEMonochromeFilter() {}
+    ~CGEMonochromeFilter() {}
 
-		bool init();
+    bool init();
 
-		void setRed(float value);
-		void setGreen(float value);
-		void setBlue(float value);
-		void setCyan(float value);
-		void setMagenta(float value);
-		void setYellow(float value);
+    void setRed(float value);
+    void setGreen(float value);
+    void setBlue(float value);
+    void setCyan(float value);
+    void setMagenta(float value);
+    void setYellow(float value);
 
-	protected:
-		static CGEConstString paramRed;
-		static CGEConstString paramGreen;
-		static CGEConstString paramBlue;
-		static CGEConstString paramCyan;
-		static CGEConstString paramMagenta;
-		static CGEConstString paramYellow;
-	};
-}
+protected:
+    static CGEConstString paramRed;
+    static CGEConstString paramGreen;
+    static CGEConstString paramBlue;
+    static CGEConstString paramCyan;
+    static CGEConstString paramMagenta;
+    static CGEConstString paramYellow;
+};
+} // namespace CGE
 
-#endif 
+#endif

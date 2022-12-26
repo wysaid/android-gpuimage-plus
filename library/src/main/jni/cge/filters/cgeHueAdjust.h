@@ -12,21 +12,20 @@
 
 namespace CGE
 {
-	class CGEHueAdjustFilter : public CGEImageFilterInterface
-	{
-	public:
+class CGEHueAdjustFilter : public CGEImageFilterInterface
+{
+public:
+    // Range: [0, 2π]
+    void setHue(float value);
 
-		//Range: [0, 2π]
-		void setHue(float value);
+    void setIntensity(float intensity);
 
-		void setIntensity(float intensity);
+    bool init();
 
-		bool init();
+protected:
+    static CGEConstString paramName;
+};
 
-	protected:
-		static CGEConstString paramName;
-	};
-
-}
+} // namespace CGE
 
 #endif

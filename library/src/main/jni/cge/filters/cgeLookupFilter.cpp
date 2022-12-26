@@ -1,10 +1,10 @@
 ﻿/*
-* cgeLookupFilter.cpp
-*
-*  Created on: 2016-7-4
-*      Author: Wang Yang
-* Description: 全图LUT滤镜
-*/
+ * cgeLookupFilter.cpp
+ *
+ *  Created on: 2016-7-4
+ *      Author: Wang Yang
+ * Description: 全图LUT滤镜
+ */
 
 #include "cgeLookupFilter.h"
 

@@ -13,25 +13,23 @@
 
 namespace CGE
 {
-	class CGEImageHandlerAndroid : public CGE::CGEImageHandler
-	{
-	public:
-		CGEImageHandlerAndroid();
-		~CGEImageHandlerAndroid();
+class CGEImageHandlerAndroid : public CGE::CGEImageHandler
+{
+public:
+    CGEImageHandlerAndroid();
+    ~CGEImageHandlerAndroid();
 
-		bool initWithBitmap(JNIEnv* env, jobject bitmap, bool enableReversion = false);
+    bool initWithBitmap(JNIEnv* env, jobject bitmap, bool enableReversion = false);
 
-		jobject getResultBitmap(JNIEnv* env);
+    jobject getResultBitmap(JNIEnv* env);
 
-		void processingFilters();
+    void processingFilters();
 
-		void swapBufferFBO();
+    void swapBufferFBO();
 
-	protected:
+protected:
+};
 
-	};
-
-}
-
+} // namespace CGE
 
 #endif

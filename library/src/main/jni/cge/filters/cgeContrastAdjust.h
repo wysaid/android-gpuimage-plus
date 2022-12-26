@@ -14,19 +14,19 @@
 
 namespace CGE
 {
-	class CGEContrastFilter : public CGEImageFilterInterface
-	{
-	public:
-		CGEContrastFilter(){}
-		~CGEContrastFilter(){}
+class CGEContrastFilter : public CGEImageFilterInterface
+{
+public:
+    CGEContrastFilter() {}
+    ~CGEContrastFilter() {}
 
-		void setIntensity(float value); //range > 0, and 1 for origin
+    void setIntensity(float value); // range > 0, and 1 for origin
 
-		bool init();
+    bool init();
 
-	protected:
-		static CGEConstString paramName;
-	};
-}
+protected:
+    static CGEConstString paramName;
+};
+} // namespace CGE
 
 #endif

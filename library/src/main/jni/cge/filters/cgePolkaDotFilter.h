@@ -12,17 +12,17 @@
 
 namespace CGE
 {
-	class CGEPolkaDotFilter : public CGEHalftoneFilter
-	{
-	public:
-		bool init();
+class CGEPolkaDotFilter : public CGEHalftoneFilter
+{
+public:
+    bool init();
 
-		//Range: (0, 1]
-		void setDotScaling(float value);
+    // Range: (0, 1]
+    void setDotScaling(float value);
 
-	protected:
-		static CGEConstString paramDotScaling;
-	};
-}
+protected:
+    static CGEConstString paramDotScaling;
+};
+} // namespace CGE
 
 #endif

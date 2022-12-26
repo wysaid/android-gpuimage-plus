@@ -13,31 +13,30 @@
 namespace CGE
 {
 
-	class CGEVignetteFilter : public CGEImageFilterInterface
-	{
-	public:
+class CGEVignetteFilter : public CGEImageFilterInterface
+{
+public:
+    virtual bool init();
 
-		virtual bool init();
+    void setVignetteCenter(float x, float y);   // Range: [0, 1], and 0.5 for the center.
+    void setVignette(float start, float range); // Range: [0, 1]
 
-		void setVignetteCenter(float x, float y); //Range: [0, 1], and 0.5 for the center.
-		void setVignette(float start, float range); //Range: [0, 1]
+protected:
+    static CGEConstString paramVignetteCenterName;
+    static CGEConstString paramVignetteName;
+};
 
-	protected:
-		static CGEConstString paramVignetteCenterName;
-		static CGEConstString paramVignetteName;
-	};
+class CGEVignetteExtFilter : public CGEVignetteFilter
+{
+public:
+    bool init();
 
-	class CGEVignetteExtFilter : public CGEVignetteFilter
-	{
-	public:	
-		bool init();
+    void setVignetteColor(float r, float g, float b);
 
-		void setVignetteColor(float r, float g, float b);
+protected:
+    static CGEConstString paramVignetteColor;
+};
 
-	protected:
-		static CGEConstString paramVignetteColor;
-	};
-
-}
+} // namespace CGE
 
 #endif

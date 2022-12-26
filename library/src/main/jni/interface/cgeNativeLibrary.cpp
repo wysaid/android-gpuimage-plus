@@ -1,35 +1,33 @@
 /*
-* cgeNativeLibrary.cpp
-*
-*  Created on: 2015-7-9
-*      Author: Wang Yang
-*        Mail: admin@wysaid.org
-*/
-
-#include <jni.h>
-#include <android/bitmap.h>
-#include <ctime>
+ * cgeNativeLibrary.cpp
+ *
+ *  Created on: 2015-7-9
+ *      Author: Wang Yang
+ *        Mail: admin@wysaid.org
+ */
 
 #include "cgeNativeLibrary.h"
-#include "cgeGlobal.h"
-#include "cgeGLFunctions.h"
-#include "cgeSharedGLContext.h"
 
 #include "cgeFilters.h"
-
+#include "cgeGLFunctions.h"
+#include "cgeGlobal.h"
+#include "cgeSharedGLContext.h"
 #include "cgeUtilFunctions.h"
+
+#include <android/bitmap.h>
+#include <ctime>
+#include <jni.h>
 
 using namespace CGE;
 
-extern "C" {
-
+extern "C"
+{
 /*
  * Class:     org_wysaid_nativePort_CGENativeLibrary
  * Method:    filterImage_MultipleEffects
  * Signature: (Landroid/graphics/Bitmap;Ljava/lang/String;)Landroid/graphics/Bitmap;
  */
-JNIEXPORT jobject JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterImage_1MultipleEffects
-  (JNIEnv *env, jclass cls, jobject bmp, jstring config, jfloat intensity)
+JNIEXPORT jobject JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterImage_1MultipleEffects(JNIEnv* env, jclass cls, jobject bmp, jstring config, jfloat intensity)
 {
     CGETexLoadArg texLoadArg;
     texLoadArg.env = env;
@@ -38,7 +36,7 @@ JNIEXPORT jobject JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterI
     AndroidBitmapInfo info;
     int w, h, ret;
     char* row;
-    
+
     CGE_LOG_CODE(clock_t tm = clock();)
 
     if ((ret = AndroidBitmap_getInfo(env, bmp, &info)) < 0)
@@ -60,7 +58,7 @@ JNIEXPORT jobject JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterI
     jobject newBitmap;
     jclass bitmapCls = env->GetObjectClass(bmp);
 
-    ret = AndroidBitmap_lockPixels(env, bmp, (void**) &row);
+    ret = AndroidBitmap_lockPixels(env, bmp, (void**)&row);
     if (ret < 0)
     {
         CGE_LOG_ERROR("AndroidBitmap_lockPixels() failed ! error=%d", ret);
@@ -68,12 +66,12 @@ JNIEXPORT jobject JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterI
     }
 
     CGESharedGLContext* glContext = CGESharedGLContext::create();
-    if(glContext == nullptr)
+    if (glContext == nullptr)
     {
         CGE_LOG_ERROR("Create Context Failed!");
         return bmp;
     }
-    
+
     glContext->makecurrent();
 
     {
@@ -102,7 +100,7 @@ JNIEXPORT jobject JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterI
         env->DeleteLocalRef(configName);
         newBitmap = env->CallStaticObjectMethod(bitmapCls, createBitmapFunction, info.width, info.height, bitmapConfig);
 
-        ret = AndroidBitmap_lockPixels(env, newBitmap, (void**) &row);
+        ret = AndroidBitmap_lockPixels(env, newBitmap, (void**)&row);
         if (ret < 0)
         {
             CGE_LOG_ERROR("AndroidBitmap_lockPixels() failed ! error=%d", ret);
@@ -125,8 +123,7 @@ JNIEXPORT jobject JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterI
  * Method:    filterImage_MultipleEffectsWriteBack
  * Signature: (Landroid/graphics/Bitmap;Ljava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterImage_1MultipleEffectsWriteBack
-  (JNIEnv *env, jclass cls, jobject bmp, jstring config, jfloat intensity)
+JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterImage_1MultipleEffectsWriteBack(JNIEnv* env, jclass cls, jobject bmp, jstring config, jfloat intensity)
 {
     CGETexLoadArg texLoadArg;
     texLoadArg.env = env;
@@ -138,12 +135,14 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterImag
 
     CGE_LOG_CODE(clock_t tm = clock();)
 
-    if ((ret = AndroidBitmap_getInfo(env, bmp, &info)) < 0) {
+    if ((ret = AndroidBitmap_getInfo(env, bmp, &info)) < 0)
+    {
         CGE_LOG_ERROR("AndroidBitmap_getInfo() failed ! error=%d", ret);
         return;
     }
     CGE_LOG_INFO("color image :: width is %d; height is %d; stride is %d; format is %d;flags is %d", info.width, info.height, info.stride, info.format, info.flags);
-    if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+    if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888)
+    {
         CGE_LOG_ERROR("Bitmap format is not RGBA_8888 !");
         return;
     }
@@ -151,7 +150,7 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterImag
     w = info.width;
     h = info.height;
 
-    ret = AndroidBitmap_lockPixels(env, bmp, (void**) &row);
+    ret = AndroidBitmap_lockPixels(env, bmp, (void**)&row);
 
     if (ret < 0)
     {
@@ -161,10 +160,10 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterImag
 
     CGESharedGLContext* glContext = CGESharedGLContext::create();
 
-    if(glContext == nullptr)
+    if (glContext == nullptr)
     {
         CGE_LOG_ERROR("Create Context Failed!");
-        return ;
+        return;
     }
 
     glContext->makecurrent();
@@ -195,11 +194,9 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeFilterImag
     }
 
     delete glContext;
-
 }
 
-JNIEXPORT jlong JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeCreateFilterWithConfig
-  (JNIEnv *env, jclass, jstring config)
+JNIEXPORT jlong JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeCreateFilterWithConfig(JNIEnv* env, jclass, jstring config)
 {
     CGETexLoadArg texLoadArg;
     texLoadArg.env = env;
@@ -210,7 +207,7 @@ JNIEXPORT jlong JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeCreateFil
     CGEMutipleEffectFilter* filter = new CGEMutipleEffectFilter;
     filter->setTextureLoadFunction(cgeGlobalTextureLoadFunc, &texLoadArg);
 
-    if(!filter->initWithEffectString(configStr))
+    if (!filter->initWithEffectString(configStr))
     {
         delete filter;
         filter = nullptr;
@@ -221,20 +218,18 @@ JNIEXPORT jlong JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeCreateFil
     return (jlong)filter;
 }
 
-JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeDeleteFilterWithAddress
-  (JNIEnv *env, jclass, jlong addr)
+JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeDeleteFilterWithAddress(JNIEnv* env, jclass, jlong addr)
 {
     delete (CGEImageFilterInterfaceAbstract*)addr;
 }
 
 // filterType: normal, keep_ratio, tile
 
-JNIEXPORT jlong JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeCreateBlendFilter
-  (JNIEnv *env, jclass, jint blendMode, jint texID, jint texWidth, jint texHeight, jint filterType, jfloat intensity)
+JNIEXPORT jlong JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeCreateBlendFilter(JNIEnv* env, jclass, jint blendMode, jint texID, jint texWidth, jint texHeight, jint filterType, jfloat intensity)
 {
     CGEBlendWithResourceFilter* filter = nullptr;
 
-    switch(filterType)
+    switch (filterType)
     {
     case 0:
         filter = new CGEBlendWithResourceFilter();
@@ -253,7 +248,7 @@ JNIEXPORT jlong JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeCreateBle
         return 0;
     }
 
-    if(filter->initWithMode((CGETextureBlendMode)blendMode))
+    if (filter->initWithMode((CGETextureBlendMode)blendMode))
     {
         filter->setSamplerID(texID);
         filter->setTexSize(texWidth, texHeight);
@@ -265,15 +260,6 @@ JNIEXPORT jlong JNICALL Java_org_wysaid_nativePort_CGENativeLibrary_cgeCreateBle
         filter = nullptr;
     }
 
-    return (jlong)filter;    
+    return (jlong)filter;
 }
-
-
 }
-
-
-
-
-
-
-

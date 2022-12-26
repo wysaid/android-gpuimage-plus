@@ -12,22 +12,22 @@
 
 namespace CGE
 {
-	class CGERandomBlurFilter : public CGEAdvancedEffectOneStepFilterHelper
-	{
-	public:
-		CGERandomBlurFilter(){}
-		~CGERandomBlurFilter(){}
+class CGERandomBlurFilter : public CGEAdvancedEffectOneStepFilterHelper
+{
+public:
+    CGERandomBlurFilter() {}
+    ~CGERandomBlurFilter() {}
 
-		void setIntensity(float value);
-		void setSamplerScale(float value);
+    void setIntensity(float value);
+    void setSamplerScale(float value);
 
-		bool init();
+    bool init();
 
-	protected:
-		static CGEConstString paramIntensity;
-		static CGEConstString paramSamplerScale;
-		static CGEConstString paramSamplerRadius;
-	};
-}
+protected:
+    static CGEConstString paramIntensity;
+    static CGEConstString paramSamplerScale;
+    static CGEConstString paramSamplerRadius;
+};
+} // namespace CGE
 
-#endif 
+#endif

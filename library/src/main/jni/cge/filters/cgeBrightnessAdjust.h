@@ -12,31 +12,29 @@
 
 namespace CGE
 {
-	class CGEBrightnessFilter : public CGEImageFilterInterface
-	{
-	public:
+class CGEBrightnessFilter : public CGEImageFilterInterface
+{
+public:
+    void setIntensity(float value); // range: [-1, 1]
 
-		void setIntensity(float value); // range: [-1, 1]
+    bool init();
 
-		bool init();
-        
-        void render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
+    void render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
 
-	protected:
-		static CGEConstString paramName;
-        
-    private:
-        float m_intensity;
-	};
+protected:
+    static CGEConstString paramName;
 
-	class CGEBrightnessFastFilter : public CGEFastAdjustRGBFilter
-	{
-	public:
+private:
+    float m_intensity;
+};
 
-		void setIntensity(float value);
-		bool init();
-	};
+class CGEBrightnessFastFilter : public CGEFastAdjustRGBFilter
+{
+public:
+    void setIntensity(float value);
+    bool init();
+};
 
-}
+} // namespace CGE
 
 #endif

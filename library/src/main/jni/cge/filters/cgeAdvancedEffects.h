@@ -8,47 +8,46 @@
 #ifndef _CGEADVANCEDEFFECTS_H_
 #define _CGEADVANCEDEFFECTS_H_
 
-#include "cgeEmbossFilter.h"
-#include "cgeEdgeFilter.h"
-#include "cgeRandomBlurFilter.h"
+#include "cgeBeautifyFilter.h"
 #include "cgeBilateralBlurFilter.h"
-#include "cgeMosaicBlurFilter.h"
-#include "cgeLiquifyFilter.h"
-#include "cgeHalftoneFilter.h"
-#include "cgePolarPixellateFilter.h"
-#include "cgePolkaDotFilter.h"
 #include "cgeCrosshatchFilter.h"
+#include "cgeEdgeFilter.h"
+#include "cgeEmbossFilter.h"
+#include "cgeHalftoneFilter.h"
 #include "cgeHazeFilter.h"
 #include "cgeLerpblurFilter.h"
-
+#include "cgeLiquifyFilter.h"
+#include "cgeMosaicBlurFilter.h"
+#include "cgePolarPixellateFilter.h"
+#include "cgePolkaDotFilter.h"
+#include "cgeRandomBlurFilter.h"
 #include "cgeSketchFilter.h"
-#include "cgeBeautifyFilter.h"
 
 namespace CGE
 {
-	CGEEmbossFilter* createEmbossFilter();
-	CGEEdgeFilter* createEdgeFilter();
-	CGEEdgeSobelFilter* createEdgeSobelFilter();
-	CGERandomBlurFilter* createRandomBlurFilter();
-	CGEBilateralBlurFilter* createBilateralBlurFilter();
-    CGEBilateralBlurBetterFilter* createBilateralBlurBetterFilter();
-	CGEMosaicBlurFilter* createMosaicBlurFilter();
-	CGELiquifyFilter* getLiquidationFilter(float ratio, float stride);
-	CGELiquifyFilter* getLiquidationFilter(float width, float height , float stride);
+CGEEmbossFilter* createEmbossFilter();
+CGEEdgeFilter* createEdgeFilter();
+CGEEdgeSobelFilter* createEdgeSobelFilter();
+CGERandomBlurFilter* createRandomBlurFilter();
+CGEBilateralBlurFilter* createBilateralBlurFilter();
+CGEBilateralBlurBetterFilter* createBilateralBlurBetterFilter();
+CGEMosaicBlurFilter* createMosaicBlurFilter();
+CGELiquifyFilter* getLiquidationFilter(float ratio, float stride);
+CGELiquifyFilter* getLiquidationFilter(float width, float height, float stride);
 
-	CGELiquidationNicerFilter* getLiquidationNicerFilter(float ratio, float stride);
-	CGELiquidationNicerFilter* getLiquidationNicerFilter(float width, float height , float stride);
+CGELiquidationNicerFilter* getLiquidationNicerFilter(float ratio, float stride);
+CGELiquidationNicerFilter* getLiquidationNicerFilter(float width, float height, float stride);
 
-	CGEHalftoneFilter* createHalftoneFilter();
-	CGEPolarPixellateFilter* createPolarPixellateFilter();
-	CGEPolkaDotFilter* createPolkaDotFilter();
-	CGECrosshatchFilter* createCrosshatchFilter();
-	CGEHazeFilter* createHazeFilter();
-	CGELerpblurFilter* createLerpblurFilter();
+CGEHalftoneFilter* createHalftoneFilter();
+CGEPolarPixellateFilter* createPolarPixellateFilter();
+CGEPolkaDotFilter* createPolkaDotFilter();
+CGECrosshatchFilter* createCrosshatchFilter();
+CGEHazeFilter* createHazeFilter();
+CGELerpblurFilter* createLerpblurFilter();
 
-	CGESketchFilter* createSketchFilter();
-    
-    CGEBeautifyFilter* createBeautifyFilter();
-}
+CGESketchFilter* createSketchFilter();
 
-#endif 
+CGEBeautifyFilter* createBeautifyFilter();
+} // namespace CGE
+
+#endif

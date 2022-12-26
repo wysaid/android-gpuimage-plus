@@ -12,21 +12,21 @@
 
 namespace CGE
 {
-	class CGEColorLevelFilter : public CGEImageFilterInterface
-	{
-	public:
-		CGEColorLevelFilter() {}
-		~CGEColorLevelFilter() {}
+class CGEColorLevelFilter : public CGEImageFilterInterface
+{
+public:
+    CGEColorLevelFilter() {}
+    ~CGEColorLevelFilter() {}
 
-		bool init();
+    bool init();
 
-		void setLevel(float dark, float light); // range [0, 1], dark < light
-		void setGamma(float value); // range [0, 3], default: 1 (origin)
+    void setLevel(float dark, float light); // range [0, 1], dark < light
+    void setGamma(float value);             // range [0, 3], default: 1 (origin)
 
-	protected: 
-		static CGEConstString paramLevelName;
-		static CGEConstString paramGammaName;
-	};
-}
+protected:
+    static CGEConstString paramLevelName;
+    static CGEConstString paramGammaName;
+};
+} // namespace CGE
 
 #endif

@@ -19,26 +19,26 @@ typedef enum CustomFilterType
     CGE_CUSTOM_FILTER_TOTAL_NUMBER
 } CustomFilterType;
 
-#include <jni.h>
-#include <android/bitmap.h>
-#include "cgeSharedGLContext.h"
 #include "cgeNativeLibrary.h"
+#include "cgeSharedGLContext.h"
+
+#include <android/bitmap.h>
+#include <jni.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-    
-    //intensity: 0 for origin, 1 for normal, below 0 for neg effect, above 1 for enhanced effect.
-    //processingContext: nil for global context, otherwise use the context you provided.
-    jobject cgeFilterImage_CustomFilters(JNIEnv *env, jobject bmp, CustomFilterType type, float intensity, jboolean hasContext, bool useWrapper);
 
-    //processingContext: you can pass nullptr, so the previous binded context will be used. (may return nullptr if no context is binded)
-    //other args meanings is the same to the above.
-    //type "CGEMutipleEffectFilter" will be returned.
-    void* cgeCreateCustomFilter(CustomFilterType type, float intensity, bool useWrapper);
-    
-    
+// intensity: 0 for origin, 1 for normal, below 0 for neg effect, above 1 for enhanced effect.
+// processingContext: nil for global context, otherwise use the context you provided.
+jobject cgeFilterImage_CustomFilters(JNIEnv* env, jobject bmp, CustomFilterType type, float intensity, jboolean hasContext, bool useWrapper);
+
+// processingContext: you can pass nullptr, so the previous binded context will be used. (may return nullptr if no context is binded)
+// other args meanings is the same to the above.
+// type "CGEMutipleEffectFilter" will be returned.
+void* cgeCreateCustomFilter(CustomFilterType type, float intensity, bool useWrapper);
+
 #ifdef __cplusplus
 }
 #endif

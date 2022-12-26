@@ -12,19 +12,17 @@
 
 namespace CGE
 {
-	class CGEExposureFilter : public CGEImageFilterInterface
-	{
-	public:
+class CGEExposureFilter : public CGEImageFilterInterface
+{
+public:
+    // Range: [-10, 10]
+    void setIntensity(float value);
 
-		//Range: [-10, 10]
-		void setIntensity(float value);
+    bool init();
 
-		bool init();
-
-	protected:
-		static CGEConstString paramName;
-
-	};
-}
+protected:
+    static CGEConstString paramName;
+};
+} // namespace CGE
 
 #endif

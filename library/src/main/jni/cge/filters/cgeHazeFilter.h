@@ -12,25 +12,24 @@
 
 namespace CGE
 {
-	class CGEHazeFilter : public CGEImageFilterInterface
-	{
-	public:	
+class CGEHazeFilter : public CGEImageFilterInterface
+{
+public:
+    // Range: [-0.5, 0.5], default: 0.2
+    void setDistance(float value);
+    // Range: [-0.5, 0.5] defualt: 0
+    void setSlope(float value);
 
-		//Range: [-0.5, 0.5], default: 0.2
-		void setDistance(float value);
-		//Range: [-0.5, 0.5] defualt: 0
-		void setSlope(float value);
+    // Range: [0, 1], Defualt: all 1
+    void setHazeColor(float r, float g, float b);
 
-		//Range: [0, 1], Defualt: all 1
-		void setHazeColor(float r, float g, float b);
+    bool init();
 
-		bool init();
-
-	protected:
-		static CGEConstString paramDistance;
-		static CGEConstString paramSlope;
-		static CGEConstString paramHazeColor;
-	};
-}
+protected:
+    static CGEConstString paramDistance;
+    static CGEConstString paramSlope;
+    static CGEConstString paramHazeColor;
+};
+} // namespace CGE
 
 #endif

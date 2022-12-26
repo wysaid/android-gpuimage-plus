@@ -13,8 +13,8 @@
 
 namespace CGE
 {
-	CGEDynamicWaveFilter* createDynamicWaveFilter();
-    CGEMotionFlowFilter* createMotionFlowFilter();
-}
+CGEDynamicWaveFilter* createDynamicWaveFilter();
+CGEMotionFlowFilter* createMotionFlowFilter();
+} // namespace CGE
 
 #endif

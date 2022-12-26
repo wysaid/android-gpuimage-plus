@@ -12,26 +12,24 @@
 
 namespace CGE
 {
-	class CGEHalftoneFilter : public CGEImageFilterInterface
-	{
-	public:
+class CGEHalftoneFilter : public CGEImageFilterInterface
+{
+public:
+    bool init();
 
-		bool init();
+    // Range: >= 1.
+    void setDotSize(float value);
 
-		//Range: >= 1.
-		void setDotSize(float value);
+    void setIntensity(float value);
 
-		void setIntensity(float value);
+    void render2Texture(CGE::CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
 
-		void render2Texture(CGE::CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
+protected:
+    static CGEConstString paramAspectRatio;
+    static CGEConstString paramDotPercent;
+    float m_dotSize;
+};
 
-	protected:
-		static CGEConstString paramAspectRatio;
-		static CGEConstString paramDotPercent;
-		float m_dotSize;
-	};
-
-
-}
+} // namespace CGE
 
 #endif

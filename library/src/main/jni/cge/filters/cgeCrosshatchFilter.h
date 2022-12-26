@@ -12,22 +12,21 @@
 
 namespace CGE
 {
-	class CGECrosshatchFilter : public CGEImageFilterInterface
-	{
-	public:
+class CGECrosshatchFilter : public CGEImageFilterInterface
+{
+public:
+    // Range: (0, 0.1], default: 0.03
+    void setCrosshatchSpacing(float value);
+    // Range: (0, 0.01], default: 0.003
+    void setLineWidth(float value);
 
-		//Range: (0, 0.1], default: 0.03
-		void setCrosshatchSpacing(float value);
-		//Range: (0, 0.01], default: 0.003
-		void setLineWidth(float value);
+    bool init();
 
-		bool init();
+protected:
+    static CGEConstString paramCrosshatchSpacing;
+    static CGEConstString paramLineWidth;
+};
 
-	protected:
-		static CGEConstString paramCrosshatchSpacing;
-		static CGEConstString paramLineWidth;
-	};
-
-}
+} // namespace CGE
 
 #endif

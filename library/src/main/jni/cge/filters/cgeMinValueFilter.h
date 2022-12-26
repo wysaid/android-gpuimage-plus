@@ -1,10 +1,10 @@
 ﻿/*
-* cgeMinValueFilter.h
-*
-*  Created on: 2015-3-20
-*      Author: Wang Yang
-* Description: 最小值滤波
-*/
+ * cgeMinValueFilter.h
+ *
+ *  Created on: 2015-3-20
+ *      Author: Wang Yang
+ * Description: 最小值滤波
+ */
 
 #ifndef _CGE_MINVALUE_FILTER_H_
 #define _CGE_MINVALUE_FILTER_H_
@@ -13,35 +13,32 @@
 
 namespace CGE
 {
-	class CGEMinValueFilter3x3: public CGEImageFilterInterface
-	{
-	public:
+class CGEMinValueFilter3x3 : public CGEImageFilterInterface
+{
+public:
+    bool init();
 
-		bool init();
+    void render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
 
-		void render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
+    GLint getStepsLocation() { return m_samplerStepsLoc; }
 
-		GLint getStepsLocation() { return m_samplerStepsLoc; }
+protected:
+    static CGEConstString paramSamplerStepsName;
 
-	protected:
+    virtual const char* getShaderCompFunc();
 
-		static CGEConstString paramSamplerStepsName;
-		
-		virtual const char* getShaderCompFunc();
+    void initLocations();
 
-		void initLocations();
+private:
+    GLint m_samplerStepsLoc;
+};
 
-	private:
-		GLint m_samplerStepsLoc;
-	};
+class CGEMinValueFilter3x3Plus : public CGEMinValueFilter3x3
+{
+public:
+    bool init();
+};
 
-	class CGEMinValueFilter3x3Plus: public CGEMinValueFilter3x3
-	{
-	public:
-
-		bool init();
-	};
-
-}
+} // namespace CGE
 
 #endif

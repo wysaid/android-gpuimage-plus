@@ -9,12 +9,12 @@
 #ifndef CommonHelper_h
 #define CommonHelper_h
 
-#include "cgeGLFunctions.h"
 #include "cgeCustomFilters.h"
+#include "cgeGLFunctions.h"
 
 namespace CGE
 {
-    CGEImageFilterInterface* cgeCreateCustomFilterByType(CustomFilterType type);
+CGEImageFilterInterface* cgeCreateCustomFilterByType(CustomFilterType type);
 }
 
 #endif

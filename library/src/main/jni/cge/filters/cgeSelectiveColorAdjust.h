@@ -12,30 +12,30 @@
 
 namespace CGE
 {
-	class CGESelectiveColorFilter : public CGEImageFilterInterface
-	{
-	public:
+class CGESelectiveColorFilter : public CGEImageFilterInterface
+{
+public:
+    CGESelectiveColorFilter() :
+        m_curveTexture(0) {}
+    ~CGESelectiveColorFilter() {}
 
-		CGESelectiveColorFilter():m_curveTexture(0){}
-		~CGESelectiveColorFilter(){}
+    void setRed(float cyan, float magenta, float yellow, float key);     // range: [-1, 1]
+    void setGreen(float cyan, float magenta, float yellow, float key);   // range: [-1, 1]
+    void setBlue(float cyan, float magenta, float yellow, float key);    // range: [-1, 1]
+    void setCyan(float cyan, float magenta, float yellow, float key);    // range: [-1, 1]
+    void setMagenta(float cyan, float magenta, float yellow, float key); // range: [-1, 1]
+    void setYellow(float cyan, float magenta, float yellow, float key);  // range: [-1, 1]
+    void setWhite(float cyan, float magenta, float yellow, float key);   // range: [-1, 1]
+    void setGray(float cyan, float magenta, float yellow, float key);    // range: [-1, 1]
+    void setBlack(float cyan, float magenta, float yellow, float key);   // range: [-1, 1]
 
-		void setRed    (float cyan,float magenta,float yellow,float key); // range: [-1, 1]
-		void setGreen  (float cyan,float magenta,float yellow,float key); // range: [-1, 1]
-		void setBlue   (float cyan,float magenta,float yellow,float key); // range: [-1, 1]
-		void setCyan   (float cyan,float magenta,float yellow,float key); // range: [-1, 1]
-		void setMagenta(float cyan,float magenta,float yellow,float key); // range: [-1, 1]
-		void setYellow (float cyan,float magenta,float yellow,float key); // range: [-1, 1]
-		void setWhite  (float cyan,float magenta,float yellow,float key); // range: [-1, 1]
-		void setGray   (float cyan,float magenta,float yellow,float key); // range: [-1, 1]
-		void setBlack  (float cyan,float magenta,float yellow,float key); // range: [-1, 1]
+    bool init();
 
-		bool init();
+protected:
+    unsigned int m_curveTexture;
+    static CGEConstString paramName;
+};
 
-	protected:
-		unsigned int m_curveTexture;
-		static CGEConstString paramName;
-	};
-
-}
+} // namespace CGE
 
 #endif

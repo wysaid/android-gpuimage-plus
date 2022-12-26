@@ -12,21 +12,20 @@
 
 namespace CGE
 {
-	class CGEPolarPixellateFilter : public CGEImageFilterInterface
-	{
-	public:
+class CGEPolarPixellateFilter : public CGEImageFilterInterface
+{
+public:
+    // Range: [0, 1]
+    void setCenter(float x, float y);
+    // Range: [0, 0.2]
+    void setPixelSize(float x, float y);
 
-		//Range: [0, 1]
-		void setCenter(float x, float y);
-		//Range: [0, 0.2]
-		void setPixelSize(float x, float y);
+    bool init();
 
-		bool init();
-
-	protected:
-		static CGEConstString paramCenter;
-		static CGEConstString paramPixelSize;
-	};
-}
+protected:
+    static CGEConstString paramCenter;
+    static CGEConstString paramPixelSize;
+};
+} // namespace CGE
 
 #endif
