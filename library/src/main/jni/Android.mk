@@ -16,13 +16,12 @@ CGE_ROOT=$(LOCAL_PATH)
 
 CGE_SOURCE=$(CGE_ROOT)/cge
 
-CGE_INCLUDE=$(CGE_ROOT)/include
-
 #### CGE Library headers ###########
 LOCAL_C_INCLUDES := \
 					$(CGE_ROOT)/interface \
-					$(CGE_INCLUDE) \
-					$(CGE_INCLUDE)/filters \
+					$(CGE_SOURCE)/common \
+					$(CGE_SOURCE)/extends \
+					$(CGE_SOURCE)/filters \
 
 
 #### CGE Library native source  ###########
@@ -182,4 +181,4 @@ endif
 
 # Call user defined module
 include $(CLEAR_VARS)
-include $(CGE_ROOT)/source/source.mk
+include $(CGE_ROOT)/custom/source.mk

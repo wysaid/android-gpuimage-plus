@@ -6,6 +6,8 @@
 
 CGEEXT_ROOT := $(call my-dir)
 CGE_ROOT := $(CGEEXT_ROOT)/..
+CGE_SOURCE=$(CGE_ROOT)/cge
+
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := CGEExt
@@ -16,9 +18,10 @@ LOCAL_MODULE    := CGEExt
 LOCAL_C_INCLUDES := \
 			\
 			$(CGEEXT_ROOT) \
-			$(CGEEXT_ROOT)/../include \
-			$(CGEEXT_ROOT)/../include/filters \
-			$(CGEEXT_ROOT)/../interface \
+			$(CGE_ROOT)/interface \
+			$(CGE_SOURCE)/common \
+			$(CGE_SOURCE)/extends \
+			$(CGE_SOURCE)/filters
 
 
 #### CGE Library native source  ###########
