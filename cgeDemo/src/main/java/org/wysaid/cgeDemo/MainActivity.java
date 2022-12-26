@@ -27,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
     public static final String LOG_TAG = "wysaid";
 
     public static final String EFFECT_CONFIGS[] = {
+            "@style waveform 0.5 0.5 200. 150. 0.0 0.0 0.0 ",
+            "@style hist 0.5 0.5 200. 150. 0.0 0.0 0.0 ",
             "",
             "@curve RGB(0,255)(255,0) @style cm mapping0.jpg 80 80 8 3", // ASCII art (字符画效果)
             "@beautify face 1 480 640", //Beautify
