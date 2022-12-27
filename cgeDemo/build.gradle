@@ -4,7 +4,7 @@ android {
     compileSdkVersion 25
 
     defaultConfig {
-        applicationId "org.wysaid.cgedemo"
+        applicationId "org.wysaid.cgeDemo"
         minSdkVersion 14
         targetSdkVersion 22
         versionCode 1

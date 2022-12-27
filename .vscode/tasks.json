@@ -1,0 +1,67 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "[Android] Build Android Demo",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "vscode_tasks.sh",
+                "--build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "[Android] Run Android Demo",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "vscode_tasks.sh",
+                "--build",
+                "--run"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "[Android] Build And Run Android Demo",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "echo done!"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc",
+            "dependsOn": [
+                "[Android] Build Android Demo",
+                "[Android] Run Android Demo",
+            ]
+        },
+        {
+            "label": "[Android] Build Native Library",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "library/src/main/jni/buildJNI"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        }
+    ]
+}
