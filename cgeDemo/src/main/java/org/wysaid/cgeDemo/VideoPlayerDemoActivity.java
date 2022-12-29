@@ -160,6 +160,9 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                if (chartView != null) {
+                    hideWaveform();
+                }
                 if (histogram == null) {
                     histogram = new HistogramView(VideoPlayerDemoActivity.this);
                     mGLViewGroup.addView(histogram);
@@ -174,6 +177,10 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
         mWaveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                
+                if (histogram != null) {
+                    hideBrightness();
+                }
                 if (chartView == null) {
                     chartView = new ChartGLSurfaceView(VideoPlayerDemoActivity.this);
                     mGLViewGroup.addView(chartView);
