@@ -60,10 +60,10 @@ public class HistogramView extends View implements Handler.Callback {
         for (int x = 0; x < 256; x++) {
             float xpos = x * xscale;
             float ypos;
-            if (histogram[x] < 100000) {
+            if (histogram[x] < 10000) {
                 ypos = histogram[x] * yscale;
             } else {
-                ypos = 100000 * yscale;
+                ypos = 10000 * yscale;
             }
             canvas.drawLine(xpos, height, xpos + xscale, height - ypos, paint);
         }
