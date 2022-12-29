@@ -20,9 +20,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 
-import org.wysaid.cgeDemo.view.ChartGLSurfaceView;
-import org.wysaid.cgeDemo.view.HistogramView;
-import org.wysaid.cgeDemo.view.VideoPlayerGLSurfaceView;
+import org.wysaid.cgeDemo.ChartGLSurfaceView;
+import org.wysaid.cgeDemo.HistogramView;
+import org.wysaid.cgeDemo.VideoPlayerGLSurfaceView;
 import org.wysaid.common.Common;
 import org.wysaid.myUtils.FileUtil;
 import org.wysaid.myUtils.ImageUtil;
