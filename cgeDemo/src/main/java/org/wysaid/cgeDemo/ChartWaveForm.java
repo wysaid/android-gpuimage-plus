@@ -1,4 +1,4 @@
-package org.wysaid.cgeDemo.view;
+package org.wysaid.cgeDemo;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
