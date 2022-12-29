@@ -1,11 +1,14 @@
 package org.wysaid.cgeDemo;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,14 +17,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 
+import org.wysaid.cgeDemo.view.ChartGLSurfaceView;
+import org.wysaid.cgeDemo.view.HistogramView;
+import org.wysaid.cgeDemo.view.VideoPlayerGLSurfaceView;
 import org.wysaid.common.Common;
 import org.wysaid.myUtils.FileUtil;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.myUtils.MsgUtil;
 import org.wysaid.nativePort.CGEFrameRenderer;
-import org.wysaid.view.VideoPlayerGLSurfaceView;
 
 public class VideoPlayerDemoActivity extends AppCompatActivity {
 
@@ -33,6 +39,36 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
     String mCurrentConfig;
 
     public static final int REQUEST_CODE_PICK_VIDEO = 1;
+
+    public static VideoPlayerDemoActivity instance = null;
+    private ChartGLSurfaceView chartView;
+    private HistogramView histogram;
+    RelativeLayout mGLViewGroup;
+    Button mHistBtn;
+    Button mWaveBtn;
+
+    public Handler mHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case 0:
+                    if (chartView != null) {
+                        chartView.setChartData((float[]) msg.obj);
+                    }
+                    break;
+
+                case 1:
+
+                    if (histogram != null) {
+                        histogram.onPreviewFrame((float[]) msg.obj, mPlayerView);
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return false;
+        }
+    });
 
     private VideoPlayerGLSurfaceView.PlayCompletionCallback playCompletionCallback = new VideoPlayerGLSurfaceView.PlayCompletionCallback() {
         @Override
@@ -48,6 +84,7 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
         }
     };
 
+    @SuppressLint("AppCompatCustomView")
     class MyVideoButton extends Button implements View.OnClickListener {
 
         Uri videoUri;
@@ -78,6 +115,35 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
         }
     }
 
+    public static VideoPlayerDemoActivity getInstance() {
+        return instance;
+    }
+
+    public void setWStatue(boolean statue) {
+        mPlayerView.switchWaveform(statue);
+    }
+
+    //隐藏波形图
+    public void hideWaveform() {
+        if (chartView != null) {
+            setWStatue(false);
+            mGLViewGroup.removeView(chartView);
+            chartView = null;
+        }
+    }
+
+    public void setHStatue(boolean statue) {
+        mPlayerView.switchLumForm(statue);
+    }
+
+    public void hideBrightness() {
+        if (histogram != null) {
+            setHStatue(false);
+            mGLViewGroup.removeView(histogram);
+            histogram = null;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,6 +151,38 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
         mPlayerView = (VideoPlayerGLSurfaceView) findViewById(R.id.videoGLSurfaceView);
         mPlayerView.setZOrderOnTop(false);
         mPlayerView.setZOrderMediaOverlay(true);
+
+        instance = this;
+
+        mGLViewGroup = (RelativeLayout) findViewById(R.id.sv_device_group);
+        mHistBtn = (Button) findViewById(R.id.histgramBtn);
+        mHistBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (histogram == null) {
+                    histogram = new HistogramView(VideoPlayerDemoActivity.this);
+                    mGLViewGroup.addView(histogram);
+                    setHStatue(true);
+                } else {
+                    hideBrightness();
+                }
+            }
+        });
+
+        mWaveBtn = (Button) findViewById(R.id.waveformBtn);
+        mWaveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (chartView == null) {
+                    chartView = new ChartGLSurfaceView(VideoPlayerDemoActivity.this);
+                    mGLViewGroup.addView(chartView);
+                    setWStatue(true);
+                } else {
+                    hideWaveform();
+                }
+            }
+        });
 
         mShapeBtn = (Button) findViewById(R.id.switchShapeBtn);
 
@@ -318,4 +416,5 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 }

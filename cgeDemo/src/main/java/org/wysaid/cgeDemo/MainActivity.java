@@ -14,25 +14,89 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import org.wysaid.common.Common;
+import org.wysaid.nativePort.CGENativeLibrary;
+
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.wysaid.common.Common;
-import org.wysaid.myUtils.MsgUtil;
-import org.wysaid.nativePort.CGENativeLibrary;
 
 
 public class MainActivity extends AppCompatActivity {
 
+//    uniform float radius;
+//    uniform vec2 center;
+//    uniform vec4 borderColor;
+//    uniform float borderThickness;
+//
+//    void main()
+//    {
+//        vec2 textureCoordinateToUse = textureCoordinate;
+//        float dist = distance(center, textureCoordinate);
+//
+//        if (dist < radius && factor > 0.0) {
+//            textureCoordinateToUse -= center;
+//            textureCoordinateToUse = textureCoordinateToUse / factor;
+//            textureCoordinateToUse += center;
+//        }
+//
+//        gl_FragColor = texture2D(inputImageTexture, textureCoordinateToUse);
+//    }
+//
+//    void main()
+//    {
+//        vec4 color = texture2D(inputImageTexture, textureCoordinate);
+//
+//        //vec4 color = vec4(255.0,255.0,255.0,1.0);
+//
+//        vec2 uv = textureCoordinate.xy - center;
+//
+//        float d = sqrt(dot(uv,uv));
+//
+//        //float t = 1.0 - smoothstep(radius-borderThickness,radius, d);
+//        float t = 1.0 - smoothstep(0.0, borderThickness, abs(radius-d));
+//        gl_FragColor = vec4(color.rgb,color.a*t);
+//    }
     public static final String LOG_TAG = "wysaid";
 
     public static final String EFFECT_CONFIGS[] = {
+
             "@style waveform 0.5 0.5 200. 150. 0.0 0.0 0.0 ",
             "@style hist 0.5 0.5 200. 150. 0.0 0.0 0.0 ",
-            "",
+
+            "@style 3x3Texture 0.0002 0.0002 ",
+//            "@pixblend cl 1 0 0 0 90",
+//            "@pixblend cl 255 0 0 255 100",
+//            "@blend colorbw 255 0 0 255 100",
+//            "@style stroke 255.0 0.0 0.0 0.2 2. 3. ",
+            "@style histogram 255.0 255.0 255.0",
+
+            //"@style waveform 255.0 0.0 0.0 0.02",
+            "@style drawbg 0.5 0.5 0.2 0.2 0.02",
+            "@style waveform 0.5 0.5 0.5 0.5 255.0 0.0 0.0 0.1",
+            "@style drawbg 0.05 0.8 0.35 0.4 0.02 @style waveform 0.05 0.8 0.35 0.4 255.0 0.0 0.0 0.02",
+
+            "@adjust level 0.66 0.23 0.44 ",
+            //"@blend overlay histogram_bg.png 100",
+            "@style zebraCrossing histogram_bg.png",
+
+            "@style lumrange 0.6",
             "@curve RGB(0,255)(255,0) @style cm mapping0.jpg 80 80 8 3", // ASCII art (字符画效果)
             "@beautify face 1 480 640", //Beautify
-            "@adjust lut edgy_amber.png",
+
+            "@style falsecolor 1.0",
+
+//            "@style falsecolor colorscale_hsv.jpg",
+//            "@style falsecolor colorscale_jet.jpg",
+//            "@style falsecolor colorscale_rainbow.jpg",
+//            "@style falsecolor colorscale_spring.jpg",
+//            "@style lut colorscale_autumn.jpg",
+//            "@style lut colorscale_bone.jpg",
+//            "@style lut colorscale_cool.jpg",
+//            "@style lut colorscale_hot.jpg",
+//            "@style lut colorscale_summer.jpg",
+//            "@style lut colorscale_winter.jpg",
+            //11
+            "@style fcolor 1.0 ",
             "@adjust lut filmstock.png",
             "@adjust lut foggy_night.png",
             "@adjust lut late_sunset.png",
@@ -42,26 +106,46 @@ public class MainActivity extends AppCompatActivity {
             "@blur lerp 1", //can adjust blur mix
             "#unpack @dynamic wave 1", //can adjust speed
             "@dynamic wave 0.5",       //can adjust wave mix
+            //21
             "#unpack @style sketch 0.9",
             "#unpack @krblend sr hehe.jpg 100 ",
             "#unpack @krblend ol hehe.jpg 100",
             "#unpack @krblend add hehe.jpg 100",
+            "#unpack @krblend add histogram_bg.png 100",
             "#unpack @krblend darken hehe.jpg 100",
             "@beautify bilateral 100 3.5 2 ",
-            "@style crosshatch 0.01 0.003 ",
-            "@style edge 1 2 ",
-            "@style edge 1 2 @curve RGB(0, 255)(255, 0) ",
+            //27
+            "",
+            "@style edge 0.2 2 1 ",
+            "@style edge 0.5 2 1",
+            "@style edge 1 1 1",
+            "@style sobel 0.1 2 ",
+            "@style sobel 0.5 2",
+            "@style sobel 1 1",
+            "@style drawround 0.5 0.5 0.05 0.02 255.0 0.0 0.0",
+            "@style magnifier 0.5 0.5 1.5 0.2 @style drawsquare 0.5 0.5 255.0 0.0 0.0 0.003 0.2",// @style drawround 0.5 0.5 0.003 0.2 255.0 0.0 0.0
+            //36
+            "@style singlecolor 255.0 0.0 0.0 0.2",
+            "@pixblend cb 255 0 0 255 100",
+//            "@pixblend ol 255 0 0 255 100",
+            "@style drawround 0.5 0.5 0.5 0.2 255.0 0.0 0.0",
+            "@style drawsquare 0.5 0.5 255.0 0.0 0.0 0.003 0.2",
+            "@style drawcross 0.5 0.5 255.0 0.0 0.0",
+//            "@style toon 0.2 10.0 ",
             "@style edge 1 2 @curve RGB(0, 255)(255, 0) @adjust saturation 0 @adjust level 0.33 0.71 0.93 ",
             "@adjust level 0.31 0.54 0.13 ",
-            "#unpack @style emboss 1 2 2 ",
-            "@style halftone 1.2 ",
+            //43
+            "#unpack @style emboss 1 1 1 ",
+            "@style halftone 1.5 ",
             "@vigblend overlay 255 0 0 255 100 0.12 0.54 0.5 0.5 3 ",
             "@curve R(0, 0)(63, 101)(200, 84)(255, 255)G(0, 0)(86, 49)(180, 183)(255, 255)B(0, 0)(19, 17)(66, 41)(97, 92)(137, 156)(194, 211)(255, 255)RGB(0, 0)(82, 36)(160, 183)(255, 255) ",
             "@adjust exposure 0.98 ",
             "@adjust shadowhighlight -200 200 ",
             "@adjust sharpen 10 1.5 ",
+            //50 颜色平衡
             "@adjust colorbalance 0.99 0.52 -0.31 ",
-            "@adjust level 0.66 0.23 0.44 ",
+            "@style crosshatch 0.03 0.002",
+
             "@style min",
             "@style max",
             "@style haze 0.5 -0.14 1 0.8 1 ",
@@ -193,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
             new DemoClassDescription("TestCaseActivity", "Test Cases")
     };
 
-    public class DemoButton extends Button implements View.OnClickListener {
+    public class DemoButton extends android.support.v7.widget.AppCompatButton implements View.OnClickListener {
         private DemoClassDescription mDemo;
 
         public void setDemo(DemoClassDescription demo) {
@@ -209,12 +293,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onClick(final View v) {
-
-            if (mDemo.activityName == "FaceTrackingDemoActivity") {
-                MsgUtil.toastMsg(v.getContext(), "Error: Please checkout the branch 'face_features' for this demo!");
-                return;
-            }
-
             Log.i(LOG_TAG, String.format("%s is clicked!", mDemo.title));
             Class cls;
             try {
