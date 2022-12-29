@@ -1,5 +1,5 @@
 
-package org.wysaid.cgeDemo.view;
+package org.wysaid.cgeDemo;
 
 import android.content.Context;
 import android.content.res.Configuration;
