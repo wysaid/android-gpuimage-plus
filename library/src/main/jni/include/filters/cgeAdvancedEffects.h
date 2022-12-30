@@ -24,6 +24,8 @@
 #include "cgeSketchFilter.h"
 #include "cgeBeautifyFilter.h"
 
+#include "cgeHistogramFilter.h"
+#include "cgeWaveformFilter.h"
 namespace CGE
 {
 	CGEEmbossFilter* createEmbossFilter();
@@ -49,6 +51,9 @@ namespace CGE
 	CGESketchFilter* createSketchFilter();
     
     CGEBeautifyFilter* createBeautifyFilter();
+
+    CGEHistogramFilter* createHistogramFilter();
+    CGEWaveformFilter* createWaveformFilter();
 }
 
 #endif 
