@@ -1,7 +1,15 @@
 apply plugin: 'com.android.library'
 
+def usingCMakeCompile() {
+    /// define  gradle.ext.usingCMakeCompile = false to disable CMakeCompile Mode.
+    return gradle.ext == null || !gradle.ext.has("usingCMakeCompile") || !gradle.ext.has("usingCMakeCompile");
+}
+
 android {
     compileSdkVersion 25
+    if(usingCMakeCompile()) {
+        ndkVersion "24.0.8215888"
+    }
 
     defaultConfig {
         minSdkVersion 14
@@ -11,8 +19,12 @@ android {
 
         externalNativeBuild {
             cmake {
-                cppFlags ""
-                abiFilters 'armeabi-v7a'
+                arguments "-DCGE_USE_VIDEO_MODULE=1",
+                    "-DANDROID_STL=c++_static",
+                    "-DANDROID_ARM_NEON=TRUE",
+                    "-DANDROID_GRADLE=1"
+
+                cppFlags "-frtti -std=c++14"
             }
         }
     }
