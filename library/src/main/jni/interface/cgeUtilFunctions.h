@@ -1,10 +1,10 @@
 /*
-* cgeUtilFunctions.h
-*
-*  Created on: 2015-11-25
-*      Author: Wang Yang
-*        Mail: admin@wysaid.org
-*/
+ * cgeUtilFunctions.h
+ *
+ *  Created on: 2015-11-25
+ *      Author: Wang Yang
+ *        Mail: admin@wysaid.org
+ */
 
 #ifndef _CGEUTILFUNCTIONS_H_
 #define _CGEUTILFUNCTIONS_H_
@@ -13,22 +13,20 @@
 
 #ifdef __cplusplus
 
-extern "C"{
-
+extern "C"
+{
 #endif
-
-
 
 struct CGETexLoadArg
 {
-	JNIEnv* env;
-	jclass cls;
+    JNIEnv* env;
+    jclass cls;
 };
 
 struct CGETextureResult
 {
-	GLuint texID;
-	int width, height;
+    GLuint texID;
+    int width, height;
 };
 
 double getCurrentTimeMillis();

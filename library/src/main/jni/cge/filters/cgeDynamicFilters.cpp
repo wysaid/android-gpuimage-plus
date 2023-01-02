@@ -7,25 +7,25 @@
 
 #include "cgeDynamicFilters.h"
 
-#define COMMON_FUNC(type) \
-type* proc = new type();\
-if(!proc->init())\
-{\
-	delete proc;\
-	proc = NULL;\
-}\
-return proc;\
+#define COMMON_FUNC(type)    \
+    type* proc = new type(); \
+    if (!proc->init())       \
+    {                        \
+        delete proc;         \
+        proc = NULL;         \
+    }                        \
+    return proc;
 
 namespace CGE
 {
 
-	CGEDynamicWaveFilter* createDynamicWaveFilter()
-	{
-		COMMON_FUNC(CGEDynamicWaveFilter);
-	}
-    
-    CGEMotionFlowFilter* createMotionFlowFilter()
-    {
-        COMMON_FUNC(CGEMotionFlowFilter);
-    }
+CGEDynamicWaveFilter* createDynamicWaveFilter()
+{
+    COMMON_FUNC(CGEDynamicWaveFilter);
 }
+
+CGEMotionFlowFilter* createMotionFlowFilter()
+{
+    COMMON_FUNC(CGEMotionFlowFilter);
+}
+} // namespace CGE

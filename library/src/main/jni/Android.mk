@@ -16,13 +16,12 @@ CGE_ROOT=$(LOCAL_PATH)
 
 CGE_SOURCE=$(CGE_ROOT)/cge
 
-CGE_INCLUDE=$(CGE_ROOT)/include
-
 #### CGE Library headers ###########
 LOCAL_C_INCLUDES := \
 					$(CGE_ROOT)/interface \
-					$(CGE_INCLUDE) \
-					$(CGE_INCLUDE)/filters \
+					$(CGE_SOURCE)/common \
+					$(CGE_SOURCE)/extends \
+					$(CGE_SOURCE)/filters \
 
 
 #### CGE Library native source  ###########
@@ -73,7 +72,7 @@ LOCAL_SRC_FILES :=  \
 			$(CGE_SOURCE)/filters/cgeEdgeFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeEmbossFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeCrosshatchFilter.cpp \
-			$(CGE_SOURCE)/filters/cgeLiquidationFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeLiquifyFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeRandomBlurFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeMinValueFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeMaxValueFilter.cpp \
@@ -99,10 +98,11 @@ LOCAL_SRC_FILES :=  \
 			$(CGE_ROOT)/interface/cgeVideoPlayer.cpp \
 			$(CGE_ROOT)/interface/cgeImageHandlerAndroid.cpp \
 			$(CGE_ROOT)/interface/cgeImageHandlerWrapper.cpp \
+			$(CGE_ROOT)/interface/cgeDeformFilterWrapper.cpp \
 
 
-LOCAL_CPPFLAGS := -frtti -std=gnu++11
-LOCAL_LDLIBS :=  -llog -lEGL -lGLESv2 -ljnigraphics -latomic
+LOCAL_CPPFLAGS := -frtti -std=c++11
+LOCAL_LDLIBS :=  -llog -lEGL -lGLESv2 -ljnigraphics
 
 # 'CGE_USE_VIDEO_MODULE' determines if the project should compile with ffmpeg.
 
@@ -181,4 +181,4 @@ endif
 
 # Call user defined module
 include $(CLEAR_VARS)
-include $(CGE_ROOT)/source/source.mk
+include $(CGE_ROOT)/custom/source.mk

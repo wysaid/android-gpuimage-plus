@@ -1,39 +1,43 @@
 # Android-GPUImage-Plus
-Image, Camera And Video Filters Based On OpenGL (ES2.0).
+
+Image, Camera And Video Filters Based On OpenGL
 
 >To get pure lib without ffmpeg(No feature of video recording), please checkout the branch [min](https://github.com/wysaid/android-gpuimage-plus/tree/min). The whole jni module will be less than 600KB.
 
-## Gradle dependency ##
+## New Feature
 
-```
+See the `image deform demo`.
+
+![](screenshots/6.gif) ![](screenshots/5.gif)
+
+## Gradle dependency
+
+```gradle
 repositories {
     jcenter()
 }
 
 //Choose only one of them
 dependencies {
-    //All arch: armeabi, armeabi-v7a, arm64-v8a, mips, x86
-    compile 'org.wysaid:gpuimage-plus:2.5.0'
-    
-    //Only armeabi-v7a 
-    compile 'org.wysaid:gpuimage-plus:2.5.0-armv7a' //Recommended
+    //All arch: armeabi, armeabi-v7a, arm64-v8a, x86
+    compile 'org.wysaid:gpuimage-plus:2.6.3'
 
     //Pure graphics lib without ffmpeg. (all arch for branch 'min')
-    compile 'org.wysaid:gpuimage-plus:2.5.0-min'
-
-    //Pure graphics lib without ffmpeg. (arch armv7a for branch 'min')
-    compile 'org.wysaid:gpuimage-plus:2.5.0-min-armv7a' //Recommended
+    compile 'org.wysaid:gpuimage-plus:2.6.3-min'
 }
 ```
 
-## Abstract ##
+> Use other ffmpeg-library, see: <https://github.com/wysaid/FFmpeg-Android.git>
 
-*  This repo is an Android Studio Project, comprising "cgeDemo", "library" two sub-modules. Hundreds of built-in filters are available in the demo. 😋If you'd like to add your own filter, please take a look at the manual page. Or you can follow the demo code. The new custom filter should be written in C++.
+## Abstract
+
+* This repo is an Android Studio Project, comprising "cgeDemo", "library" two sub-modules. Hundreds of built-in filters are available in the demo. 😋If you'd like to add your own filter, please take a look at the manual page. Or you can follow the demo code. The new custom filter should be written in C++.
 
 * Demo and Library will be updated as needed. Welcome for your questions or PR.
 
 * To build with the jni part, pleasae try:
-```
+
+```shell
 export NDK=path/of/your/ndk
 cd folder/of/jni (android-gpuimage-plus/library/src/main/jni)
 
@@ -60,18 +64,19 @@ your_path_to_ndk\ndk-bundle\ndk-build.cmd
 //CGEFFmpegNativeLibrary.avRegisterAll();
 ```
 
-> You can find precompiled libs here: [android-gpuimage-plus-libs](https://github.com/wysaid/android-gpuimage-plus-libs) (The precompiled '.so' files are generated with NDK-r16b)
+> You can find precompiled libs here: [android-gpuimage-plus-libs](https://github.com/wysaid/android-gpuimage-plus-libs) (The precompiled '.so' files are generated with NDK-r23b)
 
 Note that the generated file "libFaceTracker.so" is not necessary. So just remove this file if you don't want any feature of it.
 
 * iOS version: [https://github.com/wysaid/ios-gpuimage-plus](https://github.com/wysaid/ios-gpuimage-plus "http://wysaid.org")
 
-## Manual ##
+## Manual
 
-### 1. Usage ###
+### 1. Usage
 
 ___Sample Code for doing a filter with Bitmap___
-```
+
+```java
 //Simply apply a filter to a Bitmap.
 @Override
 protected void onCreate(Bundle savedInstanceState) {
@@ -94,12 +99,13 @@ protected void onCreate(Bundle savedInstanceState) {
 }
 ```
 
-### 2. Custom Shader Filter ###
+### 2. Custom Shader Filter
 
-#### 2.1 Write your own filter ####
+#### 2.1 Write your own filter
+
 >Your filter must inherit [CGEImageFilterInterfaceAbstract](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L42) or its child class. Most of the filters are inherited from [CGEImageFilterInterface](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L57) because it has many useful functions.
 
-```
+```cpp
 // A simple customized filter to do a color reversal.
 class MyCustomFilter : public CGE::CGEImageFilterInterface
 {
@@ -134,10 +140,11 @@ public:
 
 >Note: To add your own shader filter with c++. [Please see the demo for further details](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/source/customFilter_N.cpp).
 
-#### 2.2 Run your own filter ####
+#### 2.2 Run your own filter
 
 __In C++, you can use a CGEImageHandler to do that:__
-```
+
+```cpp
 //Assume the gl context already exists:
 //JNIEnv* env = ...;
 //jobject bitmap = ...;
@@ -159,7 +166,6 @@ jobject resultBitmap = handler.getResultBitmap(env);
 
 >If no gl context exists, the class [CGESharedGLContext](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/interface/cgeSharedGLContext.h#L22) may be helpful.
 
-
 __In Java, you can simply follow the sample:__
 
 See: [CGENativeLibrary.cgeFilterImageWithCustomFilter](https://github.com/wysaid/android-gpuimage-plus/blob/master/cgeDemo/src/main/java/org/wysaid/cgeDemo/TestCaseActivity.java#L123)
@@ -168,26 +174,28 @@ __Or to do with a [CGEImageHandler](https://github.com/wysaid/android-gpuimage-p
 
 ### 3. Filter Rule String ###
 
-En: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-En](https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-En "http://wysaid.org")
+Doc: <https://github.com/wysaid/android-gpuimage-plus/wiki>
 
-Ch: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule](https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule "http://wysaid.org")
+En: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(EN)](https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(EN) "http://wysaid.org")
 
-## Tool ##
+Ch: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(ZH)](https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(ZH) "http://wysaid.org")
+
+## Tool
 
 Some utils are available for creating filters: [https://github.com/wysaid/cge-tools](https://github.com/wysaid/cge-tools "http://wysaid.org")
 
 [![Tool](https://raw.githubusercontent.com/wysaid/cge-tools/master/screenshots/0.jpg "cge-tool")](https://github.com/wysaid/cge-tools)
 
-## License ##
+## License
 
 [MIT License](https://github.com/wysaid/android-gpuimage-plus/blob/master/LICENSE)
 
-## Donate ##
+## Donate
 
 Alipay:
 
 ![Alipay](https://raw.githubusercontent.com/wysaid/android-gpuimage-plus/master/screenshots/alipay.jpg "alipay")
 
-Paypal: 
+Paypal:
 
 [![Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif "Paypal")](http://blog.wysaid.org/p/donate.html)

@@ -17,10 +17,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * @Author: wangyang
- * @Mail: admin@wysaid.org
- * @Date: 2017/10/29
- * @Description:
+ * Author: wangyang
+ * Mail: admin@wysaid.org
+ * Data: 2017/10/29
+ * Description:
  */
 
 public class FaceTrackingDemo implements TrackingCameraGLSurfaceView.TrackingProc {
@@ -76,7 +76,7 @@ public class FaceTrackingDemo implements TrackingCameraGLSurfaceView.TrackingPro
         if (mOriginWidth == width && mOriginHeight == height)
             return;
 
-        float scaling = mMaxSize / (float) Math.min(width, height);
+        float scaling = mMaxSize / (float) Math.max(width, height);
 
         if (scaling > 1.0f) {
             mWidth = width;
@@ -114,6 +114,7 @@ public class FaceTrackingDemo implements TrackingCameraGLSurfaceView.TrackingPro
         }
 
         mBitmapSrc.copyPixelsFromBuffer(luminanceBuffer.position(0));
+        mBitmapDst.eraseColor(0);
         mTransformCanvas.drawBitmap(mBitmapSrc, 0.0f, 0.0f, null);
         mBitmapDst.copyPixelsToBuffer(mImageCacheBuffer.position(0));
 

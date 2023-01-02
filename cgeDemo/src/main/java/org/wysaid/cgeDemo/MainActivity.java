@@ -14,11 +14,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
-import org.wysaid.common.Common;
-import org.wysaid.nativePort.CGENativeLibrary;
-
 import java.io.IOException;
 import java.io.InputStream;
+
+import org.wysaid.common.Common;
+import org.wysaid.myUtils.MsgUtil;
+import org.wysaid.nativePort.CGENativeLibrary;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -181,7 +182,9 @@ public class MainActivity extends AppCompatActivity {
     private static final DemoClassDescription mDemos[] = new DemoClassDescription[]{
             new DemoClassDescription("BasicImageDemoActivity", "Basic Image Filter Demo"),
             new DemoClassDescription("ImageDemoActivity", "Advanced Image Filter Demo"),
+            new DemoClassDescription("ImageDeformActivity", "Image Deform Demo"),
             new DemoClassDescription("CameraDemoActivity", "Camera Filter Demo"),
+            new DemoClassDescription("MultiInputActivity", "Multi Input Demo"),
             new DemoClassDescription("SimplePlayerDemoActivity", "Simple Player Demo"),
             new DemoClassDescription("VideoPlayerDemoActivity", "Video Player Demo"),
             new DemoClassDescription("FaceTrackingDemoActivity", "Face Tracking Demo"),
@@ -204,6 +207,12 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onClick(final View v) {
+
+            if (mDemo.activityName == "FaceTrackingDemoActivity") {
+                MsgUtil.toastMsg(v.getContext(), "Error: Please checkout the branch 'face_features' for this demo!");
+                return;
+            }
+
             Log.i(LOG_TAG, String.format("%s is clicked!", mDemo.title));
             Class cls;
             try {

@@ -3,10 +3,10 @@ package org.wysaid.gpuCodec;
 import org.wysaid.common.TextureDrawer;
 
 /**
- * @Author: wangyang
- * @Mail: admin@wysaid.org
- * @Date: 2017/5/3
- * @Description:
+ * Author: wangyang
+ * Mail: admin@wysaid.org
+ * Date: 2017/5/3
+ * Description:
  */
 
 public class TextureDrawerCodec extends TextureDrawer {

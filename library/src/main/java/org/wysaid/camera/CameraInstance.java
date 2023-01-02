@@ -96,6 +96,7 @@ public class CameraInstance {
                     if (cameraInfo.facing == facing) {
                         mDefaultCameraID = i;
                         mFacing = facing;
+                        break;
                     }
                 }
             }

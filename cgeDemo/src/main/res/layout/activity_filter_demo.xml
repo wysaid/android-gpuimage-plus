@@ -12,11 +12,11 @@
         android:id="@+id/mainImageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/seekBar"
+        android:layout_below="@+id/globalRestoreSeekBar"
         android:layout_above="@+id/horizontalScroll"/>
 
     <SeekBar
-        android:id="@+id/seekBar"
+        android:id="@+id/globalRestoreSeekBar"
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:layout_alignParentTop="true"

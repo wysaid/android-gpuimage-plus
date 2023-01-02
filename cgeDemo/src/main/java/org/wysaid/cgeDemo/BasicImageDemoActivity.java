@@ -21,10 +21,10 @@ import org.wysaid.view.ImageGLSurfaceView;
 import java.io.InputStream;
 
 /**
- * @Author: wangyang
- * @Mail: admin@wysaid.org
- * @Date: 2017/7/7
- * @Description:
+ * Author: wangyang
+ * Mail: admin@wysaid.org
+ * Data: 2017/7/7
+ * Description:
  */
 
 // For general photo editing scene.
@@ -133,7 +133,7 @@ public class BasicImageDemoActivity extends AppCompatActivity {
 
         mImageView.setDisplayMode(ImageGLSurfaceView.DisplayMode.DISPLAY_ASPECT_FIT);
 
-        mSeekBar = (SeekBar) findViewById(R.id.seekBar);
+        mSeekBar = (SeekBar) findViewById(R.id.globalRestoreSeekBar);
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {

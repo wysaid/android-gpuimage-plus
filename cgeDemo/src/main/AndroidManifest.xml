@@ -1,24 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="org.wysaid.cgeDemo">
-
+    package="org.wysaid.cgeDemo">
     <!-- <uses-sdk android:minSdkVersion="14" -->
     <!-- android:targetSdkVersion="22" -->
     <!-- /> -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-
-    <uses-feature android:name="android.hardware.camera"/>
-    <uses-feature android:name="android.hardware.camera.autofocus"/>
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <permission
         android:name="android.permission.FLASHLIGHT"
         android:permissionGroup="android.permission-group.HARDWARE_CONTROLS"
-        android:protectionLevel="normal"/>
+        android:protectionLevel="normal" />
 
     <application
         android:allowBackup="true"
@@ -26,30 +24,34 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
+        <activity android:name=".MultiInputActivity"></activity>
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".BasicImageDemoActivity"
-            android:label="@string/title_activity_filter_demo2"/>
+            android:label="@string/title_activity_filter_demo2" />
         <activity
             android:name=".ImageDemoActivity"
-            android:label="@string/title_activity_filter_demo"/>
+            android:label="@string/title_activity_filter_demo" />
+        <activity
+            android:name=".ImageDeformActivity"
+            android:label="@string/title_activity_image_deform" />
         <activity
             android:name=".CameraDemoActivity"
             android:label="@string/title_activity_camera_demo"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".SimplePlayerDemoActivity"
-            android:label="@string/title_activity_video_player"/>
-        <activity android:name=".VideoPlayerDemoActivity"/>
-        <activity android:name=".TestCaseActivity"/>
+            android:label="@string/title_activity_video_player" />
+        <activity android:name=".VideoPlayerDemoActivity" />
+        <activity android:name=".TestCaseActivity" />
         <activity
             android:name=".FaceTrackingDemoActivity"
             android:label="@string/title_activity_face_tracker_demo" />

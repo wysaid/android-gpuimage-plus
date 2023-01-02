@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context=".MultiInputActivity">
+
+    <FrameLayout
+        android:id="@+id/glviewFrameLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <org.wysaid.cgeDemo.demoUtils.MultiInputDemo
+            android:id="@+id/myGLSurfaceView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </FrameLayout>
+
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <LinearLayout
+            android:id="@+id/menuLinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true">
+
+            <Button
+                android:id="@+id/takePicBtn"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:text="ClickMe!"
+                android:onClick="demoClicked"
+                android:textAllCaps="false" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+</RelativeLayout>

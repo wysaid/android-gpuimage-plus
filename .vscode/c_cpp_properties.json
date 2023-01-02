@@ -1,0 +1,34 @@
+{
+    "version": 4,
+    "env": {
+        "myDefaultIncludePath": [
+            "${workspaceFolder}",
+            "${workspaceFolder}/library/src/main/jni",
+            "${workspaceFolder}/library/src/main/jni/cge/common",
+            "${workspaceFolder}/library/src/main/jni/cge/extends",
+            "${workspaceFolder}/library/src/main/jni/cge/filters",
+            "${workspaceFolder}/library/src/main/jni/custom",
+            "${workspaceFolder}/library/src/main/jni/ffmpeg",
+            "${workspaceFolder}/library/src/main/jni/interface"
+        ]
+    },
+    "configurations": [
+        {
+            "name": "default",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "defines": [
+                "DEBUG=1",
+                "_CGE_USE_FFMPEG_=1",
+                "ANDROID_NDK=1",
+                "_CGE_DISABLE_GLOBALCONTEXT_=1",
+                "_CGE_ONLY_FILTERS_=1"
+            ],
+            "includePath": [
+                "${myDefaultIncludePath}",
+                "${env:NDK}/ndk-build-toolchain/sysroot/usr/include"
+            ],
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ]
+}

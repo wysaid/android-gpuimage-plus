@@ -1,0 +1,143 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".ImageDeformActivity">
+
+    <org.wysaid.view.ImageGLSurfaceView
+        android:id="@+id/mainImageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/globalRestoreSeekBar"
+        android:layout_above="@+id/horizontalScroll"/>
+
+    <SeekBar
+        android:id="@+id/globalRestoreSeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_alignParentTop="true"
+        android:layout_gravity="center_horizontal|top"
+        />
+
+    <HorizontalScrollView
+        android:id="@+id/horizontalScroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <LinearLayout
+            android:id="@+id/menuLayout"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/galleryBtn"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:onClick="galleryBtnClicked"
+                android:text="Gallery"
+                />
+
+            <Button
+                android:id="@+id/saveImageBtn"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:onClick="saveImageBtnClicked"
+                android:text="Save"
+                />
+
+            <Button
+                android:id="@+id/restoreBtn"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:onClick="restoreBtnClicked"
+                android:text="restore"/>
+
+            <Button
+                android:id="@+id/forwardModeBtn"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:onClick="forwardModeBtnClicked"
+                android:text="forwardMode"/>
+
+            <Button
+                android:id="@+id/restoreModeBtn"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:onClick="restoreModeBtnClicked"
+                android:text="restoreMode"/>
+
+            <Button
+                android:id="@+id/bloatModeBtn"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:onClick="bloatModeBtnClicked"
+                android:text="bloatMode"/>
+
+            <Button
+                android:id="@+id/wrinkleModeBtn"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:onClick="wrinkleModeBtnClicked"
+                android:text="wrinkleMode"/>
+
+            <Button
+                android:id="@+id/undoBtn"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:onClick="undoBtnClicked"
+                android:text="undo"/>
+
+            <Button
+                android:id="@+id/redoBtn"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:onClick="redoBtnClicked"
+                android:text="redo"/>
+
+            <Button
+                android:id="@+id/radiusIncBtn"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:onClick="radiusIncClicked"
+                android:text="radiusInc"/>
+
+            <Button
+                android:id="@+id/radiusDecBtn"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:onClick="radiusDecClicked"
+                android:text="radiusDec"/>
+
+            <Button
+                android:id="@+id/intensityIncBtn"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:onClick="intensityIncClicked"
+                android:text="intensityInc"/>
+
+            <Button
+                android:id="@+id/intensityDecBtn"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:onClick="intensityDecClicked"
+                android:text="intensityDec"/>
+
+            <Button
+                android:id="@+id/showMeshBtn"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:onClick="showMeshBtnClicked"
+                android:text="showMesh"/>
+
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+</RelativeLayout>
