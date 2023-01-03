@@ -135,7 +135,7 @@ void UniformParameters::pushf(const char* name, GLfloat x, GLfloat y, GLfloat z,
 void UniformParameters::pushSampler1D(const char* name, GLuint* textureID, GLint textureBindID)
 {
     UniformData* data = new UniformData(name, uniformSAMPLER1D);
-    data->uniformValue[0].valueuPtr = textureID;
+    data->uniformValue[0].valuePtr = textureID;
     data->uniformValue[1].valuei = textureBindID;
     m_vecUniforms.push_back(data);
 }
@@ -143,7 +143,7 @@ void UniformParameters::pushSampler1D(const char* name, GLuint* textureID, GLint
 void UniformParameters::pushSampler2D(const char* name, GLuint* textureID, GLint textureBindID)
 {
     UniformData* data = new UniformData(name, uniformSAMPLER2D);
-    data->uniformValue[0].valueuPtr = textureID;
+    data->uniformValue[0].valuePtr = textureID;
     data->uniformValue[1].valuei = textureBindID;
     m_vecUniforms.push_back(data);
 }
@@ -217,7 +217,7 @@ void UniformParameters::assignUniforms(CGEImageHandlerInterface* hander, GLuint 
 #ifdef GL_TEXTURE_1D
             int texutreBindID = CGE_TEXTURE_START + (*iter)->uniformValue[1].valuei;
             glActiveTexture(texutreBindID);
-            glBindTexture(GL_TEXTURE_1D, *(*iter)->uniformValue[0].valueuPtr);
+            glBindTexture(GL_TEXTURE_1D, *(*iter)->uniformValue[0].valuePtr);
             glUniform1i(uniformID, texutreBindID - GL_TEXTURE0);
 #endif
         }
@@ -225,7 +225,7 @@ void UniformParameters::assignUniforms(CGEImageHandlerInterface* hander, GLuint 
         case uniformSAMPLER2D: {
             int texutreBindID = CGE_TEXTURE_START + (*iter)->uniformValue[1].valuei;
             glActiveTexture(texutreBindID);
-            glBindTexture(GL_TEXTURE_2D, *(*iter)->uniformValue[0].valueuPtr);
+            glBindTexture(GL_TEXTURE_2D, *(*iter)->uniformValue[0].valuePtr);
             glUniform1i(uniformID, texutreBindID - GL_TEXTURE0);
         }
         break;
@@ -306,14 +306,19 @@ ProgramObject::~ProgramObject()
     glDeleteProgram(m_programID);
 }
 
+bool ProgramObject::initWithComputeShader(const char* csh)
+{
+    return m_fragOrComputeShader.init(GL_COMPUTE_SHADER) && m_fragOrComputeShader.loadShaderSourceFromString(csh) && linkWithShaderObject(m_fragOrComputeShader, m_fragOrComputeShader, true);
+}
+
 bool ProgramObject::initFragmentShaderSourceFromString(const char* fragShader)
 {
-    return m_fragObj.init(GL_FRAGMENT_SHADER) && m_fragObj.loadShaderSourceFromString(fragShader);
+    return m_fragOrComputeShader.init(GL_FRAGMENT_SHADER) && m_fragOrComputeShader.loadShaderSourceFromString(fragShader);
 }
 
 bool ProgramObject::initVertexShaderSourceFromString(const char* vertShader)
 {
-    return m_vertObj.init(GL_VERTEX_SHADER) && m_vertObj.loadShaderSourceFromString(vertShader);
+    return m_vertShader.init(GL_VERTEX_SHADER) && m_vertShader.loadShaderSourceFromString(vertShader);
 }
 
 bool ProgramObject::initWithShaderStrings(const char* vsh, const char* fsh)
@@ -338,17 +343,21 @@ bool ProgramObject::linkWithShaderObject(ShaderObject& vertObj, ShaderObject& fr
     {
         m_programID = glCreateProgram();
     }
+
     GLint programStatus;
-    glAttachShader(m_programID, vertObj.shaderID());
+
+    if (vertObj.shaderID() != fragObj.shaderID()) /// equals when using compute shader.
+        glAttachShader(m_programID, vertObj.shaderID());
     glAttachShader(m_programID, fragObj.shaderID());
+
     cgeCheckGLError("Attach Shaders in useProgram");
     glLinkProgram(m_programID);
     glGetProgramiv(m_programID, GL_LINK_STATUS, &programStatus);
 
     if (shouldClear)
     {
-        m_vertObj.clear();
-        m_fragObj.clear();
+        m_vertShader.clear();
+        m_fragOrComputeShader.clear();
     }
 
     if (programStatus != GL_TRUE)
