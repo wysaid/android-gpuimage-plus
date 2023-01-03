@@ -15,6 +15,7 @@
 #include "cgeEmbossFilter.h"
 #include "cgeHalftoneFilter.h"
 #include "cgeHazeFilter.h"
+#include "cgeHistogramFilter.h"
 #include "cgeLerpblurFilter.h"
 #include "cgeLiquifyFilter.h"
 #include "cgeMosaicBlurFilter.h"
@@ -22,6 +23,7 @@
 #include "cgePolkaDotFilter.h"
 #include "cgeRandomBlurFilter.h"
 #include "cgeSketchFilter.h"
+#include "cgeWaveformFilter.h"
 
 namespace CGE
 {
@@ -48,6 +50,9 @@ CGELerpblurFilter* createLerpblurFilter();
 CGESketchFilter* createSketchFilter();
 
 CGEBeautifyFilter* createBeautifyFilter();
+
+CGEHistogramFilter* createHistogramFilter();
+CGEWaveformFilter* createWaveformFilter();
 } // namespace CGE
 
 #endif
