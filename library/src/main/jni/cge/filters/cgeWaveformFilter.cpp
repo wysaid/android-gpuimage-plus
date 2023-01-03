@@ -2,26 +2,20 @@
 
 #include <EGL/egl.h>
 
-static CGEConstString s_vshWaveform = "#version 310 es\n" CGE_SHADER_STRING_PRECISION_H(
-    layout(location = 0) in vec2 position;
-    layout(location = 0) out vec2 textureCoordinate;
-    void main() {
-        gl_Position = vec4(position, 0.0, 1.0);
-        textureCoordinate = (position.xy + 1.0) / 2.0;
-    });
-
-static CGEConstString s_fshWaveform = "#version 310 es\n" CGE_SHADER_STRING(
+static CGEConstString s_cshWaveform = "#version 310 es\n" CGE_SHADER_STRING(
     precision highp float;
     precision highp int;
-    layout(location = 0) in vec2 textureCoordinate;
-    layout(binding = 0) uniform sampler2D inputImageTexture;
-    layout(rgba8, binding = 1) uniform writeonly image2D outputImageTexture;
-    layout(location = 0) out vec4 fragColor;
+
+    layout(local_size_x = 16, local_size_y = 16) in;
+    layout(rgba8, binding = 0) uniform readonly highp image2D inputImage;
+    layout(rgba8, binding = 1) uniform writeonly highp image2D outputImage;
 
     void main() {
-        fragColor = texture(inputImageTexture, textureCoordinate);
-
-        fragColor.r = 1.0;
+        ivec2 workPos = ivec2(gl_GlobalInvocationID.xy);
+        vec3 inputColor = imageLoad(inputImage, workPos).rgb;
+        float lum = dot(inputColor, vec3(0.299, 0.587, 0.114));
+        ivec2 newLoc = ivec2(workPos.x, int(lum * float(imageSize(outputImage).y)));
+        imageStore(outputImage, newLoc, vec4(lum));
     });
 
 namespace CGE
@@ -32,7 +26,7 @@ CGEWaveformFilter::~CGEWaveformFilter()
 
 bool CGEWaveformFilter::init()
 {
-    if (initShadersFromString(s_vshWaveform, s_fshWaveform))
+    if (m_program.initWithComputeShader(s_cshWaveform))
     {
         setFormPosition(0.5f, 0.5f);
         setFormSize(0.4f, 0.3f);
@@ -45,28 +39,38 @@ bool CGEWaveformFilter::init()
  Only GLES 3.1+ support image store. 
  You need to imp a fallback version which reading pixels every frame like `cgeColorMappingFilter`
 )");
-    CGE_LOG_ERROR("Failed Vertex Shader: %s\n", s_vshWaveform);
-    CGE_LOG_ERROR("Failed Fragment Shader: %s\n", s_fshWaveform);
+    CGE_LOG_ERROR("Failed Compute Shader: %s\n", s_cshWaveform);
     return false;
 }
 
 void CGEWaveformFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID)
 {
     handler->setAsTarget();
-    m_program.bind();
+    glClear(GL_COLOR_BUFFER_BIT);
 
-    /// 渲染不写入, 使用 imageStore 写入.
-    // glColorMask(false, false, false, false);
+    m_program.bind();
+    auto& sz = handler->getOutputFBOSize();
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glActiveTexture(GL_TEXTURE0);
-    // glBindImageTexture(0, srcTexture, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
     glBindTexture(GL_TEXTURE_2D, srcTexture);
+    glBindImageTexture(0, srcTexture, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, handler->getTargetTextureID());
+    glBindImageTexture(0, handler->getTargetTextureID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
+
+    glDispatchCompute(std::max(sz.width / 16, 1), std::max(sz.height / 16, 1), 1);
+
+    glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+
+    handler->swapBufferFBO();
+
     // glActiveTexture(GL_TEXTURE1);
     // glBindImageTexture(1, handler->getTargetTextureID(), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
     // glBindTexture(GL_TEXTURE_2D, handler->getTargetTextureID());
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+//    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
 void CGEWaveformFilter::setFormPosition(float left, float top)
