@@ -22,19 +22,25 @@ if (NOT DEFINED ANDROID_GRADLE)
 
     set(NDK_STANDALONE_TOOLCHAIN $ENV{NDK}/ndk-build-toolchain)
     message(${NDK_STANDALONE_TOOLCHAIN})
-    set(CMAKE_SYSTEM_NAME AndroidARM)
     set(CMAKE_C_COMPILER ${NDK_STANDALONE_TOOLCHAIN}/bin/clang)
     set(CMAKE_CXX_COMPILER ${NDK_STANDALONE_TOOLCHAIN}/bin/clang++)
+    set(CMAKE_SYSROOT ${NDK_STANDALONE_TOOLCHAIN}/sysroot)
     set(CMAKE_FIND_ROOT_PATH ${NDK_STANDALONE_TOOLCHAIN})
 
-    add_definitions(--sysroot=${NDK_STANDALONE_TOOLCHAIN}/sysroot)
     if (DEFINED NDK_STANDALONE_TOOLCHAIN)
-        include_directories(${NDK_STANDALONE_TOOLCHAIN}/sysroot/usr/include)
+        set(NDK_INCLUDE_DIR ${NDK_STANDALONE_TOOLCHAIN}/sysroot/usr/include)
+        if (EXISTS ${NDK_STANDALONE_TOOLCHAIN}/sysroot/usr/include/aarch64-linux-android)
+            set(NDK_INCLUDE_DIR ${NDK_INCLUDE_DIR}
+                    ${NDK_STANDALONE_TOOLCHAIN}/sysroot/usr/include/aarch64-linux-android)
+        endif ()
+        include_directories(${NDK_INCLUDE_DIR})
     endif ()
 endif ()
 
 if (NOT DEFINED ANDROID_ABI)
     add_definitions(-DANDROID_ABI=arm64-v8a)
+else ()
+    add_definitions(-DANDROID_ABI=${ANDROID_ABI})
 endif ()
 
 execute_process(COMMAND find ${CMAKE_CURRENT_SOURCE_DIR}/cge -maxdepth 3 -type d OUTPUT_VARIABLE CGE_CORE_HEADER_DIR)
@@ -52,7 +58,7 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/custom
         ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg)
 
-add_definitions(-DANDROID_NDK -DCGE_LOG_TAG=\"libCGE\" -DCGE_TEXTURE_PREMULTIPLIED=1 -D_CGE_USE_FFMPEG_ -D__STDC_CONSTANT_MACROS -D_CGE_DISABLE_GLOBALCONTEXT_ -O3 -ffast-math -D_CGE_ONLY_FILTERS_ -DANDROID_ARM_NEON)
+add_definitions(-DANDROID_NDK -DCGE_LOG_TAG=\"libCGE\" -DCGE_TEXTURE_PREMULTIPLIED=1 -D_CGE_USE_FFMPEG_ -D__STDC_CONSTANT_MACROS -D_CGE_DISABLE_GLOBALCONTEXT_ -O3 -D_CGE_ONLY_FILTERS_)
 
 add_library(CGE
         ${CGE_CORE_SRC}
