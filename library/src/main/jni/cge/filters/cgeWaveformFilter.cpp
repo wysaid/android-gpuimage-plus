@@ -2,7 +2,7 @@
 
 #include <EGL/egl.h>
 
-static CGEConstString s_vshWaveform = "#version 320 es\n" CGE_SHADER_STRING_PRECISION_H(
+static CGEConstString s_vshWaveform = "#version 310 es\n" CGE_SHADER_STRING_PRECISION_H(
     layout(location = 0) in vec2 position;
     layout(location = 0) out vec2 textureCoordinate;
     void main() {
@@ -10,7 +10,7 @@ static CGEConstString s_vshWaveform = "#version 320 es\n" CGE_SHADER_STRING_PREC
         textureCoordinate = (position.xy + 1.0) / 2.0;
     });
 
-static CGEConstString s_fshWaveform = "#version 320 es\n" CGE_SHADER_STRING(
+static CGEConstString s_fshWaveform = "#version 310 es\n" CGE_SHADER_STRING(
     precision highp float;
     precision highp int;
     layout(location = 0) in vec2 textureCoordinate;
