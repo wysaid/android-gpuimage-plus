@@ -6,31 +6,38 @@ def usingCMakeCompile() {
 }
 
 android {
-    compileSdkVersion 25
-    if(usingCMakeCompile()) {
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+    buildToolsVersion rootProject.ext.android.buildToolsVersion
+
+    if (usingCMakeCompile()) {
         ndkVersion "23.1.7779620"
     }
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 22
-        versionCode 1
-        versionName "2.4.6"
+        minSdkVersion rootProject.ext.android.minSdkVersion
+        targetSdkVersion rootProject.ext.android.targetSdkVersion
+        versionCode rootProject.ext.android.versionCode
+        versionName rootProject.ext.android.versionName
 
-        externalNativeBuild {
-            cmake {
-                arguments "-DCGE_USE_VIDEO_MODULE=1",
-                    "-DANDROID_STL=c++_static",
-                    "-DANDROID_ARM_NEON=TRUE",
-                    "-DANDROID_GRADLE=1"
+        if (usingCMakeCompile()) {
+            externalNativeBuild {
+                cmake {
+                    arguments "-DCGE_USE_VIDEO_MODULE=1",
+                            "-DANDROID_STL=c++_static",
+                            "-DANDROID_ARM_NEON=TRUE",
+                            "-DANDROID_GRADLE=1"
 
-                cppFlags "-frtti -std=c++14"
+                    cppFlags "-frtti -std=c++14"
+                }
             }
         }
     }
-    externalNativeBuild {
-        cmake {
-            path 'src/main/jni/CMakeLists.txt'
+
+    if (usingCMakeCompile()) {
+        externalNativeBuild {
+            cmake {
+                path 'src/main/jni/CMakeLists.txt'
+            }
         }
     }
 
@@ -44,12 +51,11 @@ android {
     ////////////////////////////////////////
 
     sourceSets.main {
-        if(usingCMakeCompile()) {
+        if (usingCMakeCompile()) {
             jniLibs.srcDir 'src/main/libs' //set libs as .so's location instead of jni
-        }
-        else {
+        } else {
             jni.srcDirs = [] //disable automatic ndk-build call with auto-generated Android.mk file
-        }        
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -58,6 +64,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.2.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:' + rootProject.ext.android.appcompatV7
+    implementation 'androidx.appcompat:appcompat:' + rootProject.ext.android.appcompatX
 }

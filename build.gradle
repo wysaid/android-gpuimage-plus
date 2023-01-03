@@ -2,7 +2,7 @@
 
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
         google()
     }
     dependencies {
@@ -15,7 +15,21 @@ buildscript {
 
 allprojects {
     repositories {
-        jcenter()
+        mavenCentral()
         google()
     }
+}
+
+ext {
+    android = [
+            compileSdkVersion: 30,
+            buildToolsVersion: '30.0.2',
+            minSdkVersion    : 16,
+            targetSdkVersion : 30,
+            versionCode      : 1,
+            versionName      : "1.0.0",
+            applicationId    : "org.wysaid.cgeDemo",
+            appcompatV7      : "30.0.0",
+            appcompatX       : "1.2.0"
+    ]
 }
