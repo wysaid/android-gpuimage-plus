@@ -10,6 +10,8 @@ public class NativeLibraryLoader {
         System.loadLibrary("CGE");
         System.loadLibrary("CGEExt");
         CGEFFmpegNativeLibrary.avRegisterAll();
+        onLoad();
     }
 
+    static native void onLoad();
 }

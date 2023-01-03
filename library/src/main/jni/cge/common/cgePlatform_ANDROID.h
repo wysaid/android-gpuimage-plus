@@ -16,7 +16,8 @@
 #include <GLES3/gl3ext.h>
 #else
 #include <GLES2/gl2.h>
-
+#include "cgeGL3Stub.h"
+#include "cgeGL31Stub.h"
 #endif
 
 #include <GLES2/gl2ext.h>

@@ -22,6 +22,21 @@ using namespace CGE;
 
 extern "C"
 {
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved)
+{
+    cgeGl3StubInit();
+    cgeGl31StubInit();
+    CGE_LOG_INFO("JNI_OnLoad called. cgeGl3StubInit called.\n");
+    return JNI_VERSION_1_6;
+}
+
+JNIEXPORT void JNICALL Java_org_wysaid_nativePort_NativeLibraryLoader_onLoad(JNIEnv* env, jclass cls)
+{
+    cgeGl3StubInit();
+    cgeGl31StubInit();
+    CGE_LOG_INFO("NativeLibraryLoader.onload called. cgeGl3StubInit called.\n");
+}
+
 /*
  * Class:     org_wysaid_nativePort_CGENativeLibrary
  * Method:    filterImage_MultipleEffects
