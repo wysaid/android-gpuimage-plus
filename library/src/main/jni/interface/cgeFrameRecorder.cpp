@@ -92,7 +92,7 @@ ImageDataWriteThread::DataCache ImageDataWriteThread::getData4Write()
     {
         if (m_totalCaches.size() < MAX_DATA_CACHE_LEN)
         {
-            assert(bufferSize != 0); // bufferSize must be set!
+            assert(m_bufferSize != 0); // bufferSize must be set!
 
             //增加申请内存失败判断
             cache.buffer = new (std::nothrow) unsigned char[m_bufferSize];

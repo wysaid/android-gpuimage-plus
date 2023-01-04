@@ -25,7 +25,8 @@ android {
                     arguments "-DCGE_USE_VIDEO_MODULE=1",
                             "-DANDROID_STL=c++_static",
                             "-DANDROID_ARM_NEON=TRUE",
-                            "-DANDROID_GRADLE=1"
+                            "-DANDROID_GRADLE=1",
+                            "-DCGE_USE_VIDEO_MODULE=1"
 
                     cppFlags "-frtti -std=c++14"
                 }
@@ -51,11 +52,10 @@ android {
     ////////////////////////////////////////
 
     sourceSets.main {
-        if (usingCMakeCompile()) {
-            jniLibs.srcDir 'src/main/libs' //set libs as .so's location instead of jni
-        } else {
-            jni.srcDirs = [] //disable automatic ndk-build call with auto-generated Android.mk file
-        }
+         if (!usingCMakeCompile()) {
+             jniLibs.srcDir 'src/main/libs' //set libs as .so's location instead of jni
+             jni.srcDirs = [] //disable automatic ndk-build call with auto-generated Android.mk file
+         }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -65,6 +65,5 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:' + rootProject.ext.android.appcompatV7
     implementation 'androidx.appcompat:appcompat:' + rootProject.ext.android.appcompatX
 }

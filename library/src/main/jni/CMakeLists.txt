@@ -8,6 +8,8 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIE")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIE -frtti -std=c++14")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fPIE -pie")
 
+option(CGE_USE_VIDEO_MODULE "boolean option to enable video module" OFF)
+
 if (NOT DEFINED ANDROID_GRADLE)
     if (NOT DEFINED ENV{NDK})
         execute_process(COMMAND which ndk-build OUTPUT_VARIABLE CGE_NDK_DIR)
@@ -41,13 +43,17 @@ if (NOT DEFINED ANDROID_ABI)
     add_definitions(-DANDROID_ABI=arm64-v8a)
 else ()
     add_definitions(-DANDROID_ABI=${ANDROID_ABI})
+    set(JNI_LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI})
 endif ()
 
 execute_process(COMMAND find ${CMAKE_CURRENT_SOURCE_DIR}/cge -maxdepth 3 -type d OUTPUT_VARIABLE CGE_CORE_HEADER_DIR)
-execute_process(COMMAND bash -c "find ${CMAKE_CURRENT_SOURCE_DIR} -type f -iname '*.cpp' | grep -v cmake" OUTPUT_VARIABLE CGE_CORE_SRC)
+execute_process(COMMAND bash -c "find \"${CMAKE_CURRENT_SOURCE_DIR}/cge\" -type f -iname '*.cpp'" OUTPUT_VARIABLE CGE_CORE_SRC)
 
 string(REGEX REPLACE "\n" ";" CGE_CORE_HEADER_DIR ${CGE_CORE_HEADER_DIR})
 string(REGEX REPLACE "\n" ";" CGE_CORE_SRC ${CGE_CORE_SRC})
+
+file(GLOB_RECURSE CGE_CORE_SRC_INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/interface/*.cpp")
+list(APPEND CGE_CORE_SRC ${CGE_CORE_SRC_INTERFACE})
 
 include_directories(
         ${CGE_CORE_HEADER_DIR}
@@ -60,8 +66,56 @@ include_directories(
 
 add_definitions(-DANDROID_NDK -DCGE_LOG_TAG=\"libCGE\" -DCGE_TEXTURE_PREMULTIPLIED=1 -D_CGE_USE_FFMPEG_ -D__STDC_CONSTANT_MACROS -D_CGE_DISABLE_GLOBALCONTEXT_ -O3 -D_CGE_ONLY_FILTERS_)
 
-add_library(CGE
-        ${CGE_CORE_SRC}
+if (CGE_USE_VIDEO_MODULE)
+
+    # ffmpeg ref
+    add_library(ffmpeg SHARED IMPORTED)
+    set_target_properties(ffmpeg PROPERTIES IMPORTED_LOCATION
+            ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/${ANDROID_ABI}/libffmpeg.so)
+
+    set(CGE_VIDEO_MODULE "ffmpeg")
+    # if (DEFINED ANDROID_ABI)
+    #     set_target_properties(ffmpeg PROPERTIES
+    #             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI})
+    # endif ()
+endif ()
+
+if (NOT DEFINED ANDROID_GRADLE)
+    add_library(CGE
+            ${CGE_CORE_SRC}
+            )
+else ()
+    add_library(CGE SHARED
+            ${CGE_CORE_SRC}
+            )
+endif ()
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/custom)
+file(GLOB_RECURSE CGE_EXT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/custom/*.cpp")
+
+add_library(CGEExt SHARED ${CGE_EXT_SRC})
+
+# if (DEFINED ANDROID_ABI)
+#     set_target_properties(CGE PROPERTIES
+#             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI})
+#     set_target_properties(CGEExt PROPERTIES
+#             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI})
+# endif ()
+
+target_link_libraries(CGE
+        ${CGE_VIDEO_MODULE}
+        GLESv2
+        EGL
+        jnigraphics
+        log
+        android
         )
 
-target_link_libraries(CGE)
+target_link_libraries(CGEExt
+        CGE
+        ${CGE_VIDEO_MODULE}
+        GLESv2
+        EGL
+        jnigraphics
+        log
+        android)

@@ -6,7 +6,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.2'
+        classpath 'com.android.tools.build:gradle:7.2.2'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -23,13 +23,12 @@ allprojects {
 ext {
     android = [
             compileSdkVersion: 30,
-            buildToolsVersion: '30.0.2',
+            buildToolsVersion: '30.0.3',
             minSdkVersion    : 16,
             targetSdkVersion : 30,
             versionCode      : 1,
             versionName      : "1.0.0",
             applicationId    : "org.wysaid.cgeDemo",
-            appcompatV7      : "30.0.0",
             appcompatX       : "1.2.0"
     ]
 }

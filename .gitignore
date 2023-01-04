@@ -10,3 +10,4 @@ tmp
 objs/
 obj/
 build/
+library/.cxx/
