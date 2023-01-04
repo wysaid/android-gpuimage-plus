@@ -5,6 +5,11 @@ def usingCMakeCompile() {
     return gradle.ext != null && gradle.ext.has("usingCMakeCompile") && gradle.ext.usingCMakeCompile;
 }
 
+def usingCMakeCompileDebug() {
+    /// define  gradle.ext.usingCMakeCompileDebug = true to enable CMake Debug Mode.
+    return gradle.ext != null && gradle.ext.has("usingCMakeCompileDebug") && gradle.ext.usingCMakeCompileDebug;
+}
+
 android {
     compileSdkVersion rootProject.ext.android.compileSdkVersion
     buildToolsVersion rootProject.ext.android.buildToolsVersion
@@ -22,14 +27,39 @@ android {
         if (usingCMakeCompile()) {
             externalNativeBuild {
                 cmake {
-                    arguments "-DCGE_USE_VIDEO_MODULE=1",
+
+                    def cmakeBuildType = "";
+                    def cppExtraFlags = "";
+
+                    if (usingCMakeCompileDebug()) {
+                        cmakeBuildType = "-DCMAKE_BUILD_TYPE=Debug"
+                        cppExtraFlags = "-DDEBUG=1 -D_DEBUG=1"
+                    } else {
+                        cmakeBuildType = "-DCMAKE_BUILD_TYPE=Release"
+                        cppExtraFlags = "-Os -DNDEBUG=1 -D_NDEBUG=1"
+                    }
+
+                    arguments "-DCGE_USE_VIDEO_MODULE=ON",
                             "-DANDROID_STL=c++_static",
                             "-DANDROID_ARM_NEON=TRUE",
-                            "-DANDROID_GRADLE=1",
-                            "-DCGE_USE_VIDEO_MODULE=1"
+                            "-DANDROID_GRADLE=ON",
+                            cmakeBuildType
 
-                    cppFlags "-frtti -std=c++14"
+                    cFlags "-mfloat-abi=softfp -mfpu=vfp -Os -ffast-math -fPIC -DNO_LOCALE_SUPPORT -DANDROID_NDK"
+                    cppFlags "-frtti -std=c++14 -fPIE -fPIC -fno-exceptions -fvisibility-inlines-hidden -DNO_LOCALE_SUPPORT -DANDROID_NDK ${cppExtraFlags}"
+
+
+
+                    println("cmake arguments: " + arguments)
+                    println("cppFlags: " + cppFlags)
                 }
+            }
+
+            ndk {
+                abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86'
+                // if (!usingCMakeCompileDebug()) {
+                //     debugSymbolLevel ''
+                // }
             }
         }
     }
@@ -38,6 +68,7 @@ android {
         externalNativeBuild {
             cmake {
                 path 'src/main/jni/CMakeLists.txt'
+                version "3.22.1"
             }
         }
     }
