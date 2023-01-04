@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.19)
 
 project(CGE)
 
@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 option(CGE_USE_VIDEO_MODULE "boolean option to enable video module" OFF)
 
-if (NOT DEFINED ANDROID_GRADLE)
+if (NOT DEFINED ANDROID_GRADLE OR NOT ANDROID_GRADLE)
     if (NOT DEFINED ENV{NDK})
         execute_process(COMMAND which ndk-build OUTPUT_VARIABLE CGE_NDK_DIR)
         if ("${CGE_NDK_DIR}" STREQUAL "")
@@ -63,7 +63,7 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/custom
         ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg)
 
-add_definitions(-DANDROID_NDK -DCGE_LOG_TAG=\"libCGE\" -DCGE_TEXTURE_PREMULTIPLIED=1 -D_CGE_USE_FFMPEG_ -D__STDC_CONSTANT_MACROS -D_CGE_DISABLE_GLOBALCONTEXT_ -O3 -D_CGE_ONLY_FILTERS_)
+add_definitions(-DANDROID_NDK -DCGE_LOG_TAG=\"libCGE\" -DCGE_TEXTURE_PREMULTIPLIED=1 -D_CGE_USE_FFMPEG_ -D__STDC_CONSTANT_MACROS -D_CGE_DISABLE_GLOBALCONTEXT_ -O3 -D_CGE_ONLY_FILTERS_=1 -D__STDC_CONSTANT_MACROS=1)
 
 if (CGE_USE_VIDEO_MODULE)
 
@@ -79,7 +79,7 @@ if (CGE_USE_VIDEO_MODULE)
     # endif ()
 endif ()
 
-if (NOT DEFINED ANDROID_GRADLE)
+if (NOT DEFINED ANDROID_GRADLE OR NOT ANDROID_GRADLE)
     add_library(CGE
             ${CGE_CORE_SRC}
             )
