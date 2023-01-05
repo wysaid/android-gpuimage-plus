@@ -45,10 +45,8 @@ android {
                             "-DANDROID_GRADLE=ON",
                             cmakeBuildType
 
-                    cFlags "-mfloat-abi=softfp -mfpu=vfp -Os -ffast-math -fPIC -DNO_LOCALE_SUPPORT -DANDROID_NDK"
-                    cppFlags "-frtti -std=c++14 -fPIE -fPIC -fno-exceptions -fvisibility-inlines-hidden -DNO_LOCALE_SUPPORT -DANDROID_NDK ${cppExtraFlags}"
-
-
+                    cFlags "-ffast-math -fPIE -fPIC -DNO_LOCALE_SUPPORT=1 -DANDROID_NDK=1 -D__STDC_CONSTANT_MACROS=1 ${cppExtraFlags}"
+                    cppFlags "-ffast-math -fPIE -fPIC -DNO_LOCALE_SUPPORT=1 -DANDROID_NDK=1 -D__STDC_CONSTANT_MACROS=1 -frtti -std=c++14 -fno-exceptions -fvisibility-inlines-hidden ${cppExtraFlags}"
 
                     println("cmake arguments: " + arguments)
                     println("cppFlags: " + cppFlags)
@@ -83,10 +81,10 @@ android {
     ////////////////////////////////////////
 
     sourceSets.main {
-         if (!usingCMakeCompile()) {
-             jniLibs.srcDir 'src/main/libs' //set libs as .so's location instead of jni
-             jni.srcDirs = [] //disable automatic ndk-build call with auto-generated Android.mk file
-         }
+        if (!usingCMakeCompile()) {
+            jniLibs.srcDir 'src/main/libs' //set libs as .so's location instead of jni
+            jni.srcDirs = [] //disable automatic ndk-build call with auto-generated Android.mk file
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
