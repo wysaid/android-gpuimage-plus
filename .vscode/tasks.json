@@ -23,7 +23,6 @@
             "command": "bash",
             "args": [
                 "vscode_tasks.sh",
-                "--build",
                 "--run"
             ],
             "options": {
@@ -37,18 +36,15 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "-c",
-                "echo done!"
+                "vscode_tasks.sh",
+                "--build",
+                "--run"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
             "group": "build",
-            "problemMatcher": "$gcc",
-            "dependsOn": [
-                "[Android] Build Android Demo",
-                "[Android] Run Android Demo",
-            ]
+            "problemMatcher": "$gcc"
         },
         {
             "label": "[Android] Build Native Library",

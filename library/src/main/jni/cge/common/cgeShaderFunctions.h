@@ -73,7 +73,7 @@ public:
     {
         GLfloat valuef;
         GLint valuei;
-        GLuint* valueuPtr;
+        GLuint* valuePtr;
     } UniformValue;
 
     typedef struct UniformData
@@ -131,12 +131,13 @@ private:
 
 class ProgramObject
 {
-private:
-    explicit ProgramObject(const ProgramObject&) {}
-
 public:
     ProgramObject();
     ~ProgramObject();
+    explicit ProgramObject(const ProgramObject&) = delete;
+
+    // For compute shader
+    bool initWithComputeShader(const char* csh);
 
     bool initWithShaderStrings(const char* vsh, const char* fsh);
 
@@ -144,7 +145,7 @@ public:
     bool initVertexShaderSourceFromString(const char* vertShader);
 
     bool linkWithShaderObject(ShaderObject& vertObj, ShaderObject& fragObj, bool shouldClear = true);
-    inline bool link() { return linkWithShaderObject(m_vertObj, m_fragObj); }
+    inline bool link() { return linkWithShaderObject(m_vertShader, m_fragOrComputeShader); }
     inline void bind() { glUseProgram(m_programID); }
 
     // For usage convenience, do not use template here.
@@ -230,7 +231,7 @@ protected:
     }
 
 private:
-    ShaderObject m_vertObj, m_fragObj;
+    ShaderObject m_vertShader, m_fragOrComputeShader;
     GLuint m_programID;
 };
 

@@ -34,6 +34,8 @@ LOCAL_SRC_FILES :=  \
 			$(CGE_SOURCE)/common/cgeShaderFunctions.cpp \
 			$(CGE_SOURCE)/common/cgeGlobal.cpp \
 			$(CGE_SOURCE)/common/cgeTextureUtils.cpp \
+			$(CGE_SOURCE)/common/cgeGL3Stub.c \
+			$(CGE_SOURCE)/common/cgeGL31Stub.c \
 			\
 			$(CGE_SOURCE)/filters/cgeAdvancedEffects.cpp \
 			$(CGE_SOURCE)/filters/cgeAdvancedEffectsCommon.cpp \
