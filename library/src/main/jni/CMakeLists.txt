@@ -42,11 +42,11 @@ if (NOT DEFINED ANDROID_ABI)
     add_definitions(-DANDROID_ABI=arm64-v8a)
 else ()
     add_definitions(-DANDROID_ABI=${ANDROID_ABI})
-    set(JNI_LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI})
+    file(MAKE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI}")
 endif ()
 
 execute_process(COMMAND find ${CMAKE_CURRENT_SOURCE_DIR}/cge -maxdepth 3 -type d OUTPUT_VARIABLE CGE_CORE_HEADER_DIR)
-execute_process(COMMAND bash -c "find \"${CMAKE_CURRENT_SOURCE_DIR}/cge\" -type f -iname '*.cpp'" OUTPUT_VARIABLE CGE_CORE_SRC)
+execute_process(COMMAND bash -c "find \"${CMAKE_CURRENT_SOURCE_DIR}/cge\" -type f -iname '*.cpp' -o -iname '*.c'" OUTPUT_VARIABLE CGE_CORE_SRC)
 
 string(REGEX REPLACE "\n" ";" CGE_CORE_HEADER_DIR ${CGE_CORE_HEADER_DIR})
 string(REGEX REPLACE "\n" ";" CGE_CORE_SRC ${CGE_CORE_SRC})
@@ -73,10 +73,14 @@ if (CGE_USE_VIDEO_MODULE)
             ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/${ANDROID_ABI}/libffmpeg.so)
 
     set(CGE_VIDEO_MODULE "ffmpeg")
-    # if (DEFINED ANDROID_ABI)
-    #     set_target_properties(ffmpeg PROPERTIES
-    #             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI})
-    # endif ()
+    if (DEFINED ANDROID_ABI)
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/${ANDROID_ABI}/libffmpeg.so 
+                  ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI}/libffmpeg.so COPYONLY)
+        # set_target_properties(ffmpeg PROPERTIES
+        #         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI})
+        # set_target_properties(ffmpeg PROPERTIES
+        #         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI})
+    endif ()
 endif ()
 
 if (NOT DEFINED ANDROID_GRADLE OR NOT ANDROID_GRADLE)
@@ -94,12 +98,12 @@ file(GLOB_RECURSE CGE_EXT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/custom/*.cpp")
 
 add_library(CGEExt SHARED ${CGE_EXT_SRC})
 
-# if (DEFINED ANDROID_ABI)
-#     set_target_properties(CGE PROPERTIES
-#             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI})
-#     set_target_properties(CGEExt PROPERTIES
-#             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI})
-# endif ()
+if (DEFINED ANDROID_ABI)
+    set_target_properties(CGE PROPERTIES
+            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI})
+    set_target_properties(CGEExt PROPERTIES
+            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI})
+endif ()
 
 target_link_libraries(CGE
         ${CGE_VIDEO_MODULE}
