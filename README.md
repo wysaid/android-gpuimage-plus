@@ -35,7 +35,20 @@ dependencies {
 
 * Demo and Library will be updated as needed. Welcome for your questions or PR.
 
-* To build with the jni part, pleasae try:
+## Build
+
+* Build with `Android Studio` and CMake: (Recommended)
+  * Put `usingCMakeCompile=true` in your `local.properties`
+  * Open the repo with the latest version of `Android Studio`
+  * Waiting for the initialization. (NDK/cmake install)
+  * Done.
+
+* Using `Visual Studio Code`: (Simple)
+  * Setup your Android SDK with ENV variable. (`ANDROID_SDK_HOME/ANDROID_SDK_ROOT/ANDROID_SDK`) are all OK.
+  * Press `⌘ + shift + B` (Mac) or `ctrl + shift + B` (Win/Linux), choose the option `Enable CMake And Build Project With CMake`.
+  * Done.
+
+* Build `JNI` part with ndk-build: (Not recommended)
 
 ```shell
 export NDK=path/of/your/ndk
