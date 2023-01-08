@@ -44,7 +44,8 @@ dependencies {
   * Done.
 
 * Using `Visual Studio Code`: (Simple)
-  * Setup your Android SDK with ENV variable. (`ANDROID_SDK_HOME/ANDROID_SDK_ROOT/ANDROID_SDK`) are all OK.
+  * Setup your Android SDK with ENV variable. (names `ANDROID_SDK_HOME` / `ANDROID_SDK_ROOT` / `ANDROID_SDK` are all OK).
+  * Open the repo with `Visual Studio Code`
   * Press `⌘ + shift + B` (Mac) or `ctrl + shift + B` (Win/Linux), choose the option `Enable CMake And Build Project With CMake`.
   * Done.
 
