@@ -10,6 +10,8 @@ import androidx.core.app.ActivityCompat;
 
 import org.wysaid.common.Common;
 
+import java.util.Vector;
+
 public class PermissionUtil {
     private static final int REQUEST_PERMISSION = 0;
     private static String[] PERMISSIONS_STORAGE = {
@@ -20,14 +22,20 @@ public class PermissionUtil {
 
     public static void verifyStoragePermissions(Activity activity) {
         try {
-
+            StringBuilder toastText = null;
             for (int i = 0; i != PERMISSIONS_STORAGE.length; ++i) {
                 int reqCode = ActivityCompat.checkSelfPermission(activity, PERMISSIONS_STORAGE[i]);
                 if (reqCode != PackageManager.PERMISSION_GRANTED) {
-                    // 没有写的权限，去申请写的权限，会弹出对话框
-                    ActivityCompat.requestPermissions(activity, new String[]{PERMISSIONS_STORAGE[i]}, REQUEST_PERMISSION);
-                    Toast.makeText(activity, "request permission " + PERMISSIONS_STORAGE[i] + " ...", Toast.LENGTH_LONG).show();
+                    // No sdcard write permission, perform request.
+                    if (toastText == null) {
+                        toastText = new StringBuilder("Request permission");
+                    }
+                    toastText.append(" ").append(PERMISSIONS_STORAGE[i]);
                 }
+            }
+            if (toastText != null) {
+                Toast.makeText(activity, toastText.toString(), Toast.LENGTH_LONG).show();
+                ActivityCompat.requestPermissions(activity, PERMISSIONS_STORAGE, REQUEST_PERMISSION);
             }
         } catch (Exception e) {
             Log.e(Common.LOG_TAG, "Error: " + e.getMessage());
