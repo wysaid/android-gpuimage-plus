@@ -14,6 +14,7 @@ public class PermissionUtil {
     private static final int REQUEST_PERMISSION = 0;
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE};
 

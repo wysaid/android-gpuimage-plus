@@ -31,10 +31,10 @@ android {
 
                     if (usingCMakeCompileDebug()) {
                         cmakeBuildType = "-DCMAKE_BUILD_TYPE=Debug"
-                        cppExtraFlags = "-DDEBUG=1 -D_DEBUG=1"
+                        cppExtraFlags = "-DDEBUG=1 -D_DEBUG=1 -Od -g"
                     } else {
                         cmakeBuildType = "-DCMAKE_BUILD_TYPE=Release"
-                        cppExtraFlags = "-Os -DNDEBUG=1 -D_NDEBUG=1"
+                        cppExtraFlags = "-O2 -DNDEBUG=1 -D_NDEBUG=1"
                     }
 
                     arguments "-DCGE_USE_VIDEO_MODULE=ON",

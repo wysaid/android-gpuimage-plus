@@ -23,8 +23,23 @@ function setupProject() {
 }
 
 function runAndroidApp() {
-    . "$ADB_COMMAND" -d shell am start -n "$PACKAGE_NAME/$PACKAGE_NAME.$LAUNCH_ACTIVITY" &&
-        . "$ADB_COMMAND" -d logcat | grep -iE "(cge|demo|wysaid)"
+
+    if . "$ADB_COMMAND" -d shell am start -n "$PACKAGE_NAME/$PACKAGE_NAME.$LAUNCH_ACTIVITY"; then
+        if [[ -z "$(ps -ef | grep -i adb | grep -v grep | grep logcat)" ]]; then
+            if [[ $(uname -s) == "Linux" ]] || [[ $(uname -s) == "Darwin" ]]; then
+                APP_PROC_ID=$(adb shell ps | grep org.wysaid.cgeDemo | tr -s ' ' | cut -d' ' -f2)
+                if [[ -n "$APP_PROC_ID" ]]; then
+                    . "$ADB_COMMAND" -d logcat | grep -F "$APP_PROC_ID"
+                else
+                    echo "Can not find proc id of org.wysaid.cgeDemo"
+                fi
+            else
+                . "$ADB_COMMAND" -d logcat | grep -iE "(cge|demo|wysaid| E |crash)"
+            fi
+        fi
+    else
+        echo "Launch $PACKAGE_NAME/$PACKAGE_NAME.$LAUNCH_ACTIVITY failed."
+    fi
 }
 
 function cleanProject() {
@@ -42,12 +57,17 @@ function buildProject() {
         exit 1
     fi
 
-    echo "apk generated at:"
-    find "$THIS_DIR/cgeDemo/build" -iname "*.apk" | grep -i "${ANDROID_BUILD_TYPE/assemble/}"
+    GENERATED_APK_FILE=$(find "$THIS_DIR/cgeDemo/build" -iname "*.apk" | grep -i "${ANDROID_BUILD_TYPE/assemble/}")
+    echo "apk generated at: $GENERATED_APK_FILE"
 
-    if [[ -n "$GRADLEW_RUN_TASK" ]] && [[ $(. "$ADB_COMMAND" -d devices | grep -v 'List' | tr -d ' \n' | wc -l) -ne 0 ]]; then
-        if ! ./gradlew -p cgeDemo "$GRADLEW_RUN_TASK"; then
-            echo "Install failed." >&2
+    if [[ -n "$GRADLEW_RUN_TASK" ]] && [[ $(. "$ADB_COMMAND" -d devices | grep -v 'List' | grep -vE '^$' | wc -l | tr -d ' ') -ne 0 ]]; then
+        if [[ "$GRADLEW_RUN_TASK" == "installRelease" ]]; then
+            # release can not be installed directly. do adb install.
+            . $ADB_COMMAND -d install "$GENERATED_APK_FILE"
+        else
+            if ! ./gradlew -p cgeDemo "$GRADLEW_RUN_TASK"; then
+                echo "Install failed." >&2
+            fi
         fi
     else
         echo "No device connected, skip installation."
@@ -65,6 +85,23 @@ if [[ ! -f "local.properties" ]]; then
         echo "Can't find ANDROID_SDK, Please setup 'local.properties'" >&2
     fi
 fi
+
+function changeProperty() {
+    TARGET_FILE="$1"
+    MATCH_PATTERN="$2"
+    SED_PATTERN="$3"
+    DEFAULT_VALUE="$4"
+    if [[ -f "$TARGET_FILE" ]] && grep -E "$MATCH_PATTERN" "$TARGET_FILE" >/dev/null; then
+        # Stupid diff between the command.
+        if [[ "$(uname -s)" == "Darwin" ]]; then # Mac OS
+            sed -I "" -E "$SED_PATTERN" "$TARGET_FILE"
+        else
+            sed -i"" -E "$SED_PATTERN" "$TARGET_FILE"
+        fi
+    else
+        echo "$DEFAULT_VALUE" >>"$TARGET_FILE"
+    fi
+}
 
 while [[ $# > 0 ]]; do
 
@@ -84,12 +121,15 @@ while [[ $# > 0 ]]; do
         ;;
     --release)
         ANDROID_BUILD_TYPE="assembleRelease"
+        # ANDROID_BUILD_TYPE="assembleDebug" # use this if the release apk can not be installed.
         GRADLEW_RUN_TASK="installRelease"
+        changeProperty "local.properties" '^usingCMakeCompileDebug=' 's/usingCMakeCompileDebug=.*/usingCMakeCompileDebug=false/' 'usingCMakeCompileDebug=false'
         shift
         ;;
     --debug)
         ANDROID_BUILD_TYPE="assembleDebug"
         GRADLEW_RUN_TASK="installDebug"
+        changeProperty "local.properties" '^usingCMakeCompileDebug=' 's/usingCMakeCompileDebug=.*/usingCMakeCompileDebug=true/' 'usingCMakeCompileDebug=true'
         shift
         ;;
     --setup-project)
@@ -113,16 +153,7 @@ while [[ $# > 0 ]]; do
         shift # past argument
         ;;
     --enable-cmake)
-        if [[ -f "local.properties" ]] && grep -E '^usingCMakeCompile=' "local.properties" >/dev/null; then
-            # Stupid diff between the command.
-            if [[ "$(uname -s)" == "Darwin" ]]; then # Mac OS
-                sed -I "" -E 's/usingCMakeCompile=.*/usingCMakeCompile=true/' "local.properties"
-            else
-                sed -i"" -E 's/usingCMakeCompile=.*/usingCMakeCompile=true/' "local.properties"
-            fi
-        else
-            echo "usingCMakeCompile=true" >>"local.properties"
-        fi
+        changeProperty "local.properties" '^usingCMakeCompile=' 's/usingCMakeCompile=.*/usingCMakeCompile=true/' 'usingCMakeCompile=true'
         shift # past argument
         ;;
     *)
