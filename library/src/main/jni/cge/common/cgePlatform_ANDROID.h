@@ -44,10 +44,13 @@
 
 #if defined(_CGE_GENERAL_ERROR_TEST_) && _CGE_GENERAL_ERROR_TEST_
 #define CGE_UNEXPECTED_ERR_MSG(...) __VA_ARGS__
-// for important log msg
-#define CGE_LOG_KEEP(...) __android_log_print(ANDROID_LOG_WARN, CGE_LOG_TAG, __VA_ARGS__)
 #else
 #define CGE_UNEXPECTED_ERR_MSG(...)
+#endif
+
+#ifndef CGE_LOG_KEEP
+// for important log msg
+#define CGE_LOG_KEEP(...) __android_log_print(ANDROID_LOG_WARN, CGE_LOG_TAG, __VA_ARGS__)
 #endif
 
 #endif /* HTPLATFORMS_H_ */

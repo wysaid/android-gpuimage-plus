@@ -26,6 +26,7 @@ function runAndroidApp() {
 
     if . "$ADB_COMMAND" -d shell am start -n "$PACKAGE_NAME/$PACKAGE_NAME.$LAUNCH_ACTIVITY"; then
         if [[ -z "$(ps -ef | grep -i adb | grep -v grep | grep logcat)" ]]; then
+            . "$ADB_COMMAND" -d logcat -c
             if [[ $(uname -s) == "Linux" ]] || [[ $(uname -s) == "Darwin" ]]; then
                 APP_PROC_ID=$(adb shell ps | grep org.wysaid.cgeDemo | tr -s ' ' | cut -d' ' -f2)
                 if [[ -n "$APP_PROC_ID" ]]; then

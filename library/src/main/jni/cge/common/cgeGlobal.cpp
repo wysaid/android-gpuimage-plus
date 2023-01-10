@@ -45,7 +45,7 @@ void cgeInitFilterStatus()
 
     g_isFastFilterImpossible = (iParam < 300);
 
-    CGE_LOG_INFO("Use Fast Filter: %d\n", !g_isFastFilterImpossible);
+    CGE_LOG_KEEP("Use Fast Filter: %d\n", !g_isFastFilterImpossible);
 
     cgeCheckGLError("cgeInitFilterStatus - before 'GL_PIXEL_PACK_BUFFER'");
 
@@ -74,7 +74,7 @@ bool cgeInitialize(int width, int height, CGEGlobalConfig::InitArguments arg)
 
     if (arg == CGEGlobalConfig::CGE_INIT_LEAST)
     {
-        CGE_LOG_INFO("You chosed CGE_INIT_LEAST for initialize, so the sprites could not be used! Once you used, unexpected problem would be happen\n");
+        CGE_LOG_KEEP("You chosed CGE_INIT_LEAST for initialize, so the sprites could not be used! Once you used, unexpected problem would be happen\n");
         return true;
     }
 
@@ -144,7 +144,7 @@ extern "C"
 {
 void cgePrintGLInfo()
 {
-    CGE_LOG_INFO("===== Here are some information of your device =====\n\n");
+    CGE_LOG_KEEP("===== Here are some information of your device =====\n\n");
 
     cgePrintGLString("Vendor", GL_VENDOR);
     cgePrintGLString("Renderer", GL_RENDERER);
@@ -160,7 +160,7 @@ void cgePrintGLInfo()
 #ifdef GL_MAX_VERTEX_UNIFORM_COMPONENTS // GL Desktop
     glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, iParam);
 #endif
-    CGE_LOG_INFO("Max Vertex Uniform Vectors: %d\n", iParam[0]);
+    CGE_LOG_KEEP("Max Vertex Uniform Vectors: %d\n", iParam[0]);
 
 #ifdef GL_MAX_FRAGMENT_UNIFORM_VECTORS
     glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, iParam);
@@ -168,7 +168,7 @@ void cgePrintGLInfo()
 #ifdef GL_MAX_FRAGMENT_UNIFORM_COMPONENTS
     glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, iParam);
 #endif
-    CGE_LOG_INFO("Max Fragment Uniform Vectors : %d\n", iParam[0]);
+    CGE_LOG_KEEP("Max Fragment Uniform Vectors : %d\n", iParam[0]);
 
 #ifdef GL_MAX_VARYING_VECTORS
     glGetIntegerv(GL_MAX_VARYING_VECTORS, iParam);
@@ -176,40 +176,40 @@ void cgePrintGLInfo()
 #ifdef GL_MAX_VARYING_COMPONENTS
     glGetIntegerv(GL_MAX_VARYING_COMPONENTS, iParam);
 #endif
-    CGE_LOG_INFO("Max Varying Vectors: %d\n", iParam[0]);
+    CGE_LOG_KEEP("Max Varying Vectors: %d\n", iParam[0]);
 
     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, iParam);
-    CGE_LOG_INFO("Max Texture Image Units : %d\n", iParam[0]);
+    CGE_LOG_KEEP("Max Texture Image Units : %d\n", iParam[0]);
 
     glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, iParam);
-    CGE_LOG_INFO("Max Combined Texture Image Units : %d\n", iParam[0]);
+    CGE_LOG_KEEP("Max Combined Texture Image Units : %d\n", iParam[0]);
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, iParam);
-    CGE_LOG_INFO("Max Texture Size : %d\n", iParam[0]);
+    CGE_LOG_KEEP("Max Texture Size : %d\n", iParam[0]);
 
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, iParam);
-    CGE_LOG_INFO("Max Vertex Attribs: %d\n", iParam[0]);
+    CGE_LOG_KEEP("Max Vertex Attribs: %d\n", iParam[0]);
 
     glGetIntegerv(GL_MAX_VIEWPORT_DIMS, iParam);
-    CGE_LOG_INFO("Max Viewport Dims : [%d, %d]\n", iParam[0], iParam[1]);
+    CGE_LOG_KEEP("Max Viewport Dims : [%d, %d]\n", iParam[0], iParam[1]);
 
     glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, iParam);
-    CGE_LOG_INFO("Max Render Buffer Size: %d\n", iParam[0]);
+    CGE_LOG_KEEP("Max Render Buffer Size: %d\n", iParam[0]);
 
     glGetIntegerv(GL_STENCIL_BITS, iParam);
-    CGE_LOG_INFO("Stencil Buffer Bits : %d\n", iParam[0]);
+    CGE_LOG_KEEP("Stencil Buffer Bits : %d\n", iParam[0]);
 
     glGetIntegerv(GL_ALIASED_POINT_SIZE_RANGE, iParam);
-    CGE_LOG_INFO("Point Size Range: [%d, %d]\n", iParam[0], iParam[1]);
+    CGE_LOG_KEEP("Point Size Range: [%d, %d]\n", iParam[0], iParam[1]);
 
     glGetIntegerv(GL_ALIASED_LINE_WIDTH_RANGE, iParam);
-    CGE_LOG_INFO("Line Width Range: [%d, %d]\n", iParam[0], iParam[1]);
+    CGE_LOG_KEEP("Line Width Range: [%d, %d]\n", iParam[0], iParam[1]);
 
     glGetIntegerv(GL_DEPTH_BITS, iParam);
-    CGE_LOG_INFO("Depth Bits: %d\n", iParam[0]);
+    CGE_LOG_KEEP("Depth Bits: %d\n", iParam[0]);
 
     cgeCheckGLError("cgePrintGLInfo");
-    CGE_LOG_INFO("\n===== Information end =====\n\n");
+    CGE_LOG_KEEP("\n===== Information end =====\n\n");
 }
 
 const char* cgeQueryGLExtensions()
