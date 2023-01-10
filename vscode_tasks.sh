@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [[ $# -eq 0 ]]; then
-    echo "usage: [--clean] [--build] [--run]"
+    echo "usage: [--debug|--release] [--clean] [--enable-cmake] [--setup-project] [--build] [--run]"
 fi
 
 cd "$(dirname "$0")"
@@ -108,10 +108,6 @@ while [[ $# > 0 ]]; do
     PARSE_KEY="$1"
 
     case "$PARSE_KEY" in
-    --run-only)
-        runAndroidApp
-        shift
-        ;;
     --rebuild-android-demo)
         cd "$PROJECT_DIR" && git clean -ffdx
         cleanProject
