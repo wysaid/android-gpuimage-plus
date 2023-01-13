@@ -28,7 +28,7 @@ function runAndroidApp() {
         if [[ -z "$(ps -ef | grep -i adb | grep -v grep | grep logcat)" ]]; then
             . "$ADB_COMMAND" -d logcat -c
             if [[ $(uname -s) == "Linux" ]] || [[ $(uname -s) == "Darwin" ]]; then
-                APP_PROC_ID=$(adb shell ps | grep org.wysaid.cgeDemo | tr -s ' ' | cut -d' ' -f2)
+                APP_PROC_ID=$(. "$ADB_COMMAND" shell ps | grep org.wysaid.cgeDemo | tr -s ' ' | cut -d' ' -f2)
                 if [[ -n "$APP_PROC_ID" ]]; then
                     . "$ADB_COMMAND" -d logcat | grep -F "$APP_PROC_ID"
                 else
@@ -50,7 +50,7 @@ function cleanProject() {
 function buildProject() {
     if ! ./gradlew -p cgeDemo "$ANDROID_BUILD_TYPE"; then
 
-        echo "Failed to run..."
+        echo "Failed to run: ./gradlew -p cgeDemo $ANDROID_BUILD_TYPE"
         echo "Please run the following command and try again:"
         echo "---"
         echo "$THIS_DIR/vscode_tasks.sh --setup-project"
@@ -64,7 +64,7 @@ function buildProject() {
     if [[ -n "$GRADLEW_RUN_TASK" ]] && [[ $(. "$ADB_COMMAND" -d devices | grep -v 'List' | grep -vE '^$' | wc -l | tr -d ' ') -ne 0 ]]; then
         if [[ "$GRADLEW_RUN_TASK" == "installRelease" ]]; then
             # release can not be installed directly. do adb install.
-            . $ADB_COMMAND -d install "$GENERATED_APK_FILE"
+            . "$ADB_COMMAND" -d install "$GENERATED_APK_FILE"
         else
             if ! ./gradlew -p cgeDemo "$GRADLEW_RUN_TASK"; then
                 echo "Install failed." >&2
