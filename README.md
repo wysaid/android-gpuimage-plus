@@ -69,9 +69,9 @@ $NDK/ndk-build
 #And remove the loading part of ffmpeg&facetracker
 $NDK/ndk-build
 
-#For Window user, you should include the `.cmd` extension to `ndk-build` like this:
-cd your_path_to\android-gpuimage-plus-master\library\src\main\jni
-your_path_to_ndk\ndk-bundle\ndk-build.cmd
+#For Windows user, you should include the `.cmd` extension to `ndk-build` like this:
+cd <your\path\to\this\repo>\library\src\main\jni
+<your\path\to\ndk>\ndk-build.cmd
 
 #Also remember to comment out these line in NativeLibraryLoader
 //System.loadLibrary("ffmpeg");

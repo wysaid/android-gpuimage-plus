@@ -45,14 +45,23 @@ else ()
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI}")
 endif ()
 
-execute_process(COMMAND find ${CMAKE_CURRENT_SOURCE_DIR}/cge -maxdepth 3 -type d OUTPUT_VARIABLE CGE_CORE_HEADER_DIR)
-execute_process(COMMAND bash -c "find \"${CMAKE_CURRENT_SOURCE_DIR}/cge\" -type f -iname '*.cpp' -o -iname '*.c'" OUTPUT_VARIABLE CGE_CORE_SRC)
+if (CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
+    execute_process(COMMAND cmd.exe /C "dir /L /S /B /A:D"
+                OUTPUT_VARIABLE CGE_CORE_HEADER_DIR
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cge)
+else()
+    execute_process(COMMAND find ${CMAKE_CURRENT_SOURCE_DIR}/cge -maxdepth 3 -type d OUTPUT_VARIABLE CGE_CORE_HEADER_DIR)
+endif()
 
+message("CGE_CORE_HEADER_DIR=${CGE_CORE_HEADER_DIR}")
 string(REGEX REPLACE "\n" ";" CGE_CORE_HEADER_DIR ${CGE_CORE_HEADER_DIR})
-string(REGEX REPLACE "\n" ";" CGE_CORE_SRC ${CGE_CORE_SRC})
 
-file(GLOB_RECURSE CGE_CORE_SRC_INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/interface/*.cpp")
-list(APPEND CGE_CORE_SRC ${CGE_CORE_SRC_INTERFACE})
+# execute_process(COMMAND bash -c "find \"${CMAKE_CURRENT_SOURCE_DIR}/cge\" -type f -iname '*.cpp' -o -iname '*.c'" OUTPUT_VARIABLE CGE_CORE_SRC)
+# string(REGEX REPLACE "\n" ";" CGE_CORE_SRC ${CGE_CORE_SRC})
+
+file(GLOB_RECURSE CGE_CORE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/cge/*.cpp"
+                "${CMAKE_CURRENT_SOURCE_DIR}/cge/*.c"
+                "${CMAKE_CURRENT_SOURCE_DIR}/interface/*.cpp")
 
 include_directories(
         ${CGE_CORE_HEADER_DIR}

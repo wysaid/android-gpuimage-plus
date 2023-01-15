@@ -4,10 +4,26 @@
 #NDK=/Users/wangyang/android_dev/android-ndk
 
 if [[ "$NDK" == "" ]]; then
+    if command -v ndk-build; then
+        export $NDK=$(command -v ndk-build)
+    elif command -v ndk-build.cmd; then
+        export $NDK=$(command -v ndk-build.cmd)
+    else
+        if ! command -v cmd; then
+            function cmd() {
+                if [[ -f "/mnt/c/Windows/system32/cmd.exe" ]]; then
+                    /mnt/c/Windows/system32/cmd.exe $@
+                fi
+            }
+        fi
 
-    echo "Please specify the NDK variable to your ndk-dir"
-    exit
+        echo "command -v cmd=$(command -v cmd)"
 
+        if [[ -z "$(command -v cmd &>/dev/null && cmd /C set | grep -i 'NDK')" ]]; then
+            echo "Please specify the NDK variable to your ndk-dir"
+            exit
+        fi
+    fi
 fi
 
 cd $(dirname $0)
@@ -71,4 +87,10 @@ if [[ -z "$THREADS" ]] || [[ "$THREADS" -eq "0" ]]; then
     THREADS=8
 fi
 
-$NDK/ndk-build ${BUILD_ARG} -j${THREADS}
+if [[ -n "$NDK" ]] && [[ -f "$NDK/ndk-build" ]]; then
+    "$NDK/ndk-build" ${BUILD_ARG} -j${THREADS}
+elif [[ -n $(command -v cmd && cmd /C set | grep -i 'NDK') ]]; then
+    cmd /C "set CGE_USE_VIDEO_MODULE=1 && %NDK%/ndk-build.cmd" ${BUILD_ARG} -j${THREADS}
+else
+    echo "Can not find NDK!"
+fi
