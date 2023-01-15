@@ -14,11 +14,23 @@ export LAUNCH_ACTIVITY="MainActivity"
 export GRADLEW_RUN_TASK="installDebug"
 export ANDROID_BUILD_TYPE="assembleDebug"
 
+if ! command -v cmd &>/dev/null && [[ -f "/mnt/c/Windows/system32/cmd.exe" ]]; then
+    function cmd() {
+        /mnt/c/Windows/system32/cmd.exe $@
+    }
+fi
+
+function runGradleCommand() {
+    if ! ./gradlew $@; then
+        command -v cmd &>/dev/null && cmd /C gradlew $@
+    fi
+}
+
 function setupProject() {
     if [[ -f "$PROJECT_DIR/local.properties" ]] && grep -E '^usingCMakeCompile=true' "$PROJECT_DIR/local.properties"; then
         echo "Using cmake, skip ndk build..."
     else
-        bash "$PROJECT_DIR/library/src/main/jni/buildJNI"
+        bash "$PROJECT_DIR/library/src/main/jni/buildJNI" || exit 1
     fi
 }
 
@@ -44,11 +56,11 @@ function runAndroidApp() {
 }
 
 function cleanProject() {
-    ./gradlew clean --refresh-dependencies
+    runGradleCommand clean --refresh-dependencies
 }
 
 function buildProject() {
-    if ! ./gradlew -p cgeDemo "$ANDROID_BUILD_TYPE"; then
+    if ! runGradleCommand -p cgeDemo "$ANDROID_BUILD_TYPE"; then
 
         echo "Failed to run: ./gradlew -p cgeDemo $ANDROID_BUILD_TYPE"
         echo "Please run the following command and try again:"
@@ -66,7 +78,7 @@ function buildProject() {
             # release can not be installed directly. do adb install.
             . "$ADB_COMMAND" -d install "$GENERATED_APK_FILE"
         else
-            if ! ./gradlew -p cgeDemo "$GRADLEW_RUN_TASK"; then
+            if ! runGradleCommand -p cgeDemo "$GRADLEW_RUN_TASK"; then
                 echo "Install failed." >&2
             fi
         fi
@@ -131,7 +143,8 @@ while [[ $# > 0 ]]; do
         ;;
     --setup-project)
         setupProject
-        exit 0 # setup 的情况下不编译.
+        runGradleCommand signingReport
+        exit 0 # setup then stop.
         ;;
     --clean)
         echo "clean"

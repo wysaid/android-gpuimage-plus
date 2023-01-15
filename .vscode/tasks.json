@@ -123,6 +123,20 @@
             "problemMatcher": "$gcc"
         },
         {
+            "label": "Setup Gradle Project",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "vscode_tasks.sh",
+                "--setup-project"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
             "label": "[Debug] Enable CMake And Build Project With CMake",
             "type": "shell",
             "command": "bash",
