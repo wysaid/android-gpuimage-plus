@@ -88,7 +88,12 @@ if [[ -z "$THREADS" ]] || [[ "$THREADS" -eq "0" ]]; then
 fi
 
 if [[ -n "$NDK" ]] && [[ -f "$NDK/ndk-build" ]]; then
-    "$NDK/ndk-build" ${BUILD_ARG} -j${THREADS}
+    if ! "$NDK/ndk-build" ${BUILD_ARG} -j${THREADS}; then
+        # check if using mac m1.
+        if [[ $(uname -s) == "Darwin" ]] && uname -a | grep -i arm64; then
+            arch -arch x86_64 "$NDK/ndk-build" ${BUILD_ARG} -j${THREADS}
+        fi
+    fi
 elif [[ -n $(command -v cmd && cmd /C set | grep -i 'NDK') ]]; then
     cmd /C "set CGE_USE_VIDEO_MODULE=1 && %NDK%/ndk-build.cmd" ${BUILD_ARG} -j${THREADS}
 else
