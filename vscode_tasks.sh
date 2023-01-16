@@ -88,10 +88,16 @@ function buildProject() {
 }
 
 if [[ ! -f "local.properties" ]]; then
-    if [[ -n "$ANDROID_SDK_HOME" ]]; then
-        echo "sdk.dir=$ANDROID_SDK_HOME" >>local.properties
+    if [[ -n "$ANDROID_HOME" ]]; then
+        echo "sdk.dir=$ANDROID_HOME" >>local.properties
     elif [[ -n "$ANDROID_SDK_ROOT" ]]; then
         echo "sdk.dir=$ANDROID_SDK_ROOT" >>local.properties
+    elif [[ -n "$ANDROID_SDK_HOME" ]]; then
+        if [[ -d "$ANDROID_SDK_HOME/platform-tools" ]]; then
+            echo "sdk.dir=$ANDROID_SDK_HOME" >>local.properties
+        elif [[ -d "$ANDROID_SDK_HOME/../platform-tools" ]]; then
+            echo "sdk.dir=$(realpath $ANDROID_SDK_HOME/../platform-tools)" >>local.properties
+        fi
     elif [[ -n "$ANDROID_SDK" ]]; then
         echo "sdk.dir=$ANDROID_SDK" >>local.properties
     else
