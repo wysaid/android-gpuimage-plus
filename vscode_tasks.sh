@@ -9,22 +9,12 @@ THIS_DIR="$(pwd)"
 PROJECT_DIR="$THIS_DIR"
 ADB_COMMAND="$PROJECT_DIR/utils/adb_command.sh"
 
+source "$PROJECT_DIR/utils/platform_utils.sh"
+
 export PACKAGE_NAME="org.wysaid.cgeDemo"
 export LAUNCH_ACTIVITY="MainActivity"
 export GRADLEW_RUN_TASK="installDebug"
 export ANDROID_BUILD_TYPE="assembleDebug"
-
-if ! command -v cmd &>/dev/null && [[ -f "/mnt/c/Windows/system32/cmd.exe" ]]; then
-    function cmd() {
-        /mnt/c/Windows/system32/cmd.exe $@
-    }
-fi
-
-function runGradleCommand() {
-    if ! ./gradlew $@; then
-        command -v cmd &>/dev/null && cmd /C gradlew $@
-    fi
-}
 
 function setupProject() {
     if [[ -f "$PROJECT_DIR/local.properties" ]] && grep -E '^usingCMakeCompile=true' "$PROJECT_DIR/local.properties"; then
@@ -87,21 +77,20 @@ function buildProject() {
     fi
 }
 
-if [[ ! -f "local.properties" ]]; then
-    if [[ -n "$ANDROID_HOME" ]]; then
-        echo "sdk.dir=$ANDROID_HOME" >>local.properties
-    elif [[ -n "$ANDROID_SDK_ROOT" ]]; then
-        echo "sdk.dir=$ANDROID_SDK_ROOT" >>local.properties
-    elif [[ -n "$ANDROID_SDK_HOME" ]]; then
-        if [[ -d "$ANDROID_SDK_HOME/platform-tools" ]]; then
-            echo "sdk.dir=$ANDROID_SDK_HOME" >>local.properties
-        elif [[ -d "$ANDROID_SDK_HOME/../platform-tools" ]]; then
-            echo "sdk.dir=$(realpath $ANDROID_SDK_HOME/../platform-tools)" >>local.properties
-        fi
-    elif [[ -n "$ANDROID_SDK" ]]; then
-        echo "sdk.dir=$ANDROID_SDK" >>local.properties
-    else
-        echo "Can't find ANDROID_SDK, Please setup 'local.properties'" >&2
+function patchAndroidSDKLocation() {
+    VAR_ENV_VALUE=$(getEnvironmentVariable $@)
+    if [[ -n "$VAR_ENV_VALUE" ]]; then
+        VAR_ENV_VALUE=$(echo $VAR_ENV_VALUE | tr '\\' '/')
+        echo "sdk.dir=$VAR_ENV_VALUE" >>local.properties
+        return 0
+    fi
+    return 1
+}
+
+if [[ ! -f "local.properties" ]] && ! grep "sdk.dir=" local.properties &>/dev/null; then
+    if ! (patchAndroidSDKLocation ANDROID_HOME ||
+        patchAndroidSDKLocation ANDROID_SDK_ROOT); then
+        echo "sdk.dir is missing in 'local.properties' and env var ANDROID_HOME is not defined." >&2
     fi
 fi
 
