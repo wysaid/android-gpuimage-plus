@@ -1,12 +1,14 @@
 # Android-GPUImage-Plus
 
-Image, Camera And Video Filters Based On OpenGL
+Image, Camera And Video Filters Based On `Vulkan` & `OpenGL`
 
 >To get pure lib without ffmpeg(No feature of video recording), please checkout the branch [min](https://github.com/wysaid/android-gpuimage-plus/tree/min). The whole jni module will be less than 600KB.
 
 ## New Feature
 
-See the `image deform demo`.
+- ### Vulkan Support
+ 
+- ### See the `image deform demo`. (2018.9)
 
 ![](screenshots/6.gif) ![](screenshots/5.gif)
 
