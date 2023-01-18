@@ -2,6 +2,7 @@
 
 if [[ $# -eq 0 ]]; then
     echo "usage: [--debug|--release] [--clean] [--enable-cmake] [--setup-project] [--build] [--run]"
+    exit 0
 fi
 
 cd "$(dirname "$0")"

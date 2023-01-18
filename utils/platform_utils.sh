@@ -46,7 +46,7 @@ function getEnvironmentVariable() {
     fi
 
     if [[ -z "$RET_VALUE" ]]; then
-        RET_VALUE=${VAR_NAME}
+        RET_VALUE=${!VAR_NAME}
     fi
 
     if [[ -n "$RET_VALUE" ]]; then
