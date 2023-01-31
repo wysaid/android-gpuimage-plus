@@ -1,1 +1,20 @@
 include ':library', ':cgeDemo'
+
+def pFile = new File(settingsDir, 'local.properties')
+Properties properties = new Properties()
+properties.load(pFile.newDataInputStream())
+
+if (properties.getProperty('usingCMakeCompile', null) == null) {
+    pFile.append('\nusingCMakeCompile=false\n')
+}
+
+if (properties.getProperty('usingCMakeCompileDebug', null) == null) {
+    pFile.append('\nusingCMakeCompileDebug=false\n')
+}
+
+if (gradle.ext == null) {
+    gradle.ext = {}
+}
+
+gradle.ext.usingCMakeCompile = properties.getProperty("usingCMakeCompile", "") == "true"
+gradle.ext.usingCMakeCompileDebug = properties.getProperty("usingCMakeCompileDebug", "") == "true"

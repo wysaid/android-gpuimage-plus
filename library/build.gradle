@@ -1,24 +1,74 @@
 apply plugin: 'com.android.library'
 
+def usingCMakeCompile() {
+    /// define  gradle.ext.usingCMakeCompile = false to disable CMakeCompile Mode.
+    return gradle.ext != null && gradle.ext.has("usingCMakeCompile") && gradle.ext.usingCMakeCompile;
+}
+
+def usingCMakeCompileDebug() {
+    /// define  gradle.ext.usingCMakeCompileDebug = true to enable CMake Debug Mode.
+    return gradle.ext != null && gradle.ext.has("usingCMakeCompileDebug") && gradle.ext.usingCMakeCompileDebug;
+}
+
 android {
-    compileSdkVersion 25
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+    buildToolsVersion rootProject.ext.android.buildToolsVersion
+
+    if (usingCMakeCompile()) {
+        ndkVersion "23.1.7779620"
+    }
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 22
-        versionCode 1
-        versionName "2.4.6"
+        minSdkVersion rootProject.ext.android.minSdkVersion
+        targetSdkVersion rootProject.ext.android.targetSdkVersion
 
-        ndk {
-            moduleName "CGE"
-//            cFlags "-std=c++11 -DANDROID_NDK -DDEBUG -D_CGE_ONLY_FILTERS_ -D_CGE_STATIC_ASSERT_ -DCGE_TEXTURE_PREMULTIPLIED=1 -DCGE_LOG_TAG=\\\"libCGE\\\" -I${project.buildDir}/../src/main/jni/include -I${project.buildDir}/../src/main/jni/include/filters"
-//            stl "gnustl_shared"
-////            abiFilters "all"
-//            abiFilters "armeabi", "armeabi-v7a"
-//            ldLibs "log", "android", "EGL", "GLESv2", "jnigraphics"
+        if (usingCMakeCompile()) {
+            externalNativeBuild {
+                cmake {
+
+                    def cmakeBuildType = "";
+                    def cppExtraFlags = "";
+
+                    if (usingCMakeCompileDebug()) {
+                        cmakeBuildType = "-DCMAKE_BUILD_TYPE=Debug"
+                        cppExtraFlags = "-DDEBUG=1 -D_DEBUG=1 -Od -g"
+                    } else {
+                        cmakeBuildType = "-DCMAKE_BUILD_TYPE=Release"
+                        cppExtraFlags = "-Os -DNDEBUG=1 -D_NDEBUG=1"
+                    }
+
+                    arguments "-DCGE_USE_VIDEO_MODULE=ON",
+                            "-DANDROID_STL=c++_static",
+                            "-DANDROID_ARM_NEON=TRUE",
+                            "-DANDROID_GRADLE=ON",
+                            cmakeBuildType
+
+                    cFlags "-ffast-math -fPIE -fPIC -DNO_LOCALE_SUPPORT=1 -DANDROID_NDK=1 -D__STDC_CONSTANT_MACROS=1 ${cppExtraFlags}"
+                    cppFlags "-ffast-math -fPIE -fPIC -DNO_LOCALE_SUPPORT=1 -DANDROID_NDK=1 -D__STDC_CONSTANT_MACROS=1 -frtti -std=c++14 -fno-exceptions -fvisibility-inlines-hidden ${cppExtraFlags}"
+
+                    println("cmake arguments: " + arguments)
+                    println("cppFlags: " + cppFlags)
+                }
+            }
+
+            ndk {
+                abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86'
+                // if (!usingCMakeCompileDebug()) {
+                //     debugSymbolLevel ''
+                // }
+            }
         }
-
     }
+
+    if (usingCMakeCompile()) {
+        externalNativeBuild {
+            cmake {
+                path 'src/main/jni/CMakeLists.txt'
+                version "3.22.1"
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -29,17 +79,19 @@ android {
     ////////////////////////////////////////
 
     sourceSets.main {
-        jniLibs.srcDir 'src/main/libs' //set libs as .so's location instead of jni
-        jni.srcDirs = [] //disable automatic ndk-build call with auto-generated Android.mk file
+        if (!usingCMakeCompile()) {
+            jniLibs.srcDir 'src/main/libs' //set libs as .so's location instead of jni
+            jni.srcDirs = [] //disable automatic ndk-build call with auto-generated Android.mk file
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
+    namespace 'org.wysaid.library'
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.2.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:' + rootProject.ext.android.appcompatX
 }

@@ -2,14 +2,20 @@
 
 if ! command -v adb &>/dev/null; then
 
-    if [[ -n "$ANDROID_SDK_HOME" ]]; then
-        export PATH=$PATH:$ANDROID_SDK_HOME/platform-tools
-    elif [[ -n "$ANDROID_SDK_ROOT" ]]; then
+    if [[ -n "$ANDROID_HOME" ]] && [[ -d "$ANDROID_HOME/platform-tools" ]]; then
+        export PATH=$PATH:$ANDROID_HOME/platform-tools
+    elif [[ -n "$ANDROID_SDK_ROOT" ]] && [[ -d "$ANDROID_SDK_ROOT/platform-tools" ]]; then
         export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
+    elif [[ -n "$ANDROID_SDK_HOME" ]]; then
+        if [[ -d "$ANDROID_SDK_HOME/platform-tools" ]]; then
+            export PATH=$PATH:$ANDROID_SDK_HOME/platform-tools
+        elif [[ -d "$ANDROID_SDK_HOME/../platform-tools" ]]; then
+            export PATH=$PATH:$(realpath $ANDROID_SDK_HOME/../platform-tools)
+        fi
     fi
 
     if ! command -v adb &>/dev/null; then
-        echo "can't find adb!'"
+        echo "$(pwd): Can't find adb!'"
         exit 1
     fi
 fi

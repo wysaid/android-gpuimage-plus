@@ -6,7 +6,7 @@ import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,10 +16,13 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import org.wysaid.camera.CameraInstance;
 import org.wysaid.myUtils.FileUtil;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.myUtils.MsgUtil;
+import org.wysaid.myUtils.PermissionUtil;
 import org.wysaid.nativePort.CGENativeLibrary;
 import org.wysaid.view.CameraRecordGLSurfaceView;
 
@@ -112,6 +115,7 @@ public class CameraDemoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_demo);
+        PermissionUtil.verifyStoragePermissions(this);
 
 //        lastVideoPathFileName = FileUtil.getPathInPackage(CameraDemoActivity.this, true) + "/lastVideoPath.txt";
         Button takePicBtn = (Button) findViewById(R.id.takePicBtn);

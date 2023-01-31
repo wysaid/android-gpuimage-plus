@@ -53,7 +53,7 @@ const char* cgeGetVersion()
 
 void cgePrintGLString(const char* name, GLenum em)
 {
-    CGE_LOG_INFO("GL_INFO %s = %s\n", name, glGetString(em));
+    CGE_LOG_KEEP("GL_INFO %s = %s\n", name, glGetString(em));
 }
 
 const char* cgeGetBlendModeName(CGETextureBlendMode mode, bool withChinese)

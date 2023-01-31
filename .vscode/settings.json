@@ -5,5 +5,10 @@
     "files.exclude": {
     },
     "files.associations": {
+        "*.h": "cpp",
+        "*.cc": "cpp",
+        "params.txt": "json",
+        "CMakeLists*.txt": "cmake",
+        "__config": "c"
     }
 }

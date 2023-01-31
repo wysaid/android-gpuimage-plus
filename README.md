@@ -35,7 +35,21 @@ dependencies {
 
 * Demo and Library will be updated as needed. Welcome for your questions or PR.
 
-* To build with the jni part, pleasae try:
+## Build
+
+* Build with `Android Studio` and CMake: (Recommended)
+  * Put `usingCMakeCompile=true` in your `local.properties`
+  * Open the repo with the latest version of `Android Studio`
+  * Waiting for the initialization. (NDK/cmake install)
+  * Done.
+
+* Using `Visual Studio Code`: (Simple)
+  * Setup ENV variable `ANDROID_HOME` to your Android SDK installation directory.
+  * Open the repo with `Visual Studio Code`
+  * Press `⌘ + shift + B` (Mac) or `ctrl + shift + B` (Win/Linux), choose the option `Enable CMake And Build Project With CMake`.
+  * Done.
+
+* Build `JNI` part with ndk-build: (Not recommended)
 
 ```shell
 export NDK=path/of/your/ndk
@@ -55,9 +69,9 @@ $NDK/ndk-build
 #And remove the loading part of ffmpeg&facetracker
 $NDK/ndk-build
 
-#For Window user, you should include the `.cmd` extension to `ndk-build` like this:
-cd your_path_to\android-gpuimage-plus-master\library\src\main\jni
-your_path_to_ndk\ndk-bundle\ndk-build.cmd
+#For Windows user, you should include the `.cmd` extension to `ndk-build` like this:
+cd <your\path\to\this\repo>\library\src\main\jni
+<your\path\to\ndk>\ndk-build.cmd
 
 #Also remember to comment out these line in NativeLibraryLoader
 //System.loadLibrary("ffmpeg");

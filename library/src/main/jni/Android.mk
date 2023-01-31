@@ -107,7 +107,7 @@ LOCAL_SRC_FILES :=  \
 			$(CGE_ROOT)/interface/cgeDeformFilterWrapper.cpp \
 
 
-LOCAL_CPPFLAGS := -frtti -std=c++11
+LOCAL_CPPFLAGS := -frtti -std=c++14
 LOCAL_LDLIBS :=  -llog -lEGL -lGLESv2 -ljnigraphics
 
 # 'CGE_USE_VIDEO_MODULE' determines if the project should compile with ffmpeg.
@@ -162,7 +162,7 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := ffmpeg
-LOCAL_CFLAGS := -mfloat-abi=softfp -mfpu=vfp -O3 -ffast-math -funroll-loops -fPIC
+LOCAL_CFLAGS := -mfloat-abi=softfp -mfpu=vfp -Os -ffast-math -fPIC
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
 LOCAL_CFLAGS := $(LOCAL_CFLAGS) march=armv7-a -mfpu=neon
 endif

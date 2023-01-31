@@ -1,10 +1,11 @@
 package org.wysaid.cgeDemo;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.wysaid.camera.CameraInstance;
 import org.wysaid.cgeDemo.demoUtils.MultiInputDemo;

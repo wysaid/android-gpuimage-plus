@@ -5,12 +5,15 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatButton;
+
+
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 
 import org.wysaid.common.Common;
 import org.wysaid.myUtils.ImageUtil;
@@ -137,8 +140,8 @@ public class BasicImageDemoActivity extends AppCompatActivity {
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(mActiveConfig != null) {
-                    float intensity = progress / (float)seekBar.getMax();
+                if (mActiveConfig != null) {
+                    float intensity = progress / (float) seekBar.getMax();
                     mActiveConfig.setIntensity(intensity, true);
                 }
             }
@@ -156,7 +159,7 @@ public class BasicImageDemoActivity extends AppCompatActivity {
 
         LinearLayout menuLayout = (LinearLayout) findViewById(R.id.menuLayout);
 
-        if(BASIC_FILTER_NAMES.length == mAdjustConfigs.length) {
+        if (BASIC_FILTER_NAMES.length == mAdjustConfigs.length) {
 
             for (int i = 0; i != BASIC_FILTER_NAMES.length; ++i) {
                 MyButton btn = new MyButton(this, mAdjustConfigs[i]);
@@ -244,7 +247,7 @@ public class BasicImageDemoActivity extends AppCompatActivity {
             public void run() {
 
                 CGEImageHandler handler = mImageView.getImageHandler();
-                for(AdjustConfig config : mAdjustConfigs) {
+                for (AdjustConfig config : mAdjustConfigs) {
 
                     handler.setFilterIntensityAtIndex(config.originValue, config.index, false);
                 }

@@ -1,14 +1,30 @@
 apply plugin: 'com.android.application'
 
+def usingCMakeCompile() {
+    /// define  gradle.ext.usingCMakeCompile = false to disable CMakeCompile Mode.
+    return gradle.ext != null && gradle.ext.has("usingCMakeCompile") && gradle.ext.usingCMakeCompile;
+}
+
+def usingCMakeCompileDebug() {
+    /// define  gradle.ext.usingCMakeCompileDebug = true to enable CMake Debug Mode.
+    return gradle.ext != null && gradle.ext.has("usingCMakeCompileDebug") && gradle.ext.usingCMakeCompileDebug;
+}
+
 android {
-    compileSdkVersion 25
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+    buildToolsVersion rootProject.ext.android.buildToolsVersion
+
+    if (usingCMakeCompile()) {
+        ndkVersion "23.1.7779620"
+    }
 
     defaultConfig {
-        applicationId "org.wysaid.cgeDemo"
-        minSdkVersion 14
-        targetSdkVersion 22
-        versionCode 1
-        versionName "1.0"
+        applicationId rootProject.ext.android.applicationId
+        minSdkVersion rootProject.ext.android.minSdkVersion
+        targetSdkVersion rootProject.ext.android.targetSdkVersion
+        versionCode rootProject.ext.android.versionCode
+        versionName rootProject.ext.android.versionName
+        signingConfig signingConfigs.debug
     }
     buildTypes {
         release {
@@ -16,11 +32,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    namespace 'org.wysaid.cgeDemo'
 
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.2.0'
-    compile project(':library')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':library')
+    implementation 'androidx.appcompat:appcompat:' + rootProject.ext.android.appcompatX
 }

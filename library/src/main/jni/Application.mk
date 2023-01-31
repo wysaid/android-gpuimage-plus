@@ -9,6 +9,6 @@ APP_STL := c++_static
 
 #APP_CPPFLAGS := -frtti -fexceptions
 #APP_CPPFLAGS := -fpermissive
-APP_CPPFLAGS := -frtti -std=c++11
+APP_CPPFLAGS := -frtti -std=c++14
 
 APP_OPTIM := release

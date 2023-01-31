@@ -2,11 +2,11 @@
 
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.2'
+        classpath 'com.android.tools.build:gradle:7.3.1'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -15,7 +15,20 @@ buildscript {
 
 allprojects {
     repositories {
-        jcenter()
+        mavenCentral()
         google()
     }
+}
+
+ext {
+    android = [
+            compileSdkVersion: 30,
+            buildToolsVersion: '30.0.3',
+            minSdkVersion    : 16,
+            targetSdkVersion : 25, // higher target version needs more storage permission request.
+            versionCode      : 1,
+            versionName      : "1.0.0",
+            applicationId    : "org.wysaid.cgeDemo",
+            appcompatX       : "1.2.0"
+    ]
 }

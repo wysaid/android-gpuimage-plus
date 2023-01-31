@@ -4,11 +4,12 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "[Android] Build Android Demo",
+            "label": "[Debug] Build Android Demo",
             "type": "shell",
             "command": "bash",
             "args": [
                 "vscode_tasks.sh",
+                "--debug",
                 "--build"
             ],
             "options": {
@@ -18,11 +19,12 @@
             "problemMatcher": "$gcc"
         },
         {
-            "label": "[Android] Run Android Demo",
+            "label": "[Debug] Run Android Demo",
             "type": "shell",
             "command": "bash",
             "args": [
                 "vscode_tasks.sh",
+                "--debug",
                 "--run"
             ],
             "options": {
@@ -32,11 +34,12 @@
             "problemMatcher": "$gcc"
         },
         {
-            "label": "[Android] Build And Run Android Demo",
+            "label": "[Debug] Build And Run Android Demo",
             "type": "shell",
             "command": "bash",
             "args": [
                 "vscode_tasks.sh",
+                "--debug",
                 "--build",
                 "--run"
             ],
@@ -47,11 +50,117 @@
             "problemMatcher": "$gcc"
         },
         {
-            "label": "[Android] Build Native Library",
+            "label": "[Release] Build Android Demo",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "vscode_tasks.sh",
+                "--release",
+                "--build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "[Release] Run Android Demo",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "vscode_tasks.sh",
+                "--release",
+                "--run"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "[Release] Build And Run Android Demo",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "vscode_tasks.sh",
+                "--release",
+                "--build",
+                "--run"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "[Release] Build Native Library With NDK Build",
             "type": "shell",
             "command": "bash",
             "args": [
                 "library/src/main/jni/buildJNI"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "Enable Gradle CMake Build",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "vscode_tasks.sh",
+                "--enable-cmake"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "Setup Gradle Project",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "vscode_tasks.sh",
+                "--setup-project"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "[Debug] Enable CMake And Build Project With CMake",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "vscode_tasks.sh",
+                "--debug",
+                "--enable-cmake",
+                "--build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "[Release] Enable CMake And Build Project With CMake",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "vscode_tasks.sh",
+                "--release",
+                "--enable-cmake",
+                "--build"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
