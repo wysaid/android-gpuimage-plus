@@ -23,10 +23,10 @@ static CGEConstString s_fshWaveform = "#version 310 es\n" CGE_SHADER_STRING(
         vec4 color = texture(inputImageTexture, textureCoordinate);
         float lum = dot(color.rgb, vec3(0.299, 0.587, 0.114));
         ivec2 newLoc = ivec2(vec2(textureCoordinate.x, lum) * vec2(imageSize(outputImage)));
-        uint newLum = uint(lum * 255.0);
-        imageStore(outputImage, newLoc, uvec4(newLum, newLum, newLum, 255));
+        // uint newLum = uint(lum * 255.0);
+        imageStore(outputImage, newLoc, uvec4(255, 255, 255, 255));
 
-        // TODO: 考虑使用 imageAtomicAdd 保障原子操作 (不闪屏)
+        // TODO: 直接使用 255 来描述最亮是没有问题的。 如果要实现颜色亮度叠加. 可以考虑使用 imageAtomicAdd.
     });
 
 namespace CGE
@@ -45,6 +45,7 @@ bool CGEWaveformFilter::init()
         setColor(0.0f, 0.0f, 0.0f, 0.5f);
         m_drawer.reset(TextureDrawer::create());
         m_drawer->setFlipScale(1.0f, -1.0f); // flip upside down, meet the gl coord.
+        m_renderTarget = std::make_unique<FrameBufferWithTexture>();
         return true;
     }
 
@@ -59,8 +60,16 @@ bool CGEWaveformFilter::init()
 
 void CGEWaveformFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID)
 {
-    handler->setAsTarget();
+    auto&& sz = handler->getOutputFBOSize();
+    if (sz.width != m_renderTarget->width() || m_renderTarget->texture() == 0)
+    {
+        m_renderTarget->bindTexture2D(sz.width, 256);
+    }
+
+    m_renderTarget->bind();
+    glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
+
     m_program.bind();
 
     /// 渲染不写入, 使用 imageStore 写入.
@@ -74,17 +83,15 @@ void CGEWaveformFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, 0);
-    glBindImageTexture(1, handler->getTargetTextureID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8UI);
+    glBindImageTexture(1, m_renderTarget->texture(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8UI);
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     glColorMask(true, true, true, true);
     glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 
-    handler->swapBufferFBO();
     handler->setAsTarget();
-    auto&& sz = handler->getOutputFBOSize();
     glViewport(m_position[0] * sz.width, m_position[1] * sz.height, m_size[0] * sz.width, m_size[1] * sz.height);
-    m_drawer->drawTexture(handler->getBufferTextureID());
+    m_drawer->drawTexture(m_renderTarget->texture());
 }
 
 void CGEWaveformFilter::setFormPosition(float left, float top)

@@ -32,6 +32,7 @@ public:
 
 protected:
     std::unique_ptr<TextureDrawer> m_drawer;
+    std::unique_ptr<FrameBufferWithTexture> m_renderTarget;
     Vec2f m_position;
     Vec2f m_size;
     Vec4f m_color;
