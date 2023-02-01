@@ -74,71 +74,6 @@ inline GLint cgeGetMaxTextureSize()
     return n - 1;
 }
 
-class SharedTexture
-{
-public:
-    SharedTexture(int w = 0, int h = 0) :
-        m_textureID(0), m_refCount(nullptr), width(w), height(h) {}
-    SharedTexture(GLuint textureID, int w, int h);
-
-    SharedTexture(const SharedTexture& other) :
-        m_textureID(0), m_refCount(nullptr)
-    {
-        *this = other;
-    }
-
-    ~SharedTexture();
-
-    inline SharedTexture& operator=(const SharedTexture& other)
-    {
-        assert(this != &other && (other.m_refCount == nullptr || other.m_textureID != 0));
-
-        if (m_refCount != nullptr && --*m_refCount <= 0)
-        {
-            clear();
-        }
-
-        m_textureID = other.m_textureID;
-        m_refCount = other.m_refCount;
-        if (m_refCount)
-        {
-            ++*m_refCount;
-            CGE_LOG_INFO("CGESharedTexture assgin: textureID %d, refCount: %d\n", m_textureID, *m_refCount);
-        }
-
-        width = other.width;
-        height = other.height;
-        return *this;
-    }
-
-    inline GLuint texID() const { return m_textureID; }
-
-    inline void bindToIndex(GLint index) const
-    {
-        glActiveTexture(GL_TEXTURE0 + index);
-        glBindTexture(GL_TEXTURE_2D, m_textureID);
-    }
-
-    void forceRelease(bool bDelTexture);
-
-    //特殊用法， 与 forceRelease 配对使用
-    inline void forceAssignTextureID(GLuint texID)
-    {
-        m_textureID = texID;
-    }
-
-public:
-    int width; // public, for easy accessing.
-    int height;
-
-protected:
-    void clear();
-
-private:
-    GLuint m_textureID;
-    mutable int* m_refCount;
-};
-
 class FrameBuffer
 {
 public:
@@ -146,16 +81,6 @@ public:
     ~FrameBuffer() { glDeleteFramebuffers(1, &m_framebuffer); }
 
     inline void bind() const { glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer); }
-
-    inline void bindTexture2D(const SharedTexture& texture, GLenum attachment = GL_COLOR_ATTACHMENT0) const
-    {
-        bindTexture2D(texture.texID(), texture.width, texture.height, attachment);
-    }
-
-    inline void bindTexture2D(const SharedTexture& texture, GLsizei x, GLsizei y, GLsizei w, GLsizei h, GLenum attachment = GL_COLOR_ATTACHMENT0) const
-    {
-        bindTexture2D(texture.texID(), x, y, w, h, attachment);
-    }
 
     inline void bindTexture2D(GLuint texID, GLsizei w, GLsizei h, GLenum attachment = GL_COLOR_ATTACHMENT0) const
     {
@@ -179,9 +104,9 @@ public:
         glViewport(x, y, w, h);
     }
 
-    inline GLuint getID() { return m_framebuffer; }
+    inline GLuint fbo() { return m_framebuffer; }
 
-private:
+protected:
     GLuint m_framebuffer;
 };
 
@@ -221,6 +146,68 @@ struct CGESizef
     }
     GLfloat width;
     GLfloat height;
+};
+
+struct TextureInfo
+{
+    GLuint name{};
+    int width{}, height{};
+};
+
+class TextureObject
+{
+public:
+    virtual ~TextureObject();
+    explicit TextureObject(GLuint texture = 0, const CGESizei& size = CGESizei());
+    explicit TextureObject(const TextureObject&) = delete;
+    TextureObject(TextureObject&&) noexcept;
+    explicit TextureObject(TextureInfo&& t) :
+        m_texture(t.name), m_size(t.width, t.height) { t.name = 0; }
+
+    GLuint texture() const { return m_texture; }
+    GLint width() const { return m_size.width; }
+    GLint height() const { return m_size.height; }
+    CGESizei size() const { return m_size; }
+
+    void cleanup(bool deleteTexture = true);
+
+    // 注意, format 不支持改变, 如果有相关需求需要自行添加
+    bool resize(int w, int h, const void* buffer = nullptr, GLenum format = GL_RGBA);
+    inline bool updateTextureData(int w, int h, const void* buffer = nullptr, GLenum format = GL_RGBA)
+    {
+        return resize(w, h, buffer, format);
+    }
+
+    TextureObject& operator=(TextureObject&& t) noexcept;
+    TextureObject& operator=(TextureInfo&& t);
+
+protected:
+    GLuint m_texture = 0;
+    CGESizei m_size;
+};
+
+class FrameBufferWithTexture : protected FrameBuffer, public TextureObject
+{
+public:
+    using FrameBuffer::FrameBuffer;
+    ~FrameBufferWithTexture() override;
+
+    GLuint renderbuffer() const { return m_renderBuffer; }
+
+    // act like resize.
+    // it will resize renderbuffer if exist.
+    void bindTexture2D(GLsizei w, GLsizei h, const void* buffer = nullptr);
+
+    void attachDepthBuffer();
+
+    bool checkStatus();
+
+    using FrameBuffer::bind;
+    using FrameBuffer::fbo;
+
+private:
+    using TextureObject::resize;
+    GLuint m_renderBuffer = 0;
 };
 
 struct CGELuminance
