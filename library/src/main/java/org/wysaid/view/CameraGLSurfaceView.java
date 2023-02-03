@@ -91,8 +91,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         return true;
     }
 
-    protected int mMaxPreviewWidth = 1280;
-    protected int mMaxPreviewHeight = 1280;
+    protected int mMaxPreviewWidth = 1920;
+    protected int mMaxPreviewHeight = 1920;
 
     public static class Viewport {
          public int x, y, width, height;
@@ -104,7 +104,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         return mDrawViewport;
     }
 
-    //The max preview size. Change it to 1920+ if you want to preview with 1080P
+    //The max preview size. Make it greater if you want to preview with 2K/4K or more!
     void setMaxPreviewSize(int w, int h) {
         mMaxPreviewWidth = w;
         mMaxPreviewHeight = h;
@@ -142,6 +142,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
             width = (int) (width * scaling);
             height = (int) (height * scaling);
         }
+
+        Log.i(Common.LOG_TAG, "presetRecordingSize: " + width + "x" + height);
 
         mRecordWidth = width;
         mRecordHeight = height;
