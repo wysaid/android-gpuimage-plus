@@ -57,7 +57,7 @@ dependencies {
   export ANDROID_HOME=/path/to/android/sdk
   
   # Setup Project
-  bash --setup-project
+  bash vscode_tasks.sh --setup-project
 
   # Compile with CMake Debug
   bash vscode_tasks.sh --debug --enable-cmake --build
