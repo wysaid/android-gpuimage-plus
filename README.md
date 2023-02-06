@@ -43,13 +43,13 @@ dependencies {
   * Waiting for the initialization. (NDK/cmake install)
   * Done.
 
-* Using `Visual Studio Code`: (Simple)
+* Using `Visual Studio Code`: (Requires __[WSL(Recommended)](https://learn.microsoft.com/en-us/windows/wsl/install)__/__[MinGW](https://osdn.net/projects/mingw/)__/__[Cygwin](https://www.cygwin.com/)__ on Windows.)
   * Setup ENV variable `ANDROID_HOME` to your Android SDK installation directory.
   * Open the repo with `Visual Studio Code`
   * Press `⌘ + shift + B` (Mac) or `ctrl + shift + B` (Win/Linux), choose the option `Enable CMake And Build Project With CMake`.
   * Done.
 
-* Build with preset tasks: (Requires `wsl`/`mingw`/`cygwin` on Windows.)
+* Build with preset tasks: (Requires __[WSL(Recommended)](https://learn.microsoft.com/en-us/windows/wsl/install)__/__[MinGW](https://osdn.net/projects/mingw/)__/__[Cygwin](https://www.cygwin.com/)__ on Windows.)
 
   ```shell
   # define the environment variable "ANDROID_HOME"
