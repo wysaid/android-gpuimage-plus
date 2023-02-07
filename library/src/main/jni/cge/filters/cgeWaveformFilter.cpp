@@ -70,6 +70,11 @@ void CGEWaveformFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    /// 在部分低端机型上, glClear 可能会发生在 shader write 之后. 这里必须控制一下时序.
+    /// 经过测试, 使用 glMemoryBarrier(GL_ALL_BARRIER_BITS) 也不管用, 但是 glFlush 可以修复此问题
+    /// 暂且这么实现.
+    glFlush();
+
     m_program.bind();
 
     /// 渲染不写入, 使用 imageStore 写入.
