@@ -4,6 +4,20 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Cleanup workspace (git clean -ffdx)",
+            "type": "shell",
+            "command": "git",
+            "args": [
+                "clean",
+                "-ffdx"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
             "label": "[Debug] Build Android Demo",
             "type": "shell",
             "command": "bash",
