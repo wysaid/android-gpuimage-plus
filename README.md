@@ -43,40 +43,59 @@ dependencies {
   * Waiting for the initialization. (NDK/cmake install)
   * Done.
 
-* Using `Visual Studio Code`: (Simple)
+* Using `Visual Studio Code`: (Requires __[WSL(Recommended)](https://learn.microsoft.com/en-us/windows/wsl/install)__/__[MinGW](https://osdn.net/projects/mingw/)__/__[Cygwin](https://www.cygwin.com/)__ on Windows.)
   * Setup ENV variable `ANDROID_HOME` to your Android SDK installation directory.
   * Open the repo with `Visual Studio Code`
   * Press `⌘ + shift + B` (Mac) or `ctrl + shift + B` (Win/Linux), choose the option `Enable CMake And Build Project With CMake`.
   * Done.
 
+* Build with preset tasks: (Requires __[WSL(Recommended)](https://learn.microsoft.com/en-us/windows/wsl/install)__/__[MinGW](https://osdn.net/projects/mingw/)__/__[Cygwin](https://www.cygwin.com/)__ on Windows.)
+
+  ```shell
+  # define the environment variable "ANDROID_HOME"
+  # If using Windows, define ANDROID_HOME in Windows Environment Settings by yourself.
+  export ANDROID_HOME=/path/to/android/sdk
+  
+  # Setup Project
+  bash vscode_tasks.sh --setup-project
+
+  # Compile with CMake Debug
+  bash vscode_tasks.sh --debug --enable-cmake --build
+  # Compile with CMake Release
+  bash vscode_tasks.sh --release --enable-cmake --build
+
+  # Start Demo By Command
+  bash vscode_tasks.sh --run
+  ```
+
 * Build `JNI` part with ndk-build: (Not recommended)
 
-```shell
-export NDK=path/of/your/ndk
-cd folder/of/jni (android-gpuimage-plus/library/src/main/jni)
-
-#This will make all arch: armeabi, armeabi-v7a arm64-v8a, x86, mips
-./buildJNI
-#Or use "sh buildJNI"
-
-#Try this if you failed to run the shell above
-export CGE_USE_VIDEO_MODULE=1
-$NDK/ndk-build
-
-#If you don't want anything except the image filter,
-#Do as below to build with only cge module
-#No ffmpeg, opencv or faceTracker.
-#And remove the loading part of ffmpeg&facetracker
-$NDK/ndk-build
-
-#For Windows user, you should include the `.cmd` extension to `ndk-build` like this:
-cd <your\path\to\this\repo>\library\src\main\jni
-<your\path\to\ndk>\ndk-build.cmd
-
-#Also remember to comment out these line in NativeLibraryLoader
-//System.loadLibrary("ffmpeg");
-//CGEFFmpegNativeLibrary.avRegisterAll();
-```
+  ```shell
+  export NDK=path/of/your/ndk
+  cd folder/of/jni (android-gpuimage-plus/library/src/main/jni)
+  
+  #This will make all arch: armeabi, armeabi-v7a arm64-v8a, x86, mips
+  ./buildJNI
+  #Or use "sh buildJNI"
+  
+  #Try this if you failed to run the shell above
+  export CGE_USE_VIDEO_MODULE=1
+  $NDK/ndk-build
+  
+  #If you don't want anything except the image filter,
+  #Do as below to build with only cge module
+  #No ffmpeg, opencv or faceTracker.
+  #And remove the loading part of ffmpeg&facetracker
+  $NDK/ndk-build
+  
+  #For Windows user, you should include the `.cmd` extension to `ndk-build` like this:
+  cd <your\path\to\this\repo>\library\src\main\jni
+  <your\path\to\ndk>\ndk-build.cmd
+  
+  #Also remember to comment out these line in NativeLibraryLoader
+  //System.loadLibrary("ffmpeg");
+  //CGEFFmpegNativeLibrary.avRegisterAll();
+  ```
 
 > You can find precompiled libs here: [android-gpuimage-plus-libs](https://github.com/wysaid/android-gpuimage-plus-libs) (The precompiled '.so' files are generated with NDK-r23b)
 
