@@ -120,6 +120,7 @@ FOUNDATION_EXPORT const unsigned char cgeVersionString[];
 #import <cge/cgeVignetteAdjust.h>
 #import <cge/cgeWhiteBalanceAdjust.h>
 
+#import <cge/cgeFalseColorFilter.h>
 #endif
 
 #endif

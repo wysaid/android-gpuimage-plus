@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String EFFECT_CONFIGS[] = {
             "",
+            "@style falsecolor 1.0",
             "@style waveform 0.01 0.01 0.4 0.4 0.0 0.0 0.0 0.9",
             "@style hist 0.5 0.5 0.5 0.5 0.0 0.0 0.0 ",
             "@curve RGB(0,255)(255,0) @style cm mapping0.jpg 80 80 8 3", // ASCII art (字符画效果)

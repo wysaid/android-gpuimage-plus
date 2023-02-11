@@ -146,4 +146,9 @@ CGEWaveformFilter* createWaveformFilter()
 {
     COMMON_FUNC(CGEWaveformFilter);
 }
+
+	CGEFalseColorFilter* createFalseColorFilter()
+	{
+		COMMON_FUNC(CGEFalseColorFilter);
+	}
 } // namespace CGE

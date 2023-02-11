@@ -24,6 +24,7 @@
 #include "cgeRandomBlurFilter.h"
 #include "cgeSketchFilter.h"
 #include "cgeWaveformFilter.h"
+#include "cgeFalseColorFilter.h"
 
 namespace CGE
 {
@@ -53,6 +54,7 @@ CGEBeautifyFilter* createBeautifyFilter();
 
 CGEHistogramFilter* createHistogramFilter();
 CGEWaveformFilter* createWaveformFilter();
+    CGEFalseColorFilter* createFalseColorFilter();
 } // namespace CGE
 
 #endif

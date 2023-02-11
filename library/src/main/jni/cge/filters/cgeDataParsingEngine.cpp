@@ -1093,6 +1093,11 @@ CGEImageFilterInterface* CGEDataParsingEngine::advancedStyleParser(const char* p
     {
         ADJUSTHELP_COMMON_FUNC2(pstr, CGECrosshatchFilter, setCrosshatchSpacing, setLineWidth);
     }
+
+		else if(strcmp(buffer, "falsecolor") == 0)
+        {
+			ADJUSTHELP_COMMON_FUNC(pstr, CGEFalseColorFilter, setIntensity);
+        }
     else if (strcmp(buffer, "hist") == 0)
     {
         float x, y, value1, value2, r, g, b;
