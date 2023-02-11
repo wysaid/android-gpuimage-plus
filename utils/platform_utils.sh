@@ -1,8 +1,8 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 if ! command -v realpath &>/dev/null; then
-    function realpath() {
-        if [[ $# -ne 0 ]]; then
+    realpath() {
+        if [ $# -ne 0 ]; then
             pushd . >/dev/null
             cd $@ && pwd
             popd >/dev/null
@@ -12,32 +12,32 @@ fi
 
 REPO_DIR=$(git rev-parse --show-toplevel)
 
-function isWsl() {
-    [[ -d "/mnt/c" ]] || command -v wslpath &>/dev/null
+isWsl() {
+    [ -d "/mnt/c" ] || command -v wslpath &>/dev/null
 }
 
-function isMingW() {
-    [[ -d "/c" ]]
+isMingW() {
+    [ -d "/c" ]
 }
 
-function isCygwin() {
-    [[ -d "/cygdrive/c" ]]
+isCygwin() {
+    [ -d "/cygdrive/c" ]
 }
 
-function isWindows() {
+isWindows() {
     # check mingw and cygwin
     isWsl || isMingW || isCygwin
 }
 
-function isMacOSX() {
-    [[ "$(uname -s)" == "Darwin" ]]
+isMacOSX() {
+    [ "$(uname -s)" == "Darwin" ]
 }
 
-function isLinux() {
-    [[ "$(uname -s)" == "Linux" ]]
+isLinux() {
+    [ "$(uname -s)" == "Linux" ]
 }
 
-function getEnvironmentVariable() {
+getEnvironmentVariable() {
     VAR_NAME="$@"
     RET_VALUE=
     if isWindows && command -v cmd &>/dev/null; then
@@ -45,34 +45,34 @@ function getEnvironmentVariable() {
         RET_VALUE=$(cmd /C set "$VAR_NAME" | sed 's/.*=//')
     fi
 
-    if [[ -z "$RET_VALUE" ]]; then
+    if [ -z "$RET_VALUE" ]; then
         RET_VALUE=${!VAR_NAME}
     fi
 
-    if [[ -n "$RET_VALUE" ]]; then
+    if [ -n "$RET_VALUE" ]; then
         echo $RET_VALUE
     fi
 }
 
 if isWindows && ! command -v cmd &>/dev/null; then
-    if [[ -f "/mnt/c/Windows/system32/cmd.exe" ]]; then
-        function cmd() {
+    if [ -f "/mnt/c/Windows/system32/cmd.exe" ]; then
+        cmd() {
             /mnt/c/Windows/system32/cmd.exe $@
         }
-    elif [[ -f "/c/Windows/system32/cmd.exe" ]]; then
-        function cmd() {
+    elif [ -f "/c/Windows/system32/cmd.exe" ]; then
+        cmd() {
             /c/Windows/system32/cmd.exe $@
         }
-    elif [[ -f "/cygdrive/c/Windows/system32/cmd.exe" ]]; then
-        function cmd() {
+    elif [ -f "/cygdrive/c/Windows/system32/cmd.exe" ]; then
+        cmd() {
             /cygdrive/c/Windows/system32/cmd.exe $@
         }
     fi
 fi
 
-function runGradleCommand() {
+runGradleCommand() {
 
-    if isWindows && [[ -f "$REPO_DIR/local.properties" ]] && [[ -n "$(grep -i "sdk.dir=" "$REPO_DIR/local.properties" | grep -E ':(\\|/)')" ]]; then
+    if isWindows && [ -f "$REPO_DIR/local.properties" ] && [ -n "$(grep -i "sdk.dir=" "$REPO_DIR/local.properties" | grep -E ':(\\|/)')" ]; then
         # Run with Windows Native
         echo "Perform Windows Native Gradle Func: "
         cmd /C gradlew $@ && exit 0
@@ -81,7 +81,7 @@ function runGradleCommand() {
         export GRADLE_RUN_WIN_FAILED=true
     fi
 
-    if ! ./gradlew $@ && [[ -z "$GRADLE_RUN_WIN_FAILED" ]]; then
+    if ! ./gradlew $@ && [ -z "$GRADLE_RUN_WIN_FAILED" ]; then
         # Try again with Windows Native
         command -v cmd &>/dev/null && cmd /C gradlew $@
     fi

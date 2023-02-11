@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-if [[ $# -eq 0 ]]; then
+if [ $# -eq 0 ]; then
     echo "usage: [--debug|--release] [--clean] [--enable-cmake] [--setup-project] [--build] [--run]"
     exit 0
 fi
@@ -10,29 +10,33 @@ THIS_DIR="$(pwd)"
 PROJECT_DIR="$THIS_DIR"
 ADB_COMMAND="$PROJECT_DIR/utils/adb_command.sh"
 
-source "$PROJECT_DIR/utils/platform_utils.sh"
+if command -v source; then
+    source "$PROJECT_DIR/utils/platform_utils.sh"
+else
+    . "$PROJECT_DIR/utils/platform_utils.sh"
+fi
 
 export PACKAGE_NAME="org.wysaid.cgeDemo"
 export LAUNCH_ACTIVITY="MainActivity"
 export GRADLEW_RUN_TASK="installDebug"
 export ANDROID_BUILD_TYPE="assembleDebug"
 
-function setupProject() {
-    if [[ -f "$PROJECT_DIR/local.properties" ]] && grep -E '^usingCMakeCompile=true' "$PROJECT_DIR/local.properties"; then
+setupProject() {
+    if [ -f "$PROJECT_DIR/local.properties" ] && grep -E '^usingCMakeCompile=true' "$PROJECT_DIR/local.properties"; then
         echo "Using cmake, skip ndk build..."
     else
         bash "$PROJECT_DIR/library/src/main/jni/buildJNI" || exit 1
     fi
 }
 
-function runAndroidApp() {
+runAndroidApp() {
 
     if . "$ADB_COMMAND" -d shell am start -n "$PACKAGE_NAME/$PACKAGE_NAME.$LAUNCH_ACTIVITY"; then
-        if [[ -z "$(ps -ef | grep -i adb | grep -v grep | grep logcat)" ]]; then
+        if [ -z "$(ps -ef | grep -i adb | grep -v grep | grep logcat)" ]; then
             . "$ADB_COMMAND" -d logcat -c
-            if [[ $(uname -s) == "Linux" ]] || [[ $(uname -s) == "Darwin" ]]; then
+            if [ $(uname -s) == "Linux" ] || [ $(uname -s) == "Darwin" ]; then
                 APP_PROC_ID=$(. "$ADB_COMMAND" shell ps | grep org.wysaid.cgeDemo | tr -s ' ' | cut -d' ' -f2)
-                if [[ -n "$APP_PROC_ID" ]]; then
+                if [ -n "$APP_PROC_ID" ]; then
                     . "$ADB_COMMAND" -d logcat | grep -F "$APP_PROC_ID"
                 else
                     echo "Can not find proc id of org.wysaid.cgeDemo"
@@ -46,11 +50,11 @@ function runAndroidApp() {
     fi
 }
 
-function cleanProject() {
+cleanProject() {
     runGradleCommand clean --refresh-dependencies
 }
 
-function buildProject() {
+buildProject() {
     if ! runGradleCommand -p cgeDemo "$ANDROID_BUILD_TYPE"; then
 
         echo "Failed to run: ./gradlew -p cgeDemo $ANDROID_BUILD_TYPE"
@@ -64,8 +68,8 @@ function buildProject() {
     GENERATED_APK_FILE=$(find "$THIS_DIR/cgeDemo/build" -iname "*.apk" | grep -i "${ANDROID_BUILD_TYPE/assemble/}")
     echo "apk generated at: $GENERATED_APK_FILE"
 
-    if [[ -n "$GRADLEW_RUN_TASK" ]] && [[ $(. "$ADB_COMMAND" -d devices | grep -v 'List' | grep -vE '^$' | wc -l | tr -d ' ') -ne 0 ]]; then
-        if [[ "$GRADLEW_RUN_TASK" == "installRelease" ]]; then
+    if [ -n "$GRADLEW_RUN_TASK" ] && [ $(. "$ADB_COMMAND" -d devices | grep -v 'List' | grep -vE '^$' | wc -l | tr -d ' ') -ne 0 ]; then
+        if [ "$GRADLEW_RUN_TASK" == "installRelease" ]; then
             # release can not be installed directly. do adb install.
             . "$ADB_COMMAND" -d install "$GENERATED_APK_FILE"
         else
@@ -78,9 +82,9 @@ function buildProject() {
     fi
 }
 
-function patchAndroidSDKLocation() {
+patchAndroidSDKLocation() {
     VAR_ENV_VALUE=$(getEnvironmentVariable $@)
-    if [[ -n "$VAR_ENV_VALUE" ]]; then
+    if [ -n "$VAR_ENV_VALUE" ]; then
         VAR_ENV_VALUE=$(echo $VAR_ENV_VALUE | tr '\\' '/')
         echo "sdk.dir=$VAR_ENV_VALUE" >>local.properties
         return 0
@@ -88,21 +92,21 @@ function patchAndroidSDKLocation() {
     return 1
 }
 
-if [[ ! -f "local.properties" ]] && ! grep "sdk.dir=" local.properties &>/dev/null; then
+if [ ! -f "local.properties" ] && ! grep "sdk.dir=" local.properties &>/dev/null; then
     if ! (patchAndroidSDKLocation ANDROID_HOME ||
         patchAndroidSDKLocation ANDROID_SDK_ROOT); then
         echo "sdk.dir is missing in 'local.properties' and env var ANDROID_HOME is not defined." >&2
     fi
 fi
 
-function changeProperty() {
+changeProperty() {
     TARGET_FILE="$1"
     MATCH_PATTERN="$2"
     SED_PATTERN="$3"
     DEFAULT_VALUE="$4"
-    if [[ -f "$TARGET_FILE" ]] && grep -E "$MATCH_PATTERN" "$TARGET_FILE" >/dev/null; then
+    if [ -f "$TARGET_FILE" ] && grep -E "$MATCH_PATTERN" "$TARGET_FILE" >/dev/null; then
         # Stupid diff between the command.
-        if [[ "$(uname -s)" == "Darwin" ]]; then # Mac OS
+        if [ "$(uname -s)" == "Darwin" ]; then # Mac OS
             sed -I "" -E "$SED_PATTERN" "$TARGET_FILE"
         else
             sed -i"" -E "$SED_PATTERN" "$TARGET_FILE"
@@ -112,7 +116,7 @@ function changeProperty() {
     fi
 }
 
-while [[ $# > 0 ]]; do
+while [ $# ] >0; do
 
     PARSE_KEY="$1"
 
@@ -171,16 +175,16 @@ while [[ $# > 0 ]]; do
 
 done
 
-# if [[ -z "$SKIP_GRADLEW_TASKS" ]]; then
+# if [ -z "$SKIP_GRADLEW_TASKS" ]; then
 
-#     if [[ -n "$CLEAN_GRADLEW_TASKS" ]]; then
+#     if [ -n "$CLEAN_GRADLEW_TASKS" ]; then
 #         ./gradlew clean
 #     fi
 
 #     buildProject
 # fi
 
-# if [[ -n "$GRADLEW_RUN_TASK" ]] || [[ -n $SKIP_GRADLEW_TASKS ]]; then
+# if [ -n "$GRADLEW_RUN_TASK" ] || [ -n $SKIP_GRADLEW_TASKS ]; then
 #     runAndroidApp
 # else
 #     echo "apk generated at:"
