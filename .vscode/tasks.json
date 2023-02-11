@@ -6,7 +6,7 @@
         {
             "label": "[Debug] Build Android Demo",
             "type": "shell",
-            "command": "bash",
+            "command": "sh",
             "args": [
                 "vscode_tasks.sh",
                 "--debug",
@@ -21,7 +21,7 @@
         {
             "label": "[Debug] Run Android Demo",
             "type": "shell",
-            "command": "bash",
+            "command": "sh",
             "args": [
                 "vscode_tasks.sh",
                 "--debug",
@@ -36,7 +36,7 @@
         {
             "label": "[Debug] Build And Run Android Demo",
             "type": "shell",
-            "command": "bash",
+            "command": "sh",
             "args": [
                 "vscode_tasks.sh",
                 "--debug",
@@ -52,7 +52,7 @@
         {
             "label": "[Release] Build Android Demo",
             "type": "shell",
-            "command": "bash",
+            "command": "sh",
             "args": [
                 "vscode_tasks.sh",
                 "--release",
@@ -67,7 +67,7 @@
         {
             "label": "[Release] Run Android Demo",
             "type": "shell",
-            "command": "bash",
+            "command": "sh",
             "args": [
                 "vscode_tasks.sh",
                 "--release",
@@ -82,7 +82,7 @@
         {
             "label": "[Release] Build And Run Android Demo",
             "type": "shell",
-            "command": "bash",
+            "command": "sh",
             "args": [
                 "vscode_tasks.sh",
                 "--release",
@@ -98,7 +98,7 @@
         {
             "label": "[Release] Build Native Library With NDK Build",
             "type": "shell",
-            "command": "bash",
+            "command": "sh",
             "args": [
                 "library/src/main/jni/buildJNI"
             ],
@@ -111,7 +111,7 @@
         {
             "label": "Enable Gradle CMake Build",
             "type": "shell",
-            "command": "bash",
+            "command": "sh",
             "args": [
                 "vscode_tasks.sh",
                 "--enable-cmake"
@@ -125,7 +125,7 @@
         {
             "label": "Setup Gradle Project",
             "type": "shell",
-            "command": "bash",
+            "command": "sh",
             "args": [
                 "vscode_tasks.sh",
                 "--setup-project"
@@ -139,7 +139,7 @@
         {
             "label": "[Debug] Enable CMake And Build Project With CMake",
             "type": "shell",
-            "command": "bash",
+            "command": "sh",
             "args": [
                 "vscode_tasks.sh",
                 "--debug",
@@ -155,7 +155,7 @@
         {
             "label": "[Release] Enable CMake And Build Project With CMake",
             "type": "shell",
-            "command": "bash",
+            "command": "sh",
             "args": [
                 "vscode_tasks.sh",
                 "--release",
