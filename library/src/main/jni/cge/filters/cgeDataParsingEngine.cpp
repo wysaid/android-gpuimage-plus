@@ -1115,8 +1115,8 @@ CGEImageFilterInterface* CGEDataParsingEngine::advancedStyleParser(const char* p
 
     else if (strcmp(buffer, "waveform") == 0)
     {
-        float x, y, value1, value2, r, g, b, a = 1.0f;
-        if (sscanf(pstr, "%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f", &x, &y, &value1, &value2, &r, &g, &b, &a) < 7)
+        float x, y, width, height;
+        if (sscanf(pstr, "%f%*c%f%*c%f%*c%f", &x, &y, &width, &height) < 4)
         {
             LOG_ERROR_PARAM(pstr);
             return nullptr;
@@ -1127,8 +1127,7 @@ CGEImageFilterInterface* CGEDataParsingEngine::advancedStyleParser(const char* p
         {
             proc = filter;
             filter->setFormPosition(x, y);
-            filter->setFormSize(value1, value2);
-            filter->setColor(r, g, b, a);
+            filter->setFormSize(width, height);
         }
     }
     else if (strcmp(buffer, "edge") == 0)

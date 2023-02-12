@@ -1,33 +1,33 @@
 #include "cgeWaveformFilter.h"
 
-#include <EGL/egl.h>
+#define USING_ALPHA 1 /// 视图增加一个 80% 的半透明
 
-static CGEConstString s_vshWaveform = "#version 310 es\n" CGE_SHADER_STRING_PRECISION_H(
-    layout(location = 0) in vec2 position;
-    layout(location = 0) out vec2 textureCoordinate;
-    void main() {
-        gl_Position = vec4(position, 0.0, 1.0);
-        textureCoordinate = (position.xy + 1.0) / 2.0;
-    });
+// static CGEConstString s_vshWaveform = "#version 310 es\n" CGE_SHADER_STRING_PRECISION_H(
+//     layout(location = 0) in vec2 position;
+//     layout(location = 0) out vec2 textureCoordinate;
+//     void main() {
+//         gl_Position = vec4(position, 0.0, 1.0);
+//         textureCoordinate = (position.xy + 1.0) / 2.0;
+//     });
 
-static CGEConstString s_fshWaveform = "#version 310 es\n" CGE_SHADER_STRING(
-    precision highp float;
-    precision highp int;
-    layout(location = 0) in vec2 textureCoordinate;
-    layout(binding = 0) uniform sampler2D inputImageTexture;
-    layout(rgba8ui, binding = 1) uniform writeonly highp uimage2D outputImage;
-    layout(location = 0) out vec4 fragColor;
+// static CGEConstString s_fshWaveform = "#version 310 es\n" CGE_SHADER_STRING(
+//     precision highp float;
+//     precision highp int;
+//     layout(location = 0) in vec2 textureCoordinate;
+//     layout(binding = 0) uniform sampler2D inputImageTexture;
+//     layout(rgba8ui, binding = 1) uniform writeonly highp uimage2D outputImage;
+//     layout(location = 0) out vec4 fragColor;
 
-    void main() {
-        fragColor = vec4(1.0);
-        vec4 color = texture(inputImageTexture, textureCoordinate);
-        float lum = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-        ivec2 newLoc = ivec2(vec2(textureCoordinate.x, lum) * vec2(imageSize(outputImage)));
-        // uint newLum = uint(lum * 255.0);
-        imageStore(outputImage, newLoc, uvec4(255, 255, 255, 255));
+//     void main() {
+//         fragColor = vec4(1.0);
+//         vec4 color = texture(inputImageTexture, textureCoordinate);
+//         float lum = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+//         ivec2 newLoc = ivec2(vec2(textureCoordinate.x, lum) * vec2(imageSize(outputImage)));
+//         // uint newLum = uint(lum * 255.0);
+//         imageStore(outputImage, newLoc, uvec4(255, 255, 255, 255));
 
-        // TODO: 直接使用 255 来描述最亮是没有问题的。 如果要实现颜色亮度叠加. 可以考虑使用 imageAtomicAdd.
-    });
+//         // TODO: 直接使用 255 来描述最亮是没有问题的。 如果要实现颜色亮度叠加. 可以考虑使用 imageAtomicAdd.
+//     });
 
 static CGEConstString s_cshWaveform = "#version 310 es\n" CGE_SHADER_STRING(
     precision highp float;
@@ -55,31 +55,17 @@ bool CGEWaveformFilter::init()
         m_program.bind();
         setFormPosition(0.1f, 0.1f);
         setFormSize(0.3f, 0.3f);
-        setColor(0.0f, 0.0f, 0.0f, 0.5f);
         m_drawer.reset(TextureDrawer::create());
         m_drawer->setFlipScale(1.0f, -1.0f); // flip upside down, meet the gl coord.
         m_renderTarget = std::make_unique<FrameBufferWithTexture>();
         return true;
     }
 
-    // if (initShadersFromString(s_vshWaveform, s_fshWaveform))
-    // {
-    //     m_program.bind();
-    //     setFormPosition(0.1f, 0.1f);
-    //     setFormSize(0.3f, 0.3f);
-    //     setColor(0.0f, 0.0f, 0.0f, 0.5f);
-    //     m_drawer.reset(TextureDrawer::create());
-    //     m_drawer->setFlipScale(1.0f, -1.0f); // flip upside down, meet the gl coord.
-    //     m_renderTarget = std::make_unique<FrameBufferWithTexture>();
-    //     return true;
-    // }
-
     CGE_LOG_ERROR(R"(CGEWaveformFilter::init failed. This filter needs GLES3.1 and later!
  Only GLES 3.1+ support image store. 
  You need to imp a fallback version which reading pixels every frame like `cgeColorMappingFilter`
 )");
-    CGE_LOG_ERROR("Failed Vertex Shader: %s\n", s_vshWaveform);
-    CGE_LOG_ERROR("Failed Fragment Shader: %s\n", s_fshWaveform);
+    CGE_LOG_ERROR("Failed Compute Shader: %s\n", s_cshWaveform);
     return false;
 }
 
@@ -106,9 +92,20 @@ void CGEWaveformFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint
 
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
+#if USING_ALPHA
+    glEnable(GL_BLEND);
+    glBlendColor(1, 1, 1, 0.8);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_CONSTANT_ALPHA);
+#endif
+
     handler->setAsTarget();
     glViewport(m_position[0] * sz.width, m_position[1] * sz.height, m_size[0] * sz.width, m_size[1] * sz.height);
     m_drawer->drawTexture(m_renderTarget->texture());
+
+#if USING_ALPHA
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_BLEND);
+#endif
 }
 
 void CGEWaveformFilter::setFormPosition(float left, float top)
@@ -121,8 +118,4 @@ void CGEWaveformFilter::setFormSize(float width, float height)
     m_size = { width, height };
 }
 
-void CGEWaveformFilter::setColor(float r, float g, float b, float a)
-{
-    m_color = { r, g, b, a };
-}
 } // namespace CGE
