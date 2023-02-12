@@ -29,15 +29,28 @@ static CGEConstString s_fshWaveform = "#version 310 es\n" CGE_SHADER_STRING(
         // TODO: 直接使用 255 来描述最亮是没有问题的。 如果要实现颜色亮度叠加. 可以考虑使用 imageAtomicAdd.
     });
 
+static CGEConstString s_cshWaveform = "#version 310 es\n" CGE_SHADER_STRING(
+    precision highp float;
+    precision highp int;
+    layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+    layout(rgba8ui, binding = 0) uniform readonly highp uimage2D inputImageTexture;
+    layout(rgba8ui, binding = 1) uniform writeonly highp uimage2D outputImage;
+
+    void main() {
+        ivec2 texCoord = ivec2(gl_GlobalInvocationID);
+        uvec3 color = imageLoad(inputImageTexture, texCoord).rgb;
+        float lum = dot(vec3(color.rgb), vec3(0.299, 0.587, 0.114));
+        ivec2 newLoc = ivec2(texCoord.x, uint(lum));
+        imageStore(outputImage, newLoc, uvec4(255, 255, 255, 255));
+    });
+
 namespace CGE
 {
-CGEWaveformFilter::~CGEWaveformFilter()
-{
-}
+CGEWaveformFilter::~CGEWaveformFilter() = default;
 
 bool CGEWaveformFilter::init()
 {
-    if (initShadersFromString(s_vshWaveform, s_fshWaveform))
+    if (m_program.initWithComputeShader(s_cshWaveform))
     {
         m_program.bind();
         setFormPosition(0.1f, 0.1f);
@@ -48,6 +61,18 @@ bool CGEWaveformFilter::init()
         m_renderTarget = std::make_unique<FrameBufferWithTexture>();
         return true;
     }
+
+    // if (initShadersFromString(s_vshWaveform, s_fshWaveform))
+    // {
+    //     m_program.bind();
+    //     setFormPosition(0.1f, 0.1f);
+    //     setFormSize(0.3f, 0.3f);
+    //     setColor(0.0f, 0.0f, 0.0f, 0.5f);
+    //     m_drawer.reset(TextureDrawer::create());
+    //     m_drawer->setFlipScale(1.0f, -1.0f); // flip upside down, meet the gl coord.
+    //     m_renderTarget = std::make_unique<FrameBufferWithTexture>();
+    //     return true;
+    // }
 
     CGE_LOG_ERROR(R"(CGEWaveformFilter::init failed. This filter needs GLES3.1 and later!
  Only GLES 3.1+ support image store. 
@@ -70,29 +95,16 @@ void CGEWaveformFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    /// 在部分低端机型上, glClear 可能会发生在 shader write 之后. 这里必须控制一下时序.
-    /// 经过测试, 使用 glMemoryBarrier(GL_ALL_BARRIER_BITS) 也不管用, 但是 glFlush 可以修复此问题
-    /// 暂且这么实现.
-    glFlush();
+    glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 
     m_program.bind();
 
-    /// 渲染不写入, 使用 imageStore 写入.
-    glColorMask(false, false, false, false);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, srcTexture);
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindImageTexture(0, handler->getTargetTextureID(), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8UI);
     glBindImageTexture(1, m_renderTarget->texture(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8UI);
 
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-    glColorMask(true, true, true, true);
-    glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+    glDispatchCompute(sz.width, sz.height, 1);
+
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
     handler->setAsTarget();
     glViewport(m_position[0] * sz.width, m_position[1] * sz.height, m_size[0] * sz.width, m_size[1] * sz.height);
