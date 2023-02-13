@@ -2,33 +2,6 @@
 
 #define USING_ALPHA 1 /// 视图增加一个 80% 的半透明
 
-// static CGEConstString s_vshWaveform = "#version 310 es\n" CGE_SHADER_STRING_PRECISION_H(
-//     layout(location = 0) in vec2 position;
-//     layout(location = 0) out vec2 textureCoordinate;
-//     void main() {
-//         gl_Position = vec4(position, 0.0, 1.0);
-//         textureCoordinate = (position.xy + 1.0) / 2.0;
-//     });
-
-// static CGEConstString s_fshWaveform = "#version 310 es\n" CGE_SHADER_STRING(
-//     precision highp float;
-//     precision highp int;
-//     layout(location = 0) in vec2 textureCoordinate;
-//     layout(binding = 0) uniform sampler2D inputImageTexture;
-//     layout(rgba8ui, binding = 1) uniform writeonly highp uimage2D outputImage;
-//     layout(location = 0) out vec4 fragColor;
-
-//     void main() {
-//         fragColor = vec4(1.0);
-//         vec4 color = texture(inputImageTexture, textureCoordinate);
-//         float lum = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-//         ivec2 newLoc = ivec2(vec2(textureCoordinate.x, lum) * vec2(imageSize(outputImage)));
-//         // uint newLum = uint(lum * 255.0);
-//         imageStore(outputImage, newLoc, uvec4(255, 255, 255, 255));
-
-//         // TODO: 直接使用 255 来描述最亮是没有问题的。 如果要实现颜色亮度叠加. 可以考虑使用 imageAtomicAdd.
-//     });
-
 static CGEConstString s_cshWaveform = "#version 310 es\n" CGE_SHADER_STRING(
     precision highp float;
     precision highp int;
