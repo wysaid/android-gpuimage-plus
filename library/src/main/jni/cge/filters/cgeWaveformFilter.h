@@ -27,7 +27,9 @@ public:
 
 protected:
     std::unique_ptr<TextureDrawer> m_drawer;
-    std::unique_ptr<FrameBufferWithTexture> m_renderTarget;
+    std::unique_ptr<TextureObject> m_diagramTexture;
+    ProgramObject m_clearImageProgram;
+    
     Vec2f m_position;
     Vec2f m_size;
 };

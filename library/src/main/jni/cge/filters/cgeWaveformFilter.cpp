@@ -17,20 +17,31 @@ static CGEConstString s_cshWaveform = "#version 310 es\n" CGE_SHADER_STRING(
         imageStore(outputImage, newLoc, uvec4(255, 255, 255, 255));
     });
 
+static CGEConstString s_cshClearImage = "#version 310 es\n" CGE_SHADER_STRING(
+    precision highp float;
+    precision highp int;
+    layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+    layout(rgba8ui, binding = 1) uniform writeonly highp uimage2D outputImage;
+
+    void main() {
+        ivec2 texCoord = ivec2(gl_GlobalInvocationID);
+        imageStore(outputImage, texCoord, uvec4(0, 0, 0, 255));
+    });
+
 namespace CGE
 {
 CGEWaveformFilter::~CGEWaveformFilter() = default;
 
 bool CGEWaveformFilter::init()
 {
-    if (m_program.initWithComputeShader(s_cshWaveform))
+    if (m_program.initWithComputeShader(s_cshWaveform) && m_clearImageProgram.initWithComputeShader(s_cshClearImage))
     {
         m_program.bind();
         setFormPosition(0.1f, 0.1f);
         setFormSize(0.3f, 0.3f);
         m_drawer.reset(TextureDrawer::create());
         m_drawer->setFlipScale(1.0f, -1.0f); // flip upside down, meet the gl coord.
-        m_renderTarget = std::make_unique<FrameBufferWithTexture>();
+        m_diagramTexture = std::make_unique<TextureObject>();
         return true;
     }
 
@@ -45,21 +56,26 @@ bool CGEWaveformFilter::init()
 void CGEWaveformFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID)
 {
     auto&& sz = handler->getOutputFBOSize();
-    if (sz.width != m_renderTarget->width() || m_renderTarget->texture() == 0)
+    if (sz.width != m_diagramTexture->width() || m_diagramTexture->texture() == 0)
     {
-        m_renderTarget->bindTexture2D(sz.width, 256);
+        m_diagramTexture->resize(sz.width, 256);
     }
 
-    m_renderTarget->bind();
-    glClearColor(0, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glBindImageTexture(0, handler->getTargetTextureID(), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8UI);
+    glBindImageTexture(1, m_diagramTexture->texture(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8UI);
 
-    glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+    // Clear diagram texture before frame.
+    // You can also use glClear(GL_COLOR_BUFFER_BIT) on some devices.
+    {
+        // @attention: glClear does not work on some devices. e.g. Mali-G76
+        // Perform clear with a compute shader.
+        m_clearImageProgram.bind();
+        glDispatchCompute(sz.width, sz.height, 1);
+    }
+
+    // glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
     m_program.bind();
-
-    glBindImageTexture(0, handler->getTargetTextureID(), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8UI);
-    glBindImageTexture(1, m_renderTarget->texture(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8UI);
 
     glDispatchCompute(sz.width, sz.height, 1);
 
@@ -73,7 +89,7 @@ void CGEWaveformFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint
 
     handler->setAsTarget();
     glViewport(m_position[0] * sz.width, m_position[1] * sz.height, m_size[0] * sz.width, m_size[1] * sz.height);
-    m_drawer->drawTexture(m_renderTarget->texture());
+    m_drawer->drawTexture(m_diagramTexture->texture());
 
 #if USING_ALPHA
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
