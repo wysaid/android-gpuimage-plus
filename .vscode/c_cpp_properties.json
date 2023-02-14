@@ -19,7 +19,7 @@
             "cppStandard": "c++17",
             "defines": [
                 "DEBUG=1",
-                "_CGE_USE_FFMPEG_=1",
+                "CGE_USE_FFMPEG=1",
                 "ANDROID_NDK=1",
                 "_CGE_DISABLE_GLOBALCONTEXT_=1",
                 "_CGE_ONLY_FILTERS_=1"

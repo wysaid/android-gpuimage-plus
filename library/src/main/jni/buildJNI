@@ -26,59 +26,39 @@ if [[ "$NDK" == "" ]]; then
     fi
 fi
 
-cd $(dirname $0)
+cd "$(dirname "$0")"
 
-for i in $*; do
-
-    if [ "${i}" == "-r" ] || [ "${i}" == "--release" ]; then
-
+while [[ $# -gt 0 ]]; do
+    PARSE_KEY="$1"
+    case "$PARSE_KEY" in
+    -r | --release)
         export CGE_RELEASE_MODE=1
-
         echo "release mode enabled!"
-
-    fi
-
-    if [ "${i}" == "-d" ] || [ "${i}" == "--debug" ]; then
-
+        shift
+        ;;
+    -d | --debug)
         export CGE_DEBUG_MODE=1
-
         echo "debug mode enabled!"
-
-    fi
-
-    if [ "${i}" == "-b" ] || [ "${i}" == "-B" ]; then
-
+        shift
+        ;;
+    -b | -B)
         BUILD_ARG=-B
-
         echo "force rebuild!"
+        shift
+        ;;
+    --disable-video-module)
+        export CGE_NO_VIDEO_MODULE=1
+        shift
+        ;;
 
-    fi
-
-    if [ "${i}" == "--noface" ] || [ "${i}" == "-n" ]; then
-
-        NO_FACE=1
-
-        echo "disable face module!"
-
-    fi
-
-    if [ "${i}" == "--leaktest" ] || [ "${i}" == "-lt" ] || [ "${i}" == "--lt" ]; then
-
-        export CGE_USE_LEAK_TEST=1
-
-        echo "leak test enabled!"
-
-    fi
+    esac
 
 done
 
-# if [[ "$NO_FACE" == "" ]]; then
-
-# export CGE_USE_FACE_MODULE=1
-
-# fi
-
-export CGE_USE_VIDEO_MODULE=1
+if [[ -z "$CGE_NO_VIDEO_MODULE" ]]; then
+    export CGE_USE_VIDEO_MODULE=1
+    export CGE_VIDEO_MODULEDEFINE="CGE_USE_VIDEO_MODULE=1"
+fi
 
 echo "The NDK dir is: ${NDK}, If the shell can not run normally, you should set the NDK variable to your local ndk-dir"
 
@@ -95,7 +75,7 @@ if [[ -n "$NDK" ]] && [[ -f "$NDK/ndk-build" ]]; then
         fi
     fi
 elif [[ -n $(command -v cmd && cmd /C set | grep -i 'NDK') ]]; then
-    cmd /C "set CGE_USE_VIDEO_MODULE=1 && %NDK%/ndk-build.cmd" ${BUILD_ARG} -j${THREADS}
+    cmd /C "set $CGE_VIDEO_MODULEDEFINE && %NDK%/ndk-build.cmd" ${BUILD_ARG} -j${THREADS}
 else
     echo "Can not find NDK!"
 fi

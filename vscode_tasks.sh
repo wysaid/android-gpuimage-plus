@@ -162,6 +162,15 @@ while [[ $# > 0 ]]; do
         changeProperty "local.properties" '^usingCMakeCompile=' 's/usingCMakeCompile=.*/usingCMakeCompile=true/' 'usingCMakeCompile=true'
         shift # past argument
         ;;
+    --enable-video-module)
+        changeProperty "local.properties" '^disableVideoModule=' 's/disableVideoModule=.*/disableVideoModule=false/' 'disableVideoModule=false'
+        shift # past argument
+        ;;
+    --disable-video-module)
+        changeProperty "local.properties" '^disableVideoModule=' 's/disableVideoModule=.*/disableVideoModule=true/' 'disableVideoModule=true'
+        shift # past argument
+        ;;
+
     *)
         echo "Invalid argument $PARSE_KEY..."
         exit 1

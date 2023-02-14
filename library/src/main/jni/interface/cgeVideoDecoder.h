@@ -6,7 +6,7 @@
  *        Mail: admin@wysaid.org
  */
 
-#if !defined(_CGEVIDEODECODER_H_) && defined(_CGE_USE_FFMPEG_)
+#if !defined(_CGEVIDEODECODER_H_) && defined(CGE_USE_FFMPEG)
 #define _CGEVIDEODECODER_H_
 
 #include "cgeCommonDefine.h"
