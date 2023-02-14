@@ -2,13 +2,11 @@
 
 Image, Camera And Video Filters Based On OpenGL
 
->To get pure lib without ffmpeg(No feature of video recording), please checkout the branch [min](https://github.com/wysaid/android-gpuimage-plus/tree/min). The whole jni module will be less than 600KB.
-
 ## New Feature
 
 See the `image deform demo`.
 
-![](screenshots/6.gif) ![](screenshots/5.gif)
+![screenshots](screenshots/6.gif) ![screenshots](screenshots/5.gif)
 
 ## Gradle dependency
 
@@ -27,7 +25,9 @@ dependencies {
 }
 ```
 
-> Use other ffmpeg-library, see: <https://github.com/wysaid/FFmpeg-Android.git>
+> __The jcenter is out of date, please try the source for now. Latest prebuilt versions will be provided soon.__
+
+> To compile other versions of ffmpeg, see: <https://github.com/wysaid/FFmpeg-Android.git>
 
 ## Abstract
 
@@ -36,6 +36,11 @@ dependencies {
 * Demo and Library will be updated as needed. Welcome for your questions or PR.
 
 ## Build
+
+* Options to know in `local.properties`:
+  * `usingCMakeCompile=true`: Compile the native library with CMake if set to true. (Default to false, so you can use the prebuilt libs)
+  * `usingCMakeCompileDebug=true`: Compile the native library in Debug Mode if set to true. (Default to false)
+  * `disableVideoModule=true`: Disable the video recording feature, The whole jni module will be very small. (Default to false)
 
 * Build with `Android Studio` and CMake: (Recommended)
   * Put `usingCMakeCompile=true` in your `local.properties`
@@ -125,7 +130,6 @@ protected void onCreate(Bundle savedInstanceState) {
     Bitmap dstImage = CGENativeLibrary.filterImage_MultipleEffects(src, ruleString, 1.0f);
 
     //Then the dstImage is applied with the filter.
-    //It's so convenient, isn't it?
 
     //Save the result image to /sdcard/libCGE/rec_???.jpg.
     ImageUtil.saveBitmap(dstImage);
