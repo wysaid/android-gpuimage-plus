@@ -19,6 +19,7 @@ import android.widget.SeekBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.wysaid.camera.CameraInstance;
+import org.wysaid.library.BuildConfig;
 import org.wysaid.myUtils.FileUtil;
 import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.myUtils.MsgUtil;
@@ -68,6 +69,12 @@ public class CameraDemoActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
+
+            if (!BuildConfig.CGE_USE_VIDEO_MODULE) {
+                MsgUtil.toastMsg(CameraDemoActivity.this, "gradle.ext.disableVideoModule is defined to true, video module disabled!!");
+                return;
+            }
+
             Button btn = (Button) v;
 
             if (!isValid) {

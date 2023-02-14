@@ -6,12 +6,19 @@
  *        Mail: admin@wysaid.org
  */
 
-#ifdef _CGE_USE_FFMPEG_
-
 #include "cgeFrameRecorderWrapper.h"
 
-#include "cgeFrameRecorder.h"
 #include "cgeUtilFunctions.h"
+
+#ifdef CGE_USE_FFMPEG
+#include "cgeFrameRecorder.h"
+#else
+#include "cgeFrameRenderer.h"
+namespace CGE
+{
+typedef CGEFrameRenderer CGEFrameRecorder;
+}
+#endif
 
 using namespace CGE;
 
@@ -33,65 +40,101 @@ JNIEXPORT jlong JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeCreate
 
 JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeStartRecording(JNIEnv* env, jobject, jlong addr, jint fps, jstring filename, jint bitRate)
 {
+#ifdef CGE_USE_FFMPEG
     const char* path = env->GetStringUTFChars(filename, 0);
     CGEFrameRecorder* recorder = (CGEFrameRecorder*)addr;
     bool ret = recorder->startRecording(fps, path, bitRate);
     env->ReleaseStringUTFChars(filename, path);
     return ret;
+#else
+    return {};
+#endif
 }
 
 JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeIsRecordingStarted(JNIEnv* env, jobject, jlong addr)
 {
+#ifdef CGE_USE_FFMPEG
     CGEFrameRecorder* recorder = (CGEFrameRecorder*)addr;
     return recorder->isRecordingStarted();
+#else
+    return {};
+#endif
 }
 
 JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeEndRecording(JNIEnv* env, jobject, jlong addr, jboolean shouldSave)
 {
+#ifdef CGE_USE_FFMPEG
     CGEFrameRecorder* recorder = (CGEFrameRecorder*)addr;
     return recorder->endRecording(shouldSave);
+#else
+    return {};
+#endif
 }
 
 JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativePauseRecording(JNIEnv* env, jobject, jlong addr)
 {
+#ifdef CGE_USE_FFMPEG
     CGEFrameRecorder* recorder = (CGEFrameRecorder*)addr;
     recorder->pauseRecording();
+#endif
 }
 
 JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeIsRecordingPaused(JNIEnv* env, jobject, jlong addr)
 {
+#ifdef CGE_USE_FFMPEG
     CGEFrameRecorder* recorder = (CGEFrameRecorder*)addr;
     return recorder->isRecordingPaused();
+#else
+    return {};
+#endif
 }
 
 JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeResumeRecording(JNIEnv* env, jobject, jlong addr)
 {
+#ifdef CGE_USE_FFMPEG
     CGEFrameRecorder* recorder = (CGEFrameRecorder*)addr;
     return recorder->resumeRecording();
+#else
+    return {};
+#endif
 }
 
 JNIEXPORT jdouble JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeGetTimestamp(JNIEnv* env, jobject, jlong addr)
 {
+#ifdef CGE_USE_FFMPEG
     CGEFrameRecorder* recorder = (CGEFrameRecorder*)addr;
     return recorder->getRecordingTimestamp();
+#else
+    return {};
+#endif
 }
 
 JNIEXPORT jdouble JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeGetVideoStreamtime(JNIEnv* env, jobject, jlong addr)
 {
+#ifdef CGE_USE_FFMPEG
     CGEFrameRecorder* recorder = (CGEFrameRecorder*)addr;
     return recorder->getVideoStreamTime();
+#else
+    return {};
+#endif
 }
 
 JNIEXPORT jdouble JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeGetAudioStreamtime(JNIEnv* env, jobject, jlong addr)
 {
+#ifdef CGE_USE_FFMPEG
     CGEFrameRecorder* recorder = (CGEFrameRecorder*)addr;
     return recorder->getAudioStreamTime();
+#else
+    return {};
+#endif
 }
 
 JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeRecordImageFrame(JNIEnv* env, jobject, jlong addr)
 {
+#ifdef CGE_USE_FFMPEG
     CGEFrameRecorder* recorder = (CGEFrameRecorder*)addr;
     recorder->recordImageFrame();
+#endif
 }
 
 // static inline bool isBigEndian()
@@ -104,25 +147,11 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeRecordI
 
 JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeRecordAudioFrame(JNIEnv* env, jobject, jlong addr, jobject audioBuffer, jint bufferLen)
 {
+#ifdef CGE_USE_FFMPEG
     unsigned short* buffer = (unsigned short*)env->GetDirectBufferAddress(audioBuffer);
 
     if (buffer != nullptr)
     {
-        // Java一定是大端， 所以需要判断当前cpu到底是大端还是小端。
-        //  static bool sIsBigEndian = isBigEndian();
-
-        // if(!sIsBigEndian)
-        // {
-        // 	unsigned char* buffer2 = (unsigned char*)buffer;
-        // 	int total = bufferLen * 2;
-        // 	for(int i = 0; i < total; i += 2)
-        // 	{
-        // 		unsigned char c = buffer2[i];
-        // 		buffer2[i] = buffer2[i + 1];
-        // 		buffer2[i + 1] = c;
-        // 	}
-        // }
-
         CGEFrameRecorder* recorder = (CGEFrameRecorder*)addr;
         CGEVideoEncoderMP4::AudioSampleData audioData;
         audioData.channels = 1;
@@ -134,12 +163,14 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeRecordA
     {
         CGE_LOG_ERROR("Record Audio Frame failed!\n");
     }
+#endif
 }
 
 /////////////////  Face Detection  /////////////////////////////
 
 JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeSetGlobalFilter(JNIEnv* env, jobject, jlong addr, jstring config)
 {
+#ifdef CGE_USE_FFMPEG
     static CGETexLoadArg texLoadArg;
     texLoadArg.env = env;
     texLoadArg.cls = env->FindClass("org/wysaid/nativePort/CGENativeLibrary");
@@ -148,10 +179,12 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeSetGlob
     const char* configStr = env->GetStringUTFChars(config, 0);
     recorder->setGlobalFilter(configStr, cgeGlobalTextureLoadFunc, &texLoadArg);
     env->ReleaseStringUTFChars(config, configStr);
+#endif
 }
 
 JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeSetBeautifyFilter(JNIEnv*, jobject, jlong addr)
 {
+#ifdef CGE_USE_FFMPEG
     CGEFrameRecorder* recorder = (CGEFrameRecorder*)addr;
     auto* handler = recorder->getImageHandler();
     int w = -1, h = -1;
@@ -174,19 +207,24 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeSetBeau
 
     recorder->setGlobalFilter(config, nullptr, nullptr);
     CGE_LOG_INFO("启用美化效果!");
+#endif
 }
 
 JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeSetGlobalFilterIntensity(JNIEnv* env, jobject, jlong addr, jfloat intensity)
 {
+#ifdef CGE_USE_FFMPEG
     CGEFrameRecorder* recorder = (CGEFrameRecorder*)addr;
     recorder->setGlobalFilterIntensity(intensity);
+#endif
 }
 
 JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeIsGlobalFilterEnabled(JNIEnv*, jobject, jlong addr)
 {
+#ifdef CGE_USE_FFMPEG
     CGEFrameRecorder* recorder = (CGEFrameRecorder*)addr;
     return recorder->getGlobalFilter() != nullptr;
-}
-}
-
+#else
+    return {};
 #endif
+}
+}

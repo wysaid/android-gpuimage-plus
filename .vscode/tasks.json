@@ -110,11 +110,25 @@
             "problemMatcher": "$gcc"
         },
         {
-            "label": "[Release] Build Native Library With NDK Build",
+            "label": "[Release] NDK Build Native Library With FFmpeg (Deprecated)",
             "type": "shell",
             "command": "bash",
             "args": [
                 "library/src/main/jni/buildJNI"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "[Release] NDK Build Native Library Without FFmpeg (Deprecated)",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "library/src/main/jni/buildJNI",
+                "--disable-video-module",
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -129,6 +143,34 @@
             "args": [
                 "vscode_tasks.sh",
                 "--enable-cmake"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "Enable Video Module",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "vscode_tasks.sh",
+                "--enable-video-module"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "Disable Video Module",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "vscode_tasks.sh",
+                "--disable-video-module"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

@@ -6,7 +6,9 @@
  *        Mail: admin@wysaid.org
  */
 
-#if !defined(_CGEFRAMERECORDER_H_) && defined(_CGE_USE_FFMPEG_)
+#ifdef CGE_USE_FFMPEG
+
+#if !defined(_CGEFRAMERECORDER_H_) && defined(CGE_USE_FFMPEG)
 #define _CGEFRAMERECORDER_H_
 
 #include "cgeFrameRenderer.h"
@@ -166,5 +168,7 @@ protected:
 };
 
 } // namespace CGE
+
+#endif
 
 #endif

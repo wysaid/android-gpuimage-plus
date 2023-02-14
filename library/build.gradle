@@ -10,6 +10,10 @@ def usingCMakeCompileDebug() {
     return gradle.ext != null && gradle.ext.has("usingCMakeCompileDebug") && gradle.ext.usingCMakeCompileDebug;
 }
 
+def disableVideoModule() {
+    return gradle.ext != null && gradle.ext.has("disableVideoModule") && gradle.ext.disableVideoModule;
+}
+
 android {
     compileSdkVersion rootProject.ext.android.compileSdkVersion
     buildToolsVersion rootProject.ext.android.buildToolsVersion
@@ -22,12 +26,15 @@ android {
         minSdkVersion rootProject.ext.android.minSdkVersion
         targetSdkVersion rootProject.ext.android.targetSdkVersion
 
+        buildConfigField("boolean", "CGE_USE_VIDEO_MODULE", disableVideoModule() ? "false" : "true")
+
         if (usingCMakeCompile()) {
             externalNativeBuild {
                 cmake {
 
                     def cmakeBuildType = "";
                     def cppExtraFlags = "";
+                    def cgeVideoModuleDef = "";
 
                     if (usingCMakeCompileDebug()) {
                         cmakeBuildType = "-DCMAKE_BUILD_TYPE=Debug"
@@ -37,11 +44,17 @@ android {
                         cppExtraFlags = "-Os -DNDEBUG=1 -D_NDEBUG=1"
                     }
 
-                    arguments "-DCGE_USE_VIDEO_MODULE=ON",
-                            "-DANDROID_STL=c++_static",
+                    if (disableVideoModule()) {
+                        cgeVideoModuleDef = "-DCGE_USE_VIDEO_MODULE=OFF"
+                    } else {
+                        cgeVideoModuleDef = "-DCGE_USE_VIDEO_MODULE=ON"
+                    }
+
+                    arguments "-DANDROID_STL=c++_static",
                             "-DANDROID_ARM_NEON=TRUE",
                             "-DANDROID_GRADLE=ON",
-                            cmakeBuildType
+                            cmakeBuildType,
+                            cgeVideoModuleDef
 
                     cFlags "-ffast-math -fPIE -fPIC -DNO_LOCALE_SUPPORT=1 -DANDROID_NDK=1 -D__STDC_CONSTANT_MACROS=1 ${cppExtraFlags}"
                     cppFlags "-ffast-math -fPIE -fPIC -DNO_LOCALE_SUPPORT=1 -DANDROID_NDK=1 -D__STDC_CONSTANT_MACROS=1 -frtti -std=c++14 -fno-exceptions -fvisibility-inlines-hidden ${cppExtraFlags}"

@@ -47,11 +47,11 @@ endif ()
 
 if (CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
     execute_process(COMMAND cmd.exe /C "dir /L /S /B /A:D"
-                OUTPUT_VARIABLE CGE_CORE_HEADER_DIR
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cge)
-else()
+            OUTPUT_VARIABLE CGE_CORE_HEADER_DIR
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cge)
+else ()
     execute_process(COMMAND find ${CMAKE_CURRENT_SOURCE_DIR}/cge -maxdepth 3 -type d OUTPUT_VARIABLE CGE_CORE_HEADER_DIR)
-endif()
+endif ()
 
 message("CGE_CORE_HEADER_DIR=${CGE_CORE_HEADER_DIR}")
 string(REGEX REPLACE "\n" ";" CGE_CORE_HEADER_DIR ${CGE_CORE_HEADER_DIR})
@@ -60,8 +60,8 @@ string(REGEX REPLACE "\n" ";" CGE_CORE_HEADER_DIR ${CGE_CORE_HEADER_DIR})
 # string(REGEX REPLACE "\n" ";" CGE_CORE_SRC ${CGE_CORE_SRC})
 
 file(GLOB_RECURSE CGE_CORE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/cge/*.cpp"
-                "${CMAKE_CURRENT_SOURCE_DIR}/cge/*.c"
-                "${CMAKE_CURRENT_SOURCE_DIR}/interface/*.cpp")
+        "${CMAKE_CURRENT_SOURCE_DIR}/cge/*.c"
+        "${CMAKE_CURRENT_SOURCE_DIR}/interface/*.cpp")
 
 include_directories(
         ${CGE_CORE_HEADER_DIR}
@@ -72,7 +72,7 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/custom
         ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg)
 
-add_definitions(-DANDROID_NDK -DCGE_LOG_TAG=\"libCGE\" -DCGE_TEXTURE_PREMULTIPLIED=1 -D_CGE_USE_FFMPEG_ -D_CGE_DISABLE_GLOBALCONTEXT_ -O3 -D_CGE_ONLY_FILTERS_=1)
+add_definitions(-DANDROID_NDK=1 -DCGE_LOG_TAG=\"libCGE\" -DCGE_TEXTURE_PREMULTIPLIED=1 -D_CGE_DISABLE_GLOBALCONTEXT_ -O3 -D_CGE_ONLY_FILTERS_=1)
 
 if (CGE_USE_VIDEO_MODULE)
 
@@ -82,6 +82,7 @@ if (CGE_USE_VIDEO_MODULE)
             ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/${ANDROID_ABI}/libffmpeg.so)
 
     set(CGE_VIDEO_MODULE "ffmpeg")
+    add_definitions(-DCGE_USE_FFMPEG=1)
     # if (DEFINED ANDROID_ABI)
     #     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/${ANDROID_ABI}/libffmpeg.so 
     #               ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI}/libffmpeg.so COPYONLY)
@@ -91,6 +92,8 @@ if (CGE_USE_VIDEO_MODULE)
     #     #         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI})
     # endif ()
 endif ()
+
+message("CGE_USE_VIDEO_MODULE=${CGE_USE_VIDEO_MODULE}")
 
 if (NOT DEFINED ANDROID_GRADLE OR NOT ANDROID_GRADLE)
     add_library(CGE

@@ -58,13 +58,13 @@ public class ImageDeformActivity extends AppCompatActivity {
                     public void run() {
                         int w = mBitmap.getWidth(), h = mBitmap.getHeight();
                         float scaling = Math.min(1280.0f / w, 1280.0f / h);
-                        if(scaling < 1.0f) {
+                        if (scaling < 1.0f) {
                             w *= scaling;
                             h *= scaling;
                         }
                         mDeformWrapper = CGEDeformFilterWrapper.create(w, h, 10.0f);
                         mDeformWrapper.setUndoSteps(200); // set max undo steps to 200.
-                        if(mDeformWrapper != null) {
+                        if (mDeformWrapper != null) {
                             CGEImageHandler handler = mImageView.getImageHandler();
                             handler.setFilterWithAddres(mDeformWrapper.getNativeAddress());
                             handler.processFilters();
@@ -84,11 +84,11 @@ public class ImageDeformActivity extends AppCompatActivity {
     SeekBar.OnSeekBarChangeListener mSeekListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
-            if(mDeformWrapper != null) {
+            if (mDeformWrapper != null) {
                 mImageView.lazyFlush(true, new Runnable() {
                     @Override
                     public void run() {
-                        if(mDeformWrapper != null) {
+                        if (mDeformWrapper != null) {
                             float intensity = progress / 100.0f;
                             mDeformWrapper.restoreWithIntensity(intensity);
                         }
@@ -108,7 +108,7 @@ public class ImageDeformActivity extends AppCompatActivity {
         }
     };
 
-    View.OnTouchListener mTouchListener = new View.OnTouchListener(){
+    View.OnTouchListener mTouchListener = new View.OnTouchListener() {
 
         float mLastX, mLastY;
         boolean mIsMoving = false;
@@ -117,7 +117,7 @@ public class ImageDeformActivity extends AppCompatActivity {
         @Override
         public boolean onTouch(View v, final MotionEvent event) {
 
-            if(mDeformWrapper == null) {
+            if (mDeformWrapper == null) {
                 return false;
             }
 
@@ -132,7 +132,7 @@ public class ImageDeformActivity extends AppCompatActivity {
                     mIsMoving = true;
                     mLastX = x;
                     mLastY = y;
-                    if(!mDeformWrapper.canUndo()) {
+                    if (!mDeformWrapper.canUndo()) {
                         mDeformWrapper.pushDeformStep();
                     }
                     return true;
@@ -141,11 +141,11 @@ public class ImageDeformActivity extends AppCompatActivity {
                 case MotionEvent.ACTION_CANCEL:
                 case MotionEvent.ACTION_UP:
                     mIsMoving = false;
-                    if(mHasMotion) {
+                    if (mHasMotion) {
                         mImageView.queueEvent(new Runnable() {
                             @Override
                             public void run() {
-                                if(mImageView != null) {
+                                if (mImageView != null) {
                                     mDeformWrapper.pushDeformStep();
                                     Log.i(Common.LOG_TAG, "Init undo status...");
                                 }
@@ -156,7 +156,7 @@ public class ImageDeformActivity extends AppCompatActivity {
                     return true;
             }
 
-            if(mSeekbar.getProgress() != 0) {
+            if (mSeekbar.getProgress() != 0) {
                 mSeekbar.setOnSeekBarChangeListener(null);
                 mSeekbar.setProgress(0);
                 mSeekbar.setOnSeekBarChangeListener(mSeekListener);
@@ -168,8 +168,8 @@ public class ImageDeformActivity extends AppCompatActivity {
             mImageView.lazyFlush(true, new Runnable() {
                 @Override
                 public void run() {
-                    if(mDeformWrapper == null)
-                        return ;
+                    if (mDeformWrapper == null)
+                        return;
                     switch (mDeformMode) {
                         case Restore:
                             mDeformWrapper.restoreWithPoint(x, y, w, h, mTouchRadius, mTouchIntensaity);
@@ -199,7 +199,7 @@ public class ImageDeformActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
 
-        if(mDeformWrapper != null) {
+        if (mDeformWrapper != null) {
             mDeformWrapper.release(false);
             mDeformWrapper = null;
         }
@@ -266,7 +266,7 @@ public class ImageDeformActivity extends AppCompatActivity {
         mImageView.flush(true, new Runnable() {
             @Override
             public void run() {
-                if(mDeformWrapper != null) {
+                if (mDeformWrapper != null) {
                     mDeformWrapper.restore();
                     mImageView.requestRender();
                 }
@@ -295,9 +295,9 @@ public class ImageDeformActivity extends AppCompatActivity {
     }
 
     void checkRadius() {
-        if(mTouchRadius < 10.0f) {
+        if (mTouchRadius < 10.0f) {
             mTouchRadius = 10.0f;
-        } else if(mTouchRadius > 400.0f) {
+        } else if (mTouchRadius > 400.0f) {
             mTouchRadius = 400.0f;
         }
     }
@@ -316,9 +316,9 @@ public class ImageDeformActivity extends AppCompatActivity {
     }
 
     void checkIntensity() {
-        if(mTouchIntensaity < 0.02f) {
+        if (mTouchIntensaity < 0.02f) {
             mTouchIntensaity = 0.02f;
-        } else if(mTouchIntensaity > 0.9f) {
+        } else if (mTouchIntensaity > 0.9f) {
             mTouchIntensaity = 0.9f;
         }
     }
@@ -339,8 +339,8 @@ public class ImageDeformActivity extends AppCompatActivity {
         mImageView.flush(true, new Runnable() {
             @Override
             public void run() {
-                if(mDeformWrapper != null) {
-                    if(!mDeformWrapper.undo()) {
+                if (mDeformWrapper != null) {
+                    if (!mDeformWrapper.undo()) {
                         mImageView.post(new Runnable() {
                             @Override
                             public void run() {
@@ -381,7 +381,7 @@ public class ImageDeformActivity extends AppCompatActivity {
         mImageView.flush(true, new Runnable() {
             @Override
             public void run() {
-                if(mDeformWrapper != null) {
+                if (mDeformWrapper != null) {
                     mShowMesh = !mShowMesh;
                     mDeformWrapper.showMesh(mShowMesh);
                     mImageView.requestRender();
