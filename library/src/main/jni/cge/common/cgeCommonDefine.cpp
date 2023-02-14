@@ -300,6 +300,7 @@ GLuint cgeGenTextureWithBuffer(const void* bufferData, GLint w, GLint h, GLenum 
     assert(w != 0 && h != 0);
     GLuint tex;
     static const GLenum eArrs[] = { GL_LUMINANCE, GL_LUMINANCE_ALPHA, GL_RGB, GL_RGBA };
+    static const GLenum eArrsSized8[] = { GL_R8, GL_RG8, GL_RGB8, GL_RGBA8 };
     if (channel <= 0 || channel > 4)
         return 0;
     const GLenum& internalFormat = eArrs[channel - 1];
@@ -307,7 +308,18 @@ GLuint cgeGenTextureWithBuffer(const void* bufferData, GLint w, GLint h, GLenum 
     glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D, tex);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+#ifdef ANDROID_NDK
+    if (bufferData == nullptr && dataFmt == GL_UNSIGNED_BYTE)
+    {
+        glTexStorage2D(GL_TEXTURE_2D, 1, eArrsSized8[channel - 1], w, h);
+    }
+    else
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, w, h, 0, channelFmt, dataFmt, bufferData);
+    }
+#else
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, w, h, 0, channelFmt, dataFmt, bufferData);
+#endif
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texFilter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texFilter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texWrap);

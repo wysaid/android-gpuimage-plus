@@ -212,71 +212,182 @@ char* cgeGetScaledBufferInSize(const void* buffer, int& w, int& h, int channel, 
 
 /////////////////////////////////////////////////
 
-SharedTexture::SharedTexture(GLuint textureID, int w, int h)
+TextureObject::TextureObject(GLuint texture, const CGESizei& size) :
+    m_texture(texture), m_size(size)
 {
-    m_textureID = textureID;
-    m_refCount = new int(1);
-    width = w;
-    height = h;
-    CGE_LOG_CODE(
-        if (m_textureID == 0)
-            CGE_LOG_ERROR("CGESharedTexture : Invalid TextureID!");
-        else {
-            CGE_LOG_INFO("---CGESharedTexture creating, textureID %d, total : %d ###\n", textureID, ++sTextureCount);
-        });
+    if (texture == 0 && size.width != 0 && size.height != 0)
+    {
+        resize(size.width, size.height);
+    }
 }
 
-SharedTexture::~SharedTexture()
+TextureObject::TextureObject(TextureObject&& t) noexcept :
+    m_texture(t.texture()), m_size(t.size())
 {
-    if (m_refCount == nullptr)
+    t.cleanup(false);
+}
+
+TextureObject::~TextureObject()
+{
+    if (m_texture != 0)
     {
-        CGE_LOG_CODE(
-            if (m_textureID != 0) {
-                CGE_LOG_ERROR("SharedTexture : Error occurred!");
-            });
-        return;
+        cleanup(true);
+    }
+}
+
+TextureObject& TextureObject::operator=(TextureObject&& t) noexcept
+{
+    if (this == &t)
+    {
+        return *this;
+    }
+    m_texture = t.texture();
+    m_size = t.size();
+    t.cleanup(false);
+    return *this;
+}
+
+TextureObject& TextureObject::operator=(TextureInfo&& t)
+{
+    m_texture = t.name;
+    m_size = { t.width, t.height };
+    t.name = 0;
+    return *this;
+}
+
+void TextureObject::cleanup(bool deleteTexture)
+{
+    if (deleteTexture && m_texture != 0)
+    {
+        assert(glIsTexture(m_texture));
+        CGE_DELETE_GL_OBJS(glDeleteTextures, m_texture);
+    }
+    m_texture = 0;
+    m_size.set(0, 0);
+}
+
+bool TextureObject::resize(int w, int h, const void* buffer, GLenum format)
+{
+    if (m_texture == 0 || m_size.width != w || m_size.height != h || buffer != nullptr)
+    {
+        if (w == 0 || h == 0)
+        {
+            assert(0 && "TextureObject::resize must not be 0!");
+            return false;
+        }
+
+        int channel;
+        switch (format)
+        {
+        case GL_LUMINANCE:
+            channel = 1;
+            break;
+        case GL_LUMINANCE_ALPHA:
+            channel = 2;
+            break;
+        case GL_RGB:
+            channel = 3;
+            break;
+        case GL_RGBA:
+            channel = 4;
+            break;
+        default:
+            assert(0);
+            channel = 4;
+            break;
+        }
+
+        if (m_texture == 0)
+        {
+            m_texture = cgeGenTextureWithBuffer(buffer, w, h, format, GL_UNSIGNED_BYTE, channel);
+            m_size.set(w, h);
+        }
+        else
+        {
+            glBindTexture(GL_TEXTURE_2D, m_texture);
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            if (m_size.width != w || m_size.height != h)
+            {
+                m_size.set(w, h);
+                glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, buffer);
+            }
+            else
+            {
+                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, format, GL_UNSIGNED_BYTE, buffer);
+            }
+        }
+
+        return true;
+    }
+    return false;
+}
+
+//////////////
+
+FrameBufferWithTexture::~FrameBufferWithTexture()
+{
+    if (m_renderBuffer != 0)
+    {
+        CGE_DELETE_GL_OBJS(glDeleteRenderbuffers, m_renderBuffer);
+    }
+}
+
+void FrameBufferWithTexture::bindTexture2D(GLsizei w, GLsizei h, const void* buffer)
+{
+    if (resize(w, h, buffer))
+    {
+        FrameBuffer::bindTexture2D(m_texture);
+
+        // auto resize renderbuffer if exist.
+        if (m_renderBuffer != 0)
+        {
+            attachDepthBuffer();
+        }
+        assert(checkStatus());
+    }
+    else
+    {
+        FrameBuffer::bind();
+    }
+}
+
+void FrameBufferWithTexture::attachDepthBuffer()
+{
+    bool shouldCreate = false;
+
+    if (m_renderBuffer == 0)
+    {
+        shouldCreate = true;
+    }
+    else
+    {
+        GLint param[2] = { 0, 0 };
+        glBindRenderbuffer(GL_RENDERBUFFER, m_renderBuffer);
+        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, param);
+        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, param + 1);
+        shouldCreate = (param[0] != m_size.width || param[1] != m_size.height);
     }
 
-    --*m_refCount;
-    if (*m_refCount <= 0)
+    if (shouldCreate)
     {
-        clear();
+        if (m_renderBuffer == 0)
+            glGenRenderbuffers(1, &m_renderBuffer);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, m_renderBuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, m_size.width, m_size.height);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_renderBuffer);
     }
-    CGE_LOG_CODE(
-        else {
-            CGE_LOG_INFO("@@@ Texture %d deRef count: %d\n", m_textureID, *m_refCount);
-        })
 }
 
-void SharedTexture::forceRelease(bool bDelTexture)
+bool FrameBufferWithTexture::checkStatus()
 {
-    assert(m_refCount == nullptr || *m_refCount == 1); // 使用 forceRelease 时 SharedTexture 必须保证只存在一个实例
-    if (bDelTexture)
-        glDeleteTextures(1, &m_textureID);
-    m_textureID = 0;
-    CGE_DELETE(m_refCount);
-    width = 0;
-    height = 0;
-    CGE_LOG_CODE(
-        --sTextureCount;);
+    GLenum ret = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (ret != GL_FRAMEBUFFER_COMPLETE)
+    {
+        CGE_LOG_ERROR("Frame buffer incomplete: %x!\n", ret);
+    }
+    return ret == GL_FRAMEBUFFER_COMPLETE;
 }
 
-void SharedTexture::clear()
-{
-    CGE_LOG_CODE(
-        if (m_textureID == 0) {
-            CGE_LOG_ERROR("!!!CGESharedTexture - Invalid TextureID To Release!\n");
-        } else {
-            CGE_LOG_INFO("###CGESharedTexture deleting, textureID %d, now total : %d ###\n", m_textureID, --sTextureCount);
-        });
-
-    assert(*m_refCount == 0); // 未知错误
-
-    glDeleteTextures(1, &m_textureID);
-    m_textureID = 0;
-
-    CGE_DELETE(m_refCount);
-    width = 0;
-    height = 0;
-}
 } // namespace CGE

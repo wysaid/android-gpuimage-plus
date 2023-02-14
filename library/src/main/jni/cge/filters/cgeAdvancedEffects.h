@@ -22,6 +22,7 @@
 #include "cgePolkaDotFilter.h"
 #include "cgeRandomBlurFilter.h"
 #include "cgeSketchFilter.h"
+#include "cgeWaveformFilter.h"
 
 namespace CGE
 {
@@ -48,6 +49,8 @@ CGELerpblurFilter* createLerpblurFilter();
 CGESketchFilter* createSketchFilter();
 
 CGEBeautifyFilter* createBeautifyFilter();
+
+CGEWaveformFilter* createWaveformFilter();
 } // namespace CGE
 
 #endif

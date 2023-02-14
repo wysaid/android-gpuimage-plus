@@ -9,6 +9,7 @@
         "*.cc": "cpp",
         "params.txt": "json",
         "CMakeLists*.txt": "cmake",
-        "__config": "c"
+        "__config": "c",
+        "cstdio": "cpp"
     }
 }

@@ -137,4 +137,8 @@ CGEBeautifyFilter* createBeautifyFilter()
     COMMON_FUNC(CGEBeautifyFilter);
 }
 
+CGEWaveformFilter* createWaveformFilter()
+{
+    COMMON_FUNC(CGEWaveformFilter);
+}
 } // namespace CGE
