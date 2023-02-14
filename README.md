@@ -1,6 +1,6 @@
 # Android-GPUImage-Plus
 
-Image, Camera And Video Filters Based On OpenGL
+A C++ & Java library for `Image`/`Camera`/`Video` filters. PRs are welcomed.
 
 ## New Feature
 
@@ -29,18 +29,12 @@ dependencies {
 
 > To compile other versions of ffmpeg, see: <https://github.com/wysaid/FFmpeg-Android.git>
 
-## Abstract
-
-* This repo is an Android Studio Project, comprising "cgeDemo", "library" two sub-modules. Hundreds of built-in filters are available in the demo. 😋If you'd like to add your own filter, please take a look at the manual page. Or you can follow the demo code. The new custom filter should be written in C++.
-
-* Demo and Library will be updated as needed. Welcome for your questions or PR.
-
 ## Build
 
 * Options to know in `local.properties`:
   * `usingCMakeCompile=true`: Compile the native library with CMake if set to true. (Default to false, so you can use the prebuilt libs)
   * `usingCMakeCompileDebug=true`: Compile the native library in Debug Mode if set to true. (Default to false)
-  * `disableVideoModule=true`: Disable the video recording feature, The whole jni module will be very small. (Default to false)
+  * `disableVideoModule=true`: Disable the video recording feature(Use full for image only scenarios). The whole jni module size will be very small. (Default to false)
 
 * Build with `Android Studio` and CMake: (Recommended)
   * Put `usingCMakeCompile=true` in your `local.properties`
