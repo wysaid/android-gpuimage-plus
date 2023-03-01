@@ -1,4 +1,4 @@
-﻿/*
+/*
  * cgeGLFunctions.cpp
  *
  *  Created on: 2013-12-5
@@ -6,7 +6,7 @@
  */
 
 #include "cgeGLFunctions.h"
-
+#include <EGL/egl.h>
 #include <cmath>
 
 CGE_LOG_CODE(
@@ -389,5 +389,75 @@ bool FrameBufferWithTexture::checkStatus()
     }
     return ret == GL_FRAMEBUFFER_COMPLETE;
 }
+
+//////////////
+
+    FrameBufferTexture::FrameBufferTexture() : m_fbo(0), m_texture(0), m_width(0), m_height(0)
+    {
+        glGenFramebuffers(1, &m_fbo);
+        assert(m_fbo != 0);
+    }
+
+    FrameBufferTexture::~FrameBufferTexture()
+    {
+        glDeleteFramebuffers(1, &m_fbo);
+        glDeleteTextures(1, &m_texture);
+    }
+
+    GLuint FrameBufferTexture::texture() const
+    {
+        return m_texture;
+    }
+
+    GLsizei FrameBufferTexture::width() const
+    {
+        return m_width;
+    }
+
+    GLsizei FrameBufferTexture::height() const
+    {
+        return m_height;
+    }
+
+    void FrameBufferTexture::bindTexture2D(GLsizei width, GLsizei height)
+    {
+        if (m_texture == 0)
+        {
+            glGenTextures(1, &m_texture);
+            assert(m_texture != 0);
+        }
+
+        glBindTexture(GL_TEXTURE_2D, m_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        m_width = width;
+        m_height = height;
+    }
+
+    void FrameBufferTexture::bind()
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture, 0);
+    }
+
+    unsigned char* FrameBufferTexture::mapBuffer()
+    {
+        glBindTexture(GL_TEXTURE_2D, m_texture);
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        const auto bufferSize = m_width * m_height * sizeof(float);
+        auto buffer = new unsigned char[bufferSize];
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
+        return buffer;
+    }
+
+    void FrameBufferTexture::unmapBuffer()
+    {
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
 
 } // namespace CGE
