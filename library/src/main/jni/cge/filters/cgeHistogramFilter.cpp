@@ -27,8 +27,10 @@ static CGEConstString s_fshHistogram = "#version 320 es\n" CGE_SHADER_STRING(
             float lum = dot(color.rgb, vec3(0.299, 0.587, 0.114));
             int newLoc = int(lum * 255.0);
             if (newLoc >= 0 && newLoc < 256) {
+                //vec2 location = vec2(newLoc, 0.0);
                 ivec2 location = ivec2(newLoc, 0);
                 atomicAdd(imageAtomic(outputImage, location), 1);
+                //imageAtomic(outputImage, ivec2(location.x, location.y), uvec4(1, 0, 0, 0));
             }
         });
 
