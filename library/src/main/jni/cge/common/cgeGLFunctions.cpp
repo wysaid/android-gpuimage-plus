@@ -451,7 +451,8 @@ bool FrameBufferWithTexture::checkStatus()
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
         const auto bufferSize = m_width * m_height * sizeof(float);
         auto buffer = new unsigned char[bufferSize];
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
+        glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+//        glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
         return buffer;
     }
 
