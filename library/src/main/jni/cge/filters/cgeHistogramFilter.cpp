@@ -55,7 +55,7 @@ namespace CGE {
     void CGEHistogramFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID) {
         auto&& sz = handler->getOutputFBOSize();
         if (sz.width != m_renderTarget->width() || m_renderTarget->texture() == 0) {
-            m_renderTarget->bindTexture2D(sz.width, 256);
+            m_renderTarget->bindTexture2D(sz.width, sz.height);
         }
         m_renderTarget->bind();
         glClearColor(0, 0, 0, 1);
