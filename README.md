@@ -34,7 +34,7 @@ dependencies {
 * Options to know in `local.properties`:
   * `usingCMakeCompile=true`: Compile the native library with CMake if set to true. (Default to false, so you can use the prebuilt libs)
   * `usingCMakeCompileDebug=true`: Compile the native library in Debug Mode if set to true. (Default to false)
-  * `disableVideoModule=true`: Disable the video recording feature(Use full for image only scenarios). The whole jni module size will be very small. (Default to false)
+  * `disableVideoModule=true`: Disable the video recording feature(Useful for image only scenarios). The whole jni module size will be very small. (Default to false)
 
 * Build with `Android Studio` and CMake: (Recommended)
   * Put `usingCMakeCompile=true` in your `local.properties`
