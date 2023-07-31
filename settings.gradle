@@ -12,11 +12,27 @@ if (properties.getProperty('usingCMakeCompileDebug', null) == null) {
     pFile.append('\nusingCMakeCompileDebug=false\n')
 }
 
-
 /// if disableVideoModule is true, the recording functions is disabled,
 /// and ffmpeg will not be used.
 if (properties.getProperty('disableVideoModule', null) == null) {
     pFile.append('\ndisableVideoModule=false\n')
+}
+
+if (properties.getProperty('deployArtifacts', null) == null) {
+    pFile.append('\ndeployArtifacts=false\n')
+}
+
+def homeDir = System.getenv('HOME')
+def mavenLocalDir = "maven_local_repo"
+
+if (homeDir != null && !homeDir.isEmpty()) {
+    mavenLocalDir = homeDir + '/' + mavenLocalDir
+}
+
+/// if deployArtifacts is true, the deploy mode is on.
+if (properties.getProperty('localRepoDir', null) == null) {
+
+    pFile.append('\nlocalRepoDir=' + mavenLocalDir + '\n')
 }
 
 if (gradle.ext == null) {
@@ -26,3 +42,5 @@ if (gradle.ext == null) {
 gradle.ext.usingCMakeCompile = properties.getProperty("usingCMakeCompile", "") == "true"
 gradle.ext.usingCMakeCompileDebug = properties.getProperty("usingCMakeCompileDebug", "") == "true"
 gradle.ext.disableVideoModule = properties.getProperty("disableVideoModule", "") == "true"
+gradle.ext.deployArtifacts = properties.getProperty("deployArtifacts", "") == "true"
+gradle.ext.localRepoDir = properties.getProperty("localRepoDir", mavenLocalDir)

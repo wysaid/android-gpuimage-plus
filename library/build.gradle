@@ -14,12 +14,16 @@ def disableVideoModule() {
     return gradle.ext != null && gradle.ext.has("disableVideoModule") && gradle.ext.disableVideoModule;
 }
 
+def deployArtifacts() {
+    return gradle.ext != null && gradle.ext.has("deployArtifacts") && gradle.ext.deployArtifacts;
+}
+
 android {
     compileSdkVersion rootProject.ext.android.compileSdkVersion
     buildToolsVersion rootProject.ext.android.buildToolsVersion
 
     if (usingCMakeCompile()) {
-        ndkVersion "23.1.7779620"
+        ndkVersion rootProject.ext.android.ndkVersion
     }
 
     defaultConfig {
@@ -77,7 +81,7 @@ android {
         externalNativeBuild {
             cmake {
                 path 'src/main/jni/CMakeLists.txt'
-                version "3.22.1"
+                version rootProject.ext.android.cmakeVersion
             }
         }
     }
@@ -101,10 +105,94 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    namespace 'org.wysaid.library'
+
+    namespace = 'org.wysaid.library'
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:' + rootProject.ext.android.appcompatX
 }
+
+if (deployArtifacts()) {
+    apply plugin: 'maven-publish'
+
+    def siteUrl = 'https://github.com/wysaid/android-gpuimage-plus'
+    def gitUrl = 'https://github.com/wysaid/android-gpuimage-plus.git'
+    group = "org.wysaid"
+    version = rootProject.ext.android.versionName
+
+    publishing {
+        publications {
+            release(MavenPublication) {
+                artifactId = 'gpuimage-plus'
+                groupId = 'org.wysaid'
+                version = rootProject.ext.android.versionName
+
+                afterEvaluate {
+                    from components.release
+//                artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+                }
+
+                pom {
+                    name = 'gpuimage-plus'
+                    description = 'A C++ & Java library for Image/Camera/Video filters.'
+                    url = siteUrl
+
+                    developers {
+                        developer {
+                            id = 'wysaid'
+                            name = 'Wang Yang'
+                            email = 'wysaid@gmail.com'
+                        }
+                    }
+
+                    scm {
+                        connection = gitUrl
+                        developerConnection = gitUrl
+                        url = siteUrl
+                    }
+
+                    licenses {
+                        license {
+                            name = 'The MIT License'
+                            url = 'https://github.com/wysaid/android-gpuimage-plus/blob/master/LICENSE'
+                        }
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                name = "local_repo"
+                url = gradle.ext.localRepoDir
+//            credentials {
+//                username = gradle.ext.repoUsername
+//                password = gradle.ext.repoPassword
+//            }
+            }
+        }
+    }
+
+    task sourcesJar(type: Jar) {
+        from android.sourceSets.main.java.srcDirs
+        classifier = 'sources'
+    }
+
+    task javadoc(type: Javadoc) {
+        source = android.sourceSets.main.java.srcDirs
+        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        archives javadocJar
+        archives sourcesJar
+    }
+
+}
+

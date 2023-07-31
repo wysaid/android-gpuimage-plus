@@ -170,7 +170,12 @@ while [[ $# > 0 ]]; do
         changeProperty "local.properties" '^disableVideoModule=' 's/disableVideoModule=.*/disableVideoModule=true/' 'disableVideoModule=true'
         shift # past argument
         ;;
-
+    --publish)
+        echo "publish"
+        changeProperty "local.properties" '^deployArtifacts=' 's/deployArtifacts=.*/deployArtifacts=true/' 'disableVideoModule=true'
+        ./gradlew assembleRelease publish
+        shift
+        ;;
     *)
         echo "Invalid argument $PARSE_KEY..."
         exit 1

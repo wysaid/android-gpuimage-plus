@@ -223,6 +223,23 @@
             },
             "group": "build",
             "problemMatcher": "$gcc"
+        },
+        {
+            "label": "[Release] Publish AAR To Maven Local",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "vscode_tasks.sh",
+                "--publish",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc",
+            "dependsOn": [
+                "[Release] Enable CMake And Build Project With CMake"
+            ]
         }
     ]
 }

@@ -15,7 +15,7 @@ android {
     buildToolsVersion rootProject.ext.android.buildToolsVersion
 
     if (usingCMakeCompile()) {
-        ndkVersion "23.1.7779620"
+        ndkVersion rootProject.ext.android.ndkVersion
     }
 
     defaultConfig {
