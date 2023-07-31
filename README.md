@@ -11,17 +11,23 @@ See the `image deform demo`.
 ## Gradle dependency
 
 ```gradle
-repositories {
-    jcenter()
+allprojects {
+    repositories {
+        maven {
+            // Use github hosted maven repo for now.
+            // Will be uploaded to maven central later.
+            url 'https://maven.wysaid.org/'
+        }
+    }
 }
 
 //Choose only one of them
 dependencies {
-    //All arch: armeabi, armeabi-v7a, arm64-v8a, x86
-    compile 'org.wysaid:gpuimage-plus:2.6.3'
+    //All arch: armeabi-v7a, arm64-v8a, x86, x86_64 with video module (ffmpeg bundled)
+    implementation 'org.wysaid:gpuimage-plus:3.0.0'
 
-    //Pure graphics lib without ffmpeg. (all arch for branch 'min')
-    compile 'org.wysaid:gpuimage-plus:2.6.3-min'
+    //All arch: armeabi-v7a, arm64-v8a, x86, x86_64 without video module (no ffmpeg)
+    implementation 'org.wysaid:gpuimage-plus:3.0.0-min'
 }
 ```
 
