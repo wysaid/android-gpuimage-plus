@@ -225,21 +225,36 @@
             "problemMatcher": "$gcc"
         },
         {
-            "label": "[Release] Publish AAR To Maven Local",
+            "label": "[Release] Publish AAR To Maven Local - Normal",
             "type": "shell",
             "command": "bash",
             "args": [
                 "vscode_tasks.sh",
+                "--enable-cmake",
+                "--enable-video-module",
                 "--publish",
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
             "group": "build",
-            "problemMatcher": "$gcc",
-            "dependsOn": [
-                "[Release] Enable CMake And Build Project With CMake"
-            ]
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "[Release] Publish AAR To Maven Local - Disable Video Module",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "vscode_tasks.sh",
+                "--enable-cmake",
+                "--disable-video-module",
+                "--publish",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
         }
     ]
 }

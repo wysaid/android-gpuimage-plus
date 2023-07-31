@@ -172,6 +172,8 @@ while [[ $# > 0 ]]; do
         ;;
     --publish)
         echo "publish"
+        git clean -fdx library
+        changeProperty "local.properties" '^usingCMakeCompileDebug=' 's/usingCMakeCompileDebug=.*/usingCMakeCompileDebug=false/' 'usingCMakeCompileDebug=false'
         changeProperty "local.properties" '^deployArtifacts=' 's/deployArtifacts=.*/deployArtifacts=true/' 'disableVideoModule=true'
         ./gradlew assembleRelease publish
         shift
