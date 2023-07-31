@@ -120,14 +120,19 @@ if (deployArtifacts()) {
     def siteUrl = 'https://github.com/wysaid/android-gpuimage-plus'
     def gitUrl = 'https://github.com/wysaid/android-gpuimage-plus.git'
     group = "org.wysaid"
-    version = rootProject.ext.android.versionName
+
+    if (disableVideoModule()) {
+        version = rootProject.ext.android.versionName + '-min'
+    } else {
+        version = rootProject.ext.android.versionName
+    }
 
     publishing {
         publications {
             release(MavenPublication) {
                 artifactId = 'gpuimage-plus'
                 groupId = 'org.wysaid'
-                version = rootProject.ext.android.versionName
+                version = version
 
                 afterEvaluate {
                     from components.release
