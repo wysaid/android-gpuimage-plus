@@ -14,14 +14,14 @@ import java.nio.FloatBuffer;
 public class TextureDrawer {
 
     protected static final String vshDrawer = "" +
-            "attribute vec2 vPosition;\n"+
-            "varying vec2 texCoord;\n"+
-            "uniform mat2 rotation;\n"+
-            "uniform vec2 flipScale;\n"+
-            "void main()\n"+
-            "{\n"+
-            "   gl_Position = vec4(vPosition, 0.0, 1.0);\n"+
-            "   texCoord = flipScale * (vPosition / 2.0 * rotation) + 0.5;\n"+
+            "attribute vec2 vPosition;\n" +
+            "varying vec2 texCoord;\n" +
+            "uniform mat2 rotation;\n" +
+            "uniform vec2 flipScale;\n" +
+            "void main()\n" +
+            "{\n" +
+            "   gl_Position = vec4(vPosition, 0.0, 1.0);\n" +
+            "   texCoord = flipScale * (vPosition / 2.0 * rotation) + 0.5;\n" +
             "}";
 
     protected static final String fshDrawer = "" +
@@ -33,8 +33,9 @@ public class TextureDrawer {
             "   gl_FragColor = texture2D(inputImageTexture, texCoord);\n" +
             "}";
 
-    public static final float[] vertices = {-1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f};
-    public static final int DRAW_FUNCTION = GLES20.GL_TRIANGLE_FAN;
+    public static final float[] vertices = {-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f};
+
+    public static final int DRAW_FUNCTION = GLES20.GL_TRIANGLE_STRIP;
 
     protected ProgramObject mProgram;
     protected int mVertBuffer;
@@ -50,7 +51,7 @@ public class TextureDrawer {
     protected boolean init(final String vsh, final String fsh) {
         mProgram = new ProgramObject();
         mProgram.bindAttribLocation("vPosition", 0);
-        if(!mProgram.init(vsh, fsh)) {
+        if (!mProgram.init(vsh, fsh)) {
             mProgram.release();
             mProgram = null;
             return false;
@@ -78,8 +79,7 @@ public class TextureDrawer {
 
     public static TextureDrawer create() {
         TextureDrawer drawer = new TextureDrawer();
-        if(!drawer.init(vshDrawer, fshDrawer))
-        {
+        if (!drawer.init(vshDrawer, fshDrawer)) {
             Log.e(Common.LOG_TAG, "TextureDrawer create failed!");
             drawer.release();
             drawer = null;
@@ -88,7 +88,7 @@ public class TextureDrawer {
     }
 
     public void release() {
-        if(mProgram != null) {
+        if (mProgram != null) {
             mProgram.release();
             mProgram = null;
         }
@@ -126,10 +126,10 @@ public class TextureDrawer {
     }
 
     private void _rotate(int location, float rad) {
-        final float cosRad = (float)Math.cos(rad);
-        final float sinRad = (float)Math.sin(rad);
+        final float cosRad = (float) Math.cos(rad);
+        final float sinRad = (float) Math.sin(rad);
 
-        final float[] rotation = new float[] {
+        final float[] rotation = new float[]{
                 cosRad, sinRad,
                 -sinRad, cosRad
         };

@@ -130,7 +130,6 @@ CGEConstString g_paramCurveMapTextureName = "curveTexture";
 
 CGEImageFilterInterfaceAbstract::CGEImageFilterInterfaceAbstract()
 {
-    CGE_ENABLE_GLOBAL_GLCONTEXT();
     CGE_UNEXPECTED_ERR_MSG(
         CGE_LOG_KEEP("Filter create, total: %d\n", ++sFilterCount);)
 }
@@ -177,7 +176,7 @@ void CGEImageFilterInterface::render2Texture(CGEImageHandlerInterface* handler, 
     if (m_uniformParam != nullptr)
         m_uniformParam->assignUniforms(handler, m_program.programID());
 
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     cgeCheckGLError("glDrawArrays");
 }
 

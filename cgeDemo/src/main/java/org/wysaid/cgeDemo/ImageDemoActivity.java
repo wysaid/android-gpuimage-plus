@@ -73,7 +73,7 @@ public class ImageDemoActivity extends AppCompatActivity {
                 mImageView.getResultBitmap(new ImageGLSurfaceView.QueryResultBitmapCallback() {
                     @Override
                     public void get(final Bitmap bmp) {
-                        if(bmp == null) {
+                        if (bmp == null) {
                             MsgUtil.toastMsg(ImageDemoActivity.this, "Get bitmap failed!");
                             return;
                         }
@@ -219,7 +219,7 @@ public class ImageDemoActivity extends AppCompatActivity {
         mImageView.getResultBitmap(new ImageGLSurfaceView.QueryResultBitmapCallback() {
             @Override
             public void get(final Bitmap bmp) {
-                if(bmp == null) {
+                if (bmp == null) {
                     MsgUtil.toastMsg(ImageDemoActivity.this, "Get bitmap failed!");
                     return;
                 }

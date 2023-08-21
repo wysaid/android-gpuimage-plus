@@ -122,13 +122,6 @@ public:
     virtual GLuint copyLastResultTexture(GLuint dstTex = 0);
     virtual GLuint copyResultTexture(GLuint dstTex = 0);
 
-#ifdef _CGE_USE_ES_API_3_0_
-
-    const void* mapOutputBuffer(CGEBufferFormat fmt);
-    void unmapOutputBuffer();
-
-#endif
-
     //辅助方法
     bool copyTexture(GLuint dst, GLuint src); //使用handler内部图像尺寸
     bool copyTexture(GLuint dst, GLuint src, int x, int y, int w, int h);
@@ -146,14 +139,6 @@ protected:
 
     TextureDrawer *m_drawer, *m_resultDrawer;
 
-#ifdef _CGE_USE_ES_API_3_0_
-    GLuint m_pixelPackBuffer;
-    GLsizei m_pixelPackBufferSize;
-
-    void clearPixelBuffer();
-    bool initPixelBuffer();
-    bool initImageFBO(const void* data, int w, int h, GLenum channelFmt, GLenum dataFmt, int channel);
-#endif
 };
 } // namespace CGE
 #endif

@@ -210,7 +210,7 @@ void CGEVideoPlayerYUV420P::render()
     glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
     glEnableVertexAttribArray(m_posAttribLocation);
     glVertexAttribPointer(m_posAttribLocation, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 void CGEVideoPlayerYUV420P::setRotation(float rad)

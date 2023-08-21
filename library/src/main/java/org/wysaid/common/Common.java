@@ -16,7 +16,7 @@ public class Common {
 
     public static final boolean DEBUG = true;
     public static final String LOG_TAG = "libCGE_java";
-    public static final float[] FULLSCREEN_VERTICES = {-1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f};
+    public static final float[] FULLSCREEN_VERTICES = {-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f};
 
     public static void checkGLError(final String tag) {
         int loopCnt = 0;

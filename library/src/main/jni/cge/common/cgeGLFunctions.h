@@ -11,39 +11,8 @@
 
 #include "cgeCommonDefine.h"
 
-#include <cassert>
-
-#if defined(_CGE_DISABLE_GLOBALCONTEXT_) && _CGE_DISABLE_GLOBALCONTEXT_
-
-#define CGE_ENABLE_GLOBAL_GLCONTEXT(...)
-#define CGE_DISABLE_GLOBAL_GLCONTEXT(...)
-
-#else
-
-#define CGE_ENABLE_GLOBAL_GLCONTEXT(...) cgeEnableGlobalGLContext()
-#define CGE_DISABLE_GLOBAL_GLCONTEXT(...) cgeDisableGlobalGLContext()
-
-#endif
-
 namespace CGE
 {
-#if !(defined(_CGE_DISABLE_GLOBALCONTEXT_) && _CGE_DISABLE_GLOBALCONTEXT_)
-
-typedef bool (*CGEEnableGLContextFunction)(void*);
-
-typedef bool (*CGEDisableGLContextFunction)(void*);
-
-void cgeSetGLContextEnableFunction(CGEEnableGLContextFunction func, void* param);
-void cgeSetGLContextDisableFunction(CGEDisableGLContextFunction func, void* param);
-void* cgeGetGLEnableParam();
-void* cgeGetGLDisableParam();
-void cgeStopGlobalGLEnableFunction();
-void cgeRestoreGlobalGLEnableFunction();
-
-void cgeEnableGlobalGLContext();
-void cgeDisableGlobalGLContext();
-
-#endif
 
 // CGEBufferLoadFun 的返回值将作为 CGEBufferUnloadFun 的第一个参数
 // CGEBufferLoadFun 的参数 arg 将作为 CGEBufferUnloadFun 的第二个参数
@@ -71,7 +40,7 @@ inline GLint cgeGetMaxTextureSize()
 {
     GLint n;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &n);
-    return n - 1;
+    return n;
 }
 
 class FrameBuffer
@@ -208,39 +177,6 @@ public:
 private:
     using TextureObject::resize;
     GLuint m_renderBuffer = 0;
-};
-
-struct CGELuminance
-{
-    enum
-    {
-        CalcPrecision = 16
-    };
-    enum
-    {
-        Weight = (1 << CalcPrecision)
-    };
-    enum
-    {
-        RWeight = int(0.299 * Weight),
-        GWeight = int(0.587 * Weight),
-        BWeight = int(0.114 * Weight)
-    };
-
-    static inline int RGB888(int r, int g, int b)
-    {
-        return (r * RWeight + g * GWeight + b * BWeight) >> CalcPrecision;
-    }
-
-    // color 从低位到高位的顺序为r-g-b, 传参时需要注意大小端问题
-    static inline int RGB565(unsigned short color)
-    {
-        const int r = (color & 31) << 3;
-        const int g = ((color >> 5) & 63) << 2;
-        const int b = ((color >> 11) & 31) << 3;
-
-        return RGB888(r, g, b);
-    }
 };
 
 } // namespace CGE

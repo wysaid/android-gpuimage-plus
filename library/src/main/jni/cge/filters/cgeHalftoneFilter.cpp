@@ -69,7 +69,7 @@ void CGEHalftoneFilter::render2Texture(CGE::CGEImageHandlerInterface* handler, G
     float dotPercent = m_dotSize / sz.width;
     m_program.sendUniformf(paramAspectRatio, aspectRatio);
     m_program.sendUniformf(paramDotPercent, dotPercent, dotPercent / aspectRatio);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     cgeCheckGLError("glDrawArrays");
 }
 } // namespace CGE
