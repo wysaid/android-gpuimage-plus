@@ -205,7 +205,7 @@ void CGEMinValueFilter3x3::render2Texture(CGEImageHandlerInterface* handler, GLu
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, srcTexture);
 
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     cgeCheckGLError("glDrawArrays");
 }
 } // namespace CGE

@@ -78,7 +78,7 @@ public abstract class TextureRenderer {
     protected static final String TRANSFORM_NAME = "transform";
 
     public static final float[] vertices = {-1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f};
-    public static final int DRAW_FUNCTION = GLES20.GL_TRIANGLE_FAN;
+    public static final int DRAW_FUNCTION = GLES20.GL_TRIANGLE_STRIP;
 
     protected int TEXTURE_2D_BINDABLE;
 

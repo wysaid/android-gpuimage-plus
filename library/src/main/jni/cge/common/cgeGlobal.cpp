@@ -30,7 +30,7 @@ bool g_shouldUsePBO = true;
 int CGEGlobalConfig::viewWidth = 1024;
 int CGEGlobalConfig::viewHeight = 768;
 GLuint CGEGlobalConfig::sVertexBufferCommon = 0;
-float CGEGlobalConfig::sVertexDataCommon[8] = { -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f };
+float CGEGlobalConfig::sVertexDataCommon[8] = { -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f };
 
 void cgeInitFilterStatus()
 {

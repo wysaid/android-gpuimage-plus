@@ -148,7 +148,7 @@ void CGELerpblurFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint
     m_framebuffer.bindTexture2D(m_texCache[0].texID);
     glBindTexture(GL_TEXTURE_2D, srcTexture);
     glViewport(0, 0, m_texCache[0].size.width, m_texCache[0].size.height);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glFlush();
 
     // down scale
@@ -159,7 +159,7 @@ void CGELerpblurFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint
         glViewport(0, 0, texCache.size.width, texCache.size.height);
 
         glBindTexture(GL_TEXTURE_2D, m_texCache[i - 1].texID);
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glFlush();
     }
 
@@ -171,13 +171,13 @@ void CGELerpblurFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint
         glViewport(0, 0, texCache.size.width, texCache.size.height);
 
         glBindTexture(GL_TEXTURE_2D, m_texCache[i].texID);
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glFlush();
     }
 
     handler->setAsTarget();
     glBindTexture(GL_TEXTURE_2D, m_texCache[0].texID);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 void CGELerpblurFilter::setMipmapBase(float value)
