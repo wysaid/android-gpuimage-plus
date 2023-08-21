@@ -130,7 +130,6 @@ CGEConstString g_paramCurveMapTextureName = "curveTexture";
 
 CGEImageFilterInterfaceAbstract::CGEImageFilterInterfaceAbstract()
 {
-    CGE_ENABLE_GLOBAL_GLCONTEXT();
     CGE_UNEXPECTED_ERR_MSG(
         CGE_LOG_KEEP("Filter create, total: %d\n", ++sFilterCount);)
 }

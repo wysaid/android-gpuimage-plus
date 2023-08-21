@@ -9,65 +9,8 @@
 
 #include <cmath>
 
-CGE_LOG_CODE(
-    static int sTextureCount;)
-
 namespace CGE
 {
-
-#if !(defined(_CGE_DISABLE_GLOBALCONTEXT_) && _CGE_DISABLE_GLOBALCONTEXT_)
-
-static CGEEnableGLContextFunction s_enableGLFunc = nullptr;
-static CGEDisableGLContextFunction s_disableGLFunc = nullptr;
-static void* s_enableGLParam;
-static void* s_disableGLParam;
-static bool s_stopGlobalGLEnableFunc = false;
-
-void cgeSetGLContextEnableFunction(CGEEnableGLContextFunction func, void* param)
-{
-    s_enableGLFunc = func;
-    s_enableGLParam = param;
-}
-
-void cgeSetGLContextDisableFunction(CGEDisableGLContextFunction func, void* param)
-{
-    s_disableGLFunc = func;
-    s_disableGLParam = param;
-}
-
-void* cgeGetGLEnableParam()
-{
-    return s_enableGLParam;
-}
-
-void* cgeGetGLDisableParam()
-{
-    return s_disableGLParam;
-}
-
-void cgeStopGlobalGLEnableFunction()
-{
-    s_stopGlobalGLEnableFunc = true;
-}
-
-void cgeRestoreGlobalGLEnableFunction()
-{
-    s_stopGlobalGLEnableFunc = false;
-}
-
-void cgeEnableGlobalGLContext()
-{
-    if (s_enableGLFunc)
-        s_enableGLFunc(s_enableGLParam);
-}
-
-void cgeDisableGlobalGLContext()
-{
-    if (s_disableGLFunc)
-        s_disableGLFunc(s_disableGLParam);
-}
-
-#endif
 
 //////////////////////////////////////////////////////////////////////////
 

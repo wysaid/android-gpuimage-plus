@@ -19,6 +19,15 @@
 #include "cgePlatform_QT.h"
 #endif
 
+#ifndef CGEAssert
+#ifdef DEBUG
+#include <assert.h>
+#define CGEAssert(...) assert(__VA_ARGS__)
+#else
+#define CGEAssert(...)
+#endif
+#endif
+
 #ifdef __cplusplus
 
 namespace CGE
@@ -42,22 +51,6 @@ public:
 
     static InitArguments sInitArugment;
 };
-
-// CGE 全局初始化函数。
-bool cgeInitialize(int w = CGEGlobalConfig::viewWidth, int h = CGEGlobalConfig::viewHeight, CGEGlobalConfig::InitArguments arg = CGEGlobalConfig::CGE_INIT_DEFAULT);
-
-inline bool cgeInitialize(int w, int h, GLenum arg)
-{
-    return cgeInitialize(w, h, CGEGlobalConfig::InitArguments(arg));
-}
-
-void cgeInitFilterStatus();
-
-// CGE 全局清除函数
-void cgeCleanup();
-
-//设置画面显示尺寸
-void cgeSetGlobalViewSize(int width, int height);
 
 } // namespace CGE
 
