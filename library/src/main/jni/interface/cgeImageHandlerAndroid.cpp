@@ -95,6 +95,12 @@ bool CGEImageHandlerAndroid::initWithBitmap(JNIEnv* env, jobject bmp, bool enabl
 
 jobject CGEImageHandlerAndroid::getResultBitmap(JNIEnv* env)
 {
+    if(m_dstImageSize.width <= 0 || m_dstImageSize.height <= 0)
+    {
+        CGE_LOG_ERROR("Invalid image size!");
+        return nullptr;
+    }
+
     jclass bitmapCls = env->FindClass("android/graphics/Bitmap");
 
     jmethodID createBitmapFunction = env->GetStaticMethodID(bitmapCls, "createBitmap", "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;");

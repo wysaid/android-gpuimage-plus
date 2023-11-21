@@ -215,6 +215,10 @@ public class BasicImageDemoActivity extends AppCompatActivity {
         mImageView.getResultBitmap(new ImageGLSurfaceView.QueryResultBitmapCallback() {
             @Override
             public void get(Bitmap bmp) {
+                if(bmp == null) {
+                    MsgUtil.toastMsg(BasicImageDemoActivity.this, "Get bitmap failed!");
+                    return;
+                }
                 final String s = ImageUtil.saveBitmap(bmp);
                 sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + s)));
                 mImageView.post(new Runnable() {
