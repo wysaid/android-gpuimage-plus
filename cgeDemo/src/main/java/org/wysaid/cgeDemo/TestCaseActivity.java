@@ -167,6 +167,11 @@ public class TestCaseActivity extends AppCompatActivity {
                     //To accelerate this, you can add a Bitmap arg for "getResultBitmap",
                     // and reuse the Bitmap instead of recycle it every time.
                     Bitmap dst = handler.getResultBitmap();
+                    if(dst == null) {
+                        Log.e(LOG_TAG, "getResultBitmap returns null!");
+                        continue;
+                    }
+
                     String s = ImageUtil.saveBitmap(dst);
                     dst.recycle();  //Maybe reuse it will be better.
 

@@ -256,6 +256,10 @@ public class ImageDeformActivity extends AppCompatActivity {
         mImageView.getResultBitmap(new ImageGLSurfaceView.QueryResultBitmapCallback() {
             @Override
             public void get(final Bitmap bmp) {
+                if (bmp == null) {
+                    MsgUtil.toastMsg(ImageDeformActivity.this, "Get bitmap failed!");
+                    return;
+                }
                 String s = ImageUtil.saveBitmap(bmp);
                 sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + s)));
             }
