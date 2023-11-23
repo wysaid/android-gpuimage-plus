@@ -31,6 +31,6 @@ ext {
             applicationId    : "org.wysaid.cgeDemo",
             appcompatX       : "1.2.0",
             ndkVersion       : "23.1.7779620",
-            cmakeVersion     : "3.22.1",
+            cmakeVersion     : "3.22.1+",
     ]
 }

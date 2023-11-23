@@ -80,6 +80,7 @@ function buildProject() {
 
 function patchAndroidSDKLocation() {
     VAR_ENV_VALUE=$(getEnvironmentVariable $@)
+    echo VAR_ENV_VALUE=$VAR_ENV_VALUE
     if [[ -n "$VAR_ENV_VALUE" ]]; then
         VAR_ENV_VALUE=$(echo $VAR_ENV_VALUE | tr '\\' '/')
         echo "sdk.dir=$VAR_ENV_VALUE" >>local.properties
@@ -101,6 +102,7 @@ function changeProperty() {
     SED_PATTERN="$3"
     DEFAULT_VALUE="$4"
     if [[ -f "$TARGET_FILE" ]] && grep -E "$MATCH_PATTERN" "$TARGET_FILE" >/dev/null; then
+        echo "Change property in $TARGET_FILE, pattern $SED_PATTERN"
         # Stupid diff between the command.
         if [[ "$(uname -s)" == "Darwin" ]]; then # Mac OS
             sed -I "" -E "$SED_PATTERN" "$TARGET_FILE"
