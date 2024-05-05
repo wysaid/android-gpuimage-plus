@@ -1,0 +1,49 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ "master", "android_ci" ]
+  pull_request:
+    branches: [ "master", "android_ci" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: nttld/setup-ndk@v1.4.2
+      id: setup-ndk
+      with:
+        ndk-version: r26d
+        link-to-sdk: true
+        add-to-path: true
+    - name: set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: gradle
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build Release Without Video Module
+      run: ./tasks.sh --enable-cmake --release --disable-video-module --build
+    - name: Save build artifacts - Release Without Video Module
+      run: mv $(find "cgeDemo/build" -iname "*.apk" | grep release) demoRelease/cgeDemo_NoVideoRecord.apk
+    - name: Build Release With Video Module
+      run: ./tasks.sh --clean --enable-cmake --release --enable-video-module --build
+    - name: Save build artifacts - Release With Video Module
+      run: mv $(find "cgeDemo/build" -iname "*.apk" | grep release) demoRelease/cgeDemo.apk
+    - name: lint
+      run: ./gradlew lint
+    - name: upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: my-artifact
+        path: |
+          demoRelease/cgeDemo_NoVideoRecord.apk
+          demoRelease/cgeDemo.apk
+        compression-level: 0
+        retention-days: 15
+        if-no-files-found: error

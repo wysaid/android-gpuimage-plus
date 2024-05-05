@@ -127,15 +127,15 @@ while [[ $# > 0 ]]; do
         shift
         ;;
     --release)
-        ANDROID_BUILD_TYPE="assembleRelease"
+        export ANDROID_BUILD_TYPE="assembleRelease"
         # ANDROID_BUILD_TYPE="assembleDebug" # use this if the release apk can not be installed.
-        GRADLEW_RUN_TASK="installRelease"
+        export GRADLEW_RUN_TASK="installRelease"
         changeProperty "local.properties" '^usingCMakeCompileDebug=' 's/usingCMakeCompileDebug=.*/usingCMakeCompileDebug=false/' 'usingCMakeCompileDebug=false'
         shift
         ;;
     --debug)
-        ANDROID_BUILD_TYPE="assembleDebug"
-        GRADLEW_RUN_TASK="installDebug"
+        export ANDROID_BUILD_TYPE="assembleDebug"
+        export GRADLEW_RUN_TASK="installDebug"
         changeProperty "local.properties" '^usingCMakeCompileDebug=' 's/usingCMakeCompileDebug=.*/usingCMakeCompileDebug=true/' 'usingCMakeCompileDebug=true'
         shift
         ;;

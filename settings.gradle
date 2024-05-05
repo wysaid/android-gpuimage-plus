@@ -2,7 +2,11 @@ include ':library', ':cgeDemo'
 
 def pFile = new File(settingsDir, 'local.properties')
 Properties properties = new Properties()
-properties.load(pFile.newDataInputStream())
+
+/// if the local.properties file does not exist, create it.
+if (pFile.exists()) {
+    properties.load(pFile.newDataInputStream())
+}
 
 if (properties.getProperty('usingCMakeCompile', null) == null) {
     pFile.append('\nusingCMakeCompile=false\n')
