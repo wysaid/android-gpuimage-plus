@@ -56,7 +56,7 @@ function buildProject() {
         echo "Failed to run: ./gradlew -p cgeDemo $ANDROID_BUILD_TYPE"
         echo "Please run the following command and try again:"
         echo "---"
-        echo "$THIS_DIR/vscode_tasks.sh --setup-project"
+        echo "$THIS_DIR/tasks.sh --setup-project"
         echo "---"
         exit 1
     fi

@@ -62,15 +62,15 @@ dependencies {
   export ANDROID_HOME=/path/to/android/sdk
   
   # Setup Project
-  bash vscode_tasks.sh --setup-project
+  bash tasks.sh --setup-project
 
   # Compile with CMake Debug
-  bash vscode_tasks.sh --debug --enable-cmake --build
+  bash tasks.sh --debug --enable-cmake --build
   # Compile with CMake Release
-  bash vscode_tasks.sh --release --enable-cmake --build
+  bash tasks.sh --release --enable-cmake --build
 
   # Start Demo By Command
-  bash vscode_tasks.sh --run
+  bash tasks.sh --run
   ```
 
 * Build `JNI` part with ndk-build: (Not recommended)

@@ -22,7 +22,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "vscode_tasks.sh",
+                "tasks.sh",
                 "--debug",
                 "--build"
             ],
@@ -37,7 +37,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "vscode_tasks.sh",
+                "tasks.sh",
                 "--debug",
                 "--run"
             ],
@@ -52,7 +52,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "vscode_tasks.sh",
+                "tasks.sh",
                 "--debug",
                 "--build",
                 "--run"
@@ -68,7 +68,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "vscode_tasks.sh",
+                "tasks.sh",
                 "--release",
                 "--build"
             ],
@@ -83,7 +83,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "vscode_tasks.sh",
+                "tasks.sh",
                 "--release",
                 "--run"
             ],
@@ -98,7 +98,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "vscode_tasks.sh",
+                "tasks.sh",
                 "--release",
                 "--build",
                 "--run"
@@ -141,7 +141,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "vscode_tasks.sh",
+                "tasks.sh",
                 "--enable-cmake"
             ],
             "options": {
@@ -155,7 +155,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "vscode_tasks.sh",
+                "tasks.sh",
                 "--enable-video-module"
             ],
             "options": {
@@ -169,7 +169,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "vscode_tasks.sh",
+                "tasks.sh",
                 "--disable-video-module"
             ],
             "options": {
@@ -183,7 +183,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "vscode_tasks.sh",
+                "tasks.sh",
                 "--setup-project"
             ],
             "options": {
@@ -197,7 +197,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "vscode_tasks.sh",
+                "tasks.sh",
                 "--debug",
                 "--enable-cmake",
                 "--build"
@@ -213,7 +213,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "vscode_tasks.sh",
+                "tasks.sh",
                 "--release",
                 "--enable-cmake",
                 "--build"
@@ -229,7 +229,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "vscode_tasks.sh",
+                "tasks.sh",
                 "--enable-cmake",
                 "--enable-video-module",
                 "--publish",
@@ -245,7 +245,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "vscode_tasks.sh",
+                "tasks.sh",
                 "--enable-cmake",
                 "--disable-video-module",
                 "--publish",
