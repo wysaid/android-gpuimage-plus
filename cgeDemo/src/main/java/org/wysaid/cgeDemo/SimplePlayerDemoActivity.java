@@ -52,7 +52,7 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
         }
     };
 
-    class MyVideoButton extends Button implements View.OnClickListener {
+    class MyVideoButton extends androidx.appcompat.widget.AppCompatButton implements View.OnClickListener {
 
         Uri videoUri;
         SimplePlayerGLSurfaceView videoView;
@@ -315,6 +315,7 @@ public class SimplePlayerDemoActivity extends AppCompatActivity {
     };
 
     public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case REQUEST_CODE_PICK_VIDEO:
                 if (resultCode == RESULT_OK) {

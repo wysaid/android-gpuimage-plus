@@ -118,6 +118,7 @@ public class ImageDemoActivity extends AppCompatActivity {
     };
 
     public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case REQUEST_CODE_PICK_IMAGE:
                 if (resultCode == RESULT_OK) {

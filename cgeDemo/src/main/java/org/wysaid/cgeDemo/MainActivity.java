@@ -195,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
             new DemoClassDescription("TestCaseActivity", "Test Cases")
     };
 
-    public class DemoButton extends Button implements View.OnClickListener {
+    public class DemoButton extends androidx.appcompat.widget.AppCompatButton implements View.OnClickListener {
         private DemoClassDescription mDemo;
 
         public void setDemo(DemoClassDescription demo) {

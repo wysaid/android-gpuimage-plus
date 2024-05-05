@@ -52,7 +52,7 @@ public class CameraDemoActivity extends AppCompatActivity {
         });
     }
 
-    public static class MyButtons extends Button {
+    public static class MyButtons extends androidx.appcompat.widget.AppCompatButton {
 
         public String filterConfig;
 
