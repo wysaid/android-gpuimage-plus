@@ -98,6 +98,18 @@
 #endif
 #endif
 
+#ifndef CGE_ASSERT
+#ifdef DEBUG
+#include <assert.h>
+#define CGE_ASSERT(...) assert(__VA_ARGS__)
+#else
+#define CGE_ASSERT(...)
+#ifndef assert
+#define assert(...)
+#endif
+#endif
+#endif
+
 #define CGE_COMMON_CREATE_FUNC(cls, funcName)         \
     static inline cls* create()                       \
     {                                                 \
@@ -316,7 +328,7 @@ typedef enum CGEGlobalBlendMode
     CGEGLOBAL_BLEND_ALPHA_SEPERATE,
     CGEGLOBAL_BLEND_ADD,
     CGEGLOBAL_BLEND_ADD_SEPARATE,
-    CGEGLOBAL_BLEND_ADD_SEPARATE_EXT, //带EXT的忽略alpha是否预乘
+    CGEGLOBAL_BLEND_ADD_SEPARATE_EXT, // 带EXT的忽略alpha是否预乘
     CGEGLOBAL_BLEND_MULTIPLY,
     CGEGLOBAL_BLEND_MULTIPLY_SEPERATE,
     CGEGLOBAL_BLEND_SCREEN,
@@ -325,7 +337,7 @@ typedef enum CGEGlobalBlendMode
 
 const char* cgeGetVersion();
 void cgePrintGLString(const char*, GLenum);
-bool _cgeCheckGLError(const char* name, const char* file, int line); //请直接使用 cgeCheckGLError
+bool _cgeCheckGLError(const char* name, const char* file, int line); // 请直接使用 cgeCheckGLError
 
 ////////////////////////////////////
 
