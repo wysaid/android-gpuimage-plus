@@ -10,6 +10,23 @@ def usingCMakeCompileDebug() {
     return gradle.ext != null && gradle.ext.has("usingCMakeCompileDebug") && gradle.ext.usingCMakeCompileDebug;
 }
 
+def testDemoWithGradleLibs() {
+    return gradle.ext != null && gradle.ext.has("testDemoWithGradleLibs") && gradle.ext.testDemoWithGradleLibs;
+}
+
+if (testDemoWithGradleLibs()) {
+    allprojects {
+        repositories {
+            maven {
+                // Use github hosted maven repo for now.
+                // Will be uploaded to maven central later.
+                url 'https://maven.wysaid.org/'
+            }
+        }
+    }
+}
+
+
 android {
     compileSdkVersion rootProject.ext.android.compileSdkVersion
     buildToolsVersion rootProject.ext.android.buildToolsVersion
@@ -38,6 +55,10 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':library')
+    if (testDemoWithGradleLibs()) {
+        implementation 'org.wysaid:gpuimage-plus:3.0.0'
+    } else {
+        implementation project(':library')
+    }
     implementation 'androidx.appcompat:appcompat:' + rootProject.ext.android.appcompatX
 }
