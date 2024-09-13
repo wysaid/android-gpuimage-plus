@@ -196,7 +196,7 @@ void UniformParameters::assignUniforms(CGEImageHandlerInterface* hander, GLuint 
             glUniform2i(uniformID, (*iter)->uniformValue[0].valuei, (*iter)->uniformValue[1].valuei);
             break;
         case uniformINTV3:
-            glUniform3i(uniformID, (*iter)->uniformValue[0].valuei, (*iter)->uniformValue[1].valuei, (*iter)->uniformValue[3].valuei);
+            glUniform3i(uniformID, (*iter)->uniformValue[0].valuei, (*iter)->uniformValue[1].valuei, (*iter)->uniformValue[2].valuei);
             break;
         case uniformINTV4:
             glUniform4i(uniformID, (*iter)->uniformValue[0].valuei, (*iter)->uniformValue[1].valuei, (*iter)->uniformValue[2].valuei, (*iter)->uniformValue[3].valuei);
