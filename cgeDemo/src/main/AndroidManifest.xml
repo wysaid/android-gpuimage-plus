@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -50,6 +51,7 @@
             android:label="@string/title_activity_video_player" />
         <activity android:name=".VideoPlayerDemoActivity" />
         <activity android:name=".TestCaseActivity" />
+        <activity android:name=".ImageDemoWithMatrixActivity" />
         <activity
             android:name=".FaceTrackingDemoActivity"
             android:label="@string/title_activity_face_tracker_demo" />
