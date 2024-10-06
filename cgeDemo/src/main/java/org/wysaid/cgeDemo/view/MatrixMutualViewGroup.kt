@@ -188,6 +188,9 @@ class MatrixMutualViewGroup : FrameLayout {
 
 
     fun setFilter(filterData: String?) = matrixMutualImageView.applyFilter(filterData)
+    fun setIntensity(intensity: Float) {
+        matrixMutualImageView.filterAdjust = intensity
+    }
 
     private fun syncMatrix2Child() {
         matrixMutualImageView.syncMatrix = syncTotalMatrix
