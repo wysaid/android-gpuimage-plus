@@ -192,6 +192,7 @@ public class MainActivity extends AppCompatActivity {
             new DemoClassDescription("SimplePlayerDemoActivity", "Simple Player Demo"),
             new DemoClassDescription("VideoPlayerDemoActivity", "Video Player Demo"),
             new DemoClassDescription("FaceTrackingDemoActivity", "Face Tracking Demo"),
+            new DemoClassDescription("ImageDemoWithMatrixActivity", "Image Demo WithMatrix"),
             new DemoClassDescription("TestCaseActivity", "Test Cases")
     };
 
