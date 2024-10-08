@@ -26,7 +26,6 @@ class ImageDemoWithMatrixActivity : AppCompatActivity() {
 
         initView()
         initEvent()
-
     }
 
     private fun initEvent() {
@@ -54,16 +53,14 @@ class ImageDemoWithMatrixActivity : AppCompatActivity() {
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
-
             }
-
         }
     }
 
     private fun initView() {
         val spinner: Spinner = findViewById(R.id.filter_item)
         val demoView: MatrixMutualViewGroup = findViewById(R.id.demo_view)
-        val mBitmap = BitmapFactory.decodeResource(resources, R.mipmap.test_image)
+        val mBitmap = BitmapFactory.decodeResource(resources, R.drawable.bgview)
         demoView.doOnLayout {
             demoView.initBitmap(mBitmap)
         }
