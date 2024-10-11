@@ -1,4 +1,4 @@
-﻿/*
+/*
  * cgeGLFunctions.h
  *
  *  Created on: 2013-12-5
@@ -103,12 +103,13 @@ public:
         bindTexture2D(texID, attachment);
         glViewport(x, y, w, h);
     }
-
     inline GLuint fbo() { return m_framebuffer; }
+
 
 protected:
     GLuint m_framebuffer;
 };
+
 
 struct CGESizei
 {
@@ -208,6 +209,27 @@ public:
 private:
     using TextureObject::resize;
     GLuint m_renderBuffer = 0;
+};
+
+class FrameBufferTexture
+    {
+    public:
+    FrameBufferTexture();
+        ~FrameBufferTexture();
+
+        GLuint texture() const;
+        GLsizei width() const;
+        GLsizei height() const;
+        void bindTexture2D(GLsizei width, GLsizei height);
+        void bind();
+        unsigned char* mapBuffer();
+        void unmapBuffer();
+
+    private:
+        GLuint m_fbo;
+        GLuint m_texture;
+        GLsizei m_width;
+        GLsizei m_height;
 };
 
 struct CGELuminance

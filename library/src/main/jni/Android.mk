@@ -75,6 +75,7 @@ LOCAL_SRC_FILES :=  \
 			$(CGE_SOURCE)/filters/cgeEmbossFilter.cpp \
 			\
 			$(CGE_SOURCE)/filters/cgeWaveformFilter.cpp \
+			$(CGE_SOURCE)/filters/cgeHistogramFilter.cpp \
 			\
 			$(CGE_SOURCE)/filters/cgeCrosshatchFilter.cpp \
 			$(CGE_SOURCE)/filters/cgeLiquifyFilter.cpp \
