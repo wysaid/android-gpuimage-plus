@@ -26,6 +26,10 @@ if (properties.getProperty('deployArtifacts', null) == null) {
     pFile.append('\ndeployArtifacts=false\n')
 }
 
+if (properties.getProperty('enable16kPageSizes', null) == null) {
+    pFile.append('\nenable16kPageSizes=false\n')
+}
+
 def homeDir = System.getenv('HOME')
 def mavenLocalDir = "maven_local_repo"
 
@@ -48,3 +52,4 @@ gradle.ext.usingCMakeCompileDebug = properties.getProperty("usingCMakeCompileDeb
 gradle.ext.disableVideoModule = properties.getProperty("disableVideoModule", "") == "true"
 gradle.ext.deployArtifacts = properties.getProperty("deployArtifacts", "") == "true"
 gradle.ext.localRepoDir = properties.getProperty("localRepoDir", mavenLocalDir)
+gradle.ext.enable16kPageSizes = properties.getProperty("enable16kPageSizes", "") == "true"

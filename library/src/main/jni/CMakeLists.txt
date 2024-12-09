@@ -53,11 +53,8 @@ else ()
     execute_process(COMMAND find ${CMAKE_CURRENT_SOURCE_DIR}/cge -maxdepth 3 -type d OUTPUT_VARIABLE CGE_CORE_HEADER_DIR)
 endif ()
 
-message("CGE_CORE_HEADER_DIR=${CGE_CORE_HEADER_DIR}")
+message(STATUS "CGE_CORE_HEADER_DIR=${CGE_CORE_HEADER_DIR}")
 string(REGEX REPLACE "\n" ";" CGE_CORE_HEADER_DIR ${CGE_CORE_HEADER_DIR})
-
-# execute_process(COMMAND bash -c "find \"${CMAKE_CURRENT_SOURCE_DIR}/cge\" -type f -iname '*.cpp' -o -iname '*.c'" OUTPUT_VARIABLE CGE_CORE_SRC)
-# string(REGEX REPLACE "\n" ";" CGE_CORE_SRC ${CGE_CORE_SRC})
 
 file(GLOB_RECURSE CGE_CORE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/cge/*.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/cge/*.c"
@@ -83,14 +80,6 @@ if (CGE_USE_VIDEO_MODULE)
 
     set(CGE_VIDEO_MODULE "ffmpeg")
     add_definitions(-DCGE_USE_FFMPEG=1)
-    # if (DEFINED ANDROID_ABI)
-    #     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/${ANDROID_ABI}/libffmpeg.so 
-    #               ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI}/libffmpeg.so COPYONLY)
-    #     # set_target_properties(ffmpeg PROPERTIES
-    #     #         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI})
-    #     # set_target_properties(ffmpeg PROPERTIES
-    #     #         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI})
-    # endif ()
 endif ()
 
 message("CGE_USE_VIDEO_MODULE=${CGE_USE_VIDEO_MODULE}")
@@ -110,12 +99,13 @@ file(GLOB_RECURSE CGE_EXT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/custom/*.cpp")
 
 add_library(CGEExt SHARED ${CGE_EXT_SRC})
 
-# if (DEFINED ANDROID_ABI)
-#     set_target_properties(CGE PROPERTIES
-#             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI})
-#     set_target_properties(CGEExt PROPERTIES
-#             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../libs/${ANDROID_ABI})
-# endif ()
+target_link_options(CGE PUBLIC -fPIE -fPIC -pie -Wl,-z,relro,-z,now)
+
+if (DEFINED ENABLE_16K_PAGE_SIZES AND ENABLE_16K_PAGE_SIZES)
+    # 16KB elf:  <https://developer.android.com/guide/practices/page-sizes#cmake>
+    target_link_options(CGE PUBLIC -Wl,-z,max-page-size=16384)
+    message("ENABLE_16K_PAGE_SIZES=${ENABLE_16K_PAGE_SIZES}")
+endif ()
 
 target_link_libraries(CGE
         ${CGE_VIDEO_MODULE}
