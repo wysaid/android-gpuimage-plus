@@ -9,7 +9,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.7.2'
+        classpath 'com.android.tools.build:gradle:8.7.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -27,14 +27,14 @@ allprojects {
 ext {
     android = [
             compileSdkVersion: 30,
-            buildToolsVersion: '30.0.3',
-            minSdkVersion    : 16,
+            buildToolsVersion: '34.0.0',
+            minSdkVersion    : 21,
             targetSdkVersion : 25, // higher target version needs more storage permission request.
             versionCode      : 2,
             versionName      : "3.0.0",
             applicationId    : "org.wysaid.cgeDemo",
             appcompatX       : "1.2.0",
-            ndkVersion       : "23.1.7779620",
+            ndkVersion       : "26.3.11579264",
             cmakeVersion     : "3.22.1+",
     ]
 }

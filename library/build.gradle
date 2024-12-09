@@ -18,9 +18,17 @@ def deployArtifacts() {
     return gradle.ext != null && gradle.ext.has("deployArtifacts") && gradle.ext.deployArtifacts;
 }
 
+def enable16kPageSizes() {
+    return gradle.ext != null && gradle.ext.has("enable16kPageSizes") && gradle.ext.enable16kPageSizes;
+}
+
 android {
     compileSdkVersion rootProject.ext.android.compileSdkVersion
     buildToolsVersion rootProject.ext.android.buildToolsVersion
+
+    buildFeatures {
+        buildConfig true
+    }
 
     if (usingCMakeCompile()) {
         ndkVersion rootProject.ext.android.ndkVersion
@@ -35,30 +43,30 @@ android {
         if (usingCMakeCompile()) {
             externalNativeBuild {
                 cmake {
-
-                    def cmakeBuildType = "";
                     def cppExtraFlags = "";
-                    def cgeVideoModuleDef = "";
 
                     if (usingCMakeCompileDebug()) {
-                        cmakeBuildType = "-DCMAKE_BUILD_TYPE=Debug"
-                        cppExtraFlags = "-DDEBUG=1 -D_DEBUG=1 -Od -g"
+                        arguments "-DCMAKE_BUILD_TYPE=Debug"
+                        cppExtraFlags = "-DDEBUG=1 -D_DEBUG=1 -O0 -g"
                     } else {
-                        cmakeBuildType = "-DCMAKE_BUILD_TYPE=Release"
+                        arguments "-DCMAKE_BUILD_TYPE=Release"
                         cppExtraFlags = "-Os -DNDEBUG=1 -D_NDEBUG=1"
                     }
 
                     if (disableVideoModule()) {
-                        cgeVideoModuleDef = "-DCGE_USE_VIDEO_MODULE=OFF"
+                        arguments "-DCGE_USE_VIDEO_MODULE=OFF"
                     } else {
-                        cgeVideoModuleDef = "-DCGE_USE_VIDEO_MODULE=ON"
+                        arguments "-DCGE_USE_VIDEO_MODULE=ON"
+                    }
+
+                    if (enable16kPageSizes()) {
+                        arguments "-DENABLE_16K_PAGE_SIZES=ON"
                     }
 
                     arguments "-DANDROID_STL=c++_static",
                             "-DANDROID_ARM_NEON=TRUE",
                             "-DANDROID_GRADLE=ON",
-                            cmakeBuildType,
-                            cgeVideoModuleDef
+                            "-Wno-deprecated"
 
                     cFlags "-ffast-math -fPIE -fPIC -DNO_LOCALE_SUPPORT=1 -DANDROID_NDK=1 -D__STDC_CONSTANT_MACROS=1 ${cppExtraFlags}"
                     cppFlags "-ffast-math -fPIE -fPIC -DNO_LOCALE_SUPPORT=1 -DANDROID_NDK=1 -D__STDC_CONSTANT_MACROS=1 -frtti -std=c++14 -fno-exceptions -fvisibility-inlines-hidden ${cppExtraFlags}"
