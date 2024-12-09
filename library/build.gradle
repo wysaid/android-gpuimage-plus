@@ -135,7 +135,7 @@ if (deployArtifacts()) {
                 version = version
 
                 afterEvaluate {
-                    from components.release
+                    from components.findByName('release')
 //                artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
                 }
 
@@ -181,7 +181,7 @@ if (deployArtifacts()) {
 
     task sourcesJar(type: Jar) {
         from android.sourceSets.main.java.srcDirs
-        classifier = 'sources'
+        archiveClassifier.set('sources')
     }
 
     task javadoc(type: Javadoc) {
@@ -190,7 +190,7 @@ if (deployArtifacts()) {
     }
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
-        classifier = 'javadoc'
+        archiveClassifier.set('javadoc')
         from javadoc.destinationDir
     }
 
