@@ -19,6 +19,8 @@ jobs:
         ndk-version: r26d
         link-to-sdk: true
         add-to-path: true
+    - name: Install Ninja
+      run: sudo apt-get install ninja-build
     - name: set up JDK 17
       uses: actions/setup-java@v3
       with:
