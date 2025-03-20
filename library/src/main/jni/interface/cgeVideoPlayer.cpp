@@ -69,8 +69,7 @@ static const GLfloat s_colorConversion709[] = {
 
 namespace CGE
 {
-CGEVideoPlayerYUV420P::CGEVideoPlayerYUV420P() :
-    m_posAttribLocation(0), m_decodeHandler(nullptr), m_vertexBuffer(0)
+CGEVideoPlayerYUV420P::CGEVideoPlayerYUV420P()
 {
     m_program.bindAttribLocation(CGEImageFilterInterface::paramPositionIndexName, m_posAttribLocation);
 
@@ -89,16 +88,16 @@ CGEVideoPlayerYUV420P::CGEVideoPlayerYUV420P() :
     m_texULoc = m_program.uniformLocation("textureU");
     m_texVLoc = m_program.uniformLocation("textureV");
 
-    glUniform1i(m_texYLoc, 1);
-    glUniform1i(m_texULoc, 2);
-    glUniform1i(m_texVLoc, 3);
-
     if (m_texYLoc < 0 || m_texULoc < 0 || m_texVLoc < 0)
     {
         CGE_LOG_ERROR("Invalid YUV Texture Uniforms\n");
     }
-
-    memset(m_texYUV, 0, sizeof(m_texYUV));
+    else
+    {
+        glUniform1i(m_texYLoc, 1);
+        glUniform1i(m_texULoc, 2);
+        glUniform1i(m_texVLoc, 3);
+    }
 
     m_rotLoc = m_program.uniformLocation("rotation");
     m_flipScaleLoc = m_program.uniformLocation("flipScale");
@@ -142,12 +141,6 @@ bool CGEVideoPlayerYUV420P::initWithDecodeHandler(CGEVideoDecodeHandler* handler
     m_linesize[0] = m_videoWidth = m_decodeHandler->getWidth();
     m_linesize[2] = m_linesize[1] = m_linesize[0] / 2;
     m_videoHeight = m_decodeHandler->getHeight();
-
-    m_texYUV[0] = cgeGenTextureWithBuffer(nullptr, m_linesize[0], m_videoHeight, GL_LUMINANCE, GL_UNSIGNED_BYTE, 1, 1);
-
-    m_texYUV[1] = cgeGenTextureWithBuffer(nullptr, m_linesize[1], m_videoHeight / 2, GL_LUMINANCE, GL_UNSIGNED_BYTE, 1, 2);
-
-    m_texYUV[2] = cgeGenTextureWithBuffer(nullptr, m_linesize[2], m_videoHeight / 2, GL_LUMINANCE, GL_UNSIGNED_BYTE, 1, 3);
 
     if (m_vertexBuffer == 0)
         m_vertexBuffer = cgeGenCommonQuadArrayBuffer();
@@ -245,23 +238,18 @@ bool CGEVideoPlayerYUV420P::updateVideoFrame(const CGEVideoFrameBufferData* data
 
     m_program.bind();
 
-    if (m_linesize[0] != framebuffer.linesize[0])
+    if (m_texYUV[0] == 0 || m_linesize[0] != framebuffer.linesize[0])
     {
         m_linesize[0] = framebuffer.linesize[0];
         m_linesize[1] = framebuffer.linesize[1];
         m_linesize[2] = framebuffer.linesize[2];
 
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, m_texYUV[0]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_linesize[0], m_videoHeight, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, framebuffer.data[0]);
+        if (m_texYUV[0] != 0)
+            glDeleteTextures(3, m_texYUV);
 
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, m_texYUV[1]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_linesize[1], m_videoHeight / 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, framebuffer.data[1]);
-
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, m_texYUV[2]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_linesize[2], m_videoHeight / 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, framebuffer.data[2]);
+        m_texYUV[0] = cgeGenTextureWithBuffer(framebuffer.data[0], m_linesize[0], m_videoHeight, GL_LUMINANCE, GL_UNSIGNED_BYTE, 1, 1);
+        m_texYUV[1] = cgeGenTextureWithBuffer(framebuffer.data[1], m_linesize[1], m_videoHeight / 2, GL_LUMINANCE, GL_UNSIGNED_BYTE, 1, 2);
+        m_texYUV[2] = cgeGenTextureWithBuffer(framebuffer.data[2], m_linesize[2], m_videoHeight / 2, GL_LUMINANCE, GL_UNSIGNED_BYTE, 1, 3);
     }
     else
     {

@@ -268,12 +268,22 @@ void TextureObject::cleanup(bool deleteTexture)
 
 bool TextureObject::resize(int w, int h, const void* buffer, GLenum format)
 {
-    if (m_texture == 0 || m_size.width != w || m_size.height != h || buffer != nullptr)
+    if (m_texture != 0 && m_size.width == w && m_size.height == h && buffer == nullptr)
     {
-        if (w == 0 || h == 0)
+        return false;
+    }
+
+    if (w == 0 || h == 0)
+    {
+        assert(0 && (void*)"TextureObject::resize must not be 0!");
+        return false;
+    }
+
+    if (m_texture == 0 || m_size.width != w || m_size.height != h)
+    {
+        if (m_texture != 0)
         {
-            assert(0 && "TextureObject::resize must not be 0!");
-            return false;
+            glDeleteTextures(1, &m_texture);
         }
 
         int channel;
@@ -297,29 +307,17 @@ bool TextureObject::resize(int w, int h, const void* buffer, GLenum format)
             break;
         }
 
-        if (m_texture == 0)
-        {
-            m_texture = cgeGenTextureWithBuffer(buffer, w, h, format, GL_UNSIGNED_BYTE, channel);
-            m_size.set(w, h);
-        }
-        else
-        {
-            glBindTexture(GL_TEXTURE_2D, m_texture);
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            if (m_size.width != w || m_size.height != h)
-            {
-                m_size.set(w, h);
-                glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, buffer);
-            }
-            else
-            {
-                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, format, GL_UNSIGNED_BYTE, buffer);
-            }
-        }
-
-        return true;
+        m_size.set(w, h);
+        m_texture = cgeGenTextureWithBuffer(buffer, w, h, format, GL_UNSIGNED_BYTE, channel);
     }
-    return false;
+    else
+    {
+        glBindTexture(GL_TEXTURE_2D, m_texture);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, format, GL_UNSIGNED_BYTE, buffer);
+    }
+
+    return true;
 }
 
 //////////////
