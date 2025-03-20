@@ -224,9 +224,10 @@ protected:
     inline GLint _getUniform(GLuint programId, const char* name)
     {
         GLint uniform = glGetUniformLocation(programId, name);
-        CGE_LOG_CODE(
-            if (uniform < 0)
-                CGE_LOG_ERROR("uniform name %s does not exist!\n", name););
+#ifdef DEBUG
+        if (uniform < 0)
+            CGE_LOG_ERROR("uniform name %s does not exist!\n", name);
+#endif
         return uniform;
     }
 

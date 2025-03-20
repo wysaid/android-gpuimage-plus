@@ -48,7 +48,7 @@ public:
 
     bool open(const char* filename, CGEVideoDecodeHandler::SamplingStyle s = CGEVideoDecodeHandler::ssFastBilinear);
 
-    //不同的初始化方式，不与 open 合用
+    // 不同的初始化方式，不与 open 合用
     bool initWithDecodeHandler(CGEVideoDecodeHandler*);
 
     void close();
@@ -81,15 +81,15 @@ public:
 
 protected:
     ProgramObject m_program;
-    GLuint m_texYUV[3];
-    GLint m_texYLoc, m_texULoc, m_texVLoc;
-    GLuint m_posAttribLocation;
-    GLuint m_rotLoc, m_flipScaleLoc;
-    CGEVideoDecodeHandler* m_decodeHandler;
+    GLuint m_texYUV[3]{};
+    GLint m_texYLoc = -1, m_texULoc = -1, m_texVLoc = -1;
+    GLuint m_posAttribLocation{};
+    GLuint m_rotLoc{}, m_flipScaleLoc{};
+    CGEVideoDecodeHandler* m_decodeHandler{};
 
-    GLuint m_vertexBuffer;
-    int m_videoWidth, m_videoHeight;
-    int m_linesize[3];
+    GLuint m_vertexBuffer{};
+    int m_videoWidth{}, m_videoHeight{};
+    int m_linesize[3]{};
 };
 } // namespace CGE
 
