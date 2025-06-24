@@ -179,6 +179,34 @@
             "problemMatcher": "$gcc"
         },
         {
+            "label": "Enable 16KB Page Size",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "tasks.sh",
+                "--enable-16kb-page-size"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "Disable 16KB Page Size",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "tasks.sh",
+                "--disable-16kb-page-size"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
             "label": "Setup Gradle Project",
             "type": "shell",
             "command": "bash",

@@ -12,3 +12,7 @@ APP_STL := c++_static
 APP_CPPFLAGS := -frtti -std=c++14
 
 APP_OPTIM := release
+
+ifdef CGE_ENABLE_16KB_PAGE_SIZE
+APP_SUPPORT_FLEXIBLE_PAGE_SIZES := true
+endif

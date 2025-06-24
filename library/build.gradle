@@ -129,10 +129,14 @@ if (deployArtifacts()) {
     def gitUrl = 'https://github.com/wysaid/android-gpuimage-plus.git'
     group = "org.wysaid"
 
-    if (disableVideoModule()) {
-        version = rootProject.ext.android.versionName + '-min'
+    if (enable16kPageSizes()) {
+        version = rootProject.ext.android.versionName + '-16k'
     } else {
         version = rootProject.ext.android.versionName
+    }
+
+    if (disableVideoModule()) {
+        version += '-min'
     }
 
     publishing {
@@ -143,8 +147,11 @@ if (deployArtifacts()) {
                 version = version
 
                 afterEvaluate {
-                    from components.findByName('release')
-//                artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+                    // Use the correct Android component
+                    from components.findByName('release') ?: components.findByName('default')
+                    
+                    // Ensure the AAR file is included and declare the correct dependencies
+                    artifact bundleReleaseAar
                 }
 
                 pom {

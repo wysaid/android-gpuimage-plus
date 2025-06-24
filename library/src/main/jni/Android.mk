@@ -109,6 +109,10 @@ LOCAL_SRC_FILES :=  \
 LOCAL_CPPFLAGS := -frtti -std=c++14
 LOCAL_LDLIBS :=  -llog -lEGL -lGLESv2 -ljnigraphics
 
+ifdef CGE_ENABLE_16KB_PAGE_SIZE
+LOCAL_LDFLAGS += "-Wl,-z,max-page-size=16384"
+endif
+
 # 'CGE_USE_VIDEO_MODULE' determines if the project should compile with ffmpeg.
 
 ifdef CGE_USE_VIDEO_MODULE
@@ -161,10 +165,13 @@ LOCAL_CFLAGS := -mfloat-abi=softfp -mfpu=vfp -Os -ffast-math -fPIC
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
 LOCAL_CFLAGS := $(LOCAL_CFLAGS) march=armv7-a -mfpu=neon
 endif
-LOCAL_SRC_FILES := ffmpeg/$(TARGET_ARCH_ABI)/libffmpeg.so
-LOCAL_EXPORT_C_INCLUDES := $(CGE_ROOT)/ffmpeg
-
-# LOCAL_SHARED_LIBRARIES := x264
+ifdef CGE_ENABLE_16KB_PAGE_SIZE
+LOCAL_SRC_FILES := ffmpeg-16kb/libs/$(TARGET_ARCH_ABI)/libffmpeg.so
+LOCAL_EXPORT_C_INCLUDES := $(CGE_ROOT)/ffmpeg-16kb/include
+else
+LOCAL_SRC_FILES := ffmpeg/libs/$(TARGET_ARCH_ABI)/libffmpeg.so
+LOCAL_EXPORT_C_INCLUDES := $(CGE_ROOT)/ffmpeg/include
+endif
 
 include $(PREBUILT_SHARED_LIBRARY)
 
