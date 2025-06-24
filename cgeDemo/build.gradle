@@ -42,7 +42,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':library')
+    // implementation project(':library')  // Disabled to use published AAR
+    implementation 'org.wysaid:gpuimage-plus:3.1.0-16k'  // Use published AAR instead
     implementation 'androidx.appcompat:appcompat:' + rootProject.ext.android.appcompatX
     implementation 'androidx.core:core-ktx:1.1.0'
 }

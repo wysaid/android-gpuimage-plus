@@ -1,4 +1,5 @@
-include ':library', ':cgeDemo'
+include ':cgeDemo'
+// include ':library'  // Excluded to use published AAR
 
 def pFile = new File(settingsDir, 'local.properties')
 Properties properties = new Properties()

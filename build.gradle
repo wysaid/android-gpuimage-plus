@@ -21,6 +21,11 @@ allprojects {
     repositories {
         mavenCentral()
         google()
+        maven {
+            // Use github hosted maven repo for now.
+            // Repo url: https://github.com/wysaid/android-gpuimage-plus-maven
+            url 'https://maven.wysaid.org/'
+        }
     }
 }
 
