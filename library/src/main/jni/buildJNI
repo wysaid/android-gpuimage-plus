@@ -50,7 +50,15 @@ while [[ $# -gt 0 ]]; do
         export CGE_NO_VIDEO_MODULE=1
         shift
         ;;
-
+    --16kb | --16KB)
+        export CGE_ENABLE_16KB_PAGE_SIZE=1
+        echo "16kb page size enabled!"
+        shift
+        ;;
+    *)
+        echo "Unknown option: $PARSE_KEY"
+        shift
+        ;;
     esac
 
 done
