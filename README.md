@@ -15,23 +15,35 @@ allprojects {
     repositories {
         maven {
             // Use github hosted maven repo for now.
-            // Will be uploaded to maven central later.
+            // Repo url: https://github.com/wysaid/android-gpuimage-plus-maven
             url 'https://maven.wysaid.org/'
         }
     }
 }
 
-//Choose only one of them
+// Choose only one of them
 dependencies {
-    //All arch: armeabi-v7a, arm64-v8a, x86, x86_64 with video module (ffmpeg bundled)
-    implementation 'org.wysaid:gpuimage-plus:3.0.0'
+    // Page size: 4KB (default)
+    // Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
+    // Full-featured with FFmpeg bundled
+    implementation 'org.wysaid:gpuimage-plus:3.1.0'
 
-    //All arch: armeabi-v7a, arm64-v8a, x86, x86_64 without video module (no ffmpeg)
-    implementation 'org.wysaid:gpuimage-plus:3.0.0-min'
+    // Page size: 16KB
+    // Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
+    // Full-featured with FFmpeg bundled
+    implementation 'org.wysaid:gpuimage-plus:3.1.0-16k'
+
+    // Page size: 4KB (default)
+    // Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
+    // Image-only version (no video features or FFmpeg)
+    implementation 'org.wysaid:gpuimage-plus:3.1.0-min'
+
+    // Page size: 16KB
+    // Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
+    // Image-only version (no video features or FFmpeg)
+    implementation 'org.wysaid:gpuimage-plus:3.1.0-16k-min'
 }
 ```
-
-> __The jcenter is out of date, please try the source for now. Latest prebuilt versions will be provided soon.__
 
 > To compile other versions of ffmpeg, see: <https://github.com/wysaid/FFmpeg-Android.git>
 
@@ -80,6 +92,9 @@ dependencies {
   export NDK=path/of/your/ndk
   cd folder/of/jni (android-gpuimage-plus/library/src/main/jni)
   
+  # Enable 16kb page sizes (optional)
+  export CGE_ENABLE_16KB_PAGE_SIZE=1
+
   #This will make all arch: armeabi, armeabi-v7a arm64-v8a, x86, mips
   ./buildJNI
   #Or use "sh buildJNI"

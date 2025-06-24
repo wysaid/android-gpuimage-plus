@@ -14,8 +14,14 @@ source "$PROJECT_DIR/utils/platform_utils.sh"
 
 export PACKAGE_NAME="org.wysaid.cgeDemo"
 export LAUNCH_ACTIVITY="MainActivity"
-export GRADLEW_RUN_TASK="installDebug"
-export ANDROID_BUILD_TYPE="assembleDebug"
+
+if [[ -z "$GRADLEW_RUN_TASK" ]]; then
+    export GRADLEW_RUN_TASK="installDebug"
+fi
+
+if [[ -z "$ANDROID_BUILD_TYPE" ]]; then
+    export ANDROID_BUILD_TYPE="assembleDebug"
+fi
 
 function setupProject() {
     if [[ -f "$PROJECT_DIR/local.properties" ]] && grep -E '^usingCMakeCompile=true' "$PROJECT_DIR/local.properties"; then
@@ -126,6 +132,10 @@ while [[ $# > 0 ]]; do
         buildProject
         shift
         ;;
+    --no-install)
+        export GRADLEW_RUN_TASK=""
+        shift
+        ;;
     --release)
         export ANDROID_BUILD_TYPE="assembleRelease"
         # ANDROID_BUILD_TYPE="assembleDebug" # use this if the release apk can not be installed.
@@ -170,6 +180,14 @@ while [[ $# > 0 ]]; do
         ;;
     --disable-video-module)
         changeProperty "local.properties" '^disableVideoModule=' 's/disableVideoModule=.*/disableVideoModule=true/' 'disableVideoModule=true'
+        shift # past argument
+        ;;
+    --enable-16kb-page-size)
+        changeProperty "local.properties" '^enable16kPageSizes=' 's/enable16kPageSizes=.*/enable16kPageSizes=true/' 'enable16kPageSizes=true'
+        shift # past argument
+        ;;
+    --disable-16kb-page-size)
+        changeProperty "local.properties" '^enable16kPageSizes=' 's/enable16kPageSizes=.*/enable16kPageSizes=false/' 'enable16kPageSizes=false'
         shift # past argument
         ;;
     --publish)
