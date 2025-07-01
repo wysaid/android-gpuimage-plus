@@ -8,12 +8,14 @@ option(CGE_USE_VIDEO_MODULE "boolean option to enable video module" OFF)
 
 if(NOT DEFINED ANDROID_GRADLE OR NOT ANDROID_GRADLE)
     if(NOT DEFINED ENV{NDK})
-        execute_process(COMMAND which ndk-build OUTPUT_VARIABLE CGE_NDK_DIR)
+        execute_process(COMMAND which ndk-build OUTPUT_VARIABLE CGE_NDK_BUILD_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-        if("${CGE_NDK_DIR}" STREQUAL "")
+        if("${CGE_NDK_BUILD_PATH}" STREQUAL "")
             message(FATAL_ERROR "You should define the NDK variable!")
         else()
-            execute_process(COMMAND export NDK=$(dirname `which ndk-build`))
+            get_filename_component(CGE_NDK_DIR "${CGE_NDK_BUILD_PATH}" DIRECTORY)
+            set(ENV{NDK} "${CGE_NDK_DIR}")
+            message(STATUS "Auto-detected NDK path: ${CGE_NDK_DIR}")
         endif()
     endif()
 
