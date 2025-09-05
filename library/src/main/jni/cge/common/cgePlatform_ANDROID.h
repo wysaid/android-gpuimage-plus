@@ -11,14 +11,6 @@
 
 #include <cstdio>
 
-#ifndef CGE_NO_EXPORT
-#if defined(__ANDROID__)
-#define CGE_NO_EXPORT __attribute__((visibility("hidden")))
-#else
-#define CGE_NO_EXPORT
-#endif
-#endif
-
 #ifdef _CGE_USE_ES_API_3_0_
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
