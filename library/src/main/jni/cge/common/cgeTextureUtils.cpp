@@ -419,7 +419,7 @@ void TextureDrawer::drawTexture(GLuint src)
     glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
 
     m_program.bind();
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 void TextureDrawer::setRotation(float rad)
@@ -590,7 +590,7 @@ void TextureDrawer4ExtOES::drawTexture(GLuint src)
     glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
 
     m_program.bind();
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 #endif
 
@@ -622,7 +622,7 @@ void TextureDrawerYUV::drawTextures()
     glBindBuffer(GL_ARRAY_BUFFER, m_vertBuffer);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 CGEConstString TextureDrawerYUV::getFragmentShaderString()
@@ -765,7 +765,7 @@ void CGELerpBlurUtil::calcWithTexture(GLuint texture, int width, int height, GLu
     m_framebuffer.bindTexture2D(m_texCache[0].texID);
     glBindTexture(GL_TEXTURE_2D, texture);
     glViewport(0, 0, m_texCache[0].size.width, m_texCache[0].size.height);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glFlush();
 
     // down scale
@@ -776,7 +776,7 @@ void CGELerpBlurUtil::calcWithTexture(GLuint texture, int width, int height, GLu
         glViewport(0, 0, texCache.size.width, texCache.size.height);
 
         glBindTexture(GL_TEXTURE_2D, m_texCache[i - 1].texID);
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glFlush();
     }
 
@@ -788,7 +788,7 @@ void CGELerpBlurUtil::calcWithTexture(GLuint texture, int width, int height, GLu
         glViewport(0, 0, texCache.size.width, texCache.size.height);
 
         glBindTexture(GL_TEXTURE_2D, m_texCache[i].texID);
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glFlush();
     }
 
@@ -797,7 +797,7 @@ void CGELerpBlurUtil::calcWithTexture(GLuint texture, int width, int height, GLu
         m_framebuffer.bindTexture2D(target);
         glViewport(0, 0, targetWidth, targetHeight);
         glBindTexture(GL_TEXTURE_2D, m_texCache[0].texID);
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 }
 
@@ -809,7 +809,7 @@ void CGELerpBlurUtil::drawTexture(GLuint texID)
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texID);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 void CGELerpBlurUtil::_clearMipmaps()

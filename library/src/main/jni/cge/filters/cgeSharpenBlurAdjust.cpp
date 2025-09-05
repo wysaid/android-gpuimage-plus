@@ -237,13 +237,13 @@ void CGESharpenBlurFilter::render2Texture(CGEImageHandlerInterface* handler, GLu
     handler->setAsTarget();
     glBindTexture(GL_TEXTURE_2D, srcTexture);
     m_program.sendUniformf(paramBlurNormalName, 0.0f, 1.0f);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     // Pass Two
     handler->swapBufferFBO();
     glBindTexture(GL_TEXTURE_2D, handler->getBufferTextureID());
     m_program.sendUniformf(paramBlurNormalName, 1.0f, 0.0f);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -286,13 +286,13 @@ void CGEBlurFastFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint
     handler->setAsTarget();
     glBindTexture(GL_TEXTURE_2D, handler->getBufferTextureID());
     m_program.sendUniformf(paramBlurNormalName, 0.0f, 1.0f);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     // Pass Two
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dstTexture, 0);
     glBindTexture(GL_TEXTURE_2D, handler->getTargetTextureID());
     m_program.sendUniformf(paramBlurNormalName, 1.0f, 0.0f);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 void CGEBlurFastFilter::setSamplerScale(int value)

@@ -127,12 +127,12 @@ void CGEMotionFlowFilter::render2Texture(CGEImageHandlerInterface* handler, GLui
     {
         glUniform1f(m_alphaLoc, alpha += m_dAlpha);
         glBindTexture(GL_TEXTURE_2D, texID);
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 
     glUniform1f(m_alphaLoc, alpha += m_dAlpha);
     glBindTexture(GL_TEXTURE_2D, srcTexture);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     glDisable(GL_BLEND);
 
