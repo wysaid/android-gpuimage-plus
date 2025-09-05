@@ -33,8 +33,8 @@ public class TextureDrawer {
             "   gl_FragColor = texture2D(inputImageTexture, texCoord);\n" +
             "}";
 
-    public static final float[] vertices = {-1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f};
-    public static final int DRAW_FUNCTION = GLES20.GL_TRIANGLE_FAN;
+    public static final float[] vertices = {-1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f};
+    public static final int DRAW_FUNCTION = GLES20.GL_TRIANGLE_STRIP;
 
     protected ProgramObject mProgram;
     protected int mVertBuffer;

@@ -62,7 +62,7 @@ public class TextureDrawerI420ToRGB extends TextureDrawerCodec {
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertBuffer);
         GLES20.glEnableVertexAttribArray(0);
         GLES20.glVertexAttribPointer(0, 2, GLES20.GL_FLOAT, false, 0, 0);
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 4);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
     }
 
     public void drawTextures(int texY, int texU, int texV) {

@@ -93,11 +93,11 @@ void CGESketchFilter::render2Texture(CGE::CGEImageHandlerInterface* handler, GLu
         glBindTexture(GL_TEXTURE_2D, srcTexture);
         glUniform2f(m_maxValueFilter.getStepsLocation(), 1.0f / sz.width, 1.0f / sz.height);
 
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
         //
         //  			glBindTexture(GL_TEXTURE_2D, handler->getTargetTextureID());
-        //  			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        //  			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, handler->getTargetTextureID(), 0);
@@ -113,7 +113,7 @@ void CGESketchFilter::render2Texture(CGE::CGEImageHandlerInterface* handler, GLu
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, m_textureCache);
 
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     cgeCheckGLError("glDrawArrays");
 }
 
