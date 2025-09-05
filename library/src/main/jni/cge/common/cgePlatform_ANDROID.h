@@ -11,6 +11,13 @@
 
 #include <cstdio>
 
+// Define CGE_NO_EXPORT for Android hidden symbols to fix 16KB page size symbol conflicts
+#if defined(__ANDROID__)
+#define CGE_NO_EXPORT __attribute__((visibility("hidden")))
+#else
+#define CGE_NO_EXPORT
+#endif
+
 #ifdef _CGE_USE_ES_API_3_0_
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>

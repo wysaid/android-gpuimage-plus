@@ -11,13 +11,6 @@
 
 #include "cgeGlobal.h"
 
-// Define CGE_NO_EXPORT for Android hidden symbols to fix 16KB page size symbol conflicts
-#if defined(__ANDROID__)
-#define CGE_NO_EXPORT __attribute__((visibility("hidden")))
-#else
-#define CGE_NO_EXPORT
-#endif
-
 #ifndef cgeCheckGLError
 #ifdef CGE_LOG_ERROR
 #define cgeCheckGLError(name) _cgeCheckGLError(name, __FILE__, __LINE__);

@@ -30,7 +30,6 @@
 
 #include <GLES2/gl2.h>
 #include <android/api-level.h>
-#include "cgeCommonDefine.h"
 
 #ifdef __cplusplus
 extern "C"
