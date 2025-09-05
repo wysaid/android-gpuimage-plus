@@ -11,6 +11,10 @@ def usingCMakeCompileDebug() {
     return gradle.ext != null && gradle.ext.has("usingCMakeCompileDebug") && gradle.ext.usingCMakeCompileDebug;
 }
 
+def enable16kPageSizes() {
+    return gradle.ext != null && gradle.ext.has("enable16kPageSizes") && gradle.ext.enable16kPageSizes;
+}
+
 android {
     compileSdkVersion rootProject.ext.android.compileSdkVersion
     buildToolsVersion rootProject.ext.android.buildToolsVersion
@@ -22,7 +26,8 @@ android {
     defaultConfig {
         applicationId rootProject.ext.android.applicationId
         minSdkVersion rootProject.ext.android.minSdkVersion
-        targetSdkVersion rootProject.ext.android.targetSdkVersion
+        // Use Android 15+ (API 35) when 16KB page sizes are enabled, otherwise use default
+        targetSdkVersion enable16kPageSizes() ? 35 : rootProject.ext.android.targetSdkVersion
         versionCode rootProject.ext.android.versionCode
         versionName rootProject.ext.android.versionName
         signingConfig signingConfigs.debug

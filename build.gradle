@@ -26,7 +26,7 @@ allprojects {
 
 ext {
     android = [
-            compileSdkVersion: 30,
+            compileSdkVersion: 35, // Updated to support Android 15 for 16KB page sizes
             buildToolsVersion: '34.0.0',
             minSdkVersion    : 21,
             targetSdkVersion : 25, // higher target version needs more storage permission request.
