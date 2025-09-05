@@ -31,6 +31,15 @@
 #include <GLES2/gl2.h>
 #include <android/api-level.h>
 
+// Define CGE_NO_EXPORT for symbol visibility control to fix 16KB page size symbol conflicts
+#ifndef CGE_NO_EXPORT
+#if defined(__ANDROID__)
+#define CGE_NO_EXPORT __attribute__((visibility("hidden")))
+#else
+#define CGE_NO_EXPORT
+#endif
+#endif
+
 #ifdef __cplusplus
 extern "C"
 {
