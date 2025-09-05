@@ -3,6 +3,7 @@
 
 #include <GLES2/gl2.h>
 #include <android/api-level.h>
+#include "cgeCommonDefine.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -220,88 +221,88 @@ GLboolean cgeGl31StubInit();
 #define GL_MAX_VERTEX_ATTRIB_BINDINGS 0x82DA
 #define GL_MAX_VERTEX_ATTRIB_STRIDE 0x82E5
 
-extern GL_APICALL void (*GL_APIENTRY glDispatchCompute)(GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z);
-extern GL_APICALL void (*GL_APIENTRY glDispatchComputeIndirect)(GLintptr indirect);
-extern GL_APICALL void (*GL_APIENTRY glDrawArraysIndirect)(GLenum mode, const void* indirect);
-extern GL_APICALL void (*GL_APIENTRY glDrawElementsIndirect)(GLenum mode, GLenum type, const void* indirect);
-extern GL_APICALL void (*GL_APIENTRY glFramebufferParameteri)(GLenum target, GLenum pname, GLint param);
-extern GL_APICALL void (*GL_APIENTRY glGetFramebufferParameteriv)(GLenum target, GLenum pname, GLint* params);
-extern GL_APICALL void (*GL_APIENTRY glGetProgramInterfaceiv)(GLuint program, GLenum programInterface, GLenum pname, GLint* params);
-extern GL_APICALL GLuint (*GL_APIENTRY glGetProgramResourceIndex)(GLuint program, GLenum programInterface, const GLchar* name);
-extern GL_APICALL void (*GL_APIENTRY glGetProgramResourceName)(GLuint program, GLenum programInterface, GLuint index, GLsizei bufSize,
+extern CGE_NO_EXPORT void (*GL_APIENTRY glDispatchCompute)(GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glDispatchComputeIndirect)(GLintptr indirect);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glDrawArraysIndirect)(GLenum mode, const void* indirect);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glDrawElementsIndirect)(GLenum mode, GLenum type, const void* indirect);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glFramebufferParameteri)(GLenum target, GLenum pname, GLint param);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glGetFramebufferParameteriv)(GLenum target, GLenum pname, GLint* params);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glGetProgramInterfaceiv)(GLuint program, GLenum programInterface, GLenum pname, GLint* params);
+extern CGE_NO_EXPORT GLuint (*GL_APIENTRY glGetProgramResourceIndex)(GLuint program, GLenum programInterface, const GLchar* name);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glGetProgramResourceName)(GLuint program, GLenum programInterface, GLuint index, GLsizei bufSize,
                                                                GLsizei* length, GLchar* name);
-extern GL_APICALL void (*GL_APIENTRY glGetProgramResourceiv)(GLuint program, GLenum programInterface, GLuint index, GLsizei propCount,
+extern CGE_NO_EXPORT void (*GL_APIENTRY glGetProgramResourceiv)(GLuint program, GLenum programInterface, GLuint index, GLsizei propCount,
                                                              const GLenum* props, GLsizei bufSize, GLsizei* length, GLint* params);
-extern GL_APICALL GLint (*GL_APIENTRY glGetProgramResourceLocation)(GLuint program, GLenum programInterface, const GLchar* name);
-extern GL_APICALL void (*GL_APIENTRY glUseProgramStages)(GLuint pipeline, GLbitfield stages, GLuint program);
-extern GL_APICALL void (*GL_APIENTRY glActiveShaderProgram)(GLuint pipeline, GLuint program);
-extern GL_APICALL GLuint (*GL_APIENTRY glCreateShaderProgramv)(GLenum type, GLsizei count, const GLchar* const* strings);
-extern GL_APICALL void (*GL_APIENTRY glBindProgramPipeline)(GLuint pipeline);
-extern GL_APICALL void (*GL_APIENTRY glDeleteProgramPipelines)(GLsizei n, const GLuint* pipelines);
-extern GL_APICALL void (*GL_APIENTRY glGenProgramPipelines)(GLsizei n, GLuint* pipelines);
-extern GL_APICALL GLboolean (*GL_APIENTRY glIsProgramPipeline)(GLuint pipeline);
-extern GL_APICALL void (*GL_APIENTRY glGetProgramPipelineiv)(GLuint pipeline, GLenum pname, GLint* params);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform1i)(GLuint program, GLint location, GLint v0);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform2i)(GLuint program, GLint location, GLint v0, GLint v1);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform3i)(GLuint program, GLint location, GLint v0, GLint v1, GLint v2);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform4i)(GLuint program, GLint location, GLint v0, GLint v1, GLint v2, GLint v3);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform1ui)(GLuint program, GLint location, GLuint v0);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform2ui)(GLuint program, GLint location, GLuint v0, GLuint v1);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform3ui)(GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform4ui)(GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform1f)(GLuint program, GLint location, GLfloat v0);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform2f)(GLuint program, GLint location, GLfloat v0, GLfloat v1);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform3f)(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform4f)(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform1iv)(GLuint program, GLint location, GLsizei count, const GLint* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform2iv)(GLuint program, GLint location, GLsizei count, const GLint* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform3iv)(GLuint program, GLint location, GLsizei count, const GLint* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform4iv)(GLuint program, GLint location, GLsizei count, const GLint* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform1uiv)(GLuint program, GLint location, GLsizei count, const GLuint* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform2uiv)(GLuint program, GLint location, GLsizei count, const GLuint* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform3uiv)(GLuint program, GLint location, GLsizei count, const GLuint* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform4uiv)(GLuint program, GLint location, GLsizei count, const GLuint* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform1fv)(GLuint program, GLint location, GLsizei count, const GLfloat* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform2fv)(GLuint program, GLint location, GLsizei count, const GLfloat* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform3fv)(GLuint program, GLint location, GLsizei count, const GLfloat* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniform4fv)(GLuint program, GLint location, GLsizei count, const GLfloat* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniformMatrix2fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
+extern CGE_NO_EXPORT GLint (*GL_APIENTRY glGetProgramResourceLocation)(GLuint program, GLenum programInterface, const GLchar* name);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glUseProgramStages)(GLuint pipeline, GLbitfield stages, GLuint program);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glActiveShaderProgram)(GLuint pipeline, GLuint program);
+extern CGE_NO_EXPORT GLuint (*GL_APIENTRY glCreateShaderProgramv)(GLenum type, GLsizei count, const GLchar* const* strings);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glBindProgramPipeline)(GLuint pipeline);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glDeleteProgramPipelines)(GLsizei n, const GLuint* pipelines);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glGenProgramPipelines)(GLsizei n, GLuint* pipelines);
+extern CGE_NO_EXPORT GLboolean (*GL_APIENTRY glIsProgramPipeline)(GLuint pipeline);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glGetProgramPipelineiv)(GLuint pipeline, GLenum pname, GLint* params);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform1i)(GLuint program, GLint location, GLint v0);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform2i)(GLuint program, GLint location, GLint v0, GLint v1);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform3i)(GLuint program, GLint location, GLint v0, GLint v1, GLint v2);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform4i)(GLuint program, GLint location, GLint v0, GLint v1, GLint v2, GLint v3);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform1ui)(GLuint program, GLint location, GLuint v0);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform2ui)(GLuint program, GLint location, GLuint v0, GLuint v1);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform3ui)(GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform4ui)(GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform1f)(GLuint program, GLint location, GLfloat v0);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform2f)(GLuint program, GLint location, GLfloat v0, GLfloat v1);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform3f)(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform4f)(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform1iv)(GLuint program, GLint location, GLsizei count, const GLint* value);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform2iv)(GLuint program, GLint location, GLsizei count, const GLint* value);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform3iv)(GLuint program, GLint location, GLsizei count, const GLint* value);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform4iv)(GLuint program, GLint location, GLsizei count, const GLint* value);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform1uiv)(GLuint program, GLint location, GLsizei count, const GLuint* value);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform2uiv)(GLuint program, GLint location, GLsizei count, const GLuint* value);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform3uiv)(GLuint program, GLint location, GLsizei count, const GLuint* value);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform4uiv)(GLuint program, GLint location, GLsizei count, const GLuint* value);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform1fv)(GLuint program, GLint location, GLsizei count, const GLfloat* value);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform2fv)(GLuint program, GLint location, GLsizei count, const GLfloat* value);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform3fv)(GLuint program, GLint location, GLsizei count, const GLfloat* value);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniform4fv)(GLuint program, GLint location, GLsizei count, const GLfloat* value);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniformMatrix2fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
                                                                 const GLfloat* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniformMatrix3fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniformMatrix3fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
                                                                 const GLfloat* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniformMatrix4fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniformMatrix4fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
                                                                 const GLfloat* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniformMatrix2x3fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniformMatrix2x3fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
                                                                   const GLfloat* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniformMatrix3x2fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniformMatrix3x2fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
                                                                   const GLfloat* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniformMatrix2x4fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniformMatrix2x4fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
                                                                   const GLfloat* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniformMatrix4x2fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniformMatrix4x2fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
                                                                   const GLfloat* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniformMatrix3x4fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniformMatrix3x4fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
                                                                   const GLfloat* value);
-extern GL_APICALL void (*GL_APIENTRY glProgramUniformMatrix4x3fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
+extern CGE_NO_EXPORT void (*GL_APIENTRY glProgramUniformMatrix4x3fv)(GLuint program, GLint location, GLsizei count, GLboolean transpose,
                                                                   const GLfloat* value);
-extern GL_APICALL void (*GL_APIENTRY glValidateProgramPipeline)(GLuint pipeline);
-extern GL_APICALL void (*GL_APIENTRY glGetProgramPipelineInfoLog)(GLuint pipeline, GLsizei bufSize, GLsizei* length, GLchar* infoLog);
-extern GL_APICALL void (*GL_APIENTRY glBindImageTexture)(GLuint unit, GLuint texture, GLint level, GLboolean layered, GLint layer,
+extern CGE_NO_EXPORT void (*GL_APIENTRY glValidateProgramPipeline)(GLuint pipeline);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glGetProgramPipelineInfoLog)(GLuint pipeline, GLsizei bufSize, GLsizei* length, GLchar* infoLog);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glBindImageTexture)(GLuint unit, GLuint texture, GLint level, GLboolean layered, GLint layer,
                                                          GLenum access, GLenum format);
-extern GL_APICALL void (*GL_APIENTRY glGetBooleani_v)(GLenum target, GLuint index, GLboolean* data);
-extern GL_APICALL void (*GL_APIENTRY glMemoryBarrier)(GLbitfield barriers);
-extern GL_APICALL void (*GL_APIENTRY glMemoryBarrierByRegion)(GLbitfield barriers);
-extern GL_APICALL void (*GL_APIENTRY glTexStorage2DMultisample)(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width,
+extern CGE_NO_EXPORT void (*GL_APIENTRY glGetBooleani_v)(GLenum target, GLuint index, GLboolean* data);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glMemoryBarrier)(GLbitfield barriers);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glMemoryBarrierByRegion)(GLbitfield barriers);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glTexStorage2DMultisample)(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width,
                                                                 GLsizei height, GLboolean fixedsamplelocations);
-extern GL_APICALL void (*GL_APIENTRY glGetMultisamplefv)(GLenum pname, GLuint index, GLfloat* val);
-extern GL_APICALL void (*GL_APIENTRY glSampleMaski)(GLuint maskNumber, GLbitfield mask);
-extern GL_APICALL void (*GL_APIENTRY glGetTexLevelParameteriv)(GLenum target, GLint level, GLenum pname, GLint* params);
-extern GL_APICALL void (*GL_APIENTRY glGetTexLevelParameterfv)(GLenum target, GLint level, GLenum pname, GLfloat* params);
-extern GL_APICALL void (*GL_APIENTRY glBindVertexBuffer)(GLuint bindingindex, GLuint buffer, GLintptr offset, GLsizei stride);
-extern GL_APICALL void (*GL_APIENTRY glVertexAttribFormat)(GLuint attribindex, GLint size, GLenum type, GLboolean normalized,
+extern CGE_NO_EXPORT void (*GL_APIENTRY glGetMultisamplefv)(GLenum pname, GLuint index, GLfloat* val);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glSampleMaski)(GLuint maskNumber, GLbitfield mask);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glGetTexLevelParameteriv)(GLenum target, GLint level, GLenum pname, GLint* params);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glGetTexLevelParameterfv)(GLenum target, GLint level, GLenum pname, GLfloat* params);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glBindVertexBuffer)(GLuint bindingindex, GLuint buffer, GLintptr offset, GLsizei stride);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glVertexAttribFormat)(GLuint attribindex, GLint size, GLenum type, GLboolean normalized,
                                                            GLuint relativeoffset);
-extern GL_APICALL void (*GL_APIENTRY glVertexAttribIFormat)(GLuint attribindex, GLint size, GLenum type, GLuint relativeoffset);
-extern GL_APICALL void (*GL_APIENTRY glVertexAttribBinding)(GLuint attribindex, GLuint bindingindex);
-extern GL_APICALL void (*GL_APIENTRY glVertexBindingDivisor)(GLuint bindingindex, GLuint divisor);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glVertexAttribIFormat)(GLuint attribindex, GLint size, GLenum type, GLuint relativeoffset);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glVertexAttribBinding)(GLuint attribindex, GLuint bindingindex);
+extern CGE_NO_EXPORT void (*GL_APIENTRY glVertexBindingDivisor)(GLuint bindingindex, GLuint divisor);
 
 #endif /* GL_ES_VERSION_3_1 */
 
