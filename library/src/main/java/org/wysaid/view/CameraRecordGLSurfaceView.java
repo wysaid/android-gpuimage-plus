@@ -5,6 +5,7 @@ package org.wysaid.view;
  */
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -162,6 +163,7 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceViewWithTexture {
         ShortBuffer audioBuffer;
         StartRecordingCallback recordingCallback;
 
+        @SuppressLint("MissingPermission")
         private AudioRecordRunnable(StartRecordingCallback callback) {
             recordingCallback = callback;
             try {
