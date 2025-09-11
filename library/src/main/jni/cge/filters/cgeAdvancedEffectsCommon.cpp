@@ -28,7 +28,7 @@ void CGEAdvancedEffectOneStepFilterHelper::render2Texture(CGEImageHandlerInterfa
         CGESizei sz = handler->getOutputFBOSize();
         m_program.sendUniformf(paramStepsName, 1.0f / sz.width, 1.0f / sz.height);
     }
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     cgeCheckGLError("glDrawArrays");
 }
 
@@ -51,7 +51,7 @@ void CGEAdvancedEffectTwoStepFilterHelper::render2Texture(CGEImageHandlerInterfa
         glBindTexture(GL_TEXTURE_2D, srcTexture);
 
         m_program.sendUniformf(paramStepsName, 0.0f, 1.0f / sz.height);
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
     // Pass Two
     handler->swapBufferFBO();
@@ -61,7 +61,7 @@ void CGEAdvancedEffectTwoStepFilterHelper::render2Texture(CGEImageHandlerInterfa
     glBindTexture(GL_TEXTURE_2D, handler->getBufferTextureID());
 
     m_program.sendUniformf(paramStepsName, 1.0f / sz.width, 0.0f);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 } // namespace CGE

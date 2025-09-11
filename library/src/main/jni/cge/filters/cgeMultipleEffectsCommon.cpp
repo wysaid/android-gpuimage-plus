@@ -437,7 +437,7 @@ void CGELomoFilter::render2Texture(CGEImageHandlerInterface* handler, GLuint src
         m_program.sendUniformf(paramSaturationName, sat);
     }
 
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     cgeCheckGLError("glDrawArrays");
 }
 
@@ -516,7 +516,7 @@ void CGELomoWithCurveFilter::render2Texture(CGEImageHandlerInterface* handler, G
         m_program.sendUniformf(paramSaturationName, sat);
     }
 
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     cgeCheckGLError("glDrawArrays");
 }
 
@@ -680,7 +680,7 @@ void CGEColorScaleFilter::render2Texture(CGEImageHandlerInterface* handler, GLui
         m_program.sendUniformf(paramColorScaleName, colorScale[0], colorScale[1]);
     }
 
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     cgeCheckGLError("glDrawArrays");
 }
 
