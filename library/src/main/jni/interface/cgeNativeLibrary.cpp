@@ -17,8 +17,57 @@
 #include <android/bitmap.h>
 #include <ctime>
 #include <jni.h>
+#include <unistd.h>
+#include <sys/mman.h>
+#include <android/api-level.h>
 
 using namespace CGE;
+
+// Function to check 16KB page size status
+static void cgeCheck16kPageSize() {
+    const char* status = "Unknown";
+    const char* details = "";
+    
+    // 1. Check compile-time support
+#ifdef ENABLE_16K_PAGE_SIZES
+    bool compileTimeSupport = true;
+#else
+    bool compileTimeSupport = false;
+#endif
+
+    // 2. Check runtime Android version (16KB pages are supported from Android 15, API 35)
+    int apiLevel = android_get_device_api_level();
+    bool systemSupport = (apiLevel >= 35);
+    
+    // 3. Check actual page size being used
+    long pageSize = sysconf(_SC_PAGESIZE);
+    bool activelyUsing16k = (pageSize == 16384);
+    
+    // Determine status and details
+    if (!compileTimeSupport) {
+        status = "DISABLED";
+        details = "16KB page size support not enabled at compile time";
+    } else if (!systemSupport) {
+        status = "COMPILE_READY";
+        details = "16KB support compiled in, but Android version < 35 (Android 15)";
+    } else if (activelyUsing16k) {
+        status = "ACTIVE";
+        details = "16KB page size is fully active and working";
+    } else {
+        status = "SUPPORTED_BUT_INACTIVE";
+        details = "16KB support available but current page size is not 16KB";
+    }
+    
+    // Log comprehensive status
+    CGE_LOG_INFO("=== CGE 16KB Page Size Status ===");
+    CGE_LOG_INFO("Status: %s", status);
+    CGE_LOG_INFO("Details: %s", details);
+    CGE_LOG_INFO("Compile-time support: %s", compileTimeSupport ? "YES" : "NO");
+    CGE_LOG_INFO("Android API Level: %d (16KB support needs API 35+)", apiLevel);
+    CGE_LOG_INFO("Current page size: %ld bytes", pageSize);
+    CGE_LOG_INFO("16KB pages active: %s", activelyUsing16k ? "YES" : "NO");
+    CGE_LOG_INFO("================================");
+}
 
 extern "C"
 {
@@ -27,6 +76,10 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved)
     cgeGl3StubInit();
     cgeGl31StubInit();
     CGE_LOG_INFO("JNI_OnLoad called. cgeGl3StubInit called.\n");
+    
+    // Check and report 16KB page size status
+    cgeCheck16kPageSize();
+    
     return JNI_VERSION_1_6;
 }
 
