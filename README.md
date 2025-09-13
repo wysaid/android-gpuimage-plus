@@ -8,6 +8,16 @@ See the `image deform demo`.
 
 ![screenshots](screenshots/6.gif) ![screenshots](screenshots/5.gif)
 
+### 16KB Page Size Detection
+
+The library now includes automatic runtime detection of 16KB page size support. When the CGE native library loads, it will automatically check and log the 16KB page size status:
+
+- **Compile-time support**: Whether 16KB support was enabled during build
+- **Runtime support**: Whether the Android system supports 16KB pages (API 35+)
+- **Active usage**: Whether 16KB pages are actually being used
+
+See [`16KB_PAGE_SIZE_DETECTION.md`](16KB_PAGE_SIZE_DETECTION.md) for detailed information.
+
 ## Gradle dependency
 
 ```gradle

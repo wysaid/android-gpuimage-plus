@@ -58,15 +58,15 @@ static void cgeCheck16kPageSize() {
         details = "16KB support available but current page size is not 16KB";
     }
     
-    // Log comprehensive status
-    CGE_LOG_INFO("=== CGE 16KB Page Size Status ===");
-    CGE_LOG_INFO("Status: %s", status);
-    CGE_LOG_INFO("Details: %s", details);
+    // Log comprehensive status - use CGE_LOG_KEEP for important status info
+    CGE_LOG_KEEP("=== CGE 16KB Page Size Status ===");
+    CGE_LOG_KEEP("Status: %s", status);
+    CGE_LOG_KEEP("Details: %s", details);
     CGE_LOG_INFO("Compile-time support: %s", compileTimeSupport ? "YES" : "NO");
     CGE_LOG_INFO("Android API Level: %d (16KB support needs API 35+)", apiLevel);
     CGE_LOG_INFO("Current page size: %ld bytes", pageSize);
     CGE_LOG_INFO("16KB pages active: %s", activelyUsing16k ? "YES" : "NO");
-    CGE_LOG_INFO("================================");
+    CGE_LOG_KEEP("================================");
 }
 
 extern "C"
