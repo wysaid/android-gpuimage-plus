@@ -31,7 +31,7 @@ ext {
             minSdkVersion    : 21,
             targetSdkVersion : 25, // higher target version needs more storage permission request.
             versionCode      : 2,
-            versionName      : "3.1.0",
+            versionName      : "3.1.1",
             applicationId    : "org.wysaid.cgeDemo",
             appcompatX       : "1.2.0",
             ndkVersion       : "26.3.11579264",
