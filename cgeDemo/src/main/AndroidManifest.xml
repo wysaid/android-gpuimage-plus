@@ -11,11 +11,11 @@
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
-    <permission
-        android:name="android.permission.FLASHLIGHT"
-        android:permissionGroup="android.permission-group.HARDWARE_CONTROLS"
-        android:protectionLevel="normal"
-        tools:ignore="ReservedSystemPermission" />
+    <!-- Request flashlight usage instead of declaring system permission which causes install error
+        Declaring android.permission.FLASHLIGHT as a <permission> attempts to define a system permission
+        (and reference android.permission-group.HARDWARE_CONTROLS) which doesn't exist for third-party apps
+        on newer Android versions. Use uses-permission to request the permission from the platform. -->
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
 
     <application
         android:allowBackup="true"
@@ -26,7 +26,8 @@
         <activity android:name=".MultiInputActivity"></activity>
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
