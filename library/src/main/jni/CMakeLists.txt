@@ -95,6 +95,7 @@ target_link_libraries(CGE PUBLIC
 if(DEFINED ENABLE_16K_PAGE_SIZES AND ENABLE_16K_PAGE_SIZES)
     # 16KB elf:  <https://developer.android.com/guide/practices/page-sizes#cmake>
     target_link_options(CGE PUBLIC -Wl,-z,max-page-size=16384,-z,common-page-size=16384)
+    target_compile_definitions(CGE PRIVATE ENABLE_16K_PAGE_SIZES=1)
     message("ENABLE_16K_PAGE_SIZES=${ENABLE_16K_PAGE_SIZES}")
 endif()
 
