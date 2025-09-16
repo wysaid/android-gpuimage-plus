@@ -1093,6 +1093,23 @@ CGEImageFilterInterface* CGEDataParsingEngine::advancedStyleParser(const char* p
     {
         ADJUSTHELP_COMMON_FUNC2(pstr, CGECrosshatchFilter, setCrosshatchSpacing, setLineWidth);
     }
+        else if (strcmp(buffer, "hist") == 0)
+        {
+            float x, y, width, height;
+            if (sscanf(pstr, "%f%*c%f%*c%f%*c%f", &x, &y, &width, &height) < 4)
+            {
+                LOG_ERROR_PARAM(pstr);
+                return nullptr;
+            }
+
+            CGEHistogramFilter* filter = createHistogramFilter();
+            if (filter != nullptr)
+            {
+                proc = filter;
+                filter->setFormPosition(x, y);
+                filter->setFormSize(width, height);
+            }
+        }
     else if (strcmp(buffer, "waveform") == 0)
     {
         float x, y, width, height;
