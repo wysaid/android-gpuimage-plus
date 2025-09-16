@@ -1,158 +1,213 @@
 
-====== Changelist =========
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- Conditional 16KB page size support for Android 15+ compliance
+- Automatic 16KB page size detection and status reporting
+- Support for OpenGL ES 3.0 and 3.1
+- Compute shader support
+- WaveForm and Histogram filters
+- CMake build system support
+- VSCode build tasks and integration
+- Android CI workflow
+- Matrix control demo for FilterView
 
-# 2018-6 Version 2.5.0 #
+### Changed
+- Replaced GL_TRIANGLE_FAN with GL_TRIANGLE_STRIP for better performance
+- Upgraded to Android Gradle Plugin (AGP) latest version
+- Improved build system with better NDK path detection
+- Enhanced Maven publishing with local repository support
+- Better file structure organization
+- Improved Mali GPU compatibility
 
-1. Add class `org.wysaid.view.CameraGLSurfaceViewWithBuffer` to do camera preview with buffer.
-2. Remove some useless functions.
-3. Bug fix for face detection demo.
+### Fixed
+- Fixed GL stub symbol conflicts for 16KB page size support
+- Fixed immutable texture creation issues
+- Fixed permission requirements for Android 15+ target SDK
+- Fixed android:exported requirement for modern Android versions
+- Fixed multiple camera support issues
+- Fixed crashes on low-end devices
+- Fixed assert not found errors
+- Fixed LUT intensity settings bugs
 
-# 2017-7 Version 2.4.6 #
+### Removed
+- OpenCV and FaceTracker dependencies (moved to legacy branch)
+- Deprecated files and unused implementations
 
-1. Add demos for android version.
-2. Write some JNI wrapper for native code.
-3. Add some new filters like color mapping.
-4. Add real time camera filter. (Preview, take picture, record video)
-4. Add real time video filter. (Preview and save)
-5. Add face landmark module. (By [FaceTracker](https://github.com/kylemcdonald/FaceTracker), not neccessary. )
+## [2.7.0-alpha] - 2023-02-06
 
-/////  Other small fix.     ////////
+### Added
+- Pre-release with NDK23 support
+- Local Maven repository publishing
+- Optional video module disable feature
+- MinGW build support for Windows
+- Mali GPU compatibility improvements
 
+### Changed
+- Updated to NDK23
+- Better project structure and organization
+- Improved gradle dependencies with GitHub hosted Maven repo
 
-# 2015-5-13 Version 1.13.1 #
+### Fixed
+- Crash fixes for various device compatibility issues
+- Mali GPU rendering issues
+- Low-end device performance problems
 
-Fix definition of ``CGE_CURVE_PRECISION``
+## [2.6.0] - 2022-04-25
 
-# 2015-5-11 Version 1.13.0 #
+### Added
+- LUT intensity settings support
+- x86_64 architecture support
 
-Feature: new filter ``monochrome`` with argument ``red, green, blue, cyan, magenta, yellow``. (The same with Photoshop)
+### Changed
+- Updated FFmpeg to version 3.4.8
+- Improved build scripts
 
-# 2015-4-10 Version 1.12.0 #
+### Fixed
+- LUT intensity calculation bugs
+- Various compilation issues
 
-Feature: Add font render module. (With FreeType)
+## [2.5.1] - 2020-09-24
 
-# 2015-3-26 Version 1.11.1 #
+### Fixed
+- Multiple camera support issues on devices with telephoto/wide-angle lenses
+- Image distortion problems
 
-Replace ``glGetAttribLocation`` with ``glBindAttribLocation``.
-No ``glGetAttribLocation`` now.
+## [2.5.0] - 2018-06
 
-# 2015-3-26 Version 1.11.0 #
+### Added
+- `CameraGLSurfaceViewWithBuffer` class for camera preview with buffer
+- Improved face detection demo
 
-Bug fix for invalid usage of glPixelStorei.
+### Removed
+- Various unused functions
 
-# 2015-2-4 Version 1.10.1 #
+### Fixed
+- Face detection demo bugs
 
-Bug fix for scene roaming: Error value when the watch point plus the watch dir is equal to 0.
+## [2.4.6] - 2017-07
 
-# 2015-1-26 Version 1.10.0 #
+### Added
+- Android demo applications
+- JNI wrappers for native code
+- Color mapping filters
+- Real-time camera filters (preview, picture, video recording)
+- Real-time video filters (preview and save)
+- Face landmark module using FaceTracker (optional)
 
-1. Support all blend modes of photoshop. (There may be difference such as dissolve)
-2. Optimize the random function in shader. (The blur looks better)
-3. Add fast filter judgement. (in cgeInitialize function)
-4. Bug fix.
-5. Finish slideshow3d, support scene roaming. Support both using 2d&3d sprites in one timeline.
+### Fixed
+- Various minor bug fixes
 
-# 2015-1-13 Version 1.9.1 #
+---
 
-Optimize the code structure of slideshow, reduce useless public functions.
+## Legacy Versions (2014-2015)
 
-# 2015-1-8 Version 1.9.0 #
+<details>
+<summary>Click to expand legacy changelog</summary>
 
-1. New 3d sprite.
-2. Support adding actions to the timeline. (Use actions to control the scene. )
-3. Optimize for the code structure.
+### [1.13.1] - 2015-05-13
+- Fixed definition of `CGE_CURVE_PRECISION`
 
-# 2014-12-18 Version 1.8.1 #
+### [1.13.0] - 2015-05-11
+- Added monochrome filter with Photoshop-compatible color arguments
 
-1. Be better with iOS.
-2. Remove some inline functions, reduce the size of library.
+### [1.12.0] - 2015-04-10
+- Added font rendering module with FreeType support
 
-# 2014-12-16 Version 1.8.0 #
+### [1.11.1] - 2015-03-26
+- Replaced `glGetAttribLocation` with `glBindAttribLocation`
 
-1. SDK fix, support image with alpha channels.(Keep the alpha channel for the result).
-2. Fix the invalid effect of ``cvlomo`` on iOS device.
-3. Some compatible fix for Android.
+### [1.11.0] - 2015-03-26
+- Fixed invalid usage of glPixelStorei
 
-# 2014-12-16 Version 1.7.1 #
+### [1.10.1] - 2015-02-04
+- Fixed scene roaming calculation errors
 
-Fix issue: The curve texture may be failed to create in some device(OpenGLES2.0).
+### [1.10.0] - 2015-01-26
+- Added support for all Photoshop blend modes
+- Optimized shader random function for better blur effects
+- Added fast filter judgment in cgeInitialize
+- Completed slideshow3d with scene roaming support
 
-# 2014-12-10 Version 1.7.0 #
+### [1.9.1] - 2015-01-13
+- Optimized slideshow code structure
 
-Be compatible with older version of CGE app.
+### [1.9.0] - 2015-01-08
+- Added 3D sprite support
+- Added timeline action support for scene control
 
-# 2014-11-24 Version 1.6.1 #
+### [1.8.1] - 2014-12-18
+- Improved iOS compatibility
+- Reduced library size by removing inline functions
 
-Bug fix: Fix the parsing method of rule ``vigblend``.
+### [1.8.0] - 2014-12-16
+- Added alpha channel support for images
+- Fixed iOS device compatibility issues
 
-# 2014-11-18 Version 1.6.0 #
+### [1.7.1] - 2014-12-16
+- Fixed curve texture creation on OpenGL ES 2.0 devices
 
-Merge with CGE Filter module, add some filters & effects.
+### [1.7.0] - 2014-12-10
+- Improved compatibility with older CGE app versions
 
-# 2014-11-14 Version 1.5.1 #
+### [1.6.1] - 2014-11-24
+- Fixed vigblend rule parsing
 
-Add ``Sprite2dWithSpecialAlpha`` for special alpha gradient.
+### [1.6.0] - 2014-11-18
+- Merged CGE Filter module with additional filters and effects
 
-# 2014-11-12 Version 1.5.0 #
+### [1.5.1] - 2014-11-14
+- Added Sprite2dWithSpecialAlpha for gradient effects
 
-Fix for curve module, remove some useless files.
+### [1.5.0] - 2014-11-12
+- Fixed curve module and removed unused files
 
-# 2014-11-11 Version 1.4.4 #
+### [1.4.4] - 2014-11-11
+- Optimized Curve Filter
 
-Bug fix & Optimize Curve Filter.
+### [1.4.3] - 2014-11-05
+- Completed filter generator for libCGE
 
-# 2014-11-5 Version 1.4.3 #
+### [1.4.2] - 2014-10-31
+- Optimized GeometryLineStrip2d program instantiation
 
-Finish filter generator for libCGE.
+### [1.4.1] - 2014-10-30
+- Added sprite module test cases
 
-# 2014-10-31 Version 1.4.2 #
+### [1.4.0] - 2014-10-29
+- Added timeline realtime jumping by progress
 
-Make GeometryLineStrip2d's program single instance. Avoid recreating it when using.
+### [1.3.0] - 2014-10-25
+- Added shader cache for sprite module
+- Reduced slideshow initialization time
 
-# 2014-10-30 Version 1.4.1 #
+### [1.2.1] - 2014-10-16
+- Added global blending mode macro and texture alpha settings
 
-Add some test case for sprite module.
+### [1.2.0] - 2014-10-16
+- Optimized code include methods for faster compilation
 
-# 2014-10-29 Version 1.4.0 #
+### [1.1.5] - 2014-10-13
+- Added antialiasing for line drawing
 
-New feature: timeline realtime jumping by progress.
+### [1.1.4] - 2014-10-11
+- Optimized Sprite module structure
 
-# 2014-10-25 Version 1.3.0 #
+### [1.1.1] - 2014-09-25
+- Added global array buffer cache system
+- Required `cgeInitialize` call
 
-Add shader cache for the sprite module.
-Reduce the time for slideshow's initialization.
+### [1.1.0] - 2014-09-24
+- Added support for mixed sprite types in timelines
 
-# 2014-10-16 Version 1.2.1 #
+### [1.0.0] - 2014-09-04
+- First stable release
 
-Add global blending mode macro. Support global setting of texture's alpha.(premultiply or not)
-
-# 2014-10-16 Version 1.2.0 #
-
-Optimize code include method, avoid long-time compile time for slideshow module. 
-
-# 2014-10-13 Version 1.1.5 #
-
-Add antialias for line drawing.
-
-# 2014-10-11 Version 1.1.4 #
-
-Optimize the stucture of the Sprite module.
-
-# 2014-9-25 Version1.1.1 #
-
-Use global array buffer cache, avoid recreating it for every instance.
-You may need to call ``cgeInitialize``.
-
-//////////////////////////////////////////////////////////
-
-# 2014-9-24 Version 1.1.0 #
-
-Support mixed type of sprites in the same timeline.
-
-//////////////////////////////////////////////////////////
-
-## 2014-9-4 Version 1.0.0 ##
-First stable version.
-Maybe some bugs. If there're anything wrong, you can go back to 0.1.*
-
-/////////////////////////////////////////////////////////
+</details>
