@@ -33,6 +33,9 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         setRenderMode(RENDERMODE_WHEN_DIRTY);
 //        setZOrderOnTop(true);
 //        setZOrderMediaOverlay(true);
+
+        // Initialize camera instance with context for Camera2 support
+        cameraInstance().initializeWithContext(context);
     }
 
     public static final String LOG_TAG = Common.LOG_TAG;

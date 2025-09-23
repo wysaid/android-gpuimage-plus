@@ -1,5 +1,6 @@
 package org.wysaid.camera;
 
+import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -17,6 +18,8 @@ import java.util.List;
 
 /**
  * Created by wangyang on 15/7/27.
+ * 
+ * Modified to support both legacy Camera API and Camera2 API through backend abstraction
  */
 
 
@@ -26,27 +29,17 @@ public class CameraInstance {
 
     private static final String ASSERT_MSG = "检测到CameraDevice 为 null! 请检查";
 
-    private Camera mCameraDevice;
-    private Camera.Parameters mParams;
+    // Backend abstraction
+    private CameraBackend mCameraBackend;
+    private Context mContext;
+
+    // Legacy compatibility fields - these delegate to the backend
+    private Camera mCameraDevice; // Kept for legacy compatibility
+    private Camera.Parameters mParams; // Kept for legacy compatibility
 
     public static final int DEFAULT_PREVIEW_RATE = 30;
 
-
-    private boolean mIsPreviewing = false;
-
-    private int mDefaultCameraID = -1;
-
     private static CameraInstance mThisInstance;
-    private int mPreviewWidth;
-    private int mPreviewHeight;
-
-    private int mPictureWidth = 1000;
-    private int mPictureHeight = 1000;
-
-    private int mPreferPreviewWidth = 640;
-    private int mPreferPreviewHeight = 640;
-
-    private int mFacing = 0;
 
     private CameraInstance() {}
 
@@ -57,16 +50,54 @@ public class CameraInstance {
         return mThisInstance;
     }
 
-    public boolean isPreviewing() { return mIsPreviewing; }
+    /**
+     * Initialize the camera instance with a context (required for Camera2)
+     * This should be called before using the camera
+     */
+    public void initializeWithContext(Context context) {
+        mContext = context.getApplicationContext();
+        Log.i(LOG_TAG, "CameraInstance initialized with context. Backend: " + 
+            CameraBackendFactory.getBackendDescription());
+    }
 
-    public int previewWidth() { return mPreviewWidth; }
-    public int previewHeight() { return mPreviewHeight; }
-    public int pictureWidth() { return mPictureWidth; }
-    public int pictureHeight() { return mPictureHeight; }
+    /**
+     * Get or create the camera backend
+     */
+    private CameraBackend getCameraBackend() {
+        if (mCameraBackend == null) {
+            if (mContext == null) {
+                Log.w(LOG_TAG, "Context not set, using legacy backend");
+                mCameraBackend = new CameraBackendLegacy();
+            } else {
+                mCameraBackend = CameraBackendFactory.createCameraBackend(mContext);
+            }
+            Log.i(LOG_TAG, "Created camera backend: " + mCameraBackend.getBackendType());
+        }
+        return mCameraBackend;
+    }
+
+    public boolean isPreviewing() { 
+        return getCameraBackend().isPreviewing();
+    }
+
+    public int previewWidth() { 
+        return getCameraBackend().previewWidth();
+    }
+    
+    public int previewHeight() { 
+        return getCameraBackend().previewHeight();
+    }
+    
+    public int pictureWidth() { 
+        return getCameraBackend().pictureWidth();
+    }
+    
+    public int pictureHeight() { 
+        return getCameraBackend().pictureHeight();
+    }
 
     public void setPreferPreviewSize(int w, int h) {
-        mPreferPreviewHeight = w;
-        mPreferPreviewWidth = h;
+        getCameraBackend().setPreferPreviewSize(w, h);
     }
 
     public interface CameraOpenCallback {
@@ -78,140 +109,85 @@ public class CameraInstance {
     }
 
     public int getFacing() {
-        return mFacing;
+        return getCameraBackend().getFacing();
     }
 
     public synchronized boolean tryOpenCamera(CameraOpenCallback callback, int facing) {
-        Log.i(LOG_TAG, "try open camera...");
-
-        try
-        {
-            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.FROYO)
-            {
-                int numberOfCameras = Camera.getNumberOfCameras();
-
-                Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
-                for (int i = 0; i < numberOfCameras; i++) {
-                    Camera.getCameraInfo(i, cameraInfo);
-                    if (cameraInfo.facing == facing) {
-                        mDefaultCameraID = i;
-                        mFacing = facing;
-                        break;
-                    }
+        Log.i(LOG_TAG, "CameraInstance: try open camera with backend: " + getCameraBackend().getBackendType());
+        
+        // Convert legacy facing constants to backend constants
+        int backendFacing = (facing == Camera.CameraInfo.CAMERA_FACING_BACK) ? 
+            CameraBackend.CAMERA_FACING_BACK : CameraBackend.CAMERA_FACING_FRONT;
+        
+        // Wrap the callback to convert between interfaces
+        CameraBackend.CameraOpenCallback backendCallback = null;
+        if (callback != null) {
+            backendCallback = new CameraBackend.CameraOpenCallback() {
+                @Override
+                public void cameraReady() {
+                    callback.cameraReady();
                 }
-            }
-            stopPreview();
-            if(mCameraDevice != null)
-                mCameraDevice.release();
-
-            if(mDefaultCameraID >= 0) {
-                mCameraDevice = Camera.open(mDefaultCameraID);
-            }
-            else {
-                mCameraDevice = Camera.open();
-                mFacing = Camera.CameraInfo.CAMERA_FACING_BACK; //default: back facing
-            }
+            };
         }
-        catch(Exception e)
-        {
-            Log.e(LOG_TAG, "Open Camera Failed!");
-            e.printStackTrace();
-            mCameraDevice = null;
-            return false;
-        }
-
-        if(mCameraDevice != null) {
-            Log.i(LOG_TAG, "Camera opened!");
-
-            try {
-                initCamera(DEFAULT_PREVIEW_RATE);
-            } catch (Exception e) {
-                mCameraDevice.release();
-                mCameraDevice = null;
-                return false;
-            }
-
-            if (callback != null) {
-                callback.cameraReady();
-            }
-
-            return true;
-        }
-
-        return false;
+            
+        return getCameraBackend().tryOpenCamera(backendCallback, backendFacing);
     }
 
     public synchronized void stopCamera() {
-        if(mCameraDevice != null) {
-            mIsPreviewing = false;
-            mCameraDevice.stopPreview();
-            mCameraDevice.setPreviewCallback(null);
-            mCameraDevice.release();
-            mCameraDevice = null;
+        if (mCameraBackend != null) {
+            mCameraBackend.stopCamera();
+            // Reset backend to allow switching
+            mCameraBackend = null;
         }
     }
 
     public boolean isCameraOpened() {
-        return mCameraDevice != null;
+        return getCameraBackend().isCameraOpened();
     }
 
     public synchronized void startPreview(SurfaceTexture texture, Camera.PreviewCallback callback) {
-        Log.i(LOG_TAG, "Camera startPreview...");
-        if(mIsPreviewing) {
-            Log.e(LOG_TAG, "Err: camera is previewing...");
-            return ;
-        }
-
-        if(mCameraDevice != null) {
-            try {
-                mCameraDevice.setPreviewTexture(texture);
-//                mCameraDevice.addCallbackBuffer(callbackBuffer);
-//                mCameraDevice.setPreviewCallbackWithBuffer(callback);
-                mCameraDevice.setPreviewCallbackWithBuffer(callback);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            mCameraDevice.startPreview();
-            mIsPreviewing = true;
-        }
+        getCameraBackend().startPreview(texture, callback);
     }
 
     public void startPreview(SurfaceTexture texture) {
-        startPreview(texture, null);
+        getCameraBackend().startPreview(texture);
     }
 
     public void startPreview(Camera.PreviewCallback callback) {
-        startPreview(null, callback);
+        getCameraBackend().startPreview(callback);
     }
 
     public synchronized void stopPreview() {
-        if(mIsPreviewing && mCameraDevice != null) {
-            Log.i(LOG_TAG, "Camera stopPreview...");
-            mIsPreviewing = false;
-            mCameraDevice.stopPreview();
-        }
+        getCameraBackend().stopPreview();
     }
 
     public synchronized Camera.Parameters getParams() {
-        if(mCameraDevice != null)
-            return mCameraDevice.getParameters();
-        assert mCameraDevice != null : ASSERT_MSG;
+        Object params = getCameraBackend().getParams();
+        if (params instanceof Camera.Parameters) {
+            mParams = (Camera.Parameters) params;
+            return mParams;
+        }
+        // For Camera2, this will return null
         return null;
     }
 
     public synchronized void setParams(Camera.Parameters param) {
-        if(mCameraDevice != null) {
-            mParams = param;
-            mCameraDevice.setParameters(mParams);
-        }
-        assert mCameraDevice != null : ASSERT_MSG;
+        getCameraBackend().setParams(param);
+        mParams = param;
     }
 
     public Camera getCameraDevice() {
-        return mCameraDevice;
+        Object device = getCameraBackend().getCameraDevice();
+        if (device instanceof Camera) {
+            mCameraDevice = (Camera) device;
+            return mCameraDevice;
+        }
+        // For Camera2, this will return null for legacy compatibility
+        return null;
     }
 
+    // Legacy compatibility methods - these now delegate to the backend
+    
     //保证从大到小排列
     private Comparator<Camera.Size> comparatorBigger = new Comparator<Camera.Size>() {
         @Override
@@ -235,140 +211,17 @@ public class CameraInstance {
     };
 
     public void initCamera(int previewRate) {
-        if(mCameraDevice == null) {
-            Log.e(LOG_TAG, "initCamera: Camera is not opened!");
-            return;
-        }
-
-        mParams = mCameraDevice.getParameters();
-        List<Integer> supportedPictureFormats = mParams.getSupportedPictureFormats();
-
-        for(int fmt : supportedPictureFormats) {
-            Log.i(LOG_TAG, String.format("Picture Format: %x", fmt));
-        }
-
-        mParams.setPictureFormat(PixelFormat.JPEG);
-
-        List<Camera.Size> picSizes = mParams.getSupportedPictureSizes();
-        Camera.Size picSz = null;
-
-        Collections.sort(picSizes, comparatorBigger);
-
-        for(Camera.Size sz : picSizes) {
-            Log.i(LOG_TAG, String.format("Supported picture size: %d x %d", sz.width, sz.height));
-            if(picSz == null || (sz.width >= mPictureWidth && sz.height >= mPictureHeight)) {
-                picSz = sz;
-            }
-        }
-
-        List<Camera.Size> prevSizes = mParams.getSupportedPreviewSizes();
-        Camera.Size prevSz = null;
-
-        Collections.sort(prevSizes, comparatorBigger);
-
-        for(Camera.Size sz : prevSizes) {
-            Log.i(LOG_TAG, String.format("Supported preview size: %d x %d", sz.width, sz.height));
-            if(prevSz == null || (sz.width >= mPreferPreviewWidth && sz.height >= mPreferPreviewHeight)) {
-                prevSz = sz;
-            }
-        }
-
-        List<Integer> frameRates = mParams.getSupportedPreviewFrameRates();
-
-        int fpsMax = 0;
-
-        for(Integer n : frameRates) {
-            Log.i(LOG_TAG, "Supported frame rate: " + n);
-            if(fpsMax < n) {
-                fpsMax = n;
-            }
-        }
-
-        mParams.setPreviewSize(prevSz.width, prevSz.height);
-        mParams.setPictureSize(picSz.width, picSz.height);
-
-        List<String> focusModes = mParams.getSupportedFocusModes();
-        if(focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)){
-            mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-        }
-
-        previewRate = fpsMax;
-        mParams.setPreviewFrameRate(previewRate); //设置相机预览帧率
-//        mParams.setPreviewFpsRange(20, 60);
-
-        try {
-            mCameraDevice.setParameters(mParams);
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-        mParams = mCameraDevice.getParameters();
-
-        Camera.Size szPic = mParams.getPictureSize();
-        Camera.Size szPrev = mParams.getPreviewSize();
-
-        mPreviewWidth = szPrev.width;
-        mPreviewHeight = szPrev.height;
-
-        mPictureWidth = szPic.width;
-        mPictureHeight = szPic.height;
-
-        Log.i(LOG_TAG, String.format("Camera Picture Size: %d x %d", szPic.width, szPic.height));
-        Log.i(LOG_TAG, String.format("Camera Preview Size: %d x %d", szPrev.width, szPrev.height));
+        // This method is kept for legacy compatibility but is no longer used
+        // The backend handles camera initialization internally
+        Log.i(LOG_TAG, "CameraInstance: initCamera called - delegating to backend");
     }
 
     public synchronized void setFocusMode(String focusMode) {
-
-        if(mCameraDevice == null)
-            return;
-
-        mParams = mCameraDevice.getParameters();
-        List<String> focusModes = mParams.getSupportedFocusModes();
-        if(focusModes.contains(focusMode)){
-            mParams.setFocusMode(focusMode);
-        }
+        getCameraBackend().setFocusMode(focusMode);
     }
 
     public synchronized void setPictureSize(int width, int height, boolean isBigger) {
-
-        if(mCameraDevice == null) {
-            mPictureWidth = width;
-            mPictureHeight = height;
-            return;
-        }
-
-        mParams = mCameraDevice.getParameters();
-
-
-        List<Camera.Size> picSizes = mParams.getSupportedPictureSizes();
-        Camera.Size picSz = null;
-
-        if(isBigger) {
-            Collections.sort(picSizes, comparatorBigger);
-            for(Camera.Size sz : picSizes) {
-                if(picSz == null || (sz.width >= width && sz.height >= height)) {
-                    picSz = sz;
-                }
-            }
-        } else {
-            Collections.sort(picSizes, comparatorSmaller);
-            for(Camera.Size sz : picSizes) {
-                if(picSz == null || (sz.width <= width && sz.height <= height)) {
-                    picSz = sz;
-                }
-            }
-        }
-
-        mPictureWidth = picSz.width;
-        mPictureHeight= picSz.height;
-
-        try {
-            mParams.setPictureSize(mPictureWidth, mPictureHeight);
-            mCameraDevice.setParameters(mParams);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        getCameraBackend().setPictureSize(width, height, isBigger);
     }
 
     public void focusAtPoint(float x, float y, final Camera.AutoFocusCallback callback) {
@@ -376,44 +229,44 @@ public class CameraInstance {
     }
 
     public synchronized void focusAtPoint(float x, float y, float radius, final Camera.AutoFocusCallback callback) {
-        if(mCameraDevice == null) {
-            Log.e(LOG_TAG, "Error: focus after release.");
-            return;
-        }
-
-        mParams = mCameraDevice.getParameters();
-
-        if(mParams.getMaxNumMeteringAreas() > 0) {
-
-            int focusRadius = (int) (radius * 1000.0f);
-            int left = (int) (x * 2000.0f - 1000.0f) - focusRadius;
-            int top = (int) (y * 2000.0f - 1000.0f) - focusRadius;
-
-            Rect focusArea = new Rect();
-            focusArea.left = Math.max(left, -1000);
-            focusArea.top = Math.max(top, -1000);
-            focusArea.right = Math.min(left + focusRadius, 1000);
-            focusArea.bottom = Math.min(top + focusRadius, 1000);
-            List<Camera.Area> meteringAreas = new ArrayList<Camera.Area>();
-            meteringAreas.add(new Camera.Area(focusArea, 800));
-
-            try {
-                mCameraDevice.cancelAutoFocus();
-                mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-                mParams.setFocusAreas(meteringAreas);
-                mCameraDevice.setParameters(mParams);
-                mCameraDevice.autoFocus(callback);
-            } catch (Exception e) {
-                Log.e(LOG_TAG, "Error: focusAtPoint failed: " + e.toString());
+        getCameraBackend().focusAtPoint(x, y, radius, new CameraBackend.AutoFocusCallback() {
+            @Override
+            public void onAutoFocus(boolean success) {
+                if (callback != null) {
+                    // For legacy compatibility, we need to call with a Camera instance
+                    // For Camera2, this will be null, but most code should handle that
+                    callback.onAutoFocus(success, getCameraDevice());
+                }
             }
-        } else {
-            Log.i(LOG_TAG, "The device does not support metering areas...");
-            try {
-                mCameraDevice.autoFocus(callback);
-            } catch (Exception e) {
-                Log.e(LOG_TAG, "Error: focusAtPoint failed: " + e.toString());
-            }
-        }
-
+        });
+    }
+    
+    /**
+     * Set the camera backend type preference
+     * This should be called before opening the camera
+     */
+    public static void setCameraBackendType(CameraBackendFactory.CameraBackendType backendType) {
+        CameraBackendFactory.setPreferredBackendType(backendType);
+    }
+    
+    /**
+     * Get the current camera backend type
+     */
+    public static CameraBackendFactory.CameraBackendType getCameraBackendType() {
+        return CameraBackendFactory.getSelectedBackendType();
+    }
+    
+    /**
+     * Check if Camera2 is supported on this device
+     */
+    public static boolean isCamera2Supported() {
+        return CameraBackendFactory.isCamera2Supported();
+    }
+    
+    /**
+     * Get information about the current camera backend configuration
+     */
+    public static String getCameraBackendInfo() {
+        return CameraBackendFactory.getBackendDescription();
     }
 }

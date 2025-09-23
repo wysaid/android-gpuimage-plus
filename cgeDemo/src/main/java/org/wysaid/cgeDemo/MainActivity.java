@@ -2,6 +2,7 @@ package org.wysaid.cgeDemo;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,13 +13,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.wysaid.camera.CameraBackendFactory;
+import org.wysaid.camera.CameraInstance;
 import org.wysaid.common.Common;
 import org.wysaid.myUtils.MsgUtil;
 import org.wysaid.myUtils.PermissionUtil;
@@ -28,6 +33,11 @@ import org.wysaid.nativePort.CGENativeLibrary;
 public class MainActivity extends AppCompatActivity {
 
     public static final String LOG_TAG = "wysaid";
+    private static final String PREFS_NAME = "CameraSettings";
+    private static final String CAMERA2_ENABLED_KEY = "camera2_enabled";
+
+    private CheckBox mCamera2CheckBox;
+    private TextView mCamera2StatusText;
 
     public static final String EFFECT_CONFIGS[] = {
             "",
@@ -242,6 +252,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setupCameraConfiguration();
+
         LinearLayout mLayout = (LinearLayout) findViewById(R.id.buttonLayout);
 
         for (DemoClassDescription demo : mDemos) {
@@ -254,6 +266,57 @@ public class MainActivity extends AppCompatActivity {
         //第二个参数根据自身需要设置， 将作为 loadImage 第二个参数回传
         CGENativeLibrary.setLoadImageCallback(mLoadImageCallback, null);
         PermissionUtil.verifyStoragePermissions(this);
+    }
+
+    private void setupCameraConfiguration() {
+        mCamera2CheckBox = findViewById(R.id.camera2CheckBox);
+        mCamera2StatusText = findViewById(R.id.camera2StatusText);
+
+        // Check Camera2 availability
+        boolean isCamera2Supported = CameraInstance.isCamera2Supported();
+        mCamera2StatusText.setText("Camera2 availability: " + 
+            (isCamera2Supported ? "✓ Supported" : "✗ Not supported (API < 21)"));
+        
+        if (!isCamera2Supported) {
+            mCamera2CheckBox.setEnabled(false);
+            mCamera2CheckBox.setText("Use Camera2 API (not available on this device)");
+        }
+
+        // Load saved preference
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        boolean camera2Enabled = prefs.getBoolean(CAMERA2_ENABLED_KEY, false);
+        mCamera2CheckBox.setChecked(camera2Enabled && isCamera2Supported);
+
+        // Apply saved setting
+        applyCameraSetting(camera2Enabled && isCamera2Supported);
+
+        // Set up checkbox listener
+        mCamera2CheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            applyCameraSetting(isChecked);
+            saveCameraSetting(isChecked);
+        });
+    }
+
+    private void applyCameraSetting(boolean useCamera2) {
+        CameraBackendFactory.CameraBackendType backendType = useCamera2 ? 
+            CameraBackendFactory.CameraBackendType.CAMERA2 : 
+            CameraBackendFactory.CameraBackendType.LEGACY;
+        
+        CameraInstance.setCameraBackendType(backendType);
+        
+        String statusText = useCamera2 ? 
+            "Using Camera2 API backend" : 
+            "Using Legacy Camera API backend";
+        Log.i(LOG_TAG, statusText);
+        
+        // Update status text
+        mCamera2StatusText.setText("Status: " + statusText);
+    }
+
+    private void saveCameraSetting(boolean useCamera2) {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        prefs.edit().putBoolean(CAMERA2_ENABLED_KEY, useCamera2).apply();
+        Log.i(LOG_TAG, "Camera setting saved: " + (useCamera2 ? "Camera2" : "Legacy"));
     }
 
 //    @Override
