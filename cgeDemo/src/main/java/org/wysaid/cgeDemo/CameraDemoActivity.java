@@ -124,6 +124,12 @@ public class CameraDemoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camera_demo);
         PermissionUtil.verifyStoragePermissions(this);
 
+        // Log which camera backend is being used
+        Log.i(LOG_TAG, "=== CameraDemoActivity ===");
+        Log.i(LOG_TAG, "Camera backend configuration: " + CameraInstance.getCameraBackendInfo());
+        Log.i(LOG_TAG, "Camera2 supported: " + CameraInstance.isCamera2Supported());
+        Log.i(LOG_TAG, "Selected backend type: " + CameraInstance.getCameraBackendType());
+
 //        lastVideoPathFileName = FileUtil.getPathInPackage(CameraDemoActivity.this, true) + "/lastVideoPath.txt";
         Button takePicBtn = (Button) findViewById(R.id.takePicBtn);
         Button takeShotBtn = (Button) findViewById(R.id.takeShotBtn);

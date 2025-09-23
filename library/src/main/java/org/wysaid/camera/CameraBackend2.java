@@ -78,6 +78,15 @@ public class CameraBackend2 extends CameraBackend {
     public boolean tryOpenCamera(CameraOpenCallback callback, int facing) {
         Log.i(LOG_TAG, "Camera2: try open camera...");
         
+        // Check camera permissions first
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            if (mContext.checkSelfPermission(android.Manifest.permission.CAMERA) 
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                Log.e(LOG_TAG, "Camera2: Camera permission not granted");
+                return false;
+            }
+        }
+        
         try {
             mFacing = facing;
             String cameraId = getCameraId(facing);

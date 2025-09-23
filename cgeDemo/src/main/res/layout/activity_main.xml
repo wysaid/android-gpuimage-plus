@@ -40,6 +40,14 @@
             android:text="Camera2 availability: Checking..."
             android:textSize="12sp"
             android:textColor="#666666"
+            android:layout_marginBottom="4dp"/>
+
+        <Button
+            android:id="@+id/showInfoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Show Camera Backend Info"
+            android:textSize="12sp"
             android:layout_marginBottom="8dp"/>
 
     </LinearLayout>

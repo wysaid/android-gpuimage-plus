@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.wysaid.camera.CameraBackendFactory;
+import org.wysaid.camera.CameraBackendTest;
 import org.wysaid.camera.CameraInstance;
 import org.wysaid.common.Common;
 import org.wysaid.myUtils.MsgUtil;
@@ -271,11 +272,14 @@ public class MainActivity extends AppCompatActivity {
     private void setupCameraConfiguration() {
         mCamera2CheckBox = findViewById(R.id.camera2CheckBox);
         mCamera2StatusText = findViewById(R.id.camera2StatusText);
+        Button showInfoButton = findViewById(R.id.showInfoButton);
 
         // Check Camera2 availability
         boolean isCamera2Supported = CameraInstance.isCamera2Supported();
-        mCamera2StatusText.setText("Camera2 availability: " + 
-            (isCamera2Supported ? "✓ Supported" : "✗ Not supported (API < 21)"));
+        String statusMessage = "Camera2 availability: " + 
+            (isCamera2Supported ? "✓ Supported (API " + android.os.Build.VERSION.SDK_INT + ")" : 
+             "✗ Not supported (API " + android.os.Build.VERSION.SDK_INT + " < 21)");
+        mCamera2StatusText.setText(statusMessage);
         
         if (!isCamera2Supported) {
             mCamera2CheckBox.setEnabled(false);
@@ -294,6 +298,22 @@ public class MainActivity extends AppCompatActivity {
         mCamera2CheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             applyCameraSetting(isChecked);
             saveCameraSetting(isChecked);
+            
+            // Show a toast message about the change
+            String message = isChecked ? 
+                "Camera2 API enabled. Restart camera activities to take effect." : 
+                "Legacy Camera API enabled. Restart camera activities to take effect.";
+            MsgUtil.toastMsg(MainActivity.this, message);
+        });
+
+        // Set up info button
+        showInfoButton.setOnClickListener(v -> {
+            String info = CameraBackendTest.getRuntimeInfo(MainActivity.this);
+            Log.i(LOG_TAG, "Camera Backend Info:\n" + info);
+            MsgUtil.toastMsg(MainActivity.this, "Camera backend info logged - check logcat");
+            
+            // Also run the test
+            CameraBackendTest.testCameraBackends(MainActivity.this);
         });
     }
 
@@ -305,12 +325,13 @@ public class MainActivity extends AppCompatActivity {
         CameraInstance.setCameraBackendType(backendType);
         
         String statusText = useCamera2 ? 
-            "Using Camera2 API backend" : 
+            "✓ Using Camera2 API backend" : 
             "Using Legacy Camera API backend";
         Log.i(LOG_TAG, statusText);
         
-        // Update status text
-        mCamera2StatusText.setText("Status: " + statusText);
+        // Update status text with more details
+        String detailedStatus = statusText + " | Backend info: " + CameraInstance.getCameraBackendInfo();
+        mCamera2StatusText.setText(detailedStatus);
     }
 
     private void saveCameraSetting(boolean useCamera2) {
