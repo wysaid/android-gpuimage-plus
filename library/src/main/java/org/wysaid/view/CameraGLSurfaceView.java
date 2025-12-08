@@ -117,7 +117,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         calcViewport();
     }
 
-    //是否使用后置摄像头
+    // Whether to use back camera
     protected boolean mIsCameraBackForward = true;
 
     public boolean isCameraBackForward() {
@@ -133,7 +133,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         mIsCameraBackForward = isBackForward;
     }
 
-    //注意， 录制的尺寸将影响preview的尺寸
+    // Note: The size of recording will affect the size of preview
     //这里的width和height表示竖屏尺寸
     //在onSurfaceCreated之前设置有效
     public void presetRecordingSize(int width, int height) {
@@ -209,7 +209,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     protected OnCreateCallback mOnCreateCallback;
 
-    //定制一些初始化操作
+    // Customize some initialization operations
     public void setOnCreateCallback(final OnCreateCallback callback) {
         mOnCreateCallback = callback;
     }

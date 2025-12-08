@@ -74,7 +74,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
     public interface PlayerInitializeCallback {
 
-        //对player 进行初始化设置， 设置未默认启动的listener， 比如 bufferupdateListener.
+        // Initialize player settings, set listeners that are not started by default, such as bufferupdateListener.
         void initPlayer(MediaPlayer player);
     }
 
@@ -220,7 +220,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
 
     private OnCreateCallback mOnCreateCallback;
 
-    //定制一些初始化操作
+    // Customize some initialization operations
     public void setOnCreateCallback(final OnCreateCallback callback) {
 
         assert callback != null : "无意义操作!";

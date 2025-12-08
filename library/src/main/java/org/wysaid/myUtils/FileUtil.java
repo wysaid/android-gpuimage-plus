@@ -49,7 +49,7 @@ public class FileUtil {
         if(context == null || packageFilesDirectory != null)
             return packageFilesDirectory;
 
-        //手机不存在sdcard, 需要使用 data/data/name.of.package/files 目录
+        // Phone does not have sdcard, need to use data/data/name.of.package/files directory
         String path = context.getFilesDir() + "/" + mDefaultFolder;
         File file = new File(path);
 

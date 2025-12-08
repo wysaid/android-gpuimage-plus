@@ -90,7 +90,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
 
     public interface PlayerInitializeCallback {
 
-        //对player 进行初始化设置， 设置未默认启动的listener， 比如 bufferupdateListener.
+        // Initialize player settings, set listeners that are not started by default, such as bufferupdateListener.
         void initPlayer(MediaPlayer player);
     }
 
@@ -152,7 +152,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
     }
 
     //根据传入bmp回调不同
-    //若设置之后使用mask， 则调用 setMaskOK
+    // If mask is used after setting, call setMaskOK
     //否则调用 unsetMaskOK
     public interface SetMaskBitmapCallback {
         void setMaskOK(TextureRendererMask renderer);
@@ -247,7 +247,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
 
     private OnCreateCallback mOnCreateCallback;
 
-    //定制一些初始化操作
+    // Customize some initialization operations
     public void setOnCreateCallback(final OnCreateCallback callback) {
 
         assert callback != null : "无意义操作!";

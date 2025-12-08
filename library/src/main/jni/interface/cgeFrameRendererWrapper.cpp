@@ -219,7 +219,7 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRenderer_nativeProcess
 {
     CGEFrameRenderer* renderer = (CGEFrameRenderer*)addr;
 
-    //较危险操作， 慎用.
+    // Dangerous operation, use with caution.
     renderer->getImageHandler()->processingWithFilter((CGEImageFilterInterfaceAbstract*)filter);
 }
 

@@ -74,7 +74,7 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
         });
     }
 
-    //定制一些初始化操作
+    // Customize some initialization operations
     public void setOnCreateCallback(final OnCreateCallback callback) {
         if (mFrameRecorder == null || callback == null) {
             mOnCreateCallback = callback;
@@ -325,7 +325,7 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
                         int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 
                         switch (orientation) {
-                            //被保存图片exif记录只有旋转90度， 和不旋转两种情况
+                            // Saved image exif records only two cases: 90 degree rotation and no rotation
                             case ExifInterface.ORIENTATION_ROTATE_90:
                                 shouldRotate = true;
                                 break;

@@ -210,13 +210,13 @@ public class VideoPlayerDemoActivity extends AppCompatActivity {
         mPlayerView.setPlayerInitializeCallback(new VideoPlayerGLSurfaceView.PlayerInitializeCallback() {
             @Override
             public void initPlayer(final MediaPlayer player) {
-                //针对网络视频进行进度检查
+                // Check progress for network videos
                 player.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
                     @Override
                     public void onBufferingUpdate(MediaPlayer mp, int percent) {
                         Log.i(Common.LOG_TAG, "Buffer update: " + percent);
                         if (percent == 100) {
-                            Log.i(Common.LOG_TAG, "缓冲完毕!");
+                            Log.i(Common.LOG_TAG, "Buffering complete!");
                             player.setOnBufferingUpdateListener(null);
                         }
                     }

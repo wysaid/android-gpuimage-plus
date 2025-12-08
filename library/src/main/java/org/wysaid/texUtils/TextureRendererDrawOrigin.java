@@ -16,7 +16,7 @@ public class TextureRendererDrawOrigin extends TextureRenderer {
             "   gl_FragColor = texture2D(inputImageTexture, texCoord);\n" +
             "}";
 
-    //初始化默认的顶点序列等。
+    // Initialize default vertex sequence etc.
     protected TextureRendererDrawOrigin() {
         defaultInitialize();
     }
