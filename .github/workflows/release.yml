@@ -10,6 +10,9 @@ jobs:
     name: Validate Version and Build Release
     runs-on: ubuntu-latest
     
+    permissions:
+      contents: write  # Required for creating releases and uploading artifacts
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
