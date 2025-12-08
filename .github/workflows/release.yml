@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*.*.*'  # Official release tags (e.g., v3.1.1)
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 3.1.1) - Manual trigger will NOT publish to Release page'
+        required: true
+        type: string
 
 jobs:
   validate-and-release:
@@ -43,19 +49,39 @@ jobs:
     - name: Extract tag version
       id: tag_version
       run: |
-        TAG_NAME="${GITHUB_REF#refs/tags/}"
-        echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
-        
-        # Extract version numbers (e.g., v3.1.1 -> 3.1.1)
-        if [[ $TAG_NAME =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-          VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "✅ Valid version tag: $TAG_NAME (version: $VERSION)"
+        # Determine if this is a manual trigger or tag push
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          # Manual trigger - use input version
+          VERSION="${{ github.event.inputs.version }}"
+          TAG_NAME="v$VERSION"
+          IS_MANUAL="true"
+          echo "🔧 Manual trigger detected"
         else
-          echo "❌ Invalid tag format: $TAG_NAME"
-          echo "Tag must be in format: v\${major}.\${minor}.\${patch} (e.g., v3.1.1)"
+          # Tag push - extract from ref
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          IS_MANUAL="false"
+          
+          # Extract version numbers (e.g., v3.1.1 -> 3.1.1)
+          if [[ $TAG_NAME =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
+          else
+            echo "❌ Invalid tag format: $TAG_NAME"
+            echo "Tag must be in format: v\${major}.\${minor}.\${patch} (e.g., v3.1.1)"
+            exit 1
+          fi
+        fi
+        
+        # Validate version format
+        if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "❌ Invalid version format: $VERSION"
+          echo "Version must be in format: \${major}.\${minor}.\${patch} (e.g., 3.1.1)"
           exit 1
         fi
+        
+        echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "is_manual=$IS_MANUAL" >> $GITHUB_OUTPUT
+        echo "✅ Valid version: $VERSION (tag: $TAG_NAME, manual: $IS_MANUAL)"
     
     - name: Validate version matches project version
       run: |
@@ -95,15 +121,15 @@ jobs:
         
         echo "✅ All artifacts built successfully"
         echo "📦 Generated artifacts:"
-        find /tmp/maven-repo -type f -name "*.aar" -o -name "*.pom" | sort
+        find /tmp/maven-repo -type f \( -name "*.aar" -o -name "*.pom" \) | sort
     
     - name: Build demo APK with video module
       run: |
         echo "🔨 Building demo APK with video module (default configuration)..."
-        ./tasks.sh --enable-cmake --release --enable-video-module --build
+        ./tasks.sh --enable-cmake --release --enable-video-module --disable-16kb-page-size --build
         
         # Find and copy the APK (look specifically for release build output)
-        APK_PATH=$(find "cgeDemo/build/outputs/apk/release" -name "*-release.apk" -o -name "*-release-unsigned.apk" | head -1)
+        APK_PATH=$(find "cgeDemo/build/outputs/apk/release" \( -name "*-release.apk" -o -name "*-release-unsigned.apk" \) | head -1)
         if [ -z "$APK_PATH" ]; then
           # Fallback: search in build directory
           APK_PATH=$(find "cgeDemo/build" -path "*/release/*" -name "*.apk" | head -1)
@@ -139,48 +165,57 @@ jobs:
           fi
         done < <(find "$MAVEN_REPO/org/wysaid/gpuimage-plus" -name "*.aar")
         
-        echo "✅ All AAR artifacts packaged"
+        # Validate that we have exactly 4 AAR files
+        AAR_COUNT=$(find "$ARTIFACTS_DIR" -name "*.aar" | wc -l)
+        if [ "$AAR_COUNT" -ne 4 ]; then
+          echo "❌ Expected 4 AAR files but found $AAR_COUNT"
+          exit 1
+        fi
+        
+        echo "✅ All AAR artifacts packaged ($AAR_COUNT files)"
         echo "📦 Final artifacts:"
         ls -lh "$ARTIFACTS_DIR/"
     
     - name: Generate release notes
       id: release_notes
       run: |
-        cat > /tmp/release_notes.md << 'EOF'
-        ## 🚀 Android GPUImage Plus ${{ steps.tag_version.outputs.tag_name }}
+        VERSION="${{ steps.tag_version.outputs.version }}"
+        TAG_NAME="${{ steps.tag_version.outputs.tag_name }}"
+        cat > /tmp/release_notes.md << EOF
+        ## 🚀 Android GPUImage Plus $TAG_NAME
         
         ### 📦 Downloads
         
         **Demo APK:**
-        - `cgeDemo-${{ steps.tag_version.outputs.version }}.apk` - Demo application with full video features
+        - \`cgeDemo-$VERSION.apk\` - Demo application with full video features
         
         **AAR Library Artifacts:**
         
         Four variants are available for different use cases:
         
-        1. **gpuimage-plus-${{ steps.tag_version.outputs.version }}.aar**
+        1. **gpuimage-plus-$VERSION.aar**
            - Page size: 4KB (default)
            - Full-featured with FFmpeg bundled
            - Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
         
-        2. **gpuimage-plus-${{ steps.tag_version.outputs.version }}-16k.aar**
+        2. **gpuimage-plus-$VERSION-16k.aar**
            - Page size: 16KB
            - Full-featured with FFmpeg bundled
            - Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
         
-        3. **gpuimage-plus-${{ steps.tag_version.outputs.version }}-min.aar**
+        3. **gpuimage-plus-$VERSION-min.aar**
            - Page size: 4KB (default)
            - Image-only version (no video features or FFmpeg)
            - Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
         
-        4. **gpuimage-plus-${{ steps.tag_version.outputs.version }}-16k-min.aar**
+        4. **gpuimage-plus-$VERSION-16k-min.aar**
            - Page size: 16KB
            - Image-only version (no video features or FFmpeg)
            - Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
         
         ### 🔧 Gradle Dependency
         
-        ```gradle
+        \`\`\`gradle
         allprojects {
             repositories {
                 maven {
@@ -193,18 +228,18 @@ jobs:
             // Choose one of the following based on your needs:
             
             // Full-featured with FFmpeg (4KB page size)
-            implementation 'org.wysaid:gpuimage-plus:${{ steps.tag_version.outputs.version }}'
+            implementation 'org.wysaid:gpuimage-plus:$VERSION'
             
             // Full-featured with FFmpeg (16KB page size)
-            implementation 'org.wysaid:gpuimage-plus:${{ steps.tag_version.outputs.version }}-16k'
+            implementation 'org.wysaid:gpuimage-plus:$VERSION-16k'
             
             // Image-only, no video (4KB page size)
-            implementation 'org.wysaid:gpuimage-plus:${{ steps.tag_version.outputs.version }}-min'
+            implementation 'org.wysaid:gpuimage-plus:$VERSION-min'
             
             // Image-only, no video (16KB page size)
-            implementation 'org.wysaid:gpuimage-plus:${{ steps.tag_version.outputs.version }}-16k-min'
+            implementation 'org.wysaid:gpuimage-plus:$VERSION-16k-min'
         }
-        ```
+        \`\`\`
         
         ### 📋 System Requirements
         
@@ -227,6 +262,7 @@ jobs:
         echo "✅ Release notes generated"
     
     - name: Create GitHub Release
+      if: steps.tag_version.outputs.is_manual != 'true'
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ steps.tag_version.outputs.tag_name }}
@@ -242,25 +278,75 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
+    - name: Upload artifacts (Manual trigger)
+      if: steps.tag_version.outputs.is_manual == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-artifacts-${{ steps.tag_version.outputs.version }}
+        path: /tmp/release-artifacts/
+        retention-days: 7
+    
+    - name: Manual trigger success message
+      if: steps.tag_version.outputs.is_manual == 'true'
+      run: |
+        echo "🎉 ============================================" 
+        echo "🎉 Manual build completed successfully!"
+        echo "🎉 ============================================"
+        echo ""
+        echo "📦 Version: ${{ steps.tag_version.outputs.version }}"
+        echo "📦 Artifacts are available for download from the workflow run."
+        echo ""
+        echo "⚠️  Note: This is a manual trigger build."
+        echo "⚠️  Artifacts are NOT published to the Release page."
+        echo "⚠️  To create an official release, push a tag (e.g., git tag v${{ steps.tag_version.outputs.version }} && git push origin v${{ steps.tag_version.outputs.version }})"
+        echo ""
+        echo "📦 Built artifacts:"
+        ls -lh /tmp/release-artifacts/
+    
     - name: Summary
       run: |
-        echo "## 🎉 Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**Release**: ${{ steps.tag_version.outputs.tag_name }}" >> $GITHUB_STEP_SUMMARY
-        echo "**Version**: ${{ steps.tag_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### ✅ Version Validation" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Tag format validated: v\${major}.\${minor}.\${patch}" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Version matches project version in build.gradle" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### 📦 Released Artifacts:" >> $GITHUB_STEP_SUMMARY
+        IS_MANUAL="${{ steps.tag_version.outputs.is_manual }}"
+        VERSION="${{ steps.tag_version.outputs.version }}"
+        TAG_NAME="${{ steps.tag_version.outputs.tag_name }}"
+        
+        if [ "$IS_MANUAL" = "true" ]; then
+          echo "## 🔧 Manual Build Completed Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger**: Manual (workflow_dispatch)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ⚠️ Note" >> $GITHUB_STEP_SUMMARY
+          echo "This is a **manual trigger build**. Artifacts are **NOT published** to the Release page." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "To create an official release, push a tag:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "git tag v$VERSION && git push origin v$VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Built Artifacts (available for download):" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "## 🎉 Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Release**: $TAG_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Version Validation" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Tag format validated: v\${major}.\${minor}.\${patch}" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Version matches project version in build.gradle" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Released Artifacts:" >> $GITHUB_STEP_SUMMARY
+        fi
+        
         echo "**Demo APK:**" >> $GITHUB_STEP_SUMMARY
-        echo "- cgeDemo-${{ steps.tag_version.outputs.version }}.apk" >> $GITHUB_STEP_SUMMARY
+        echo "- cgeDemo-$VERSION.apk" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**AAR Libraries:**" >> $GITHUB_STEP_SUMMARY
-        echo "- gpuimage-plus-${{ steps.tag_version.outputs.version }}.aar (4KB, with video)" >> $GITHUB_STEP_SUMMARY
-        echo "- gpuimage-plus-${{ steps.tag_version.outputs.version }}-16k.aar (16KB, with video)" >> $GITHUB_STEP_SUMMARY
-        echo "- gpuimage-plus-${{ steps.tag_version.outputs.version }}-min.aar (4KB, image-only)" >> $GITHUB_STEP_SUMMARY
-        echo "- gpuimage-plus-${{ steps.tag_version.outputs.version }}-16k-min.aar (16KB, image-only)" >> $GITHUB_STEP_SUMMARY
+        echo "- gpuimage-plus-$VERSION.aar (4KB, with video)" >> $GITHUB_STEP_SUMMARY
+        echo "- gpuimage-plus-$VERSION-16k.aar (16KB, with video)" >> $GITHUB_STEP_SUMMARY
+        echo "- gpuimage-plus-$VERSION-min.aar (4KB, image-only)" >> $GITHUB_STEP_SUMMARY
+        echo "- gpuimage-plus-$VERSION-16k-min.aar (16KB, image-only)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "Release page: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ steps.tag_version.outputs.tag_name }}" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "$IS_MANUAL" != "true" ]; then
+          echo "Release page: ${{ github.server_url }}/${{ github.repository }}/releases/tag/$TAG_NAME" >> $GITHUB_STEP_SUMMARY
+        fi
