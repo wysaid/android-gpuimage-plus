@@ -102,10 +102,16 @@ jobs:
         echo "🔨 Building demo APK with video module (default configuration)..."
         ./tasks.sh --enable-cmake --release --enable-video-module --build
         
-        # Find and copy the APK
-        APK_PATH=$(find "cgeDemo/build" -name "*.apk" | grep -i release | head -1)
+        # Find and copy the APK (look specifically for release build output)
+        APK_PATH=$(find "cgeDemo/build/outputs/apk/release" -name "*-release.apk" -o -name "*-release-unsigned.apk" | head -1)
+        if [ -z "$APK_PATH" ]; then
+          # Fallback: search in build directory
+          APK_PATH=$(find "cgeDemo/build" -path "*/release/*" -name "*.apk" | head -1)
+        fi
         if [ -z "$APK_PATH" ]; then
           echo "❌ APK not found!"
+          echo "Searched locations:"
+          find "cgeDemo/build" -name "*.apk" || echo "No APK files found"
           exit 1
         fi
         
@@ -125,11 +131,13 @@ jobs:
         
         # Find and copy all AAR files from the maven repository
         # Expected structure: /tmp/maven-repo/org/wysaid/gpuimage-plus/{version}/gpuimage-plus-{version}.aar
-        find "$MAVEN_REPO/org/wysaid/gpuimage-plus" -name "*.aar" | while read aar_file; do
-          filename=$(basename "$aar_file")
-          cp "$aar_file" "$ARTIFACTS_DIR/$filename"
-          echo "  ✓ Packaged: $filename"
-        done
+        while IFS= read -r aar_file; do
+          if [ -n "$aar_file" ]; then
+            filename=$(basename "$aar_file")
+            cp "$aar_file" "$ARTIFACTS_DIR/$filename"
+            echo "  ✓ Packaged: $filename"
+          fi
+        done < <(find "$MAVEN_REPO/org/wysaid/gpuimage-plus" -name "*.aar")
         
         echo "✅ All AAR artifacts packaged"
         echo "📦 Final artifacts:"
