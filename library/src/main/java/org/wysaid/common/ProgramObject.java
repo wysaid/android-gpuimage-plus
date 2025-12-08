@@ -14,7 +14,7 @@ public class ProgramObject {
     private int mProgramID;
     private ShaderObject mVertexShader, mFragmentShader;
 
-    //单独初始化之后可以进行一些 attribute location 的绑定操作
+    // After separate initialization, some attribute location binding operations can be performed
     //之后再进行init
     public ProgramObject() {
         mProgramID = GLES20.glCreateProgram();

@@ -253,10 +253,10 @@ public class ImageDemoActivity extends AppCompatActivity {
                                 content += String.format("Accuracy: %g, center %g, %g, eyeDis: %g\n", face.confidence(), pnt.x, pnt.y, eyeDis);
                                 canvas.drawRect((int) (pnt.x - eyeDis * 1.5f), (int) (pnt.y - eyeDis * 1.5f), (int) (pnt.x + eyeDis * 1.5f), (int) (pnt.y + eyeDis * 1.5f), paint);
 
-                                //眼睛中心
+                                // Eye center
                                 canvas.drawRect((int) (pnt.x - 2.0f), (int) (pnt.y - 2.0f), (int) (pnt.x + 2.0f), (int) (pnt.y + 2.0f), paint);
 
-                                //双眼
+                                // Both eyes
                                 canvas.drawRect((int) (pnt.x - halfEyeDis - 2.0f), (int) (pnt.y - 2.0f), (int) (pnt.x - halfEyeDis + 2.0f), (int) (pnt.y + 2.0f), paint);
                                 canvas.drawRect((int) (pnt.x + halfEyeDis - 2.0f), (int) (pnt.y - 2.0f), (int) (pnt.x + halfEyeDis + 2.0f), (int) (pnt.y + 2.0f), paint);
                             }

@@ -29,7 +29,7 @@ public class SharedContext {
 
     private static int mBitsR = 8, mBitsG = 8, mBitsB = 8, mBitsA = 8;
 
-    //注意， 设置之后将影响之后的所有操作
+    // Note: After setting, it will affect all subsequent operations
     static public void setContextColorBits(int r, int g, int b, int a) {
         mBitsR = r;
         mBitsG = g;

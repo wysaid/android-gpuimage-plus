@@ -18,7 +18,7 @@ extern "C"
 
 /////////////////   ffmpeg   /////////////////////////
 
-JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFFmpegNativeLibrary_avRegisterAll(JNIEnv*, jclass); //注册 ffmpeg
+JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFFmpegNativeLibrary_avRegisterAll(JNIEnv*, jclass); // Register ffmpeg
 
 // JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEFFmpegNativeLibrary_nativeGenerateVideoWithFilter
 //   (JNIEnv *, jclass, jstring, jstring, jstring, jfloat, jobject, jint, jfloat, jboolean);

@@ -108,7 +108,7 @@ public class CGEFaceTracker {
 //        sIsTrackerSetup = true;
 //    }
 
-    //命名Simple 是因为后续将接入更加完整的结果数据(包含66个点的网格等等)
+    // Named Simple because more complete result data (including 66-point mesh etc.) will be integrated in the future
     public FaceResultSimple detectFaceWithSimpleResult(Bitmap bmp, boolean drawFeature) {
         float[] result = nativeDetectFaceWithSimpleResult(mNativeAddress, bmp, drawFeature);
 

@@ -2,7 +2,7 @@
 //  cgeMultiInputFilter.h
 //
 //  Created by wysaid on 19/4/16.
-//  Copyright © 2019年 wysaid. All rights reserved.
+//  Copyright © 2019 wysaid. All rights reserved.
 //
 
 #include "cgeGLFunctions.h"

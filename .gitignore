@@ -12,3 +12,6 @@ obj/
 build/
 library/.cxx/
 .kotlin/
+
+# CodeQL
+_codeql_detected_source_root

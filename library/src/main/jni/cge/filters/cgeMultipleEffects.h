@@ -50,9 +50,9 @@ public:
 
     // bool initWithEffectID(int index);
     bool initWithEffectString(const char* pstr);
-    bool initCustomize(); //特殊用法， 自由组合
+    bool initCustomize(); // Special usage, free combination
 
-    void setIntensity(float value); //设置混合程度
+    void setIntensity(float value); // Set blend intensity
     bool isEmpty() { return m_vecFilters.empty(); }
     void clearFilters();
 

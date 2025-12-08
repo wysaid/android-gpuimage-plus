@@ -16,7 +16,7 @@ public abstract class TextureRenderer {
 
     public static final String LOG_TAG = Common.LOG_TAG;
 
-    //初始化program 等
+    // Initialize program etc.
     public abstract boolean init(boolean isExternalOES);
 
     //为了保证GLContext 的对应， 不能等待finalize

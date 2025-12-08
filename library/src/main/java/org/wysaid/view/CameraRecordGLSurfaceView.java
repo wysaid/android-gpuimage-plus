@@ -198,7 +198,7 @@ public class CameraRecordGLSurfaceView extends CameraGLSurfaceViewWithTexture {
                 return;
             }
 
-            //判断音频录制是否被初始化
+            // Check if audio recording is initialized
             while (this.audioRecord.getState() == 0) {
                 try {
                     Thread.sleep(100L);

@@ -36,7 +36,7 @@ JNIEXPORT jlong JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeCreate
     return (jlong)recorder;
 }
 
-//视频录制相关 API
+// Video recording related API
 
 JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeStartRecording(JNIEnv* env, jobject, jlong addr, jint fps, jstring filename, jint bitRate)
 {
@@ -206,7 +206,7 @@ JNIEXPORT void JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeSetBeau
     }
 
     recorder->setGlobalFilter(config, nullptr, nullptr);
-    CGE_LOG_INFO("启用美化效果!");
+    CGE_LOG_INFO("Beauty effect enabled!");
 #endif
 }
 

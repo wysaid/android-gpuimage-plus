@@ -598,10 +598,10 @@ void CGELiquidationNicerFilter::forwardDeformMesh(Vec2f start, Vec2f end, float 
     if (v2Min[0] > v2Max[0]) std::swap(v2Min[0], v2Max[0]);
     if (v2Min[1] > v2Max[1]) std::swap(v2Min[1], v2Max[1]);
 
-    //直线方程系数， 直线由起始点跟终止点构成。
+    // Line equation coefficients, the line is formed by start and end points.
     float eqA, eqB, eqC, eqD, eqD2;
 
-    //计算直线方程
+    // Calculate line equation
     {
         float a = start[1] - end[1], b = start[0] - end[0], c = start[0] * end[1] - start[1] * end[0];
 
@@ -632,7 +632,7 @@ void CGELiquidationNicerFilter::forwardDeformMesh(Vec2f start, Vec2f end, float 
                 v[1] < loopStartY || v[1] > loopEndY)
                 continue;
 
-            //点到直线距离
+            // Distance from point to line
             float dis1 = fabsf(eqA * v[0] + eqB * v[1] + eqC) / eqD;
 
             if (dis1 > radius)
@@ -640,15 +640,15 @@ void CGELiquidationNicerFilter::forwardDeformMesh(Vec2f start, Vec2f end, float 
                 continue;
             }
 
-            //点到端点距离
+            // Distance to endpoints
             float dis2 = (v - start).length();
             float dis3 = (v - end).length();
-            //点在直线方向上的投影坐标
+            // Projection coordinates of the point in the line direction
             const Vec2f projV(
                 (eqB * eqB * v[0] - eqA * eqB * v[1] - eqA * eqC) / eqD2,
                 (eqA * eqA * v[1] - eqB * eqC - eqA * eqB * v[0]) / eqD2);
 
-            //实际计算距离，若点在投影上则使用点到直线距离，否则使用较近端点距离
+            // Calculate actual distance, use point-to-line distance if point is on projection, otherwise use nearer endpoint distance
             float dis;
 
             if (projV[0] < v2Min[0] || projV[0] > v2Max[0] ||
@@ -704,10 +704,10 @@ void CGELiquidationNicerFilter::pushLeftDeformMesh(Vec2f start, Vec2f end, float
     if (v2Min[0] > v2Max[0]) std::swap(v2Min[0], v2Max[0]);
     if (v2Min[1] > v2Max[1]) std::swap(v2Min[1], v2Max[1]);
 
-    //直线方程系数， 直线由起始点跟终止点构成。
+    // Line equation coefficients, the line is formed by start and end points.
     float eqA, eqB, eqC, eqD, eqD2;
 
-    //计算直线方程
+    // Calculate line equation
     {
         float a = start[1] - end[1], b = start[0] - end[0], c = start[0] * end[1] - start[1] * end[0];
 
@@ -738,7 +738,7 @@ void CGELiquidationNicerFilter::pushLeftDeformMesh(Vec2f start, Vec2f end, float
                 v[1] < loopStartY || v[1] > loopEndY)
                 continue;
 
-            //点到直线距离
+            // Distance from point to line
             float dis1 = fabsf(eqA * v[0] + eqB * v[1] + eqC) / eqD;
 
             if (dis1 > radius)
@@ -746,15 +746,15 @@ void CGELiquidationNicerFilter::pushLeftDeformMesh(Vec2f start, Vec2f end, float
                 continue;
             }
 
-            //点到端点距离
+            // Distance to endpoints
             float dis2 = (v - start).length();
             float dis3 = (v - end).length();
-            //点在直线方向上的投影坐标
+            // Projection coordinates of the point in the line direction
             const Vec2f projV(
                 (eqB * eqB * v[0] - eqA * eqB * v[1] - eqA * eqC) / eqD2,
                 (eqA * eqA * v[1] - eqB * eqC - eqA * eqB * v[0]) / eqD2);
 
-            //实际计算距离，若点在投影上则使用点到直线距离，否则使用较近端点距离
+            // Calculate actual distance, use point-to-line distance if point is on projection, otherwise use nearer endpoint distance
             float dis;
 
             if (projV[0] < v2Min[0] || projV[0] > v2Max[0] ||

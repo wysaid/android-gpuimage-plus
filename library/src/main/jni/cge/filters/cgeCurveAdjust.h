@@ -215,7 +215,7 @@ public:
     virtual void flush();
 };
 
-//为了结构层次清晰， 与CGECurveTexFilter 存在部分相似代码
+// For clarity of structure hierarchy, has some similar code with CGECurveTexFilter
 class CGEMoreCurveTexFilter : public CGEMoreCurveFilter
 {
 public:

@@ -44,7 +44,7 @@ void CGEBrightnessFilter::setIntensity(float value)
 {
     m_program.bind();
 
-    //优先保证低精度设备不出现失真
+    // Prioritize ensuring no distortion on low precision devices
     m_intensity = fabsf(value) < 0.05f ? 0.0f : value;
     m_program.sendUniformf(paramName, m_intensity);
 }

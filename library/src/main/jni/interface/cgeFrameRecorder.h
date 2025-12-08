@@ -17,7 +17,7 @@
 
 #include <queue>
 
-// cgeFrameRecorder 适用于实时视频录制， 不适宜视频转储。
+// cgeFrameRecorder is suitable for real-time video recording, not for video conversion.
 
 namespace CGE
 {
@@ -28,7 +28,7 @@ public:
     ImageDataWriteThread();
     ~ImageDataWriteThread();
 
-    //使用最大N个缓存
+    // Use maximum N buffers
     enum
     {
         MAX_DATA_CACHE_LEN = 3
@@ -50,7 +50,7 @@ public:
     bool hasData4Read();
     bool hasData4Write();
 
-    //设置所需buffer大小
+    // Set required buffer size
     void setBufferAllocSize(int bufferSize)
     {
         m_bufferSize = bufferSize;
@@ -67,7 +67,7 @@ protected:
     void runTask();
 
 private:
-    //动态大小数据缓存
+    // Dynamic size data cache
     std::vector<DataCache> m_totalCaches;
     std::queue<DataCache> m_data4Read;
     std::queue<DataCache> m_data4Write;
@@ -88,56 +88,56 @@ public:
     CGEFrameRecorder();
     ~CGEFrameRecorder();
 
-    //会影响framebuffer设置。
+    // Will affect framebuffer settings.
     // void update(GLuint externalTexture, float* transformMatrix);
 
     void runProc();
 
     ////////////////////////////////////////////////////////////
-    //        视频录制相关
-    // 由于实际录制时不一定能够满足帧率， 当帧率不足时，
-    // 将通过计算，进行适当的跳帧以满足音视频同步
-    // 如果录制帧率过快， 也将丢弃一些帧以达到同步
+    // Video recording related
+    // During actual recording, the frame rate may not always be met. When frame rate is insufficient,
+    // frames will be dropped appropriately through calculation to maintain audio-video sync
+    // If recording frame rate is too fast, some frames will also be discarded to achieve sync
     ////////////////////////////////////////////////////////////
 
     typedef CGEVideoEncoderMP4::AudioSampleData AudioSampleData;
 
-    //记录当前图像帧.
+    // Record current image frame.
     void recordImageFrame();
 
-    //记录音频帧.
+    // Record audio frame.
     void recordAudioFrame(const AudioSampleData& data);
 
-    //开始录制视频， 参数为帧率(>0)
-    //如果启动录制成功则返回true， 否则返回false
-    // filename 必须为一个绝对路径文件地址
+    // Start recording video, parameter is frame rate (>0)
+    // Returns true if recording started successfully, otherwise false
+    // filename must be an absolute file path
     bool startRecording(int fps, const char* filename, int bitRate = 1650000);
 
-    //判断视频录制是否启动 (暂停状态也视为已启动)
+    // Check if video recording has started (paused state is also considered started)
     bool isRecordingStarted();
 
-    //结束录制视频
-    //如果不保存， 则参数为false， 否则为true
-    //返回值代表是否保存成功
+    // End video recording
+    // If not saving, parameter should be false, otherwise true
+    // Return value indicates whether saving was successful
     bool endRecording(bool shouldSave);
 
-    //暂停录制视频 (将导致音视频线程挂起)
+    // Pause video recording (will cause audio/video threads to suspend)
     void pauseRecording();
 
-    //判断视频录制是否暂停 (未启动状态视为未暂停)
+    // Check if video recording is paused (not started state is considered not paused)
     bool isRecordingPaused();
 
-    //继续录制视频
-    //返回值表示是否resume成功
+    // Resume video recording
+    // Return value indicates whether resume was successful
     bool resumeRecording();
 
-    //获取当前录制的视频时长
+    // Get current recording video duration
     double getRecordingTimestamp();
 
     double getVideoStreamTime();
     double getAudioStreamTime();
 
-    //美化相关
+    // Beauty/enhancement related
 
     void setGlobalFilter(const char* config, CGETextureLoadFun texLoadFunc, void* loadArg);
     void setGlobalFilterIntensity(float intensity);
@@ -146,11 +146,11 @@ public:
 protected:
     void _createOffscreenContext();
 
-    // 录制相关...
+    // Recording related...
 
-    //线程池仅包含一个线程， 作为录制线程使用
+    // Thread pool containing only one thread, used as recording thread
     CGEThreadPool* m_recordThread;
-    CGESharedGLContext* m_offscreenContext; //录制线程使用的离屏context
+    CGESharedGLContext* m_offscreenContext; // Offscreen context used by recording thread
 
     std::function<void(void*)> m_recordingWork;
 
@@ -163,7 +163,7 @@ protected:
     int m_recordFPS;
     bool m_isRecording, m_isRecordingPaused;
 
-    // 人脸跟踪相关
+    // Face tracking related
     CGEImageFilterInterfaceAbstract* m_globalFilter;
 };
 

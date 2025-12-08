@@ -533,14 +533,14 @@ bool CGEVideoEncoderMP4::record(const ImageData& data)
     return m_context->pVideoFrame->key_frame != 0;
 }
 
-//将缓存音频数据， 一次只能存储1024整数倍
+// Cache audio data, can only store multiples of 1024 at a time
 bool CGEVideoEncoderMP4::record(const AudioSampleData& data)
 {
     assert(m_hasAudio);
 
     if (data.data[0] != nullptr)
     {
-        assert(m_context->pSwrCtx != nullptr); // 必然resample
+        assert(m_context->pSwrCtx != nullptr); // Must resample
 
         AVCodecContext* audioCodec = m_context->pAudioStream->codec;
 
@@ -643,7 +643,7 @@ bool CGEVideoEncoderMP4::recordVideoFrame(AVFrame* pVideoFrame)
     pkt.data = m_videoPacketBuffer;
     pkt.size = m_videoPacketBufferSize;
 
-    // avcodec_encode_video2 为慢速操作
+    // avcodec_encode_video2 is a slow operation
     if (0 > avcodec_encode_video2(codecCtx, &pkt, pVideoFrame, &gotPacket))
     {
         CGE_LOG_ERROR("avcodec_encode_video2 error...\n");
@@ -651,7 +651,7 @@ bool CGEVideoEncoderMP4::recordVideoFrame(AVFrame* pVideoFrame)
     }
 
     // tm2 = getCurrentTimeMillis();
-    // CGE_LOG_ERROR("encode 花费时间: %g", (tm2 - tm));
+    // CGE_LOG_ERROR("encode time cost: %g", (tm2 - tm));
     // tm = tm2;
 
     if (gotPacket && pkt.size)
@@ -676,7 +676,7 @@ bool CGEVideoEncoderMP4::recordVideoFrame(AVFrame* pVideoFrame)
         // av_free_packet(&pkt);
 
         // tm2 = getCurrentTimeMillis();
-        // CGE_LOG_ERROR("av_interleaved_write_frame 花费时间: %g", (tm2 - tm));
+        // CGE_LOG_ERROR("av_interleaved_write_frame time cost: %g", (tm2 - tm));
         // tm = tm2;
 
         if (0 > ret)

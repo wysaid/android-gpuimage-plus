@@ -43,7 +43,7 @@ public class ImageUtil extends FileUtil {
     }
 
     public static class FaceRects {
-        public int numOfFaces; // 实际检测出的人脸数
+        public int numOfFaces; // Number of faces actually detected
         public FaceDetector.Face[] faces; // faces.length >= numOfFaces
     }
 

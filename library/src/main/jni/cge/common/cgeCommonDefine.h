@@ -43,11 +43,11 @@
     } while (0)
 
 /*
- 为节省texture资源，对OpenGL 所有texture的使用约束如下:
- 0号和1号纹理在各种初始化中可能会被多次用到，如果需要绑定固定的纹理，
- 请在使用纹理时，从 TEXTURE_START 开始。
- 不排除这种需要会增加，所以，
- 请使用下面的宏进行加法运算, 以代替手写的 GL_TEXTURE*
+ To save texture resources, the usage constraints for all OpenGL textures are as follows:
+ Textures 0 and 1 may be used multiple times during various initializations. If you need to bind a fixed texture,
+ please start from TEXTURE_START when using textures.
+ This requirement may increase, so
+ please use the macros below for addition operations instead of manually writing GL_TEXTURE*
 
  */
 
@@ -328,7 +328,7 @@ typedef enum CGEGlobalBlendMode
     CGEGLOBAL_BLEND_ALPHA_SEPERATE,
     CGEGLOBAL_BLEND_ADD,
     CGEGLOBAL_BLEND_ADD_SEPARATE,
-    CGEGLOBAL_BLEND_ADD_SEPARATE_EXT, // 带EXT的忽略alpha是否预乘
+    CGEGLOBAL_BLEND_ADD_SEPARATE_EXT, // EXT versions ignore whether alpha is premultiplied
     CGEGLOBAL_BLEND_MULTIPLY,
     CGEGLOBAL_BLEND_MULTIPLY_SEPERATE,
     CGEGLOBAL_BLEND_SCREEN,
@@ -337,7 +337,7 @@ typedef enum CGEGlobalBlendMode
 
 const char* cgeGetVersion();
 void cgePrintGLString(const char*, GLenum);
-bool _cgeCheckGLError(const char* name, const char* file, int line); // 请直接使用 cgeCheckGLError
+bool _cgeCheckGLError(const char* name, const char* file, int line); // Please use cgeCheckGLError directly
 
 ////////////////////////////////////
 

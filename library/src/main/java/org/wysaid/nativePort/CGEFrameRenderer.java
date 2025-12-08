@@ -191,6 +191,6 @@ public class CGEFrameRenderer {
     //辅助方法
     protected native void nativeProcessWithFilter(long holder, long nativeFilter);
 
-    //特殊用法, 谨慎使用, 使用不当可能造成程序运行异常.
+    // Special usage, use with caution, improper use may cause program runtime exceptions.
     protected native void nativeSetFilterWithAddr(long holder, long filter);
 }

@@ -14,7 +14,7 @@ using namespace CGE;
 
 extern "C"
 {
-//获取当前的毫秒级时间
+// Get current time in milliseconds
 double getCurrentTimeMillis()
 {
     struct timeval tv;

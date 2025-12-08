@@ -142,7 +142,7 @@ public class CGENativeLibrary {
         BLEND_TILE,
     }
 
-    //带纹理的 blendFilter 较为特殊， 增加单独处理方法, 第二个参数 texID 表示将要使用到的纹理id
+    // blendFilter with texture is special, add separate processing method, the second parameter texID represents the texture id to be used
     public static long createBlendFilter(TextureBlendMode blendMode, int texID, int texWidth, int texHeight, BlendFilterType blendFilterType, float intensity) {
         return cgeCreateBlendFilter(blendMode.ordinal(), texID, texWidth, texHeight, blendFilterType.ordinal(), intensity);
     }
@@ -153,7 +153,7 @@ public class CGENativeLibrary {
     // intensity 表示滤镜强度 [0, 1]
     public static native Bitmap cgeFilterImage_MultipleEffects(Bitmap bmp, String config, float intensity);
 
-    // 同上， 结果直接写回传入bitmap， 无返回值
+    // Same as above, result is written back directly to the input bitmap, no return value
     public static native void cgeFilterImage_MultipleEffectsWriteBack(Bitmap bmp, String config, float intensity);
 
     ////////////////////////////////////

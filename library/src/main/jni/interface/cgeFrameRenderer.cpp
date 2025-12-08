@@ -60,7 +60,7 @@ void CGEFastFrameHandler::swapBufferFBO()
     std::swap(m_bufferTextures[0], m_bufferTextures[1]);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_bufferTextures[0], 0);
 
-    //为了效率， 高帧率绘制期间不检测错误.
+    // For efficiency, errors are not checked during high frame rate rendering.
 }
 
 //////////////////////////////////////////////
@@ -91,7 +91,7 @@ bool CGEFrameRenderer::init(int srcWidth, int srcHeight, int dstWidth, int dstHe
     m_srcSize.set(srcWidth, srcHeight);
     m_dstSize.set(dstWidth, dstHeight);
 
-    //有可能通过预先设置为 mask版
+    // May be pre-set to mask version
     if (m_textureDrawer == nullptr)
         m_textureDrawer = TextureDrawer::create();
 

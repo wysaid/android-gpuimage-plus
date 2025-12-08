@@ -578,7 +578,7 @@ static CGEConstString s_luminosity = CGE_SHADER_STRING(
 
 // clang-format on
 
-// 顺序必须与 CGETextureBlendMode 里面的模式匹配， 否则将造成效果不正确
+// Order must match the modes in CGETextureBlendMode, otherwise effects will be incorrect
 static const char* s_shaderEnum[] = {
     s_mix,      // 0 正常
     s_dissolve, // 1 溶解

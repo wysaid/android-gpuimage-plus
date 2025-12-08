@@ -46,7 +46,7 @@ static CGEConstString s_vshMask = CGE_SHADER_STRING(
     void main() {
         gl_Position = vec4(vPosition, 0.0, 1.0);
         texCoord = texFlipScale * (vPosition / 2.0 * texRotation) + 0.5;
-        //如果mask的大小与source 不一致， 需要进行flipscale 达到一致
+        // If mask size does not match source, need to perform flipscale to match
         maskCoord = maskFlipScale * (vPosition / 2.0 * maskRotation) + 0.5;
     });
 
@@ -58,9 +58,9 @@ static CGEConstString s_fshMask = CGE_SHADER_STRING_PRECISION_M(
     void main() {
         gl_FragColor = texture2D(inputImageTexture, texCoord);
 
-        // mask一般为单通道
+        // mask is generally single channel
 
-        //不预乘
+        // Not premultiplied
         gl_FragColor *= texture2D(maskTexture, maskCoord);
 
         // 预乘

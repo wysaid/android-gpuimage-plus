@@ -18,7 +18,7 @@ public class CGEFrameRecorder extends CGEFrameRenderer {
         mNativeAddress = nativeCreateRecorder();
     }
 
-    /////////////////视频录制相关////////////////////
+    ///////////////// Video recording related ////////////////////
 
     public boolean startRecording(int fps, String filename) {
         return startRecording(fps, 1650000, filename);
@@ -119,7 +119,7 @@ public class CGEFrameRecorder extends CGEFrameRenderer {
 
     private native long nativeCreateRecorder();
 
-    /////////////////视频录制相关////////////////////
+    ///////////////// Video recording related ////////////////////
     private native boolean nativeStartRecording(long holder, int fps, String filename, int bitRate);
     private native boolean nativeIsRecordingStarted(long holder);
     private native boolean nativeEndRecording(long holder, boolean shouldSave);

@@ -36,39 +36,39 @@ public:
     CGEFrameRenderer();
     virtual ~CGEFrameRenderer();
 
-    // srcWidth, srcHeight为external texture的使用宽高(旋转之后的值)
-    // dstWidth, dstHeight为保存video使用的宽高， 默认640*480
+    // srcWidth, srcHeight: width and height of the external texture (values after rotation)
+    // dstWidth, dstHeight: width and height for saving video, default 640*480
     bool init(int srcWidth, int srcHeight, int dstWidth = 640, int dstHeight = 480);
 
-    // srcTexture 尺寸改变, 将重新计算viewport等
+    // srcTexture size changed, will recalculate viewport etc.
     void srcResize(int width, int height);
 
-    //会影响framebuffer设置。
+    // Will affect framebuffer settings.
     virtual void update(GLuint externalTexture, float* transformMatrix);
 
-    //滤镜process接口, 不调用将不产生滤镜效果
+    // Filter process interface, no filter effect will be applied if not called
     virtual void runProc();
 
-    //不设置framebuffer， 若要绘制到屏幕， 需绑定到0
+    // Does not set framebuffer. To render to screen, bind to 0
     void render(int x, int y, int width, int height);
 
-    //绘制一定不带mask的结果
-    //注意, drawCache和render、update 三个函数在使用时非线程安全。
+    // Draw result without mask
+    // Note: drawCache, render, and update functions are not thread-safe when used together.
     void drawCache();
 
-    //不设置framebuffer, viewport等， 直接绘制
+    // Does not set framebuffer, viewport etc., draws directly
     // void renderResult();
     // void renderResultWithMask();
 
-    //设置external texture的旋转值
+    // Set rotation value for external texture
     void setSrcRotation(float rad);
 
-    //设置external texture的翻转缩放值
+    // Set flip scale value for external texture
     void setSrcFlipScale(float x, float y);
 
-    //设置渲染结果旋转(弧度)
+    // Set render result rotation (radians)
     void setRenderRotation(float rad);
-    //设置渲染结果翻转缩放
+    // Set render result flip scale
     void setRenderFlipScale(float x, float y);
 
     void setFilterWithConfig(CGEConstString config, CGETextureLoadFun texLoadFunc, void* loadArg);
@@ -97,7 +97,7 @@ protected:
 
 protected:
     CGEFastFrameHandler* m_frameHandler;
-    //主要用于重绘external_OES类型texture
+    // Mainly used for redrawing external_OES type textures
     TextureDrawer* m_textureDrawer;
     TextureDrawer4ExtOES* m_textureDrawerExtOES;
 
@@ -107,7 +107,7 @@ protected:
     TextureDrawer* m_cacheDrawer;
     bool m_isUsingMask;
 
-    //辅助参数
+    // Auxiliary parameters
     float m_drawerFlipScaleX, m_drawerFlipScaleY;
 
     std::mutex m_resultMutex;

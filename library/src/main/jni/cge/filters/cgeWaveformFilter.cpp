@@ -1,6 +1,6 @@
 #include "cgeWaveformFilter.h"
 
-#define USING_ALPHA 1 /// 视图增加一个 80% 的半透明
+#define USING_ALPHA 1 /// View adds an 80% semi-transparent
 
 static CGEConstString s_cshWaveform = "#version 310 es\n" CGE_SHADER_STRING(
     precision highp float;

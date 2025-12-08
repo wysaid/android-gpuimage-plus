@@ -23,7 +23,7 @@
 
 namespace CGE
 {
-//辅助类，全局可用。
+// Helper class, globally available.
 class CGEGlobalConfig
 {
 public:
@@ -43,7 +43,7 @@ public:
     static InitArguments sInitArugment;
 };
 
-// CGE 全局初始化函数。
+// CGE global initialization function.
 bool cgeInitialize(int w = CGEGlobalConfig::viewWidth, int h = CGEGlobalConfig::viewHeight, CGEGlobalConfig::InitArguments arg = CGEGlobalConfig::CGE_INIT_DEFAULT);
 
 inline bool cgeInitialize(int w, int h, GLenum arg)
@@ -53,10 +53,10 @@ inline bool cgeInitialize(int w, int h, GLenum arg)
 
 void cgeInitFilterStatus();
 
-// CGE 全局清除函数
+// CGE global cleanup function
 void cgeCleanup();
 
-//设置画面显示尺寸
+// Set screen display size
 void cgeSetGlobalViewSize(int width, int height);
 
 } // namespace CGE

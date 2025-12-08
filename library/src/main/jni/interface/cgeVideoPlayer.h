@@ -48,7 +48,7 @@ public:
 
     bool open(const char* filename, CGEVideoDecodeHandler::SamplingStyle s = CGEVideoDecodeHandler::ssFastBilinear);
 
-    // 不同的初始化方式，不与 open 合用
+    // Different initialization method, not to be used with open
     bool initWithDecodeHandler(CGEVideoDecodeHandler*);
 
     void close();

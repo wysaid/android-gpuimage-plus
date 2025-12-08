@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String EFFECT_CONFIGS[] = {
             "",
-            "@curve RGB(0,255)(255,0) @style cm mapping0.jpg 80 80 8 3", // ASCII art (字符画效果)
+            "@curve RGB(0,255)(255,0) @style cm mapping0.jpg 80 80 8 3", // ASCII art effect
             "@style waveform 0.01 0.01 0.4 0.4",
             "@beautify face 1 480 640", //Beautify
             "@adjust lut edgy_amber.png",
@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
     public CGENativeLibrary.LoadImageCallback mLoadImageCallback = new CGENativeLibrary.LoadImageCallback() {
 
         //Notice: the 'name' passed in is just what you write in the rule, e.g: 1.jpg
-        //注意， 这里回传的name不包含任何路径名， 仅为具体的图片文件名如 1.jpg
+        // Note: The name returned here does not contain any path name, only the specific image filename such as 1.jpg
         @Override
         public Bitmap loadImage(String name, Object arg) {
 
@@ -167,8 +167,8 @@ public class MainActivity extends AppCompatActivity {
 
             //The bitmap is which you returned at 'loadImage'.
             //You can call recycle when this function is called, or just keep it for further usage.
-            //唯一不需要马上recycle的应用场景为 多个不同的滤镜都使用到相同的bitmap
-            //那么可以选择缓存起来。
+            // The only scenario where immediate recycle is not needed is when multiple different filters use the same bitmap
+            // Then it can be cached.
             bmp.recycle();
         }
     };
@@ -251,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //The second param will be passed as the second arg of the callback function.
-        //第二个参数根据自身需要设置， 将作为 loadImage 第二个参数回传
+        // The second parameter is set according to your needs and will be passed back as the second parameter of loadImage
         CGENativeLibrary.setLoadImageCallback(mLoadImageCallback, null);
         PermissionUtil.verifyStoragePermissions(this);
     }
