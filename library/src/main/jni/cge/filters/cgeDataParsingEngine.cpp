@@ -19,9 +19,9 @@
 #include <cstring>
 #include <sstream>
 
-//为了加快处理速度，使用固定大小的buffer来存储Parser所需参数。
-//每个method后面的参数长度都不应该超过BUFFER_LEN。
-//如果你的Parser所需参数超过此长度，请将BUFFER_LEN增加到合适的长度。
+// To speed up processing, use a fixed-size buffer to store Parser parameters.
+// The parameter length after each method should not exceed BUFFER_LEN.
+// If your Parser requires parameters longer than this, please increase BUFFER_LEN to an appropriate length.
 #define BUFFER_LEN 1024
 #define BUFFER_LEN_STR "1023"
 
@@ -374,7 +374,7 @@ CGEImageFilterInterface* CGEDataParsingEngine::adjustParser(const char* pstr, CG
         ++pstr;
     CGEImageFilterInterface* proc = nullptr;
 
-    // 2015-1-29 隐患fix, 将下一条指令直接取出再进行判断
+    // 2015-1-29 Potential bug fix, extract the next instruction directly before judging
     char buffer[128], *pBuffer = buffer;
 
     while (*pstr != '\0' && !isspace(*pstr) && (pBuffer - buffer) < sizeof(buffer))
@@ -723,7 +723,7 @@ CGEImageFilterInterface* CGEDataParsingEngine::vignetteBlendParser(const char* p
     proc->setVignette(low, range);
     proc->setVignetteCenter(centerX, centerY);
 
-    if (color[3] > 1.00001f) //判断值域范围为0~1还是0~255并进行相应处理。
+    if (color[3] > 1.00001f) // Determine if value range is 0~1 or 0~255 and handle accordingly.
     {
         color[0] /= 255.0f;
         color[1] /= 255.0f;
@@ -779,7 +779,7 @@ CGEImageFilterInterface* CGEDataParsingEngine::pixblendParser(const char* pstr, 
         return nullptr;
     }
 
-    if (color[3] > 1.00001f) //判断值域范围为0~1还是0~255并进行相应处理。
+    if (color[3] > 1.00001f) // Determine if value range is 0~1 or 0~255 and handle accordingly.
     {
         color[0] /= 255.0f;
         color[1] /= 255.0f;
@@ -1078,7 +1078,7 @@ CGEImageFilterInterface* CGEDataParsingEngine::advancedStyleParser(const char* p
         ++pstr;
     CGEImageFilterInterface* proc = nullptr;
 
-    // 2015-1-29 隐患fix, 将下一条指令直接取出再进行判断
+    // 2015-1-29 Potential bug fix, extract the next instruction directly before judging
     char buffer[128], *pBuffer = buffer;
 
     while (*pstr != '\0' && !isspace(*pstr) && (pBuffer - buffer) < sizeof(buffer))

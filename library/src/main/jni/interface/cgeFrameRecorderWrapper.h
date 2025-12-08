@@ -23,7 +23,7 @@ extern "C"
  */
 JNIEXPORT jlong JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeCreateRecorder(JNIEnv*, jobject);
 
-//视频录制相关API
+// Video recording related API
 
 JNIEXPORT jboolean JNICALL Java_org_wysaid_nativePort_CGEFrameRecorder_nativeStartRecording(JNIEnv*, jobject, jlong, jint, jstring, jint);
 

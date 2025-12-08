@@ -3,7 +3,7 @@
 //  filterLib
 //
 //  Created by wangyang on 16/8/2.
-//  Copyright © 2016年 wysaid. All rights reserved.
+//  Copyright © 2016 wysaid. All rights reserved.
 //
 
 #include "customFilter_N.h"

@@ -21,7 +21,7 @@ namespace CGE
 struct CGEEncoderContextMP4;
 
 // h264 video encoding, aac-FLTP single channel audio encoding
-// 使用h264编码视频，FLTP浮点单声道音频的mp4 encoder
+// MP4 encoder using h264 for video and FLTP floating point mono audio
 class CGEVideoEncoderMP4
 {
 public:
@@ -67,10 +67,10 @@ public:
     double getVideoStreamTime();
     double getAudioStreamTime();
 
-    //保存视频
+    // Save video
     bool save();
 
-    //丢弃视频
+    // Discard video
     void drop();
 
     int getAudioSampleRate();

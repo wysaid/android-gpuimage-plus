@@ -71,8 +71,8 @@ void CGELerpblurFilter::_genMipmaps(int width, int height)
     {
         textureType = GL_UNSIGNED_BYTE;
 
-        // Apple A9 (iphone 6s+) GL_UNSIGNED_BYTE纹理精度较低， 需要使用 GL_HALF_FLOAT_OES
-        //为了增强兼容性， 对于支持 EXT_color_buffer_half_float 扩展的设备， 通通使用 GL_HALF_FLOAT_OES
+        // Apple A9 (iphone 6s+) GL_UNSIGNED_BYTE texture precision is low, need to use GL_HALF_FLOAT_OES
+        // To enhance compatibility, for devices that support EXT_color_buffer_half_float extension, all use GL_HALF_FLOAT_OES
 #ifdef GL_HALF_FLOAT_OES
 
         if (cgeCheckGLExtension("EXT_color_buffer_half_float"))

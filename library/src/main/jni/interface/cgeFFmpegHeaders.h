@@ -6,7 +6,7 @@
  *        Mail: admin@wysaid.org
  */
 
-//不可直接在头文件中引用, 否则将对ffmpeg头文件产生较大依赖
+// Should not be directly referenced in header files, otherwise it will create heavy dependencies on ffmpeg headers
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
