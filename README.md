@@ -239,6 +239,57 @@ Some utils are available for creating filters: [https://github.com/wysaid/cge-to
 
 [![Tool](https://raw.githubusercontent.com/wysaid/cge-tools/master/screenshots/0.jpg "cge-tool")](https://github.com/wysaid/cge-tools)
 
+## Release Process
+
+This project uses an automated release workflow that is triggered by version tags.
+
+### Creating a Release
+
+1. **Update the version** in `build.gradle`:
+   ```gradle
+   ext {
+       android = [
+           ...
+           versionName: "3.1.1",  // Update this version
+           ...
+       ]
+   }
+   ```
+
+2. **Commit and push** the version change:
+   ```bash
+   git add build.gradle
+   git commit -m "Bump version to 3.1.1"
+   git push
+   ```
+
+3. **Create and push a tag** matching the version:
+   ```bash
+   git tag v3.1.1
+   git push origin v3.1.1
+   ```
+
+### What Happens Automatically
+
+When you push a tag in the format `v*.*.*` (e.g., `v3.1.1`), the release workflow will:
+
+1. **Validate** that the tag version matches the `versionName` in `build.gradle`
+2. **Build** all four AAR variants:
+   - `gpuimage-plus-{version}.aar` - Full-featured with FFmpeg (4KB page size)
+   - `gpuimage-plus-{version}-16k.aar` - Full-featured with FFmpeg (16KB page size)
+   - `gpuimage-plus-{version}-min.aar` - Image-only, no video (4KB page size)
+   - `gpuimage-plus-{version}-16k-min.aar` - Image-only, no video (16KB page size)
+3. **Build** the demo APK with video module
+4. **Create** a GitHub release with all artifacts and release notes
+
+### Requirements
+
+- Tag must be in the format: `v{major}.{minor}.{patch}` (e.g., `v3.1.1`)
+- Tag version must exactly match the `versionName` in `build.gradle`
+- All version parts must be pure numbers
+
+If the validation fails, the workflow will report an error and stop.
+
 ## License
 
 [MIT License](https://github.com/wysaid/android-gpuimage-plus/blob/master/LICENSE)
