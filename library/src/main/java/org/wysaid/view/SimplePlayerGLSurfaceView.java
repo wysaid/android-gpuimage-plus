@@ -153,7 +153,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
 
     //根据传入bmp回调不同
     // If mask is used after setting, call setMaskOK
-    //否则调用 unsetMaskOK
+    // Otherwise call unsetMaskOK
     public interface SetMaskBitmapCallback {
         void setMaskOK(TextureRendererMask renderer);
 
@@ -250,7 +250,7 @@ public class SimplePlayerGLSurfaceView extends GLSurfaceView implements GLSurfac
     // Customize some initialization operations
     public void setOnCreateCallback(final OnCreateCallback callback) {
 
-        assert callback != null : "无意义操作!";
+        assert callback != null : "Meaningless operation!";
 
         if (mDrawer == null) {
             mOnCreateCallback = callback;

@@ -223,7 +223,7 @@ public class VideoPlayerGLSurfaceView extends GLSurfaceView implements GLSurface
     // Customize some initialization operations
     public void setOnCreateCallback(final OnCreateCallback callback) {
 
-        assert callback != null : "无意义操作!";
+        assert callback != null : "Meaningless operation!";
 
         if (mFrameRenderer == null) {
             mOnCreateCallback = callback;

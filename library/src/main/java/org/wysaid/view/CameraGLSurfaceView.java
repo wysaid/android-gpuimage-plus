@@ -134,8 +134,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     }
 
     // Note: The size of recording will affect the size of preview
-    //这里的width和height表示竖屏尺寸
-    //在onSurfaceCreated之前设置有效
+    // Here width and height represent portrait size
+    // Set before onSurfaceCreated to take effect
     public void presetRecordingSize(int width, int height) {
         if (width > mMaxPreviewWidth || height > mMaxPreviewHeight) {
             float scaling = Math.min(mMaxPreviewWidth / (float) width, mMaxPreviewHeight / (float) height);
