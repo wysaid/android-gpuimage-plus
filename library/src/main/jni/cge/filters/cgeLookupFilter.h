@@ -3,7 +3,7 @@
  *
  *  Created on: 2016-7-4
  *      Author: Wang Yang
- * Description: 全图LUT滤镜
+ * Description: Full-image LUT filter
  */
 
 #ifndef _CGE_LOOKUPFILTER_H_

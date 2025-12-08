@@ -42,11 +42,11 @@ public:
     //'w', 'h': the canvas size. (the max 'x' and 'y' of the cursor)
     // radius: the deform radius in real pixels.
     // intensity: range (0, 1], 0 for origin. Better not more than 0.5
-    virtual void forwardDeformMesh(Vec2f start, Vec2f end, float w, float h, float radius, float intensity);                                 //向前变形工具
-    virtual void pushLeftDeformMesh(Vec2f start, Vec2f end, float w, float h, float radius, float intensity, float angle = 3.14159f / 2.0f); //(左)推动工具：将路径上的网格向路径的angle方向（路径的左侧）推动。 末尾参数angle默认为左侧，可设置为任意值
-    virtual void restoreMeshWithPoint(Vec2f pnt, float w, float h, float radius, float intensity);                                           //重建工具
-    virtual void bloatMeshWithPoint(Vec2f pnt, float w, float h, float radius, float intensity);                                             //膨胀工具
-    virtual void wrinkleMeshWithPoint(Vec2f pnt, float w, float h, float radius, float intensity);                                           //褶皱工具
+    virtual void forwardDeformMesh(Vec2f start, Vec2f end, float w, float h, float radius, float intensity);                                 // Forward deform tool
+    virtual void pushLeftDeformMesh(Vec2f start, Vec2f end, float w, float h, float radius, float intensity, float angle = 3.14159f / 2.0f); // (Left) Push tool: pushes the mesh on the path in the angle direction of the path (left side of the path). The last parameter angle defaults to left, can be set to any value
+    virtual void restoreMeshWithPoint(Vec2f pnt, float w, float h, float radius, float intensity);                                           // Restore tool
+    virtual void bloatMeshWithPoint(Vec2f pnt, float w, float h, float radius, float intensity);                                             // Bloat tool
+    virtual void wrinkleMeshWithPoint(Vec2f pnt, float w, float h, float radius, float intensity);                                           // Wrinkle tool
 
     void render2Texture(CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID);
 

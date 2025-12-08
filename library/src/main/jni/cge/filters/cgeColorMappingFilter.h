@@ -3,7 +3,7 @@
  *
  *  Created on: 2016-8-5
  *      Author: Wang Yang
- * Description: 色彩映射
+ * Description: Color mapping
  */
 
 #ifndef _CGE_COLOR_MAPPING_FILTER_H_
@@ -43,15 +43,15 @@ public:
     static CGEColorMappingFilter* createWithMode(MapingMode mode = MAPINGMODE_DEFAULT);
 
     virtual void pushMapingArea(const MappingArea& area);
-    virtual void endPushing(); // pushMapingArea 结束之后调用
+    virtual void endPushing(); // Call after pushMapingArea ends
 
-    // texWith, texHeight 表示纹理大小
-    // texUnitWidth, texUnitHeight 表示每个映射单元映射后的分辨率
+    // texWith, texHeight represents texture size
+    // texUnitWidth, texUnitHeight represents the resolution of each mapping unit after mapping
     virtual void setupMapping(GLuint mappingTex, int texWidth, int texHeight, int texUnitWidth, int texUnitHeight);
 
 protected:
     GLuint m_mappingTexture;
-    CGESizei m_texSize; //纹理像素尺寸
+    CGESizei m_texSize; // Texture pixel size
     CGESizei m_texUnitResolution;
     std::vector<MappingArea> m_mappingAreas;
 };

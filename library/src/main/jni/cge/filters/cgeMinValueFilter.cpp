@@ -42,7 +42,7 @@ static CGEConstString s_vshMinValue3x3 = CGE_SHADER_STRING(
 
 static CGEConstString s_vshMinValue3x3_2 = CGE_SHADER_STRING(
 
-    //针对OpenGL ES 可能仅有8个varying的设备进行兼容
+    // Compatible with OpenGL ES devices that may have only 8 varyings
     varying vec4 texCoord0;
     varying vec4 texCoord1;
     varying vec4 texCoord2;

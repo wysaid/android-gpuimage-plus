@@ -123,7 +123,7 @@ GLuint CGEMutipleEffectFilter::loadResources(const char* textureName, int* width
 {
     int w, h;
 
-    //优先使用texture loader.
+    // Prioritize using texture loader.
 
     if (m_texLoadFunc != nullptr)
     {
@@ -138,7 +138,7 @@ GLuint CGEMutipleEffectFilter::loadResources(const char* textureName, int* width
         }
     }
 
-    //不存在tex loader或者 tex loader调用失败尝试buffer loader
+    // No tex loader exists or tex loader call failed, try buffer loader
 
     void* bufferData = nullptr;
     CGEBufferLoadFun loadFunc = m_loadFunc;
@@ -229,7 +229,7 @@ bool CGEMutipleEffectFilter::initWithEffectString(const char* effectString)
             ++ptr;
         if (*ptr == '\0') break;
 
-        // 2015-1-29 隐患fix, 将下一条指令直接取出再进行判断
+        // 2015-1-29 Potential bug fix, extract the next instruction directly before judging
         char* pBuffer = buffer;
 
         while (*ptr != '\0' && !isspace(*ptr) && (pBuffer - buffer) < sizeof(buffer))
@@ -315,13 +315,13 @@ bool CGEMutipleEffectFilter::initWithEffectString(const char* effectString)
         // Add more parsing rules before this one
         else
         {
-            CGE_LOG_ERROR("指令未被解析(Invalid parameters):%s", ptr);
+            CGE_LOG_ERROR("Instruction not parsed (Invalid parameters):%s", ptr);
         }
     }
 
     if (m_vecFilters.empty())
     {
-        CGE_LOG_ERROR("特效指令 \"%s\" 无法生成任何特效!\n", effectString);
+        CGE_LOG_ERROR("Effect instruction \"%s\" cannot generate any effects!\n", effectString);
         return false;
     }
 

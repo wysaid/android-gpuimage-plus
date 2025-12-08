@@ -149,7 +149,7 @@ CGEConstString CGEImageFilterInterface::paramPositionIndexName = "vPosition";
 CGEImageFilterInterface::CGEImageFilterInterface() :
     m_uniformParam(nullptr)
 {
-    //将所有filter的 paramPositionIndexName 绑定到 0
+    // Bind paramPositionIndexName of all filters to 0
     m_program.bindAttribLocation(paramPositionIndexName, 0);
 }
 

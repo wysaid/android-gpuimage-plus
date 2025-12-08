@@ -51,7 +51,7 @@ void cgeInitFilterStatus()
 
 #if defined(_CGE_USE_ES_API_3_0_) && defined(GL_PIXEL_PACK_BUFFER)
 
-    //使用此段代码此时 GL_PIXEL_PACK_BUFFER 是否被支持
+    // Whether GL_PIXEL_PACK_BUFFER is supported when using this code
     glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     if (glGetError() == GL_FALSE)
     {

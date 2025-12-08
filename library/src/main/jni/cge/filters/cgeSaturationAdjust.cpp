@@ -29,7 +29,7 @@ const static char* const s_fshSaturation = CGE_SHADER_STRING_PRECISION_M(
         // 	else
         //		S = (maxc - minc) / (2.0 - maxc - minc);
 
-        //注意， 某些低精度情况下 N - (A+B) != N - A - B
+        // Note: In some low precision cases N - (A+B) != N - A - B
         float temp1 = maxc - minc;
         S = mix(temp1 / (2.0 - maxc - minc), temp1 / (maxc + minc), step(L, 0.5));
 

@@ -45,13 +45,13 @@ void cgeDisableGlobalGLContext();
 
 #endif
 
-// CGEBufferLoadFun 的返回值将作为 CGEBufferUnloadFun 的第一个参数
-// CGEBufferLoadFun 的参数 arg 将作为 CGEBufferUnloadFun 的第二个参数
+// The return value of CGEBufferLoadFun will be used as the first parameter of CGEBufferUnloadFun
+// The parameter arg of CGEBufferLoadFun will be used as the second parameter of CGEBufferUnloadFun
 typedef void* (*CGEBufferLoadFun)(const char* sourceName, void** bufferData, GLint* w, GLint* h, CGEBufferFormat* fmt, void* arg);
 typedef bool (*CGEBufferUnloadFun)(void* arg1, void* arg2);
 
-// 加载纹理回调， 注， 为了保持接口简洁性， 回调返回的纹理单元将由调用者负责释放
-// 返回的纹理不应该为 glDeleteTextures 无法处理的特殊纹理类型.
+// Load texture callback. Note: To keep the interface simple, the caller is responsible for releasing the texture unit returned by the callback
+// The returned texture should not be a special texture type that glDeleteTextures cannot handle.
 typedef GLuint (*CGETextureLoadFun)(const char* sourceName, GLint* w, GLint* h, void* arg);
 
 // You can set a common function for loading textures
@@ -171,7 +171,7 @@ public:
 
     void cleanup(bool deleteTexture = true);
 
-    // 注意, format 不支持改变, 如果有相关需求需要自行添加
+    // Note: format change is not supported, if there is a related need, please add it yourself
     bool resize(int w, int h, const void* buffer = nullptr, GLenum format = GL_RGBA);
     inline bool updateTextureData(int w, int h, const void* buffer = nullptr, GLenum format = GL_RGBA)
     {
@@ -232,7 +232,7 @@ struct CGELuminance
         return (r * RWeight + g * GWeight + b * BWeight) >> CalcPrecision;
     }
 
-    // color 从低位到高位的顺序为r-g-b, 传参时需要注意大小端问题
+    // color order from low to high bit is r-g-b, pay attention to endianness when passing parameters
     static inline int RGB565(unsigned short color)
     {
         const int r = (color & 31) << 3;
