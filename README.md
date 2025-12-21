@@ -233,6 +233,22 @@ En: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(E
 
 Ch: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(ZH)](https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(ZH) "http://wysaid.org")
 
+#### Common Filter Examples
+
+**Blur Filters:**
+- Mosaic Blur: `@blur mosaic <blurPixels>` 
+  - Example: `@blur mosaic 10.0` (blurPixels >= 1.0, default is 1.0 for origin)
+
+**Style Filters:**
+- Polar Pixellate: `@style polarpixellate <pixelSizeX>,<pixelSizeY>` or `@style polarpixellate <centerX>,<centerY>,<pixelSizeX>,<pixelSizeY>`
+  - Example: `@style polarpixellate 0.05,0.05` (pixel size only, uses default center 0.5,0.5)
+  - Example: `@style polarpixellate 0.5,0.5,0.05,0.05` (custom center and pixel size)
+  - Center range: [0, 1], Pixel size range: [0, 0.2]
+
+**Dynamic Filters:**
+- Motion Flow: `@dynamic mf <totalFrames>,<frameDelay>`
+  - Example: `@dynamic mf 10,0` (10 frames with no delay)
+
 ## Tool
 
 Some utils are available for creating filters: [https://github.com/wysaid/cge-tools](https://github.com/wysaid/cge-tools "http://wysaid.org")
