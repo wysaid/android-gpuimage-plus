@@ -1,4 +1,4 @@
-name: Build
+name: Ubuntu Build
 
 on:
   push:
@@ -16,358 +16,120 @@ jobs:
       matrix:
         include:
           # ============================================================
-          # PR Builds: 18 jobs total (1 Windows + 1 macOS + 16 Ubuntu)
-          # ============================================================
-          
-          # Windows: 1 job (NDK r26d + CMake + 16KB + FFmpeg)
-          - os: windows-latest
-            os-name: Windows
-            ndk: r26d
-            build-system: cmake
-            ffmpeg: with-ffmpeg
-            page-size: 16kb
-            run-on: always
-          
-          # macOS: 1 job (NDK r27c + ndk-build + 4KB + no-FFmpeg)
-          - os: macos-latest
-            os-name: macOS
-            ndk: r27c
-            build-system: ndk-build
-            ffmpeg: no-ffmpeg
-            page-size: 4kb
-            run-on: always
-          
           # Ubuntu: 16 jobs (2 NDK × 2 build-system × 2 ffmpeg × 2 page-size)
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r26d
-            build-system: cmake
-            ffmpeg: with-ffmpeg
-            page-size: 4kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r26d
-            build-system: cmake
-            ffmpeg: with-ffmpeg
-            page-size: 16kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r26d
-            build-system: cmake
-            ffmpeg: no-ffmpeg
-            page-size: 4kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r26d
-            build-system: cmake
-            ffmpeg: no-ffmpeg
-            page-size: 16kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r26d
-            build-system: ndk-build
-            ffmpeg: with-ffmpeg
-            page-size: 4kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r26d
-            build-system: ndk-build
-            ffmpeg: with-ffmpeg
-            page-size: 16kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r26d
-            build-system: ndk-build
-            ffmpeg: no-ffmpeg
-            page-size: 4kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r26d
-            build-system: ndk-build
-            ffmpeg: no-ffmpeg
-            page-size: 16kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r27c
-            build-system: cmake
-            ffmpeg: with-ffmpeg
-            page-size: 4kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r27c
-            build-system: cmake
-            ffmpeg: with-ffmpeg
-            page-size: 16kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r27c
-            build-system: cmake
-            ffmpeg: no-ffmpeg
-            page-size: 4kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r27c
-            build-system: cmake
-            ffmpeg: no-ffmpeg
-            page-size: 16kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r27c
-            build-system: ndk-build
-            ffmpeg: with-ffmpeg
-            page-size: 4kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r27c
-            build-system: ndk-build
-            ffmpeg: with-ffmpeg
-            page-size: 16kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r27c
-            build-system: ndk-build
-            ffmpeg: no-ffmpeg
-            page-size: 4kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r27c
-            build-system: ndk-build
-            ffmpeg: no-ffmpeg
-            page-size: 16kb
-            run-on: always
-          
           # ============================================================
-          # Master-only Builds: Additional 30 jobs (15 Windows + 15 macOS)
-          # ============================================================
-          
-          # Windows: Additional 15 jobs (all configs except the one already in PR)
-          - os: windows-latest
-            os-name: Windows
-            ndk: r27c
-            build-system: cmake
-            ffmpeg: with-ffmpeg
-            page-size: 16kb
-            run-on: master-only
-          - os: windows-latest
-            os-name: Windows
-            ndk: r26d
-            build-system: ndk-build
-            ffmpeg: with-ffmpeg
-            page-size: 16kb
-            run-on: master-only
-          - os: windows-latest
-            os-name: Windows
-            ndk: r27c
-            build-system: ndk-build
-            ffmpeg: with-ffmpeg
-            page-size: 16kb
-            run-on: master-only
-          - os: windows-latest
-            os-name: Windows
-            ndk: r26d
-            build-system: cmake
-            ffmpeg: no-ffmpeg
-            page-size: 16kb
-            run-on: master-only
-          - os: windows-latest
-            os-name: Windows
-            ndk: r27c
-            build-system: cmake
-            ffmpeg: no-ffmpeg
-            page-size: 16kb
-            run-on: master-only
-          - os: windows-latest
-            os-name: Windows
-            ndk: r26d
-            build-system: ndk-build
-            ffmpeg: no-ffmpeg
-            page-size: 16kb
-            run-on: master-only
-          - os: windows-latest
-            os-name: Windows
-            ndk: r27c
-            build-system: ndk-build
-            ffmpeg: no-ffmpeg
-            page-size: 16kb
-            run-on: master-only
-          - os: windows-latest
-            os-name: Windows
+          - os: ubuntu-latest
+            os-name: Ubuntu
             ndk: r26d
             build-system: cmake
             ffmpeg: with-ffmpeg
             page-size: 4kb
-            run-on: master-only
-          - os: windows-latest
-            os-name: Windows
-            ndk: r27c
-            build-system: cmake
-            ffmpeg: with-ffmpeg
-            page-size: 4kb
-            run-on: master-only
-          - os: windows-latest
-            os-name: Windows
-            ndk: r26d
-            build-system: ndk-build
-            ffmpeg: with-ffmpeg
-            page-size: 4kb
-            run-on: master-only
-          - os: windows-latest
-            os-name: Windows
-            ndk: r27c
-            build-system: ndk-build
-            ffmpeg: with-ffmpeg
-            page-size: 4kb
-            run-on: master-only
-          - os: windows-latest
-            os-name: Windows
-            ndk: r26d
-            build-system: cmake
-            ffmpeg: no-ffmpeg
-            page-size: 4kb
-            run-on: master-only
-          - os: windows-latest
-            os-name: Windows
-            ndk: r27c
-            build-system: cmake
-            ffmpeg: no-ffmpeg
-            page-size: 4kb
-            run-on: master-only
-          - os: windows-latest
-            os-name: Windows
-            ndk: r26d
-            build-system: ndk-build
-            ffmpeg: no-ffmpeg
-            page-size: 4kb
-            run-on: master-only
-          - os: windows-latest
-            os-name: Windows
-            ndk: r27c
-            build-system: ndk-build
-            ffmpeg: no-ffmpeg
-            page-size: 4kb
-            run-on: master-only
-          
-          # macOS: Additional 15 jobs (all configs except the one already in PR)
-          - os: macos-latest
-            os-name: macOS
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
             ndk: r26d
             build-system: cmake
             ffmpeg: with-ffmpeg
             page-size: 16kb
-            run-on: master-only
-          - os: macos-latest
-            os-name: macOS
-            ndk: r27c
-            build-system: cmake
-            ffmpeg: with-ffmpeg
-            page-size: 16kb
-            run-on: master-only
-          - os: macos-latest
-            os-name: macOS
-            ndk: r26d
-            build-system: ndk-build
-            ffmpeg: with-ffmpeg
-            page-size: 16kb
-            run-on: master-only
-          - os: macos-latest
-            os-name: macOS
-            ndk: r27c
-            build-system: ndk-build
-            ffmpeg: with-ffmpeg
-            page-size: 16kb
-            run-on: master-only
-          - os: macos-latest
-            os-name: macOS
-            ndk: r26d
-            build-system: cmake
-            ffmpeg: no-ffmpeg
-            page-size: 16kb
-            run-on: master-only
-          - os: macos-latest
-            os-name: macOS
-            ndk: r27c
-            build-system: cmake
-            ffmpeg: no-ffmpeg
-            page-size: 16kb
-            run-on: master-only
-          - os: macos-latest
-            os-name: macOS
-            ndk: r26d
-            build-system: ndk-build
-            ffmpeg: no-ffmpeg
-            page-size: 16kb
-            run-on: master-only
-          - os: macos-latest
-            os-name: macOS
-            ndk: r27c
-            build-system: ndk-build
-            ffmpeg: no-ffmpeg
-            page-size: 16kb
-            run-on: master-only
-          - os: macos-latest
-            os-name: macOS
-            ndk: r26d
-            build-system: cmake
-            ffmpeg: with-ffmpeg
-            page-size: 4kb
-            run-on: master-only
-          - os: macos-latest
-            os-name: macOS
-            ndk: r27c
-            build-system: cmake
-            ffmpeg: with-ffmpeg
-            page-size: 4kb
-            run-on: master-only
-          - os: macos-latest
-            os-name: macOS
-            ndk: r26d
-            build-system: ndk-build
-            ffmpeg: with-ffmpeg
-            page-size: 4kb
-            run-on: master-only
-          - os: macos-latest
-            os-name: macOS
-            ndk: r27c
-            build-system: ndk-build
-            ffmpeg: with-ffmpeg
-            page-size: 4kb
-            run-on: master-only
-          - os: macos-latest
-            os-name: macOS
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
             ndk: r26d
             build-system: cmake
             ffmpeg: no-ffmpeg
             page-size: 4kb
-            run-on: master-only
-          - os: macos-latest
-            os-name: macOS
-            ndk: r27c
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r26d
             build-system: cmake
             ffmpeg: no-ffmpeg
+            page-size: 16kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r26d
+            build-system: ndk-build
+            ffmpeg: with-ffmpeg
             page-size: 4kb
-            run-on: master-only
-          - os: macos-latest
-            os-name: macOS
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r26d
+            build-system: ndk-build
+            ffmpeg: with-ffmpeg
+            page-size: 16kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
             ndk: r26d
             build-system: ndk-build
             ffmpeg: no-ffmpeg
             page-size: 4kb
-            run-on: master-only
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r26d
+            build-system: ndk-build
+            ffmpeg: no-ffmpeg
+            page-size: 16kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r27c
+            build-system: cmake
+            ffmpeg: with-ffmpeg
+            page-size: 4kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r27c
+            build-system: cmake
+            ffmpeg: with-ffmpeg
+            page-size: 16kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r27c
+            build-system: cmake
+            ffmpeg: no-ffmpeg
+            page-size: 4kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r27c
+            build-system: cmake
+            ffmpeg: no-ffmpeg
+            page-size: 16kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r27c
+            build-system: ndk-build
+            ffmpeg: with-ffmpeg
+            page-size: 4kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r27c
+            build-system: ndk-build
+            ffmpeg: with-ffmpeg
+            page-size: 16kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r27c
+            build-system: ndk-build
+            ffmpeg: no-ffmpeg
+            page-size: 4kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r27c
+            build-system: ndk-build
+            ffmpeg: no-ffmpeg
+            page-size: 16kb
+            run-on: always
     
     # Skip master-only jobs when not on master branch
     if: matrix.run-on == 'always' || github.ref == 'refs/heads/master'

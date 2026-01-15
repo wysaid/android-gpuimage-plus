@@ -2,7 +2,13 @@
 
 ## 概述
 
-本项目使用 GitHub Actions 进行持续集成和构建。Workflow 配置文件：[build.yml](./build.yml)
+本项目使用 GitHub Actions 进行持续集成和构建。Workflow 配置文件：
+
+- [ubuntu-build.yml](./ubuntu-build.yml)
+- [windows-build.yml](./windows-build.yml)
+- [macos-build.yml](./macos-build.yml)
+
+发布流程配置文件：[release.yml](./release.yml)
 
 ## 构建矩阵
 
