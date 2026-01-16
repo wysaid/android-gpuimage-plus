@@ -2,9 +2,9 @@ name: macOS Build
 
 on:
   push:
-    branches: [ "master", "better_workflow" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "master", "better_workflow" ]
+    branches: [ "master" ]
 
 permissions:
   contents: read
@@ -131,6 +131,13 @@ jobs:
           - os: macos-latest
             os-name: macOS
             ndk: r26d
+            build-system: ndk-build
+            ffmpeg: no-ffmpeg
+            page-size: 4kb
+            run-on: master-only
+          - os: macos-latest
+            os-name: macOS
+            ndk: r27c
             build-system: ndk-build
             ffmpeg: no-ffmpeg
             page-size: 4kb

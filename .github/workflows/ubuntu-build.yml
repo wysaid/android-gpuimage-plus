@@ -2,9 +2,9 @@ name: Ubuntu Build
 
 on:
   push:
-    branches: [ "master", "better_workflow" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "master", "better_workflow" ]
+    branches: [ "master" ]
 
 permissions:
   contents: read
@@ -229,7 +229,7 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/better_workflow'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
     
     steps:
     - name: Checkout code
