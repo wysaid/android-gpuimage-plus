@@ -136,14 +136,22 @@ jobs:
             page-size: 4kb
             run-on: master-only
     
-    # Skip master-only jobs when not on master branch
-    if: matrix.run-on == 'always' || github.ref == 'refs/heads/master'
-    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Decide whether to run
+      id: gate
+      shell: bash
+      run: |
+        if [ "${{ matrix.run-on }}" = "always" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; then
+          echo "should_run=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "should_run=false" >> "$GITHUB_OUTPUT"
+        fi
     
     - name: Setup NDK
+      if: steps.gate.outputs.should_run == 'true'
       uses: nttld/setup-ndk@v1.4.2
       id: setup-ndk
       with:
@@ -152,9 +160,11 @@ jobs:
         add-to-path: true
 
     - name: Install build tools
+      if: steps.gate.outputs.should_run == 'true'
       run: choco install ninja -y
     
     - name: Setup JDK 17
+      if: steps.gate.outputs.should_run == 'true'
       uses: actions/setup-java@v3
       with:
         java-version: '17'
@@ -162,6 +172,7 @@ jobs:
         cache: gradle
     
     - name: Configure build parameters
+      if: steps.gate.outputs.should_run == 'true'
       shell: bash
       run: |
         # Set build system flag
@@ -199,15 +210,17 @@ jobs:
         echo "ARTIFACT_NAME=apk-${OS_SHORT}-${NDK_SHORT}-${BUILD_SYS}-${FFMPEG_SHORT}-${PAGE_SHORT}" >> $GITHUB_ENV
     
     - name: Setup project (ndk-build mode)
-      if: matrix.build-system == 'ndk-build'
+      if: steps.gate.outputs.should_run == 'true' && matrix.build-system == 'ndk-build'
       shell: bash
       run: bash tasks.sh --setup-project
     
     - name: Build APK
+      if: steps.gate.outputs.should_run == 'true'
       shell: bash
       run: bash tasks.sh --release $BUILD_SYSTEM_FLAG $FFMPEG_FLAG $PAGE_SIZE_FLAG --build
     
     - name: Find and rename APK
+      if: steps.gate.outputs.should_run == 'true'
       shell: bash
       run: |
         APK_FILE=$(find "cgeDemo/build" -name "*.apk" | grep -i release | head -n 1)
@@ -216,6 +229,7 @@ jobs:
         echo "APK saved as: artifacts/cgeDemo-${{ env.ARTIFACT_NAME }}.apk"
     
     - name: Upload artifacts
+      if: steps.gate.outputs.should_run == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.ARTIFACT_NAME }}
