@@ -2,9 +2,9 @@ name: Windows Build
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "better_workflow" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "better_workflow" ]
 
 permissions:
   contents: read
@@ -150,17 +150,8 @@ jobs:
         ndk-version: ${{ matrix.ndk }}
         link-to-sdk: true
         add-to-path: true
-    
-    - name: Install build tools (Ubuntu)
-      if: runner.os == 'Linux'
-      run: sudo apt-get update && sudo apt-get install -y ninja-build
-    
-    - name: Install build tools (macOS)
-      if: runner.os == 'macOS'
-      run: brew install ninja
-    
-    - name: Install build tools (Windows)
-      if: runner.os == 'Windows'
+
+    - name: Install build tools
       run: choco install ninja
     
     - name: Setup JDK 17
@@ -169,10 +160,6 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: gradle
-    
-    - name: Grant execute permission for scripts (Unix)
-      if: runner.os != 'Windows'
-      run: chmod +x gradlew tasks.sh
     
     - name: Configure build parameters
       shell: bash
@@ -214,21 +201,11 @@ jobs:
     - name: Setup project (ndk-build mode)
       if: matrix.build-system == 'ndk-build'
       shell: bash
-      run: |
-        if [ "${{ runner.os }}" == "Windows" ]; then
-          bash tasks.sh --setup-project
-        else
-          ./tasks.sh --setup-project
-        fi
+      run: bash tasks.sh --setup-project
     
     - name: Build APK
       shell: bash
-      run: |
-        if [ "${{ runner.os }}" == "Windows" ]; then
-          bash tasks.sh --release $BUILD_SYSTEM_FLAG $FFMPEG_FLAG $PAGE_SIZE_FLAG --build
-        else
-          ./tasks.sh --release $BUILD_SYSTEM_FLAG $FFMPEG_FLAG $PAGE_SIZE_FLAG --build
-        fi
+      run: bash tasks.sh --release $BUILD_SYSTEM_FLAG $FFMPEG_FLAG $PAGE_SIZE_FLAG --build
     
     - name: Find and rename APK
       shell: bash

@@ -2,9 +2,9 @@ name: Ubuntu Build
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "better_workflow" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "better_workflow" ]
 
 permissions:
   contents: read
@@ -149,17 +149,8 @@ jobs:
         link-to-sdk: true
         add-to-path: true
     
-    - name: Install build tools (Ubuntu)
-      if: runner.os == 'Linux'
+    - name: Install build tools
       run: sudo apt-get update && sudo apt-get install -y ninja-build
-    
-    - name: Install build tools (macOS)
-      if: runner.os == 'macOS'
-      run: brew install ninja
-    
-    - name: Install build tools (Windows)
-      if: runner.os == 'Windows'
-      run: choco install ninja
     
     - name: Setup JDK 17
       uses: actions/setup-java@v3
@@ -212,21 +203,11 @@ jobs:
     - name: Setup project (ndk-build mode)
       if: matrix.build-system == 'ndk-build'
       shell: bash
-      run: |
-        if [ "${{ runner.os }}" == "Windows" ]; then
-          bash tasks.sh --setup-project
-        else
-          ./tasks.sh --setup-project
-        fi
+      run: ./tasks.sh --setup-project
     
     - name: Build APK
       shell: bash
-      run: |
-        if [ "${{ runner.os }}" == "Windows" ]; then
-          bash tasks.sh --release $BUILD_SYSTEM_FLAG $FFMPEG_FLAG $PAGE_SIZE_FLAG --build
-        else
-          ./tasks.sh --release $BUILD_SYSTEM_FLAG $FFMPEG_FLAG $PAGE_SIZE_FLAG --build
-        fi
+      run: ./tasks.sh --release $BUILD_SYSTEM_FLAG $FFMPEG_FLAG $PAGE_SIZE_FLAG --build
     
     - name: Find and rename APK
       shell: bash
@@ -248,7 +229,7 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/better_workflow'
     
     steps:
     - name: Checkout code
