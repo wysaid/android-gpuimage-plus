@@ -1,0 +1,249 @@
+name: Ubuntu Build
+
+on:
+  push:
+    branches: [ "master", "better_workflow" ]
+  pull_request:
+    branches: [ "master", "better_workflow" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: "${{ matrix.os-name }} | NDK-${{ matrix.ndk }} | ${{ matrix.build-system }} | ${{ matrix.ffmpeg }} | ${{ matrix.page-size }}"
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # ============================================================
+          # Ubuntu: 16 jobs (2 NDK × 2 build-system × 2 ffmpeg × 2 page-size)
+          # ============================================================
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r26d
+            build-system: cmake
+            ffmpeg: with-ffmpeg
+            page-size: 4kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r26d
+            build-system: cmake
+            ffmpeg: with-ffmpeg
+            page-size: 16kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r26d
+            build-system: cmake
+            ffmpeg: no-ffmpeg
+            page-size: 4kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r26d
+            build-system: cmake
+            ffmpeg: no-ffmpeg
+            page-size: 16kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r26d
+            build-system: ndk-build
+            ffmpeg: with-ffmpeg
+            page-size: 4kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r26d
+            build-system: ndk-build
+            ffmpeg: with-ffmpeg
+            page-size: 16kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r26d
+            build-system: ndk-build
+            ffmpeg: no-ffmpeg
+            page-size: 4kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r26d
+            build-system: ndk-build
+            ffmpeg: no-ffmpeg
+            page-size: 16kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r27c
+            build-system: cmake
+            ffmpeg: with-ffmpeg
+            page-size: 4kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r27c
+            build-system: cmake
+            ffmpeg: with-ffmpeg
+            page-size: 16kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r27c
+            build-system: cmake
+            ffmpeg: no-ffmpeg
+            page-size: 4kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r27c
+            build-system: cmake
+            ffmpeg: no-ffmpeg
+            page-size: 16kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r27c
+            build-system: ndk-build
+            ffmpeg: with-ffmpeg
+            page-size: 4kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r27c
+            build-system: ndk-build
+            ffmpeg: with-ffmpeg
+            page-size: 16kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r27c
+            build-system: ndk-build
+            ffmpeg: no-ffmpeg
+            page-size: 4kb
+            run-on: always
+          - os: ubuntu-latest
+            os-name: Ubuntu
+            ndk: r27c
+            build-system: ndk-build
+            ffmpeg: no-ffmpeg
+            page-size: 16kb
+            run-on: always
+    
+    # Skip master-only jobs when not on master branch
+    if: matrix.run-on == 'always' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup NDK
+      uses: nttld/setup-ndk@v1.4.2
+      id: setup-ndk
+      with:
+        ndk-version: ${{ matrix.ndk }}
+        link-to-sdk: true
+        add-to-path: true
+    
+    - name: Install build tools
+      run: sudo apt-get update && sudo apt-get install -y ninja-build
+    
+    - name: Setup JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+    
+    - name: Grant execute permission for scripts (Unix)
+      if: runner.os != 'Windows'
+      run: chmod +x gradlew tasks.sh
+    
+    - name: Configure build parameters
+      shell: bash
+      run: |
+        # Set build system flag
+        if [ "${{ matrix.build-system }}" == "cmake" ]; then
+          echo "BUILD_SYSTEM_FLAG=--enable-cmake" >> $GITHUB_ENV
+        else
+          echo "BUILD_SYSTEM_FLAG=" >> $GITHUB_ENV
+        fi
+        
+        # Set FFmpeg flag
+        if [ "${{ matrix.ffmpeg }}" == "with-ffmpeg" ]; then
+          echo "FFMPEG_FLAG=--enable-video-module" >> $GITHUB_ENV
+        else
+          echo "FFMPEG_FLAG=--disable-video-module" >> $GITHUB_ENV
+        fi
+        
+        # Set page size flag
+        if [ "${{ matrix.page-size }}" == "16kb" ]; then
+          echo "PAGE_SIZE_FLAG=--enable-16kb-page-size" >> $GITHUB_ENV
+        else
+          echo "PAGE_SIZE_FLAG=--disable-16kb-page-size" >> $GITHUB_ENV
+        fi
+        
+        # Set artifact name
+        OS_SHORT="${{ runner.os }}"
+        NDK_SHORT="${{ matrix.ndk }}"
+        BUILD_SYS="${{ matrix.build-system }}"
+        if [ "${{ matrix.ffmpeg }}" == "with-ffmpeg" ]; then
+          FFMPEG_SHORT="ffmpeg"
+        else
+          FFMPEG_SHORT="noffmpeg"
+        fi
+        PAGE_SHORT="${{ matrix.page-size }}"
+        
+        echo "ARTIFACT_NAME=apk-${OS_SHORT}-${NDK_SHORT}-${BUILD_SYS}-${FFMPEG_SHORT}-${PAGE_SHORT}" >> $GITHUB_ENV
+    
+    - name: Setup project (ndk-build mode)
+      if: matrix.build-system == 'ndk-build'
+      shell: bash
+      run: ./tasks.sh --setup-project
+    
+    - name: Build APK
+      shell: bash
+      run: ./tasks.sh --release $BUILD_SYSTEM_FLAG $FFMPEG_FLAG $PAGE_SIZE_FLAG --build
+    
+    - name: Find and rename APK
+      shell: bash
+      run: |
+        APK_FILE=$(find "cgeDemo/build" -name "*.apk" | grep -i release | head -n 1)
+        mkdir -p artifacts
+        cp "$APK_FILE" "artifacts/cgeDemo-${{ env.ARTIFACT_NAME }}.apk"
+        echo "APK saved as: artifacts/cgeDemo-${{ env.ARTIFACT_NAME }}.apk"
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.ARTIFACT_NAME }}
+        path: artifacts/*.apk
+        compression-level: 0
+        retention-days: 15
+        if-no-files-found: error
+  
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/better_workflow'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+    
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    
+    - name: Run lint
+      run: ./gradlew lint

@@ -1,0 +1,109 @@
+name: Release APKs
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-beta*'
+      - 'v*.*.*-alpha*'
+      - 'v*.*.*-rc*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. v1.0.0-test)'
+        required: true
+        default: 'v0.1.0-test'
+      create_release:
+        description: 'Whether to create GitHub Release'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: "Release | ${{ matrix.artifact_name }}"
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - artifact_name: gpuimage-plus
+            ffmpeg_flag: --enable-video-module
+            page_flag: --disable-16kb-page-size
+          - artifact_name: gpuimage-plus-16k
+            ffmpeg_flag: --enable-video-module
+            page_flag: --enable-16kb-page-size
+          - artifact_name: gpuimage-plus-min
+            ffmpeg_flag: --disable-video-module
+            page_flag: --disable-16kb-page-size
+          - artifact_name: gpuimage-plus-16k-min
+            ffmpeg_flag: --disable-video-module
+            page_flag: --enable-16kb-page-size
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Resolve release tag
+      shell: bash
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "RELEASE_TAG=${{ inputs.version }}" >> $GITHUB_ENV
+        else
+          echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+        fi
+        echo "APK_NAME=cgeDemo-${{ matrix.artifact_name }}.apk" >> $GITHUB_ENV
+
+    - name: Setup NDK
+      uses: nttld/setup-ndk@v1.4.2
+      id: setup-ndk
+      with:
+        ndk-version: r26d
+        link-to-sdk: true
+        add-to-path: true
+
+    - name: Install build tools (Ubuntu)
+      run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+    - name: Setup JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Grant execute permission for scripts
+      run: chmod +x gradlew tasks.sh
+
+    - name: Build APK
+      shell: bash
+      run: |
+        ./tasks.sh --release --enable-cmake ${{ matrix.ffmpeg_flag }} ${{ matrix.page_flag }} --build
+
+    - name: Collect APK
+      shell: bash
+      run: |
+        APK_FILE=$(find "cgeDemo/build" -name "*.apk" | grep -i release | head -n 1)
+        mkdir -p artifacts
+        cp "$APK_FILE" "artifacts/${{ env.APK_NAME }}"
+        echo "APK saved as: artifacts/${{ env.APK_NAME }}"
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: artifacts/*.apk
+        compression-level: 0
+        retention-days: 15
+        if-no-files-found: error
+
+    - name: Upload to GitHub Release
+      if: github.event_name == 'push' || inputs.create_release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ env.RELEASE_TAG }}
+        name: ${{ env.RELEASE_TAG }}
+        files: artifacts/*.apk
