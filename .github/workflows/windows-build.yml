@@ -35,7 +35,7 @@ jobs:
       run: choco install ninja -y
     
     - name: Setup JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -91,6 +91,10 @@ jobs:
       shell: bash
       run: |
         APK_FILE=$(find "cgeDemo/build" -name "*.apk" | grep -i release | head -n 1)
+        if [ -z "$APK_FILE" ]; then
+          echo "Error: No release APK found in cgeDemo/build"
+          exit 1
+        fi
         mkdir -p artifacts
         cp "$APK_FILE" "artifacts/cgeDemo-${{ env.ARTIFACT_NAME }}.apk"
         echo "APK saved as: artifacts/cgeDemo-${{ env.ARTIFACT_NAME }}.apk"

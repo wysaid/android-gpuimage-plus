@@ -95,7 +95,7 @@ on:
 
 构建产物 (APK) 使用以下命名格式：
 
-```
+```text
 apk-{OS}-{NDK}-{BuildSystem}-{FFmpeg}-{PageSize}.apk
 ```
 
@@ -106,7 +106,7 @@ apk-{OS}-{NDK}-{BuildSystem}-{FFmpeg}-{PageSize}.apk
 
 ## Lint 检查
 
-代码质量检查仅在 master 分支推送时运行，确保主干代码质量。
+代码质量检查在 PR 和 master 分支推送时运行，确保主干代码质量。
 
 ## 本地测试
 
