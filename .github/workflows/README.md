@@ -18,7 +18,7 @@
 
 1. **操作系统** (3种)
    - Windows (windows-latest)
-   - macOS (macos-latest)
+   - macOS (macos-13)
    - Ubuntu (ubuntu-latest)
 
 2. **NDK 版本** (2种)
