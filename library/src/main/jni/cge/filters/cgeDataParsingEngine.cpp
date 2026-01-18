@@ -1143,6 +1143,33 @@ CGEImageFilterInterface* CGEDataParsingEngine::advancedStyleParser(const char* p
     {
         ADJUSTHELP_COMMON_FUNC(pstr, CGEPolkaDotFilter, setDotScaling);
     }
+    else if (strcmp(buffer, "polarpixellate") == 0)
+    {
+        float centerX, centerY, pixelSizeX, pixelSizeY;
+        int argNum = sscanf(pstr, "%f%*c%f%*c%f%*c%f", &centerX, &centerY, &pixelSizeX, &pixelSizeY);
+        
+        if (argNum != 2 && argNum != 4)
+        {
+            LOG_ERROR_PARAM(pstr);
+            return nullptr;
+        }
+
+        auto* filter = createPolarPixellateFilter();
+
+        if (filter != nullptr)
+        {
+            proc = filter;
+            if (argNum == 4)
+            {
+                filter->setCenter(centerX, centerY);
+                filter->setPixelSize(pixelSizeX, pixelSizeY);
+            }
+            else // argNum == 2, use as pixelSize only
+            {
+                filter->setPixelSize(centerX, centerY);
+            }
+        }
+    }
     else if (strcmp(buffer, "sketch") == 0)
     {
         ADJUSTHELP_COMMON_FUNC(pstr, CGESketchFilter, setIntensity);
@@ -1334,6 +1361,23 @@ CGEImageFilterInterface* CGEDataParsingEngine::blurParser(const char* pstr, CGEM
             {
                 filter->setIntensity(intensity);
             }
+        }
+    }
+    else if (strcmp(buffer, "mosaic") == 0)
+    {
+        float blurPixels;
+        if (sscanf(pstr, "%f", &blurPixels) != 1)
+        {
+            LOG_ERROR_PARAM(pstr);
+            return nullptr;
+        }
+
+        auto* filter = createMosaicBlurFilter();
+
+        if (filter != nullptr)
+        {
+            proc = filter;
+            filter->setBlurPixels(blurPixels);
         }
     }
 
