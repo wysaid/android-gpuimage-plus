@@ -29,11 +29,13 @@ jobs:
     - name: Install NDK
       shell: bash
       run: |
-        case "${{ matrix.ndk }}" in
-          r26d) NDK_VERSION="26.2.11394342" ;;
-          r27c) NDK_VERSION="27.2.12479018" ;;
+        NDK_FLAVOR="${{ matrix.ndk }}"
+        NDK_FLAVOR=$(printf "%s" "$NDK_FLAVOR" | tr -d '\r\n')
+        case "$NDK_FLAVOR" in
+          r26d*) NDK_VERSION="26.2.11394342" ;;
+          r27c*) NDK_VERSION="27.2.12479018" ;;
           *)
-            echo "Error: Unsupported NDK version ${{ matrix.ndk }}"
+            echo "Error: Unsupported NDK version $NDK_FLAVOR"
             exit 1
             ;;
         esac
