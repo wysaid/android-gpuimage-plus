@@ -91,6 +91,10 @@ on:
 
 非 master 分支的推送**不会触发** workflow，避免资源浪费。只有创建 PR 时才会触发精简构建。
 
+### 4. workflow 分支（全量构建）
+
+当分支名包含 `workflow` 时，会触发**全量构建**（等同于 master 全量矩阵），用于验证完整矩阵是否可通过。
+
 ## 产物命名规则
 
 构建产物 (APK) 使用以下命名格式：
@@ -107,6 +111,10 @@ apk-{OS}-{NDK}-{BuildSystem}-{FFmpeg}-{PageSize}.apk
 ## Lint 检查
 
 代码质量检查在 PR 和 master 分支推送时运行，确保主干代码质量。
+
+## Release 工作流（测试分支）
+
+当分支名包含 `workflow` 且触发 `release.yml` 时，将从 `build.gradle` 读取 `versionName`，生成 `v{版本号}-test` 的测试标签，**仅构建并上传 APK 工件**，不会创建 Release 或发布任何内容。
 
 ## 本地测试
 

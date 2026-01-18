@@ -2,6 +2,8 @@ name: Release APKs
 
 on:
   push:
+    branches:
+      - "*workflow*"
     tags:
       - 'v*.*.*'
       - 'v*.*.*-beta*'
@@ -52,8 +54,18 @@ jobs:
       run: |
         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
           echo "RELEASE_TAG=${{ inputs.version }}" >> $GITHUB_ENV
+          echo "SHOULD_RELEASE=${{ inputs.create_release }}" >> $GITHUB_ENV
+        elif [ "${{ github.ref_type }}" = "branch" ]; then
+          VERSION=$(grep -E 'versionName' build.gradle | head -n 1 | sed -E 's/.*versionName[^\"]*\"([^\"]+)\".*/\1/')
+          if [ -z "$VERSION" ]; then
+            echo "Error: Failed to parse versionName from build.gradle"
+            exit 1
+          fi
+          echo "RELEASE_TAG=v${VERSION}-test" >> $GITHUB_ENV
+          echo "SHOULD_RELEASE=false" >> $GITHUB_ENV
         else
           echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "SHOULD_RELEASE=true" >> $GITHUB_ENV
         fi
         echo "APK_NAME=cgeDemo-${{ matrix.artifact_name }}.apk" >> $GITHUB_ENV
 
@@ -101,7 +113,7 @@ jobs:
         if-no-files-found: error
 
     - name: Upload to GitHub Release
-      if: github.event_name == 'push' || inputs.create_release
+      if: env.SHOULD_RELEASE == 'true'
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ env.RELEASE_TAG }}

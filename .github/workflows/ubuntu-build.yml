@@ -2,7 +2,9 @@ name: Ubuntu Build
 
 on:
   push:
-    branches: [ "master" ]
+    branches:
+      - "master"
+      - "*workflow*"
   pull_request:
     branches: [ "master" ]
 
