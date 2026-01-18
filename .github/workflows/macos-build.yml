@@ -39,7 +39,14 @@ jobs:
             exit 1
             ;;
         esac
+        set +o pipefail
         yes | sdkmanager "ndk;${NDK_VERSION}"
+        SDKMANAGER_STATUS=${PIPESTATUS[1]}
+        set -o pipefail
+        if [ "$SDKMANAGER_STATUS" -ne 0 ]; then
+          echo "Error: sdkmanager failed with status $SDKMANAGER_STATUS"
+          exit "$SDKMANAGER_STATUS"
+        fi
         echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/${NDK_VERSION}" >> "$GITHUB_ENV"
         echo "$ANDROID_SDK_ROOT/ndk/${NDK_VERSION}" >> "$GITHUB_PATH"
 
