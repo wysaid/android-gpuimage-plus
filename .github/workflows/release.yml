@@ -1,9 +1,7 @@
-name: Release APKs
+name: Release
 
 on:
   push:
-    branches:
-      - "*workflow*"
     tags:
       - 'v*.*.*'
       - 'v*.*.*-beta*'
@@ -12,110 +10,415 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag (e.g. v1.0.0-test)'
+        description: 'Version (e.g., 3.1.1 or 3.1.1-rc1)'
         required: true
-        default: 'v0.1.0-test'
+        type: string
       create_release:
-        description: 'Whether to create GitHub Release'
+        description: 'Create GitHub Release (manual only)'
         type: boolean
         default: false
 
 permissions:
   contents: write
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  build:
-    name: "Release | ${{ matrix.artifact_name }}"
+  release:
+    name: Build and Release
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - artifact_name: gpuimage-plus
-            ffmpeg_flag: --enable-video-module
-            page_flag: --disable-16kb-page-size
-          - artifact_name: gpuimage-plus-16k
-            ffmpeg_flag: --enable-video-module
-            page_flag: --enable-16kb-page-size
-          - artifact_name: gpuimage-plus-min
-            ffmpeg_flag: --disable-video-module
-            page_flag: --disable-16kb-page-size
-          - artifact_name: gpuimage-plus-16k-min
-            ffmpeg_flag: --disable-video-module
-            page_flag: --enable-16kb-page-size
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Resolve release tag
-      shell: bash
-      run: |
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          echo "RELEASE_TAG=${{ inputs.version }}" >> $GITHUB_ENV
-          echo "SHOULD_RELEASE=${{ inputs.create_release }}" >> $GITHUB_ENV
-        elif [ "${{ github.ref_type }}" = "branch" ]; then
-          VERSION=$(grep -E 'versionName' build.gradle | head -n 1 | sed -E 's/.*versionName[^\"]*\"([^\"]+)\".*/\1/')
-          if [ -z "$VERSION" ]; then
-            echo "Error: Failed to parse versionName from build.gradle"
+      - name: Setup NDK
+        uses: nttld/setup-ndk@v1.4.2
+        id: setup-ndk
+        with:
+          ndk-version: r26d
+          link-to-sdk: true
+          add-to-path: true
+
+      - name: Install build tools (Ubuntu)
+        run: sudo apt-get update && sudo apt-get install -y ninja-build jq rsync
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for scripts
+        run: chmod +x gradlew tasks.sh publish.sh
+
+      - name: Resolve version and tag
+        id: release_meta
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RAW_VERSION="${{ inputs.version }}"
+            SHOULD_RELEASE="${{ inputs.create_release }}"
+            IS_MANUAL="true"
+          else
+            RAW_VERSION="${GITHUB_REF#refs/tags/}"
+            SHOULD_RELEASE="true"
+            IS_MANUAL="false"
+          fi
+
+          if [[ "$RAW_VERSION" =~ ^v ]]; then
+            TAG_NAME="$RAW_VERSION"
+            VERSION_FULL="${RAW_VERSION#v}"
+          else
+            TAG_NAME="v${RAW_VERSION}"
+            VERSION_FULL="$RAW_VERSION"
+          fi
+
+          if [[ ! "$TAG_NAME" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)(-.+)?$ ]]; then
+            echo "❌ Invalid tag format: $TAG_NAME"
+            echo "Tag must be v\${major}.\${minor}.\${patch} with optional suffix (e.g., v3.1.1, v3.1.1-rc1)"
             exit 1
           fi
-          echo "RELEASE_TAG=v${VERSION}-test" >> $GITHUB_ENV
-          echo "SHOULD_RELEASE=false" >> $GITHUB_ENV
-        else
-          echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
-          echo "SHOULD_RELEASE=true" >> $GITHUB_ENV
-        fi
-        echo "APK_NAME=cgeDemo-${{ matrix.artifact_name }}.apk" >> $GITHUB_ENV
 
-    - name: Setup NDK
-      uses: nttld/setup-ndk@v1.4.2
-      id: setup-ndk
-      with:
-        ndk-version: r26d
-        link-to-sdk: true
-        add-to-path: true
+          VERSION_BASE="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
+          if [[ "$TAG_NAME" == *-* ]]; then
+            IS_PRERELEASE="true"
+          else
+            IS_PRERELEASE="false"
+          fi
 
-    - name: Install build tools (Ubuntu)
-      run: sudo apt-get update && sudo apt-get install -y ninja-build
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "version_full=$VERSION_FULL" >> "$GITHUB_OUTPUT"
+          echo "version_base=$VERSION_BASE" >> "$GITHUB_OUTPUT"
+          echo "is_manual=$IS_MANUAL" >> "$GITHUB_OUTPUT"
+          echo "should_release=$SHOULD_RELEASE" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=$IS_PRERELEASE" >> "$GITHUB_OUTPUT"
 
-    - name: Setup JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: gradle
+      - name: Validate version matches project version
+        shell: bash
+        run: |
+          set -euo pipefail
 
-    - name: Grant execute permission for scripts
-      run: chmod +x gradlew tasks.sh
+          PROJECT_VERSION=$(grep -E 'versionName\s*:' build.gradle | sed -E 's/.*versionName\s*:\s*"([^"]+)".*/\1/')
+          TAG_VERSION_FULL="${{ steps.release_meta.outputs.version_full }}"
 
-    - name: Build APK
-      shell: bash
-      run: |
-        ./tasks.sh --release --enable-cmake ${{ matrix.ffmpeg_flag }} ${{ matrix.page_flag }} --build
+          echo "Project version: $PROJECT_VERSION"
+          echo "Tag version: $TAG_VERSION_FULL"
 
-    - name: Collect APK
-      shell: bash
-      run: |
-        APK_FILE=$(find "cgeDemo/build" -name "*.apk" | grep -i release | head -n 1)
-        mkdir -p artifacts
-        cp "$APK_FILE" "artifacts/${{ env.APK_NAME }}"
-        echo "APK saved as: artifacts/${{ env.APK_NAME }}"
+          if [ "$PROJECT_VERSION" != "$TAG_VERSION_FULL" ]; then
+            echo "❌ Version mismatch!"
+            echo "Tag version ($TAG_VERSION_FULL) does not match project version ($PROJECT_VERSION)"
+            echo "Please update build.gradle versionName or use the correct tag."
+            exit 1
+          fi
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ matrix.artifact_name }}
-        path: artifacts/*.apk
-        compression-level: 0
-        retention-days: 15
-        if-no-files-found: error
+          echo "✅ Version validation passed: $TAG_VERSION_FULL"
 
-    - name: Upload to GitHub Release
-      if: env.SHOULD_RELEASE == 'true'
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ env.RELEASE_TAG }}
-        name: ${{ env.RELEASE_TAG }}
-        files: artifacts/*.apk
+      - name: Setup local.properties for publishing
+        run: |
+          mkdir -p /tmp/maven-repo
+          cat > local.properties << EOF
+          usingCMakeCompile=true
+          usingCMakeCompileDebug=false
+          deployArtifacts=true
+          localRepoDir=/tmp/maven-repo
+          EOF
+
+          echo "✅ local.properties configured for publishing"
+          cat local.properties
+
+      - name: Build all artifact variants
+        run: |
+          echo "🔨 Building all 4 artifact variants..."
+          bash -e ./publish.sh
+
+          echo "✅ All artifacts built successfully"
+          echo "📦 Generated artifacts:"
+          find /tmp/maven-repo -type f \( -name "*.aar" -o -name "*.pom" \) | sort
+
+      - name: Build demo APK with video module
+        run: |
+          echo "🔨 Building demo APK with video module (default configuration)..."
+          ./tasks.sh --enable-cmake --release --enable-video-module --disable-16kb-page-size --build
+
+          APK_PATH=$(find "cgeDemo/build/outputs/apk/release" \( -name "*-release.apk" -o -name "*-release-unsigned.apk" \) | head -1)
+          if [ -z "$APK_PATH" ]; then
+            APK_PATH=$(find "cgeDemo/build" -path "*/release/*" -name "*.apk" | head -1)
+          fi
+          if [ -z "$APK_PATH" ]; then
+            echo "❌ APK not found!"
+            echo "Searched locations:"
+            find "cgeDemo/build" -name "*.apk" || echo "No APK files found"
+            exit 1
+          fi
+
+          mkdir -p /tmp/release-artifacts
+          cp "$APK_PATH" "/tmp/release-artifacts/cgeDemo-${{ steps.release_meta.outputs.version_full }}.apk"
+
+          echo "✅ Demo APK built successfully"
+          ls -lh /tmp/release-artifacts/
+
+      - name: Package AAR artifacts
+        run: |
+          echo "📦 Packaging AAR artifacts..."
+
+          MAVEN_REPO="/tmp/maven-repo"
+          ARTIFACTS_DIR="/tmp/release-artifacts"
+
+          while IFS= read -r aar_file; do
+            if [ -n "$aar_file" ]; then
+              filename=$(basename "$aar_file")
+              cp "$aar_file" "$ARTIFACTS_DIR/$filename"
+              echo "  ✓ Packaged: $filename"
+            fi
+          done < <(find "$MAVEN_REPO/org/wysaid/gpuimage-plus" -name "*.aar")
+
+          AAR_COUNT=$(find "$ARTIFACTS_DIR" -name "*.aar" | wc -l)
+          if [ "$AAR_COUNT" -ne 4 ]; then
+            echo "❌ Expected 4 AAR files but found $AAR_COUNT"
+            exit 1
+          fi
+
+          echo "✅ All AAR artifacts packaged ($AAR_COUNT files)"
+          echo "📦 Final artifacts:"
+          ls -lh "$ARTIFACTS_DIR/"
+
+      - name: Sync artifacts to maven repo and open PR
+        if: steps.release_meta.outputs.is_manual != 'true' && steps.release_meta.outputs.is_prerelease != 'true'
+        id: sync_maven_repo
+        run: |
+          set -euo pipefail
+
+          VERSION="${{ steps.release_meta.outputs.version_full }}"
+          TAG_NAME="${{ steps.release_meta.outputs.tag_name }}"
+          ARTIFACT_REPO_TOKEN="${{ secrets.ARTIFACT_REPO_TOKEN }}"
+
+          if [[ -z "${ARTIFACT_REPO_TOKEN:-}" ]]; then
+            echo "❌ Missing secret: ARTIFACT_REPO_TOKEN (repo:write to android-gpuimage-plus-maven)"
+            exit 1
+          fi
+
+          ARTIFACT_REPO="wysaid/android-gpuimage-plus-maven"
+          WORKDIR="/tmp/maven-repo-target"
+          SOURCE_REPO="/tmp/maven-repo"
+          BRANCH="sync/v${VERSION}"
+
+          echo "🔄 Cloning artifact repo..."
+          git clone --depth 1 "https://${ARTIFACT_REPO_TOKEN}@github.com/${ARTIFACT_REPO}.git" "$WORKDIR"
+
+          echo "🚚 Syncing generated Maven artifacts..."
+          mkdir -p "$WORKDIR/org/wysaid/gpuimage-plus"
+          rsync -av --delete "${SOURCE_REPO}/org/wysaid/gpuimage-plus/" "$WORKDIR/org/wysaid/gpuimage-plus/"
+
+          echo "🧭 Regenerating index pages"
+          pushd "$WORKDIR"
+          chmod +x genSites.sh
+          ./genSites.sh
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "$BRANCH"
+          git add org/wysaid/gpuimage-plus || true
+
+          echo "artifact_pr_url=" >> "$GITHUB_OUTPUT"
+
+          if git diff --cached --quiet; then
+            echo "ℹ️ No changes to publish; skipping PR."
+            exit 0
+          fi
+
+          git commit -m "Publish artifacts ${TAG_NAME}"
+          git push origin "$BRANCH"
+
+          echo "📝 Creating pull request..."
+          PR_BODY="Automated artifact sync for ${TAG_NAME}.\n\nGenerated by main repo release workflow."
+          API_JSON=$(jq -n --arg title "Publish ${TAG_NAME} artifacts" \
+                          --arg head "$BRANCH" \
+                          --arg base "master" \
+                          --arg body "$PR_BODY" \
+                          '{title:$title, head:$head, base:$base, body:$body}')
+
+          PR_RESPONSE=$(curl -sS -X POST \
+            -H "Authorization: token ${ARTIFACT_REPO_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -d "$API_JSON" \
+            "https://api.github.com/repos/${ARTIFACT_REPO}/pulls")
+
+          echo "PR response: $PR_RESPONSE"
+          PR_URL=$(echo "$PR_RESPONSE" | jq -r '.html_url')
+          if [[ "$PR_URL" == "null" || -z "$PR_URL" ]]; then
+            echo "❌ Failed to create PR"
+            exit 1
+          fi
+
+          echo "✅ PR created: $PR_URL"
+          echo "artifact_pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          popd
+
+      - name: Generate release notes
+        run: |
+          VERSION="${{ steps.release_meta.outputs.version_full }}"
+          TAG_NAME="${{ steps.release_meta.outputs.tag_name }}"
+          cat > /tmp/release_notes.md << EOF
+          ## 🚀 Android GPUImage Plus $TAG_NAME
+
+          ### 📦 Downloads
+
+          **Demo APK:**
+          - \`cgeDemo-$VERSION.apk\` - Demo application with full video features
+
+          **AAR Library Artifacts:**
+
+          Four variants are available for different use cases:
+
+          1. **gpuimage-plus-$VERSION.aar**
+             - Page size: 4KB (default)
+             - Full-featured with FFmpeg bundled
+             - Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
+
+          2. **gpuimage-plus-$VERSION-16k.aar**
+             - Page size: 16KB
+             - Full-featured with FFmpeg bundled
+             - Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
+
+          3. **gpuimage-plus-$VERSION-min.aar**
+             - Page size: 4KB (default)
+             - Image-only version (no video features or FFmpeg)
+             - Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
+
+          4. **gpuimage-plus-$VERSION-16k-min.aar**
+             - Page size: 16KB
+             - Image-only version (no video features or FFmpeg)
+             - Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
+
+          ### 🔧 Gradle Dependency
+
+          \`\`\`gradle
+          allprojects {
+              repositories {
+                  maven {
+                      url 'https://maven.wysaid.org/'
+                  }
+              }
+          }
+
+          dependencies {
+              // Choose one of the following based on your needs:
+
+              // Full-featured with FFmpeg (4KB page size)
+              implementation 'org.wysaid:gpuimage-plus:$VERSION'
+
+              // Full-featured with FFmpeg (16KB page size)
+              implementation 'org.wysaid:gpuimage-plus:$VERSION-16k'
+
+              // Image-only, no video (4KB page size)
+              implementation 'org.wysaid:gpuimage-plus:$VERSION-min'
+
+              // Image-only, no video (16KB page size)
+              implementation 'org.wysaid:gpuimage-plus:$VERSION-16k-min'
+          }
+          \`\`\`
+
+          ### 📋 System Requirements
+
+          - **Minimum Android SDK**: API 21 (Android 5.0)
+          - **Target Android SDK**: API 25
+          - **NDK Version**: r26d
+          - **Supported Architectures**: armeabi-v7a, arm64-v8a, x86, x86_64
+
+          ### 📚 Documentation
+
+          - **GitHub Repository**: https://github.com/wysaid/android-gpuimage-plus
+          - **Wiki**: https://github.com/wysaid/android-gpuimage-plus/wiki
+          - **Filter Rule Documentation**: https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(EN)
+
+          ---
+
+          For complete changelog, see the auto-generated content below.
+          EOF
+
+          echo "✅ Release notes generated"
+
+      - name: Create GitHub Release
+        if: steps.release_meta.outputs.should_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_meta.outputs.tag_name }}
+          name: Release ${{ steps.release_meta.outputs.tag_name }}
+          body_path: /tmp/release_notes.md
+          files: |
+            /tmp/release-artifacts/*.apk
+            /tmp/release-artifacts/*.aar
+          draft: false
+          prerelease: ${{ steps.release_meta.outputs.is_prerelease }}
+          generate_release_notes: true
+          make_latest: ${{ steps.release_meta.outputs.is_prerelease == 'true' && 'false' || 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts (Manual trigger)
+        if: steps.release_meta.outputs.is_manual == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts-${{ steps.release_meta.outputs.version_full }}
+          path: /tmp/release-artifacts/
+          retention-days: 7
+
+      - name: Summary
+        run: |
+          IS_MANUAL="${{ steps.release_meta.outputs.is_manual }}"
+          VERSION="${{ steps.release_meta.outputs.version_full }}"
+          TAG_NAME="${{ steps.release_meta.outputs.tag_name }}"
+          IS_PRERELEASE="${{ steps.release_meta.outputs.is_prerelease }}"
+          SHOULD_RELEASE="${{ steps.release_meta.outputs.should_release }}"
+
+          if [ "$IS_MANUAL" = "true" ]; then
+            echo "## 🔧 Manual Build Completed Successfully!" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
+            echo "**Trigger**: Manual (workflow_dispatch)" >> $GITHUB_STEP_SUMMARY
+            echo "**Create Release**: $SHOULD_RELEASE" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 📦 Built Artifacts (available for download):" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## 🎉 Release Workflow Completed!" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Release**: $TAG_NAME" >> $GITHUB_STEP_SUMMARY
+            echo "**Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
+            echo "**Prerelease**: $IS_PRERELEASE" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### ✅ Version Validation" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Tag format validated: v\${major}.\${minor}.\${patch}(-suffix)" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Version matches project version in build.gradle" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 📦 Released Artifacts:" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "**Demo APK:**" >> $GITHUB_STEP_SUMMARY
+          echo "- cgeDemo-$VERSION.apk" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**AAR Libraries:**" >> $GITHUB_STEP_SUMMARY
+          echo "- gpuimage-plus-$VERSION.aar (4KB, with video)" >> $GITHUB_STEP_SUMMARY
+          echo "- gpuimage-plus-$VERSION-16k.aar (16KB, with video)" >> $GITHUB_STEP_SUMMARY
+          echo "- gpuimage-plus-$VERSION-min.aar (4KB, image-only)" >> $GITHUB_STEP_SUMMARY
+          echo "- gpuimage-plus-$VERSION-16k-min.aar (16KB, image-only)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$IS_MANUAL" != "true" ]; then
+            echo "Release page: ${{ github.server_url }}/${{ github.repository }}/releases/tag/$TAG_NAME" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          ARTIFACT_PR_URL="${{ steps.sync_maven_repo.outputs.artifact_pr_url }}"
+          if [ -n "$ARTIFACT_PR_URL" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 📮 Artifact Repository PR" >> $GITHUB_STEP_SUMMARY
+            echo "- $ARTIFACT_PR_URL" >> $GITHUB_STEP_SUMMARY
+          fi
