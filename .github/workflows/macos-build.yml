@@ -23,13 +23,23 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Setup NDK
-      uses: nttld/setup-ndk@v1.4.2
-      id: setup-ndk
-      with:
-        ndk-version: ${{ matrix.ndk }}
-        link-to-sdk: true
-        add-to-path: true
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Install NDK
+      shell: bash
+      run: |
+        case "${{ matrix.ndk }}" in
+          r26d) NDK_VERSION="26.2.11394342" ;;
+          r27c) NDK_VERSION="27.2.12479018" ;;
+          *)
+            echo "Error: Unsupported NDK version ${{ matrix.ndk }}"
+            exit 1
+            ;;
+        esac
+        yes | sdkmanager "ndk;${NDK_VERSION}"
+        echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/${NDK_VERSION}" >> "$GITHUB_ENV"
+        echo "$ANDROID_SDK_ROOT/ndk/${NDK_VERSION}" >> "$GITHUB_PATH"
 
     - name: Install build tools
       run: brew install ninja
