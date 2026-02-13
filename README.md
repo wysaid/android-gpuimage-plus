@@ -49,189 +49,128 @@ dependencies {
 
 ## Build
 
-* Important options in `local.properties`:
-  * `usingCMakeCompile=true`: Set to true to compile the native library with CMake. Defaults to false, allowing the use of prebuilt libraries.
-  * `usingCMakeCompileDebug=true`: Set to true to compile the native library in Debug Mode. Defaults to false.
-  * `disableVideoModule=true`: Set to true to disable the video recording feature, which is useful for image-only scenarios. This reduces the size of the native library significantly. Defaults to false.
-  * `enable16kPageSizes=true`: Set to true to enable [16k page sizes](https://developer.android.com/guide/practices/page-sizes#16-kb-impact) for the native library, applicable only in CMake compile mode. Defaults to false.
+Quick start with Android Studio:
 
-* Build with `Android Studio` and CMake: (Recommended)
-  * Put `usingCMakeCompile=true` in your `local.properties`
-  * Open the repo with the latest version of `Android Studio`
-  * Waiting for the initialization. (NDK/cmake install)
-  * Done.
+1. Add `usingCMakeCompile=true` to `local.properties`
+2. Open the project in Android Studio
+3. Wait for NDK/CMake initialization
+4. Build and run
 
-* Using `Visual Studio Code`: (Requires __[WSL(Recommended)](https://learn.microsoft.com/en-us/windows/wsl/install)__/__[MinGW](https://osdn.net/projects/mingw/)__/__[Cygwin](https://www.cygwin.com/)__ on Windows.)
-  * Setup ENV variable `ANDROID_HOME` to your Android SDK installation directory.
-  * Open the repo with `Visual Studio Code`
-  * Press `⌘ + shift + B` (Mac) or `ctrl + shift + B` (Win/Linux), choose the option `Enable CMake And Build Project With CMake`.
-  * Done.
+For detailed build instructions, configuration options, and alternative build methods (VS Code, command line, ndk-build), see [docs/build.md](docs/build.md).
 
-* Build with preset tasks: (Requires __[WSL(Recommended)](https://learn.microsoft.com/en-us/windows/wsl/install)__/__[MinGW](https://osdn.net/projects/mingw/)__/__[Cygwin](https://www.cygwin.com/)__ on Windows.)
-
-  ```shell
-  # define the environment variable "ANDROID_HOME"
-  # If using Windows, define ANDROID_HOME in Windows Environment Settings by yourself.
-  export ANDROID_HOME=/path/to/android/sdk
-  
-  # Setup Project
-  bash tasks.sh --setup-project
-
-  # Compile with CMake Debug
-  bash tasks.sh --debug --enable-cmake --build
-  # Compile with CMake Release
-  bash tasks.sh --release --enable-cmake --build
-
-  # Start Demo By Command
-  bash tasks.sh --run
-  ```
-
-* Build `JNI` part with ndk-build: (Not recommended)
-
-  ```shell
-  export NDK=path/of/your/ndk
-  cd folder/of/jni (android-gpuimage-plus/library/src/main/jni)
-  
-  # Enable 16kb page sizes (optional)
-  export CGE_ENABLE_16KB_PAGE_SIZE=1
-
-  #This will make all arch: armeabi, armeabi-v7a arm64-v8a, x86, mips
-  ./buildJNI
-  #Or use "sh buildJNI"
-  
-  #Try this if you failed to run the shell above
-  export CGE_USE_VIDEO_MODULE=1
-  $NDK/ndk-build
-  
-  #If you don't want anything except the image filter,
-  #Do as below to build with only cge module
-  #No ffmpeg, opencv or faceTracker.
-  #And remove the loading part of ffmpeg&facetracker
-  $NDK/ndk-build
-  
-  #For Windows user, you should include the `.cmd` extension to `ndk-build` like this:
-  cd <your\path\to\this\repo>\library\src\main\jni
-  <your\path\to\ndk>\ndk-build.cmd
-  
-  #Also remember to comment out these line in NativeLibraryLoader
-  //System.loadLibrary("ffmpeg");
-  //CGEFFmpegNativeLibrary.avRegisterAll();
-  ```
-
-> You can find precompiled libs here: [android-gpuimage-plus-libs](https://github.com/wysaid/android-gpuimage-plus-libs) (The precompiled '.so' files are generated with NDK-r23b)
-
-Note that the generated file "libFaceTracker.so" is not necessary. So just remove this file if you don't want any feature of it.
-
-* iOS version: [https://github.com/wysaid/ios-gpuimage-plus](https://github.com/wysaid/ios-gpuimage-plus "http://wysaid.org")
+> Precompiled libraries: [android-gpuimage-plus-libs](https://github.com/wysaid/android-gpuimage-plus-libs)  
+> iOS version: [ios-gpuimage-plus](https://github.com/wysaid/ios-gpuimage-plus)
 
 ## Manual
 
 ### 1. Usage
 
-___Sample Code for doing a filter with Bitmap___
+Apply a filter with a rule string:
 
 ```java
-//Simply apply a filter to a Bitmap.
-@Override
-protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
+Bitmap srcImage = ...;
 
-    Bitmap srcImage = ...;
+// HSL Adjust (hue: 0.02, saturation: -0.31, luminance: -0.17)
+String ruleString = "@adjust hsl 0.02 -0.31 -0.17";
 
-    //HSL Adjust (hue: 0.02, saturation: -0.31, luminance: -0.17)
-    //Please see the manual for more details.
-    String ruleString = "@adjust hsl 0.02 -0.31 -0.17";
+Bitmap dstImage = CGENativeLibrary.filterImage_MultipleEffects(srcImage, ruleString, 1.0f);
 
-    Bitmap dstImage = CGENativeLibrary.filterImage_MultipleEffects(src, ruleString, 1.0f);
-
-    //Then the dstImage is applied with the filter.
-
-    //Save the result image to /sdcard/libCGE/rec_???.jpg.
-    ImageUtil.saveBitmap(dstImage);
-}
+// Save result
+ImageUtil.saveBitmap(dstImage);
 ```
 
 ### 2. Custom Shader Filter
 
-#### 2.1 Write your own filter
+#### 2.1 Writing a Filter
 
->Your filter must inherit [CGEImageFilterInterfaceAbstract](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L42) or its child class. Most of the filters are inherited from [CGEImageFilterInterface](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L57) because it has many useful functions.
+Custom filters inherit from [`CGEImageFilterInterface`](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/include/cgeImageFilter.h#L57):
 
 ```cpp
-// A simple customized filter to do a color reversal.
+// A simple color reversal filter
 class MyCustomFilter : public CGE::CGEImageFilterInterface
 {
 public:
-    
     bool init()
     {
         CGEConstString fragmentShaderString = CGE_SHADER_STRING_PRECISION_H
         (
-        varying vec2 textureCoordinate;  //defined in 'g_vshDefaultWithoutTexCoord'
-        uniform sampler2D inputImageTexture; // the same to above.
+        varying vec2 textureCoordinate;
+        uniform sampler2D inputImageTexture;
 
         void main()
         {
             vec4 src = texture2D(inputImageTexture, textureCoordinate);
-            src.rgb = 1.0 - src.rgb;  //Simply reverse all channels.
+            src.rgb = 1.0 - src.rgb;  // Reverse all channels
             gl_FragColor = src;
         }
         );
 
-        //m_program is defined in 'CGEImageFilterInterface'
-        return m_program.initWithShaderStrings(g_vshDefaultWithoutTexCoord, s_fsh);
+        return m_program.initWithShaderStrings(g_vshDefaultWithoutTexCoord, fragmentShaderString);
     }
-
-    //void render2Texture(CGE::CGEImageHandlerInterface* handler, GLuint srcTexture, GLuint vertexBufferID)
-    //{
-    //  //Your own render functions here.
-    //  //Do not override this function to use the CGEImageFilterInterface's.
-    //}
 };
 ```
 
->Note: To add your own shader filter with c++. [Please see the demo for further details](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/source/customFilter_N.cpp).
+> See [customFilter_N.cpp](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/source/customFilter_N.cpp) for a complete example.
 
-#### 2.2 Run your own filter
+#### 2.2 Running a Custom Filter
 
-__In C++, you can use a CGEImageHandler to do that:__
+__In C++:__
 
 ```cpp
-//Assume the gl context already exists:
-//JNIEnv* env = ...;
-//jobject bitmap = ...;
+// Assumes GL context exists
 CGEImageHandlerAndroid handler;
-CustomFilterType* customFilter = new CustomFilterType();
+auto* customFilter = new MyCustomFilter();
 
-//You should handle the return value (false is returned when failed.)
 customFilter->init();
 handler.initWithBitmap(env, bitmap);
+handler.addImageFilter(customFilter);  // Handler takes ownership
 
-//The customFilter will be released when the handler' destructor is called.
-//So you don't have to call 'delete customFilter' if you add it into the handler.
-handler.addImageFilter(customFilter);
-
-handler.processingFilters(); //Run the filters.
-
+handler.processingFilters();
 jobject resultBitmap = handler.getResultBitmap(env);
 ```
 
->If no gl context exists, the class [CGESharedGLContext](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/interface/cgeSharedGLContext.h#L22) may be helpful.
+> If no GL context exists, use [`CGESharedGLContext`](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/jni/interface/cgeSharedGLContext.h#L22).
 
-__In Java, you can simply follow the sample:__
+__In Java:__
 
-See: [CGENativeLibrary.cgeFilterImageWithCustomFilter](https://github.com/wysaid/android-gpuimage-plus/blob/master/cgeDemo/src/main/java/org/wysaid/cgeDemo/TestCaseActivity.java#L123)
+Use [`CGENativeLibrary.cgeFilterImageWithCustomFilter`](https://github.com/wysaid/android-gpuimage-plus/blob/master/cgeDemo/src/main/java/org/wysaid/cgeDemo/TestCaseActivity.java#L123) or [`CGEImageHandler`](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/java/org/wysaid/nativePort/CGEImageHandler.java#L93) directly.
 
-__Or to do with a [CGEImageHandler](https://github.com/wysaid/android-gpuimage-plus/blob/master/library/src/main/java/org/wysaid/nativePort/CGEImageHandler.java#L93)__
+### 3. Filter Rule Strings
 
-### 3. Filter Rule String ###
+Filter effects are defined by text-based rule strings. See [docs/filter-rules.md](docs/filter-rules.md) for complete syntax reference.
 
-Doc: <https://github.com/wysaid/android-gpuimage-plus/wiki>
+Quick example:
 
-En: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(EN)](https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(EN) "http://wysaid.org")
+```java
+// Chain multiple filters with @ separator
+String filter = "@curve RGB (0,0) (128,150) (255,255) " +
+                "@adjust hsl 0.02 -0.31 -0.17 " +
+                "@blend overlay texture.jpg 80";
+```
 
-Ch: [https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(ZH)](https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(ZH) "http://wysaid.org")
+### 4. Key Classes & Threading
+
+| Class | Purpose |
+|-------|---------|
+| `CGENativeLibrary` | Main entry — static filter methods |
+| `CGEImageHandler` | Image handler wrapper |
+| `CGEFrameRenderer` | Real-time camera/video renderer |
+| `CGEFrameRecorder` | Video recording (requires FFmpeg) |
+
+**Important**: GL operations must run on the GL thread:
+
+```java
+glSurfaceView.queueEvent(() -> {
+    // Your GL operations here
+});
+```
+
+### Documentation
+
+- [docs/build.md](docs/build.md) — Full build guide and configuration options
+- [docs/filter-rules.md](docs/filter-rules.md) — Complete filter syntax reference
+- [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) — Contributing guidelines
+- [.github/RELEASE.md](.github/RELEASE.md) — Release process
 
 ## Tool
 
@@ -242,13 +181,3 @@ Some utils are available for creating filters: [https://github.com/wysaid/cge-to
 ## License
 
 [MIT License](https://github.com/wysaid/android-gpuimage-plus/blob/master/LICENSE)
-
-## Donate
-
-Alipay:
-
-![Alipay](https://raw.githubusercontent.com/wysaid/android-gpuimage-plus/master/screenshots/alipay.jpg "alipay")
-
-Paypal:
-
-[![Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif "Paypal")](http://blog.wysaid.org/p/donate.html)

@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - "master"
-      - "*workflow*"
+      - "test_workflow*"
   pull_request:
     branches: [ "master" ]
 
@@ -19,122 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # ============================================================
-          # Ubuntu: 16 jobs (2 NDK × 2 build-system × 2 ffmpeg × 2 page-size)
-          # ============================================================
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r26d
-            build-system: cmake
-            ffmpeg: with-ffmpeg
-            page-size: 4kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r26d
-            build-system: cmake
-            ffmpeg: with-ffmpeg
-            page-size: 16kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r26d
-            build-system: cmake
-            ffmpeg: no-ffmpeg
-            page-size: 4kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r26d
-            build-system: cmake
-            ffmpeg: no-ffmpeg
-            page-size: 16kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r26d
-            build-system: ndk-build
-            ffmpeg: with-ffmpeg
-            page-size: 4kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r26d
-            build-system: ndk-build
-            ffmpeg: with-ffmpeg
-            page-size: 16kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r26d
-            build-system: ndk-build
-            ffmpeg: no-ffmpeg
-            page-size: 4kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r26d
-            build-system: ndk-build
-            ffmpeg: no-ffmpeg
-            page-size: 16kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r27c
-            build-system: cmake
-            ffmpeg: with-ffmpeg
-            page-size: 4kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r27c
-            build-system: cmake
-            ffmpeg: with-ffmpeg
-            page-size: 16kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r27c
-            build-system: cmake
-            ffmpeg: no-ffmpeg
-            page-size: 4kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r27c
-            build-system: cmake
-            ffmpeg: no-ffmpeg
-            page-size: 16kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r27c
-            build-system: ndk-build
-            ffmpeg: with-ffmpeg
-            page-size: 4kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r27c
-            build-system: ndk-build
-            ffmpeg: with-ffmpeg
-            page-size: 16kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r27c
-            build-system: ndk-build
-            ffmpeg: no-ffmpeg
-            page-size: 4kb
-            run-on: always
-          - os: ubuntu-latest
-            os-name: Ubuntu
-            ndk: r27c
-            build-system: ndk-build
-            ffmpeg: no-ffmpeg
-            page-size: 16kb
-            run-on: always
+        include: ${{ fromJson(github.event_name == 'pull_request' && '[{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r27c","build-system":"cmake","ffmpeg":"with-ffmpeg","page-size":"16kb"},{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r26d","build-system":"ndk-build","ffmpeg":"no-ffmpeg","page-size":"4kb"}]' || '[{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r26d","build-system":"cmake","ffmpeg":"with-ffmpeg","page-size":"4kb"},{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r26d","build-system":"cmake","ffmpeg":"with-ffmpeg","page-size":"16kb"},{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r26d","build-system":"cmake","ffmpeg":"no-ffmpeg","page-size":"4kb"},{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r26d","build-system":"cmake","ffmpeg":"no-ffmpeg","page-size":"16kb"},{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r26d","build-system":"ndk-build","ffmpeg":"with-ffmpeg","page-size":"4kb"},{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r26d","build-system":"ndk-build","ffmpeg":"with-ffmpeg","page-size":"16kb"},{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r26d","build-system":"ndk-build","ffmpeg":"no-ffmpeg","page-size":"4kb"},{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r26d","build-system":"ndk-build","ffmpeg":"no-ffmpeg","page-size":"16kb"},{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r27c","build-system":"cmake","ffmpeg":"with-ffmpeg","page-size":"4kb"},{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r27c","build-system":"cmake","ffmpeg":"with-ffmpeg","page-size":"16kb"},{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r27c","build-system":"cmake","ffmpeg":"no-ffmpeg","page-size":"4kb"},{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r27c","build-system":"cmake","ffmpeg":"no-ffmpeg","page-size":"16kb"},{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r27c","build-system":"ndk-build","ffmpeg":"with-ffmpeg","page-size":"4kb"},{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r27c","build-system":"ndk-build","ffmpeg":"with-ffmpeg","page-size":"16kb"},{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r27c","build-system":"ndk-build","ffmpeg":"no-ffmpeg","page-size":"4kb"},{"os":"ubuntu-latest","os-name":"Ubuntu","ndk":"r27c","build-system":"ndk-build","ffmpeg":"no-ffmpeg","page-size":"16kb"}]') }}
     
     steps:
     - name: Checkout code

@@ -1,8 +1,6 @@
 ---
 description: "Use when editing Java Android library or demo code. Covers GL thread safety and native interop patterns."
-applyTo:
-  - "library/src/main/java/**/*.java"
-  - "cgeDemo/src/main/java/**/*.java"
+applyTo: "library/src/main/java/**/*.java,cgeDemo/src/main/java/**/*.java"
 ---
 
 # Java / Android Layer
