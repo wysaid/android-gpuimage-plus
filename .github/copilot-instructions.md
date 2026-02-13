@@ -1,57 +1,52 @@
 # GitHub Copilot Instructions — android-gpuimage-plus
 
-This repo is a widely-used Android GPU filter library. Prefer **small, safe, backward-compatible** changes.
+Android GPU filter library (C++ & Java). Prefer **small, safe, backward-compatible** changes.
 
-## Non‑negotiables (stability first)
+## Stability Rules
 
-- **Do not break compatibility**: avoid changing public Java APIs, JNI method signatures, or filter rule string syntax.
-- Prefer **additive** changes (new classes/methods/filters) over refactors.
-- Keep FFmpeg/video code **fully optional** (both Java and native side guards).
+- **Never break public API**: `org.wysaid.nativePort.*` Java signatures, JNI method names, and filter rule string syntax are stable contracts.
+- Prefer **additive** changes over refactoring existing code.
+- FFmpeg/video code must remain **fully optional** — guard with `disableVideoModule` (Java/Gradle) / `CGE_USE_VIDEO_MODULE` (C++).
 
-## Where things live (only what’s non-obvious)
+## Project Layout
 
-- Java public API / JNI front door: `library/src/main/java/org/wysaid/nativePort/`
-  - `CGENativeLibrary`, `CGEImageHandler`, `CGEFrameRenderer`, `CGEFrameRecorder`
-- Native engine: `library/src/main/jni/cge/`
-- JNI bridge (Java ↔ C++): `library/src/main/jni/interface/`
-- Extension filters (built as `libCGEExt.so`): `library/src/main/jni/custom/`
-- Prebuilt FFmpeg variants: `library/src/main/jni/ffmpeg/` and `ffmpeg-16kb/`
-- Demo app (`cgeDemo/`) is for examples; avoid coupling new library APIs to demo-only code.
+| Path | Purpose |
+|------|---------|
+| `library/src/main/java/org/wysaid/nativePort/` | Public Java API (`CGENativeLibrary`, `CGEImageHandler`, etc.) |
+| `library/src/main/jni/cge/` | Core C++ engine |
+| `library/src/main/jni/interface/` | JNI bridge (Java ↔ C++) |
+| `library/src/main/jni/custom/` | Extension filters (`libCGEExt.so`) |
+| `library/src/main/jni/ffmpeg/`, `ffmpeg-16kb/` | Prebuilt FFmpeg variants |
+| `cgeDemo/` | Demo app — don't couple library APIs to demo-only code |
 
-## Build toggles you must respect
+## Build
 
-These flags come from `local.properties` (see `settings.gradle`):
+Use `tasks.sh` for all operations (`bash tasks.sh --help`). Key `local.properties` flags: `usingCMakeCompile`, `disableVideoModule`, `enable16kPageSizes`. See `docs/build.md` for details.
 
-- `usingCMakeCompile`: build native code via CMake; otherwise use prebuilt `.so` in `library/src/main/libs/`.
-- `usingCMakeCompileDebug`: toggles Debug vs Release native build.
-- `disableVideoModule`: when true, **no FFmpeg / no recording**.
-- `enable16kPageSizes`: enables 16KB page-size linking flags and uses `ffmpeg-16kb`.
-- `deployArtifacts`: enables maven publishing tasks.
+**Important**: CMake uses `GLOB_RECURSE`; ndk-build (`Android.mk`) lists sources **explicitly** — update both when adding native files.
 
-Important: CMake uses recursive globs, but **ndk-build (`Android.mk`) lists sources explicitly**. If you add native files that must compile in ndk-build mode, update `Android.mk` accordingly.
+## Code Conventions
 
-## Native/C++ conventions that matter here
+Language-specific rules live in `.github/instructions/` and are auto-applied by file path — see `cpp.instructions.md`, `java.instructions.md`, `jni-bridge.instructions.md`.
 
-- Follow `.clang-format` (Allman braces, 4 spaces, no tabs). Keep code in `namespace CGE {}`.
-- **No C++ exceptions** (compiled with `-fno-exceptions`). Use return values and log errors.
-- Use project logging macros: `CGE_LOG_INFO`, `CGE_LOG_KEEP`, `CGE_LOG_ERROR`.
-- Inline shader strings via `CGE_SHADER_STRING_PRECISION_H()` / `CGE_SHADER_STRING_PRECISION_M()`.
+For detailed standards, see `.github/CONTRIBUTING.md`.
 
-## Java/OpenGL thread rules (project-specific pitfalls)
+## Documentation
 
-- For `GLSurfaceView`-based classes, do GL operations on the GL thread via `queueEvent(...)`.
-- `NativeLibraryLoader` controls native library loading order; don’t unconditionally load FFmpeg when video module is disabled.
+- `docs/build.md` — Full build guide and configuration options
+- `docs/usage.md` — API usage, custom filters, and code samples
+- `.github/RELEASE.md` — Release process and versioning
+- `.github/CONTRIBUTING.md` — Contributing guidelines and code standards
 
-## Adding a new GPU filter / feature (minimal checklist)
+## Skills
 
-1. Implement the filter in `library/src/main/jni/custom/` (or `cge/filters/` if it’s core).
-2. Initialize shaders/uniforms in `init()`; handle compile/link failures without crashing.
-3. Ensure GL resources are released (programs/textures/FBOs) along the existing lifecycle.
-4. If the feature is exposed to Java, add/update JNI wrappers under `library/src/main/jni/interface/` and keep signatures stable.
-5. If it should be reachable from rule strings, update the parsing/registration in the native engine (don’t change existing syntax).
-6. Keep FFmpeg/video-dependent logic behind `disableVideoModule` / `CGE_USE_VIDEO_MODULE` guards.
+- **Submit PR:** Follow `.github/skills/pr-submit/SKILL.md` to create or update pull requests
+- **Review PR:** Follow `.github/skills/pr-review/SKILL.md` to review pull requests
 
-## Communication & docs
+## Behavior Constraints
 
-- Use **English** for code comments, commit messages, and PR descriptions.
-- Don’t add new “how to build” tutorials here—put long-form docs in `README.md` (this file should stay short).
+- **Validation:** After native code changes, ALWAYS run `bash tasks.sh --enable-cmake --build`.
+- **Commit Policy:** Only commit to feature branches, never force-push to `master`.
+- **Completeness:** Implement fully or request clarification — no TODOs in committed code.
+- **Dual Build:** When adding native files, update both `CMakeLists.txt` and `Android.mk`.
+- **Thread Safety:** Never call OpenGL ES functions outside the GL thread.

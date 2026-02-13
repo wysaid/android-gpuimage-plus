@@ -1,0 +1,23 @@
+# Build outputs
+build/
+.gradle/
+.cxx/
+*.apk
+*.aab
+
+# Prebuilt native libraries (large binaries)
+library/src/main/libs/
+library/src/main/jni/ffmpeg/
+library/src/main/jni/ffmpeg-16kb/
+
+# IDE configuration
+.idea/
+*.iml
+local.properties
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Release artifacts
+demoRelease/
