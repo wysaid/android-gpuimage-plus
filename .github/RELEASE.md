@@ -53,4 +53,4 @@ When a tag matching `v*.*.*` is pushed, the [release workflow](../.github/workfl
 - Alpha: `v3.1.1-alpha1`
 - Release candidate: `v3.1.1-rc1`
 
-All version parts must be pure numbers. The tag version must exactly match `versionName` in `build.gradle`.
+The core `X.Y.Z` segments must be numeric. Prerelease suffixes (for example `-beta1`, `-alpha1`, `-rc1`) are allowed, and the full tag version (including any suffix) must exactly match `versionName` in `build.gradle`.

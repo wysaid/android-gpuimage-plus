@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version number (e.g., 3.1.1) - Manual trigger will NOT publish to Release page'
+        description: 'Version number (e.g., 3.1.1 or 3.1.1-beta1, without leading v) - Manual trigger will NOT publish to Release page'
         required: true
         type: string
 
@@ -66,38 +66,59 @@ jobs:
     
     - name: Extract tag version
       id: tag_version
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        INPUT_VERSION: ${{ github.event.inputs.version }}
       run: |
         # Determine if this is a manual trigger or tag push
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          # Manual trigger - use input version
-          VERSION="${{ github.event.inputs.version }}"
+        if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+          # Manual trigger - sanitize and normalize input version
+          RAW_VERSION="$INPUT_VERSION"
+          RAW_VERSION="${RAW_VERSION#${RAW_VERSION%%[![:space:]]*}}"
+          RAW_VERSION="${RAW_VERSION%${RAW_VERSION##*[![:space:]]}}"
+
+          if [ -z "$RAW_VERSION" ]; then
+            echo "❌ Version input cannot be empty"
+            exit 1
+          fi
+
+          VERSION="${RAW_VERSION#v}"
+          if [ "$VERSION" != "$RAW_VERSION" ]; then
+            echo "⚠️ Input starts with 'v'; auto-stripped to '$VERSION'"
+          fi
+
+          if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9\.]+)?$ ]]; then
+            echo "❌ Invalid version input: $RAW_VERSION"
+            echo "Expected format: {major}.{minor}.{patch}[-prerelease], e.g., 3.1.1 or 3.1.1-beta1"
+            exit 1
+          fi
+
           TAG_NAME="v$VERSION"
           IS_MANUAL="true"
-          IS_PRERELEASE="false"
-          BASE_VERSION="$VERSION"
           echo "🔧 Manual trigger detected"
         else
           # Tag push - extract from ref
           TAG_NAME="${GITHUB_REF#refs/tags/}"
           IS_MANUAL="false"
-          
-          # Extract version numbers supporting prerelease tags (e.g., v3.1.1-beta1 -> 3.1.1-beta1)
-          if [[ $TAG_NAME =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)(-[a-zA-Z0-9\.]+)?$ ]]; then
-            BASE_VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
-            PRERELEASE_SUFFIX="${BASH_REMATCH[4]}"
-            VERSION="${BASE_VERSION}${PRERELEASE_SUFFIX}"
-            
-            if [ -n "$PRERELEASE_SUFFIX" ]; then
-              IS_PRERELEASE="true"
-              echo "🧪 Prerelease detected: $PRERELEASE_SUFFIX"
-            else
-              IS_PRERELEASE="false"
-            fi
+        fi
+
+        # Extract and validate version numbers supporting prerelease tags
+        # e.g., v3.1.1-beta1 -> base=3.1.1, version=3.1.1-beta1
+        if [[ $TAG_NAME =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)(-[a-zA-Z0-9\.]+)?$ ]]; then
+          BASE_VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
+          PRERELEASE_SUFFIX="${BASH_REMATCH[4]}"
+          VERSION="${BASE_VERSION}${PRERELEASE_SUFFIX}"
+
+          if [ -n "$PRERELEASE_SUFFIX" ]; then
+            IS_PRERELEASE="true"
+            echo "🧪 Prerelease detected: $PRERELEASE_SUFFIX"
           else
-            echo "❌ Invalid tag format: $TAG_NAME"
-            echo "Tag must be: v{major}.{minor}.{patch}[-prerelease] (e.g., v3.1.1 or v3.1.1-beta1)"
-            exit 1
+            IS_PRERELEASE="false"
           fi
+        else
+          echo "❌ Invalid tag format: $TAG_NAME"
+          echo "Tag must be: v{major}.{minor}.{patch}[-prerelease] (e.g., v3.1.1 or v3.1.1-beta1)"
+          exit 1
         fi
         
         # Validate base version format
@@ -117,22 +138,20 @@ jobs:
     - name: Validate version matches project version
       run: |
         PROJECT_VERSION=$(grep -E 'versionName\s*:' build.gradle | sed -E 's/.*versionName\s*:\s*"([^"]+)".*/\1/')
-        TAG_BASE_VERSION="${{ steps.tag_version.outputs.base_version }}"
         TAG_VERSION="${{ steps.tag_version.outputs.version }}"
         
         echo "Project version: $PROJECT_VERSION"
-        echo "Tag base version: $TAG_BASE_VERSION"
         echo "Tag full version: $TAG_VERSION"
         
-        # For prerelease versions, only validate against base version
-        if [ "$PROJECT_VERSION" != "$TAG_BASE_VERSION" ]; then
+        # Tag version must exactly match versionName in build.gradle
+        if [ "$PROJECT_VERSION" != "$TAG_VERSION" ]; then
           echo "❌ Version mismatch!"
-          echo "Tag base version ($TAG_BASE_VERSION) does not match project version ($PROJECT_VERSION)"
+          echo "Tag version ($TAG_VERSION) does not match project version ($PROJECT_VERSION)"
           echo "Please update the versionName in build.gradle to match the tag, or use the correct tag."
           exit 1
         fi
         
-        echo "✅ Version validation passed: $TAG_BASE_VERSION (full: $TAG_VERSION)"
+        echo "✅ Version validation passed: $TAG_VERSION"
     
     - name: Setup local.properties for publishing
       run: |
@@ -261,12 +280,13 @@ jobs:
     - name: Sync artifacts to maven repo and open PR
       if: steps.tag_version.outputs.is_manual != 'true'
       id: sync_maven_repo
+      env:
+        ARTIFACT_REPO_TOKEN: ${{ secrets.ARTIFACT_REPO_TOKEN }}
       run: |
         set -euo pipefail
 
         VERSION="${{ steps.tag_version.outputs.version }}"
         TAG_NAME="${{ steps.tag_version.outputs.tag_name }}"
-        ARTIFACT_REPO_TOKEN="${{ secrets.ARTIFACT_REPO_TOKEN }}"
 
         if [[ -z "${ARTIFACT_REPO_TOKEN:-}" ]]; then
           echo "❌ Missing secret: ARTIFACT_REPO_TOKEN (repo:write to android-gpuimage-plus-maven)"
@@ -307,7 +327,7 @@ jobs:
         git push origin "$BRANCH"
 
         echo "📝 Creating pull request..."
-        PR_BODY="Automated artifact sync for ${TAG_NAME}.\n\nGenerated by main repo release workflow."
+        PR_BODY=$(printf "Automated artifact sync for %s.\n\nGenerated by main repo release workflow." "$TAG_NAME")
         API_JSON=$(jq -n --arg title "Publish ${TAG_NAME} artifacts" \
                         --arg head "$BRANCH" \
                         --arg base "master" \
@@ -406,8 +426,8 @@ jobs:
         ### 📚 Documentation
         
         - **GitHub Repository**: https://github.com/wysaid/android-gpuimage-plus
-        - **Wiki**: https://github.com/wysaid/android-gpuimage-plus/wiki
-        - **Filter Rule Documentation**: https://github.com/wysaid/android-gpuimage-plus/wiki/Parsing-String-Rule-(EN)
+        - **Build & Integration Guide**: https://github.com/wysaid/android-gpuimage-plus/blob/master/docs/build.md
+        - **Filter Rule Documentation**: https://github.com/wysaid/android-gpuimage-plus/blob/master/docs/filter-rules.md
         
         ---
         
@@ -426,6 +446,8 @@ jobs:
         files: |
           /tmp/release-artifacts/*.apk
           /tmp/release-artifacts/*.aar
+          /tmp/release-artifacts/SHA256SUMS.txt
+          /tmp/release-artifacts/*.sha256
         draft: false
         prerelease: ${{ steps.tag_version.outputs.is_prerelease == 'true' }}
         generate_release_notes: true

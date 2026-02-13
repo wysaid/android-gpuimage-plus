@@ -1,6 +1,6 @@
 ---
 description: "Use when editing C++ native code. Covers CGE engine conventions, shader patterns, memory safety, and OpenGL ES resource management."
-applyTo: "library/src/main/jni/{cge,custom,interface}/**/*.{cpp,h,c}"
+applyTo: "library/src/main/jni/cge/**/*.cpp,library/src/main/jni/cge/**/*.h,library/src/main/jni/cge/**/*.c,library/src/main/jni/custom/**/*.cpp,library/src/main/jni/custom/**/*.h,library/src/main/jni/custom/**/*.c,library/src/main/jni/interface/**/*.cpp,library/src/main/jni/interface/**/*.h,library/src/main/jni/interface/**/*.c"
 ---
 
 # C++ / Native Layer

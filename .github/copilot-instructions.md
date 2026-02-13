@@ -34,7 +34,7 @@ For detailed standards, see `.github/CONTRIBUTING.md`.
 ## Documentation
 
 - `docs/build.md` — Full build guide and configuration options
-- `docs/usage.md` — API usage, custom filters, and code samples
+- `README.md` — API usage, custom filters, and code samples
 - `.github/RELEASE.md` — Release process and versioning
 - `.github/CONTRIBUTING.md` — Contributing guidelines and code standards
 
