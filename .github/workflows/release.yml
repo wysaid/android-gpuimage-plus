@@ -303,7 +303,14 @@ jobs:
 
         echo "🚚 Syncing generated Maven artifacts..."
         mkdir -p "$WORKDIR/org/wysaid/gpuimage-plus"
-        rsync -av --delete "${SOURCE_REPO}/org/wysaid/gpuimage-plus/" "$WORKDIR/org/wysaid/gpuimage-plus/"
+
+        if [ ! -d "${SOURCE_REPO}/org/wysaid/gpuimage-plus" ]; then
+          echo "❌ Source artifacts not found: ${SOURCE_REPO}/org/wysaid/gpuimage-plus"
+          exit 1
+        fi
+
+        # Additive sync: keep previously published versions in artifact repo.
+        rsync -av "${SOURCE_REPO}/org/wysaid/gpuimage-plus/" "$WORKDIR/org/wysaid/gpuimage-plus/"
 
         echo "🧭 Regenerating index pages"
         pushd "$WORKDIR"
@@ -545,13 +552,16 @@ jobs:
     
     - name: Build failure notification
       if: failure()
+      env:
+        FAILURE_VERSION: ${{ steps.tag_version.outputs.version || github.event.inputs.version || 'unknown' }}
+        FAILURE_TAG: ${{ steps.tag_version.outputs.tag_name || github.ref_name || 'unknown' }}
       run: |
-        echo "::error::Release build failed for version ${{ steps.tag_version.outputs.version }}"
+        echo "::error::Release build failed for version ${FAILURE_VERSION}"
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "## ❌ Build Failed" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**Version**: ${{ steps.tag_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-        echo "**Tag**: ${{ steps.tag_version.outputs.tag_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Version**: ${FAILURE_VERSION}" >> $GITHUB_STEP_SUMMARY
+        echo "**Tag**: ${FAILURE_TAG}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "Please check the workflow logs for details." >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
