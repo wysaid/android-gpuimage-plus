@@ -181,13 +181,3 @@ Some utils are available for creating filters: [https://github.com/wysaid/cge-to
 ## License
 
 [MIT License](https://github.com/wysaid/android-gpuimage-plus/blob/master/LICENSE)
-
-## Donate
-
-Alipay:
-
-![Alipay](https://raw.githubusercontent.com/wysaid/android-gpuimage-plus/master/screenshots/alipay.jpg "alipay")
-
-Paypal:
-
-[![Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif "Paypal")](http://blog.wysaid.org/p/donate.html)
