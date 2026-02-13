@@ -1,67 +1,31 @@
 ---
 name: pr-review
-description: Review a GitHub Pull Request for API stability, build compliance, native code safety, and code quality
+description: Address review comments from GitHub PR using gh CLI and resolve feedback
 ---
 
-## When to Use
+## When to use
 
-- Need to review a pull request before merge
-- Validate PR changes against project rules
-- Provide structured review feedback
+- Current branch has a PR with review comments requiring responses
+- Need to systematically evaluate and resolve reviewer feedback
 
 ## Constraints
 
-- All review comments **must** be in English
-- Work through checks **in order** — stop and flag any blocker immediately
-- Reference `.github/CONTRIBUTING.md` for detailed code standards
+- **ALWAYS** set `PAGER=cat` before calling `gh` to avoid pagination issues
+- Use `gh pr view <PR_NUMBER> --comments` to fetch review comments
+- Use `gh pr list --head <CURRENT_BRANCH>` to find the PR number for the current branch
 
 ## Procedure
 
-Follow `.github/CONTRIBUTING.md` for detailed rules. Check in order:
-
-1. **API Stability** (Blocker):
-   - No changes to `org.wysaid.nativePort.*` method signatures
-   - No changes to JNI function names
-   - Filter rule string syntax backward-compatible
-2. **Build Toggle Compliance** (Blocker):
-   - FFmpeg/video code properly guarded (C++: `#ifdef CGE_USE_VIDEO_MODULE`, Java: `BuildConfig.CGE_USE_VIDEO_MODULE`)
-   - Compiles with `disableVideoModule=true`
-3. **Native Code Safety** (High):
-   - No C++ exceptions, JNI null checks, GL resource cleanup, shader error handling
-4. **Dual Build System** (Medium):
-   - New native files → `Android.mk` updated
-5. **Code Quality**: Follow CONTRIBUTING.md standards
-6. **CI Status**: All platform workflows pass
+1. **Find Issues**: Use `gh` to locate the PR for current branch and retrieve all review comments
+2. **Evaluate**: Analyze each comment in project context:
+   - If valid: implement the necessary code improvements
+   - If invalid: document reasons and address any underlying real issues
+3. **Summarize**: Provide a summary covering:
+   - Valid points and how they were resolved
+   - Invalid points and reasons for rejection  
+   - Any additional issues discovered and fixed
+4. **Commit**: Generate commit message, then `git commit` and `git push`
 
 ## Output
 
-Structure the review as:
-
-```markdown
-## PR Review: <PR title>
-
-### Summary
-One-sentence assessment: Approve / Request Changes / Needs Discussion
-
-### Findings
-
-#### Blockers
-- (API stability or build toggle violations)
-
-#### Issues
-- (correctness, safety, or quality problems)
-
-#### Suggestions
-- (optional improvements, not blocking)
-
-### Verdict
-APPROVE / REQUEST_CHANGES with rationale
-```
-
-## Severity Guide
-
-| Severity | Criteria | Action |
-|----------|----------|--------|
-| **Blocker** | API break, build toggle violation, crash bug | Request changes |
-| **Issue** | Memory/GL resource leak, missing null check, wrong thread | Request changes if risky, else comment |
-| **Suggestion** | Style, naming, minor optimization | Comment only |
+- Clear mapping between review comments and their resolutions
