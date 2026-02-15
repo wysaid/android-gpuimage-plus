@@ -1,56 +1,41 @@
 # Release Process
 
-This project uses an automated release workflow triggered by version tags.
+Automated release triggered by version tags (`v*.*.*`).
 
 ## Creating a Release
 
-### 1. Update the Version
+1. **Update** `versionName` in [build.gradle](../build.gradle) (e.g., `"3.1.1"`)
+2. **Commit, tag, and push**:
 
-Edit `versionName` in `build.gradle`:
+   ```bash
+   git add build.gradle
+   git commit -m "chore: bump version to 3.1.1"
+   git tag v3.1.1
+   git push && git push origin v3.1.1
+   ```
 
-```gradle
-ext {
-    android = [
-        ...
-        versionName: "3.1.1",
-        ...
-    ]
-}
-```
-
-### 2. Commit and Push
-
-```bash
-git add build.gradle
-git commit -m "chore: bump version to 3.1.1"
-git push
-```
-
-### 3. Tag and Push
-
-```bash
-git tag v3.1.1
-git push origin v3.1.1
-```
+**Important**: Tag version must exactly match `versionName` in `build.gradle`.
 
 ## Automated Workflow
 
-When a tag matching `v*.*.*` is pushed, the [release workflow](../.github/workflows/release.yml) will:
+The [release workflow](../.github/workflows/release.yml) builds and publishes:
 
-1. **Validate** that the tag version matches `versionName` in `build.gradle`
-2. **Build** four AAR variants:
-   - `gpuimage-plus-{version}.aar` — Full with FFmpeg, 4KB page size
-   - `gpuimage-plus-{version}-16k.aar` — Full with FFmpeg, 16KB page size
-   - `gpuimage-plus-{version}-min.aar` — Image-only, 4KB page size
-   - `gpuimage-plus-{version}-16k-min.aar` — Image-only, 16KB page size
-3. **Build** the demo APK (with video module)
-4. **Create** a GitHub release with all artifacts and release notes
+| Artifact | FFmpeg | Page Size |
+| --- | --- | --- |
+| `gpuimage-plus-{version}.aar` | ✅ | 4KB |
+| `gpuimage-plus-{version}-16k.aar` | ✅ | 16KB |
+| `gpuimage-plus-{version}-min.aar` | ❌ | 4KB |
+| `gpuimage-plus-{version}-16k-min.aar` | ❌ | 16KB |
+
+Plus demo APK with video module enabled.
 
 ## Tag Format
 
-- Official: `v3.1.1`
-- Beta: `v3.1.1-beta1`
-- Alpha: `v3.1.1-alpha1`
-- Release candidate: `v3.1.1-rc1`
+| Type | Format | Example |
+|------|--------|---------|
+| Official | `vX.Y.Z` | `v3.1.1` |
+| Beta | `vX.Y.Z-beta#` | `v3.1.1-beta1` |
+| Alpha | `vX.Y.Z-alpha#` | `v3.1.1-alpha1` |
+| RC | `vX.Y.Z-rc#` | `v3.1.1-rc1` |
 
-The core `X.Y.Z` segments must be numeric. Prerelease suffixes (for example `-beta1`, `-alpha1`, `-rc1`) are allowed, and the full tag version (including any suffix) must exactly match `versionName` in `build.gradle`.
+`X.Y.Z` must be numeric; prerelease suffixes are optional.

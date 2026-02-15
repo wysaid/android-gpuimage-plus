@@ -23,20 +23,16 @@ Android GPU filter library (C++ & Java). Prefer **small, safe, backward-compatib
 
 Use `tasks.sh` for all operations (`bash tasks.sh --help`). Key `local.properties` flags: `usingCMakeCompile`, `disableVideoModule`, `enable16kPageSizes`. See `docs/build.md` for details.
 
-**Important**: CMake uses `GLOB_RECURSE`; ndk-build (`Android.mk`) lists sources **explicitly** — update both when adding native files.
-
 ## Code Conventions
 
-Language-specific rules live in `.github/instructions/` and are auto-applied by file path — see `cpp.instructions.md`, `java.instructions.md`, `jni-bridge.instructions.md`.
-
-For detailed standards, see `.github/CONTRIBUTING.md`.
+Language-specific rules live in `.github/instructions/code-conventions.instructions.md` and are auto-applied by file path.
 
 ## Documentation
 
 - `docs/build.md` — Full build guide and configuration options
 - `README.md` — API usage, custom filters, and code samples
 - `.github/RELEASE.md` — Release process and versioning
-- `.github/CONTRIBUTING.md` — Contributing guidelines and code standards
+- `.github/CONTRIBUTING.md` — Contributing workflow and compatibility rules
 
 ## Skills
 
@@ -46,7 +42,7 @@ For detailed standards, see `.github/CONTRIBUTING.md`.
 ## Behavior Constraints
 
 - **Validation:** After native code changes, ALWAYS run `bash tasks.sh --enable-cmake --build`.
+- **Dual Build:** CMake uses `GLOB_RECURSE` (auto-discovers); `Android.mk` lists files **explicitly** — update both when adding native sources.
 - **Commit Policy:** Only commit to feature branches, never force-push to `master`.
 - **Completeness:** Implement fully or request clarification — no TODOs in committed code.
-- **Dual Build:** When adding native files, update both `CMakeLists.txt` and `Android.mk`.
 - **Thread Safety:** Never call OpenGL ES functions outside the GL thread.

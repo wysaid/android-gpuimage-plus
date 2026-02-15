@@ -11,54 +11,27 @@
 ## Code Standards
 
 - Use **English** for all code comments, commit messages, and PR descriptions
-- Follow conventional-commit format for commits: `feat:`, `fix:`, `refactor:`, `chore:`
+- Follow conventional-commit format: `feat:`, `fix:`, `refactor:`, `chore:`
 - One logical change per commit
-
-### C++ (Native)
-
-- Follow `.clang-format` (Allman braces, 4-space indent)
-- All code in `namespace CGE {}`
-- No C++ exceptions (compiled with `-fno-exceptions`)
-- Use logging macros: `CGE_LOG_INFO`, `CGE_LOG_ERROR`, `CGE_LOG_KEEP`
-- Inline GLSL via `CGE_SHADER_STRING_PRECISION_H()` / `CGE_SHADER_STRING_PRECISION_M()`
-- Release GL resources (programs, textures, FBOs) along the handler lifecycle
-
-### Java (Android)
-
-- GL operations in `GLSurfaceView` subclasses must use `queueEvent(...)`
-- Load native libraries through `NativeLibraryLoader` only
-- Check `BuildConfig.CGE_USE_VIDEO_MODULE` before referencing FFmpeg classes
-
-### JNI Bridge
-
-- JNI function names: `Java_org_wysaid_nativePort_<Class>_<method>`
-- Always validate JNI parameters (null checks) before dereferencing
-- Never store JNI local references across calls
+- Detailed code style rules are automatically applied by file path — see `.github/instructions/`
 
 ## Compatibility Rules
+
+These are **hard constraints** for the public API:
 
 - **Do not change** method signatures in `org.wysaid.nativePort.*`
 - **Do not change** existing JNI function names
 - **Do not change** existing filter rule string syntax
 - New methods, filters, and syntax additions are welcome
 
-## FFmpeg / Video Module
+## Key Constraints
 
-All FFmpeg-dependent code must be optional:
+- **FFmpeg/Video Module**: All video-related code must be optional — verify builds work with `--disable-video-module`
+- **Dual Build**: When adding native files, CMake auto-discovers via `GLOB_RECURSE`, but `Android.mk` requires explicit listing
+- **Thread Safety**: GL operations must run on the GL thread (`queueEvent(...)` in Java)
 
-- C++: guard with `#ifdef CGE_USE_VIDEO_MODULE`
-- Java: check `BuildConfig.CGE_USE_VIDEO_MODULE`
-- Verify the project compiles with `--disable-video-module`
-
-## Dual Build System
-
-When adding new native source files under `library/src/main/jni/`:
-
-- **CMake**: auto-discovered via `GLOB_RECURSE` — usually no action needed
-- **ndk-build**: update `Android.mk` to explicitly list the new files
+See `copilot-instructions.md` for detailed project conventions.
 
 ## CI
 
-Pull requests trigger CI on three platforms (macOS, Ubuntu, Windows). PRs run a reduced matrix (1 combination per platform); merges to `master` run the full 16-combination matrix.
-
-Ensure all CI checks pass before requesting review.
+PRs trigger CI on three platforms (macOS, Ubuntu, Windows) with a reduced matrix. Merges to `master` run the full 16-combination matrix. Ensure all checks pass before requesting review.
