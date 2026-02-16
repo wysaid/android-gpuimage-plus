@@ -19,6 +19,8 @@ import android.widget.SeekBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.wysaid.camera.CameraInstance;
+import org.wysaid.camera.CameraProviderFactory;
+import org.wysaid.camera.ICameraProvider;
 import org.wysaid.library.BuildConfig;
 import org.wysaid.myUtils.FileUtil;
 import org.wysaid.myUtils.ImageUtil;
@@ -129,6 +131,22 @@ public class CameraDemoActivity extends AppCompatActivity {
         Button takeShotBtn = (Button) findViewById(R.id.takeShotBtn);
         Button recordBtn = (Button) findViewById(R.id.recordBtn);
         mCameraView = (CameraRecordGLSurfaceView) findViewById(R.id.myGLSurfaceView);
+
+        // --- Set up camera provider based on user selection ---
+        String cameraApi = getIntent().getStringExtra(MainActivity.EXTRA_CAMERA_API);
+        if (cameraApi == null) {
+            cameraApi = MainActivity.CAMERA_API_CAMERA1;
+        }
+        CameraProviderFactory.CameraAPI api = MainActivity.CAMERA_API_CAMERAX.equals(cameraApi)
+                ? CameraProviderFactory.CameraAPI.CAMERAX
+                : CameraProviderFactory.CameraAPI.CAMERA1;
+        ICameraProvider provider = CameraProviderFactory.create(api, this);
+        if (api == CameraProviderFactory.CameraAPI.CAMERAX) {
+            provider.attachLifecycleOwner(this);
+        }
+        mCameraView.setCameraProvider(provider);
+        Log.i(LOG_TAG, "Using camera API: " + api.name());
+
         mCameraView.presetCameraForward(false);
         SeekBar seekBar = (SeekBar) findViewById(R.id.globalRestoreSeekBar);
 
@@ -220,17 +238,17 @@ public class CameraDemoActivity extends AppCompatActivity {
         Button flashBtn = (Button) findViewById(R.id.flashBtn);
         flashBtn.setOnClickListener(new View.OnClickListener() {
             int flashIndex = 0;
-            String[] flashModes = {
-                    Camera.Parameters.FLASH_MODE_AUTO,
-                    Camera.Parameters.FLASH_MODE_ON,
-                    Camera.Parameters.FLASH_MODE_OFF,
-                    Camera.Parameters.FLASH_MODE_TORCH,
-                    Camera.Parameters.FLASH_MODE_RED_EYE,
+            ICameraProvider.FlashMode[] flashModes = {
+                    ICameraProvider.FlashMode.AUTO,
+                    ICameraProvider.FlashMode.ON,
+                    ICameraProvider.FlashMode.OFF,
+                    ICameraProvider.FlashMode.TORCH,
+                    ICameraProvider.FlashMode.RED_EYE,
             };
 
             @Override
             public void onClick(View v) {
-                mCameraView.setFlashLightMode(flashModes[flashIndex]);
+                mCameraView.setFlashMode(flashModes[flashIndex]);
                 ++flashIndex;
                 flashIndex %= flashModes.length;
             }
@@ -290,14 +308,14 @@ public class CameraDemoActivity extends AppCompatActivity {
                         final float focusX = event.getX() / mCameraView.getWidth();
                         final float focusY = event.getY() / mCameraView.getHeight();
 
-                        mCameraView.focusAtPoint(focusX, focusY, new Camera.AutoFocusCallback() {
+                        mCameraView.focusAtPoint(focusX, focusY, new ICameraProvider.AutoFocusCallback() {
                             @Override
-                            public void onAutoFocus(boolean success, Camera camera) {
+                            public void onAutoFocus(boolean success) {
                                 if (success) {
                                     Log.e(LOG_TAG, String.format("Focus OK, pos: %g, %g", focusX, focusY));
                                 } else {
                                     Log.e(LOG_TAG, String.format("Focus failed, pos: %g, %g", focusX, focusY));
-                                    mCameraView.cameraInstance().setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+                                    mCameraView.getCameraProvider().setFocusMode("continuous-video");
                                 }
                             }
                         });
@@ -357,7 +375,7 @@ public class CameraDemoActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        CameraInstance.getInstance().stopCamera();
+        mCameraView.getCameraProvider().closeCamera();
         Log.i(LOG_TAG, "activity onPause...");
         mCameraView.release(null);
         mCameraView.onPause();

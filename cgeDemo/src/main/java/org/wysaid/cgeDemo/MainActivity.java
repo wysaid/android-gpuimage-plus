@@ -2,6 +2,7 @@ package org.wysaid.cgeDemo;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +14,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -28,6 +32,15 @@ import org.wysaid.nativePort.CGENativeLibrary;
 public class MainActivity extends AppCompatActivity {
 
     public static final String LOG_TAG = "wysaid";
+
+    /** SharedPreferences key for the selected camera API. */
+    public static final String PREFS_NAME = "cge_demo_prefs";
+    public static final String PREFS_KEY_CAMERA_API = "camera_api";
+    public static final String CAMERA_API_CAMERA1 = "camera1";
+    public static final String CAMERA_API_CAMERAX = "camerax";
+
+    /** Intent extra key to pass selected camera API to camera activities. */
+    public static final String EXTRA_CAMERA_API = "camera_api";
 
     public static final String EFFECT_CONFIGS[] = {
             "",
@@ -228,8 +241,18 @@ public class MainActivity extends AppCompatActivity {
             }
 
             try {
-                if (cls != null)
-                    startActivity(new Intent(MainActivity.this, cls));
+                if (cls != null) {
+                    Intent intent = new Intent(MainActivity.this, cls);
+
+                    // Pass camera API selection to camera-related activities
+                    if (mDemo.activityName.contains("Camera")) {
+                        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                        String api = prefs.getString(PREFS_KEY_CAMERA_API, CAMERA_API_CAMERA1);
+                        intent.putExtra(EXTRA_CAMERA_API, api);
+                    }
+
+                    startActivity(intent);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -242,6 +265,29 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // --- Camera API selector ---
+        final SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        final RadioGroup radioGroup = (RadioGroup) findViewById(R.id.cameraApiRadioGroup);
+        final RadioButton radioCamera1 = (RadioButton) findViewById(R.id.radioCamera1);
+        final RadioButton radioCameraX = (RadioButton) findViewById(R.id.radioCameraX);
+
+        // Restore previous selection
+        String savedApi = prefs.getString(PREFS_KEY_CAMERA_API, CAMERA_API_CAMERA1);
+        if (CAMERA_API_CAMERAX.equals(savedApi)) {
+            radioCameraX.setChecked(true);
+        } else {
+            radioCamera1.setChecked(true);
+        }
+
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                String api = (checkedId == R.id.radioCameraX) ? CAMERA_API_CAMERAX : CAMERA_API_CAMERA1;
+                prefs.edit().putString(PREFS_KEY_CAMERA_API, api).apply();
+            }
+        });
+
+        // --- Demo buttons ---
         LinearLayout mLayout = (LinearLayout) findViewById(R.id.buttonLayout);
 
         for (DemoClassDescription demo : mDemos) {
