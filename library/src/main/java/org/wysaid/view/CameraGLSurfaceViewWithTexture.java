@@ -1,7 +1,9 @@
 package org.wysaid.view;
 
 /**
- * Created by wangyang on 15/7/27.
+ * Camera GLSurfaceView with SurfaceTexture-based rendering.
+ * Uses OES external texture + CGEFrameRecorder for GPU filter processing.
+ * Supports both Camera1 and CameraX via {@link org.wysaid.camera.ICameraProvider}.
  */
 
 
@@ -17,7 +19,8 @@ import android.opengl.GLES20;
 import android.util.AttributeSet;
 import android.util.Log;
 
-import org.wysaid.camera.CameraInstance;
+import org.wysaid.camera.Camera1Provider;
+import org.wysaid.camera.ICameraProvider;
 import org.wysaid.common.Common;
 import org.wysaid.common.FrameBufferObject;
 import org.wysaid.nativePort.CGEFrameRecorder;
@@ -101,9 +104,18 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
             Log.e(LOG_TAG, "Frame Recorder init failed!");
         }
 
-        mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
-        mFrameRecorder.setSrcFlipScale(1.0f, -1.0f);
-        mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
+        if (getCameraProvider().needsManualRotation()) {
+            mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
+            mFrameRecorder.setSrcFlipScale(1.0f, -1.0f);
+            mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
+        } else {
+            // CameraX already encodes rotation in the SurfaceTexture transform matrix.
+            // No manual rotation needed; only keep the vertical flip that matches the
+            // OpenGL / screen coordinate system.
+            mFrameRecorder.setSrcRotation(0.0f);
+            mFrameRecorder.setSrcFlipScale(1.0f, -1.0f);
+            mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
+        }
 
         mTextureID = Common.genSurfaceTextureID();
         mSurfaceTexture = new SurfaceTexture(mTextureID);
@@ -135,7 +147,7 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         super.onSurfaceChanged(gl, width, height);
 
-        if (!cameraInstance().isPreviewing()) {
+        if (!getCameraProvider().isPreviewing()) {
             resumePreview();
         }
     }
@@ -147,21 +159,44 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
             return;
         }
 
-        if (!cameraInstance().isCameraOpened()) {
+        ICameraProvider provider = getCameraProvider();
+        ICameraProvider.CameraFacing facing = mIsCameraBackForward
+                ? ICameraProvider.CameraFacing.BACK
+                : ICameraProvider.CameraFacing.FRONT;
 
-            int facing = mIsCameraBackForward ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
+        // Helper: start preview and handle async size notification.
+        // Extracted as a Runnable so it can be called from the camera-ready callback.
+        Runnable doStartPreview = () -> {
+            if (provider.isPreviewing()) return;
+            provider.startPreview(mSurfaceTexture, (pw, ph) -> {
+                // Fired once the real preview resolution is known.
+                // CameraX fires this asynchronously from the main thread;
+                // Camera1 fires it synchronously — queue to GL thread either way.
+                queueEvent(() -> {
+                    if (mFrameRecorder != null && pw > 0 && ph > 0) {
+                        mFrameRecorder.srcResize(ph, pw);
+                        requestRender();
+                    }
+                });
+            });
+            // For Camera1 (synchronous) the sizes are already set; grab them immediately.
+            int pw = provider.getPreviewWidth();
+            int ph = provider.getPreviewHeight();
+            if (pw > 0 && ph > 0) {
+                mFrameRecorder.srcResize(ph, pw);
+            }
+        };
 
-            cameraInstance().tryOpenCamera(new CameraInstance.CameraOpenCallback() {
-                @Override
-                public void cameraReady() {
-                    Log.i(LOG_TAG, "tryOpenCamera OK...");
-                }
-            }, facing);
-        }
-
-        if (!cameraInstance().isPreviewing()) {
-            cameraInstance().startPreview(mSurfaceTexture);
-            mFrameRecorder.srcResize(cameraInstance().previewHeight(), cameraInstance().previewWidth());
+        if (!provider.isCameraOpened()) {
+            provider.openCamera(facing, () -> {
+                // Called once the camera backend is ready (async for CameraX).
+                // Now it is safe to start the preview.
+                Log.i(LOG_TAG, "openCamera OK, starting preview...");
+                doStartPreview.run();
+            });
+        } else {
+            // Camera already open (e.g. resume after background) — start preview directly.
+            doStartPreview.run();
         }
 
         requestRender();
@@ -172,7 +207,7 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
     @Override
     public void onDrawFrame(GL10 gl) {
 
-        if (mSurfaceTexture == null || !cameraInstance().isPreviewing()) {
+        if (mSurfaceTexture == null || !getCameraProvider().isPreviewing()) {
             return;
         }
 
@@ -265,14 +300,19 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
     // 若为 false 则取较小的
     public void setPictureSize(int width, int height, boolean isBigger) {
         //默认会旋转90度.
-        cameraInstance().setPictureSize(height, width, isBigger);
+        getCameraProvider().setPictureSize(height, width, isBigger);
     }
 
-    public synchronized void takePicture(final TakePictureCallback photoCallback, Camera.ShutterCallback shutterCallback, final String config, final float intensity, final boolean isFrontMirror) {
+    /**
+     * Take a full-resolution picture using the provider-based API.
+     * Works with both Camera1 and CameraX backends.
+     */
+    public synchronized void takePicture(final TakePictureCallback photoCallback,
+                                         final String config, final float intensity,
+                                         final boolean isFrontMirror) {
+        ICameraProvider provider = getCameraProvider();
 
-        Camera.Parameters params = cameraInstance().getParams();
-
-        if (photoCallback == null || params == null) {
+        if (photoCallback == null || !provider.isCameraOpened()) {
             Log.e(LOG_TAG, "takePicture after release!");
             if (photoCallback != null) {
                 photoCallback.takePictureOK(null);
@@ -280,143 +320,147 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
             return;
         }
 
-        try {
-            params.setRotation(90);
-            cameraInstance().setParams(params);
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "Error when takePicture: " + e.toString());
-            if (photoCallback != null) {
+        provider.takePicture(null, (jpegData, facing, rotation) -> {
+            if (jpegData == null) {
                 photoCallback.takePictureOK(null);
+                return;
             }
-            return;
+
+            Bitmap bmp = BitmapFactory.decodeByteArray(jpegData, 0, jpegData.length);
+            if (bmp == null) {
+                photoCallback.takePictureOK(null);
+                return;
+            }
+
+            int width = bmp.getWidth();
+            int height = bmp.getHeight();
+
+            // Scale down if exceeds maximum texture size
+            if (width > mMaxTextureSize || height > mMaxTextureSize) {
+                float scaling = Math.max(width / (float) mMaxTextureSize, height / (float) mMaxTextureSize);
+                Log.i(LOG_TAG, String.format("目标尺寸(%d x %d)超过当前设备OpenGL 能够处理的最大范围(%d x %d)， 现在将图片压缩至合理大小!",
+                        width, height, mMaxTextureSize, mMaxTextureSize));
+                bmp = Bitmap.createScaledBitmap(bmp, (int) (width / scaling), (int) (height / scaling), false);
+                width = bmp.getWidth();
+                height = bmp.getHeight();
+            }
+
+            boolean shouldRotate = shouldRotateForCapture(provider, bmp, jpegData, rotation);
+            boolean isBackCamera = (facing == ICameraProvider.CameraFacing.BACK);
+            Bitmap bmp2;
+
+            if (shouldRotate) {
+                bmp2 = Bitmap.createBitmap(height, width, Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bmp2);
+
+                if (isBackCamera) {
+                    Matrix mat = new Matrix();
+                    int halfLen = Math.min(width, height) / 2;
+                    mat.setRotate(rotation, halfLen, halfLen);
+                    canvas.drawBitmap(bmp, mat, null);
+                } else {
+                    Matrix mat = new Matrix();
+                    if (isFrontMirror) {
+                        mat.postTranslate(-width / 2.0f, -height / 2.0f);
+                        mat.postScale(-1.0f, 1.0f);
+                        mat.postTranslate(width / 2.0f, height / 2.0f);
+                        int halfLen = Math.min(width, height) / 2;
+                        mat.postRotate(rotation, halfLen, halfLen);
+                    } else {
+                        int halfLen = Math.max(width, height) / 2;
+                        mat.postRotate(-rotation, halfLen, halfLen);
+                    }
+                    canvas.drawBitmap(bmp, mat, null);
+                }
+                bmp.recycle();
+            } else {
+                if (isBackCamera) {
+                    bmp2 = bmp;
+                } else {
+                    bmp2 = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(bmp2);
+                    Matrix mat = new Matrix();
+                    if (isFrontMirror) {
+                        mat.postTranslate(-width / 2.0f, -height / 2.0f);
+                        mat.postScale(1.0f, -1.0f);
+                        mat.postTranslate(width / 2.0f, height / 2.0f);
+                    } else {
+                        mat.postTranslate(-width / 2.0f, -height / 2.0f);
+                        mat.postScale(-1.0f, -1.0f);
+                        mat.postTranslate(width / 2.0f, height / 2.0f);
+                    }
+                    canvas.drawBitmap(bmp, mat, null);
+                }
+            }
+
+            if (config != null) {
+                CGENativeLibrary.filterImage_MultipleEffectsWriteBack(bmp2, config, intensity);
+            }
+
+            photoCallback.takePictureOK(bmp2);
+            provider.resumePreviewAfterCapture();
+        });
+    }
+
+    private boolean shouldRotateForCapture(ICameraProvider provider, Bitmap bitmap, byte[] jpegData, int fallbackRotation) {
+        if (provider instanceof Camera1Provider) {
+            return shouldRotateForCamera1Legacy((Camera1Provider) provider, bitmap, jpegData, fallbackRotation);
+        }
+        return fallbackRotation == 90 || fallbackRotation == 270;
+    }
+
+    private boolean shouldRotateForCamera1Legacy(Camera1Provider provider, Bitmap bitmap, byte[] jpegData, int fallbackRotation) {
+        Camera.Parameters params = provider.getCameraInstance().getParams();
+        Camera.Size pictureSize = params != null ? params.getPictureSize() : null;
+
+        if (pictureSize != null && pictureSize.width != pictureSize.height) {
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+            return (pictureSize.width > pictureSize.height && width > height)
+                    || (pictureSize.width < pictureSize.height && width < height);
         }
 
-        cameraInstance().getCameraDevice().takePicture(shutterCallback, null, new Camera.PictureCallback() {
-            @Override
-            public void onPictureTaken(final byte[] data, Camera camera) {
-
-                Camera.Parameters params = camera.getParameters();
-                Camera.Size sz = params.getPictureSize();
-
-                boolean shouldRotate;
-
-                Bitmap bmp;
-                int width, height;
-
-                //当拍出相片不为正方形时， 可以判断图片是否旋转
-                if (sz.width != sz.height) {
-                    //默认数据格式已经设置为 JPEG
-                    bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-                    width = bmp.getWidth();
-                    height = bmp.getHeight();
-                    shouldRotate = (sz.width > sz.height && width > height) || (sz.width < sz.height && width < height);
-                } else {
-                    Log.i(LOG_TAG, "Cache image to get exif.");
-
-                    try {
-                        String tmpFilename = getContext().getExternalCacheDir() + "/picture_cache000.jpg";
-                        FileOutputStream fileout = new FileOutputStream(tmpFilename);
-                        BufferedOutputStream bufferOutStream = new BufferedOutputStream(fileout);
-                        bufferOutStream.write(data);
-                        bufferOutStream.flush();
-                        bufferOutStream.close();
-
-                        ExifInterface exifInterface = new ExifInterface(tmpFilename);
-                        int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-
-                        switch (orientation) {
-                            // Saved image exif records only two cases: 90 degree rotation and no rotation
-                            case ExifInterface.ORIENTATION_ROTATE_90:
-                                shouldRotate = true;
-                                break;
-                            default:
-                                shouldRotate = false;
-                                break;
-                        }
-
-                        bmp = BitmapFactory.decodeFile(tmpFilename);
-                        width = bmp.getWidth();
-                        height = bmp.getHeight();
-
-                    } catch (IOException e) {
-                        Log.e(LOG_TAG, "Err when saving bitmap...");
-                        e.printStackTrace();
-                        return;
-                    }
-                }
-
-
-                if (width > mMaxTextureSize || height > mMaxTextureSize) {
-                    float scaling = Math.max(width / (float) mMaxTextureSize, height / (float) mMaxTextureSize);
-                    Log.i(LOG_TAG, String.format("目标尺寸(%d x %d)超过当前设备OpenGL 能够处理的最大范围(%d x %d)， 现在将图片压缩至合理大小!", width, height, mMaxTextureSize, mMaxTextureSize));
-
-                    bmp = Bitmap.createScaledBitmap(bmp, (int) (width / scaling), (int) (height / scaling), false);
-
-                    width = bmp.getWidth();
-                    height = bmp.getHeight();
-                }
-
-                Bitmap bmp2;
-
-                if (shouldRotate) {
-                    bmp2 = Bitmap.createBitmap(height, width, Bitmap.Config.ARGB_8888);
-
-                    Canvas canvas = new Canvas(bmp2);
-
-                    if (cameraInstance().getFacing() == Camera.CameraInfo.CAMERA_FACING_BACK) {
-                        Matrix mat = new Matrix();
-                        int halfLen = Math.min(width, height) / 2;
-                        mat.setRotate(90, halfLen, halfLen);
-                        canvas.drawBitmap(bmp, mat, null);
-                    } else {
-                        Matrix mat = new Matrix();
-
-                        if (isFrontMirror) {
-                            mat.postTranslate(-width / 2, -height / 2);
-                            mat.postScale(-1.0f, 1.0f);
-                            mat.postTranslate(width / 2, height / 2);
-                            int halfLen = Math.min(width, height) / 2;
-                            mat.postRotate(90, halfLen, halfLen);
-                        } else {
-                            int halfLen = Math.max(width, height) / 2;
-                            mat.postRotate(-90, halfLen, halfLen);
-                        }
-
-                        canvas.drawBitmap(bmp, mat, null);
-                    }
-
-                    bmp.recycle();
-                } else {
-                    if (cameraInstance().getFacing() == Camera.CameraInfo.CAMERA_FACING_BACK) {
-                        bmp2 = bmp;
-                    } else {
-
-                        bmp2 = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                        Canvas canvas = new Canvas(bmp2);
-                        Matrix mat = new Matrix();
-                        if (isFrontMirror) {
-                            mat.postTranslate(-width / 2, -height / 2);
-                            mat.postScale(1.0f, -1.0f);
-                            mat.postTranslate(width / 2, height / 2);
-                        } else {
-                            mat.postTranslate(-width / 2, -height / 2);
-                            mat.postScale(-1.0f, -1.0f);
-                            mat.postTranslate(width / 2, height / 2);
-                        }
-
-                        canvas.drawBitmap(bmp, mat, null);
-                    }
-
-                }
-
-                if (config != null) {
-                    CGENativeLibrary.filterImage_MultipleEffectsWriteBack(bmp2, config, intensity);
-                }
-
-                photoCallback.takePictureOK(bmp2);
-
-                cameraInstance().getCameraDevice().startPreview();
+        if (jpegData != null) {
+            Boolean shouldRotate = shouldRotateByExif(jpegData);
+            if (shouldRotate != null) {
+                return shouldRotate;
             }
-        });
+        }
+
+        return fallbackRotation == 90 || fallbackRotation == 270;
+    }
+
+    private Boolean shouldRotateByExif(byte[] jpegData) {
+        String cacheDir = getContext().getExternalCacheDir() != null ? getContext().getExternalCacheDir().getAbsolutePath() : null;
+        if (cacheDir == null) {
+            return null;
+        }
+
+        String tmpFilename = cacheDir + "/picture_cache000.jpg";
+        try (FileOutputStream fileout = new FileOutputStream(tmpFilename);
+             BufferedOutputStream bufferOutStream = new BufferedOutputStream(fileout)) {
+            bufferOutStream.write(jpegData);
+            bufferOutStream.flush();
+
+            ExifInterface exifInterface = new ExifInterface(tmpFilename);
+            int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            return orientation == ExifInterface.ORIENTATION_ROTATE_90;
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Err when reading exif from cache image: " + e.toString());
+            return null;
+        }
+    }
+
+    /**
+     * @deprecated Use {@link #takePicture(TakePictureCallback, String, float, boolean)} instead.
+     *             This overload accepts a Camera1 ShutterCallback for backward compatibility.
+     */
+    @Deprecated
+    public synchronized void takePicture(final TakePictureCallback photoCallback,
+                                         Camera.ShutterCallback shutterCallback,
+                                         final String config, final float intensity,
+                                         final boolean isFrontMirror) {
+        // Ignore the Camera1-specific shutterCallback, delegate to the new method
+        takePicture(photoCallback, config, intensity, isFrontMirror);
     }
 }
