@@ -97,7 +97,7 @@ jobject CGEImageHandlerAndroid::getResultBitmap(JNIEnv* env)
 {
     if(m_dstImageSize.width <= 0 || m_dstImageSize.height <= 0)
     {
-        CGE_LOG_ERROR("Invalid image size!");
+        CGE_LOG_ERROR("Invalid image size: %dx%d", m_dstImageSize.width, m_dstImageSize.height);
         return nullptr;
     }
 
