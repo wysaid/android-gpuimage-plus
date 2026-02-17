@@ -1,7 +1,5 @@
 package org.wysaid.camera;
 
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.util.Log;
@@ -10,27 +8,29 @@ import org.wysaid.common.Common;
 
 /**
  * Camera1 (android.hardware.Camera) implementation of {@link ICameraProvider}.
- * Wraps the legacy Camera1 API behind the unified provider interface.
- * Each instance manages its own Camera device — not a singleton.
+ *
+ * <p>This is a pure delegation wrapper over the existing {@link CameraInstance} singleton.
+ * No Camera1 logic is duplicated here — every call is forwarded to
+ * {@link CameraInstance#getInstance()}. This ensures:
+ * <ul>
+ *   <li>Perfect backward compatibility with code that calls CameraInstance directly.</li>
+ *   <li>The well-tested singleton lifecycle is preserved.</li>
+ *   <li>New code can use the unified {@link ICameraProvider} interface transparently.</li>
+ * </ul>
+ *
+ * <p>If a feature is missing from CameraInstance, add it in this class rather than
+ * modifying CameraInstance, so that existing users pay zero upgrade cost.
  */
 public class Camera1Provider implements ICameraProvider {
 
     private static final String LOG_TAG = Common.LOG_TAG;
 
-    private final CameraInstance mCameraInstance;
-
-    public Camera1Provider() {
-        mCameraInstance = new CameraInstance();
-    }
-
     /**
-     * Access the underlying CameraInstance for advanced/legacy usage.
-     *
-     * @deprecated Prefer using ICameraProvider methods instead.
+     * Access the underlying CameraInstance singleton.
+     * Prefer using {@link ICameraProvider} methods for new code.
      */
-    @Deprecated
     public CameraInstance getCameraInstance() {
-        return mCameraInstance;
+        return CameraInstance.getInstance();
     }
 
     // ========== Lifecycle ==========
@@ -41,56 +41,56 @@ public class Camera1Provider implements ICameraProvider {
         CameraInstance.CameraOpenCallback legacyCallback = callback != null
                 ? callback::cameraReady
                 : null;
-        return mCameraInstance.tryOpenCamera(legacyCallback, camera1Facing);
+        return CameraInstance.getInstance().tryOpenCamera(legacyCallback, camera1Facing);
     }
 
     @Override
     public void closeCamera() {
-        mCameraInstance.stopCamera();
+        CameraInstance.getInstance().stopCamera();
     }
 
     @Override
     public boolean isCameraOpened() {
-        return mCameraInstance.isCameraOpened();
+        return CameraInstance.getInstance().isCameraOpened();
     }
 
     // ========== Preview ==========
 
     @Override
     public void startPreview(SurfaceTexture texture) {
-        mCameraInstance.startPreview(texture);
+        CameraInstance.getInstance().startPreview(texture);
     }
 
     @Override
     public void stopPreview() {
-        mCameraInstance.stopPreview();
+        CameraInstance.getInstance().stopPreview();
     }
 
     @Override
     public boolean isPreviewing() {
-        return mCameraInstance.isPreviewing();
+        return CameraInstance.getInstance().isPreviewing();
     }
 
     @Override
     public int getPreviewWidth() {
-        return mCameraInstance.previewWidth();
+        return CameraInstance.getInstance().previewWidth();
     }
 
     @Override
     public int getPreviewHeight() {
-        return mCameraInstance.previewHeight();
+        return CameraInstance.getInstance().previewHeight();
     }
 
     @Override
     public void setPreferredPreviewSize(int width, int height) {
-        mCameraInstance.setPreferPreviewSize(width, height);
+        CameraInstance.getInstance().setPreferPreviewSize(width, height);
     }
 
     // ========== Camera Controls ==========
 
     @Override
     public CameraFacing getFacing() {
-        return ICameraProvider.camera1ToFacing(mCameraInstance.getFacing());
+        return ICameraProvider.camera1ToFacing(CameraInstance.getInstance().getFacing());
     }
 
     @Override
@@ -98,12 +98,12 @@ public class Camera1Provider implements ICameraProvider {
         Camera.AutoFocusCallback legacyCallback = callback != null
                 ? (success, camera) -> callback.onAutoFocus(success)
                 : null;
-        mCameraInstance.focusAtPoint(x, y, radius, legacyCallback);
+        CameraInstance.getInstance().focusAtPoint(x, y, radius, legacyCallback);
     }
 
     @Override
     public boolean setFlashMode(FlashMode mode) {
-        Camera.Parameters params = mCameraInstance.getParams();
+        Camera.Parameters params = CameraInstance.getInstance().getParams();
         if (params == null) return false;
 
         String camera1Mode = ICameraProvider.flashModeToCamera1(mode);
@@ -114,7 +114,7 @@ public class Camera1Provider implements ICameraProvider {
                 return false;
             }
             params.setFlashMode(camera1Mode);
-            mCameraInstance.setParams(params);
+            CameraInstance.getInstance().setParams(params);
             return true;
         } catch (Exception e) {
             Log.e(LOG_TAG, "Set flash mode failed: " + e.toString());
@@ -124,26 +124,26 @@ public class Camera1Provider implements ICameraProvider {
 
     @Override
     public FlashMode getFlashMode() {
-        Camera.Parameters params = mCameraInstance.getParams();
+        Camera.Parameters params = CameraInstance.getInstance().getParams();
         if (params == null) return null;
         return ICameraProvider.camera1ToFlashMode(params.getFlashMode());
     }
 
     @Override
     public void setPictureSize(int width, int height, boolean isBigger) {
-        mCameraInstance.setPictureSize(width, height, isBigger);
+        CameraInstance.getInstance().setPictureSize(width, height, isBigger);
     }
 
     @Override
     public void setFocusMode(String focusMode) {
-        mCameraInstance.setFocusMode(focusMode);
+        CameraInstance.getInstance().setFocusMode(focusMode);
     }
 
     // ========== Capture ==========
 
     @Override
     public void takePicture(ShutterCallback shutterCallback, PictureDataCallback pictureCallback) {
-        Camera cameraDevice = mCameraInstance.getCameraDevice();
+        Camera cameraDevice = CameraInstance.getInstance().getCameraDevice();
         if (cameraDevice == null) {
             Log.e(LOG_TAG, "takePicture: camera device is null");
             if (pictureCallback != null) {
@@ -153,11 +153,11 @@ public class Camera1Provider implements ICameraProvider {
         }
 
         // Set rotation
-        Camera.Parameters params = mCameraInstance.getParams();
+        Camera.Parameters params = CameraInstance.getInstance().getParams();
         if (params != null) {
             try {
                 params.setRotation(90);
-                mCameraInstance.setParams(params);
+                CameraInstance.getInstance().setParams(params);
             } catch (Exception e) {
                 Log.e(LOG_TAG, "Error setting rotation: " + e.toString());
             }
@@ -177,7 +177,7 @@ public class Camera1Provider implements ICameraProvider {
 
     @Override
     public void resumePreviewAfterCapture() {
-        Camera cameraDevice = mCameraInstance.getCameraDevice();
+        Camera cameraDevice = CameraInstance.getInstance().getCameraDevice();
         if (cameraDevice != null) {
             cameraDevice.startPreview();
         }

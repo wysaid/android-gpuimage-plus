@@ -18,17 +18,6 @@ import java.util.List;
 /**
  * Created by wangyang on 15/7/27.
  */
-
-
-/**
- * Camera1 API wrapper. Manages a single {@link android.hardware.Camera} instance.
- *
- * <p>The static singleton {@link #getInstance()} is retained for backward compatibility,
- * but new code should prefer {@link Camera1Provider} via the {@link ICameraProvider} interface.
- *
- * @see ICameraProvider
- * @see Camera1Provider
- */
 public class CameraInstance {
     public static final String LOG_TAG = Common.LOG_TAG;
 
@@ -56,10 +45,7 @@ public class CameraInstance {
 
     private int mFacing = 0;
 
-    /**
-     * Create a new CameraInstance. For the legacy singleton, use {@link #getInstance()}.
-     */
-    public CameraInstance() {}
+    private CameraInstance() {}
 
     public static synchronized CameraInstance getInstance() {
         if(mThisInstance == null) {
