@@ -12,6 +12,7 @@ obj/
 build/
 library/.cxx/
 .kotlin/
+tasks/
 
 # CodeQL
 _codeql_detected_source_root
