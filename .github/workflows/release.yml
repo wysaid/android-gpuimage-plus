@@ -331,8 +331,9 @@ jobs:
         TAG_NAME="${{ steps.tag_version.outputs.tag_name }}"
 
         if [[ -z "${ARTIFACT_REPO_TOKEN:-}" ]]; then
-          echo "❌ Missing secret: ARTIFACT_REPO_TOKEN (repo:write to android-gpuimage-plus-maven)"
-          exit 1
+          echo "::warning::ARTIFACT_REPO_TOKEN is not set; skipping Maven artifact sync."
+          echo "artifact_pr_url=" >> $GITHUB_OUTPUT
+          exit 0
         fi
 
         ARTIFACT_REPO="wysaid/android-gpuimage-plus-maven"

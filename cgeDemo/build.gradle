@@ -36,6 +36,9 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // Use debug signing for demo APK so CI can produce a signed release APK
+            // without a dedicated keystore. This is intentional for a demo application.
+            signingConfig signingConfigs.debug
         }
     }
     namespace 'org.wysaid.cgeDemo'
