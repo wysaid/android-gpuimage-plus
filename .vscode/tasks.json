@@ -283,6 +283,54 @@
             },
             "group": "build",
             "problemMatcher": "$gcc"
+        },
+        {
+            "label": "[Release] Publish AAR To Maven Local - 16KB Page Size",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "tasks.sh",
+                "--enable-cmake",
+                "--enable-video-module",
+                "--enable-16kb-page-size",
+                "--publish",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "[Release] Publish AAR To Maven Local - 16KB Page Size + Disable Video Module",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "tasks.sh",
+                "--enable-cmake",
+                "--disable-video-module",
+                "--enable-16kb-page-size",
+                "--publish",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "[Release] Publish All AAR To Maven Local",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "tasks.sh",
+                "--publish-all",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
         }
     ]
 }

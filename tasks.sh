@@ -198,6 +198,58 @@ while [[ $# > 0 ]]; do
         ./gradlew assembleRelease publish
         shift
         ;;
+    --publish-all)
+        echo "publish all (normal, min, 16k, 16k-min)"
+        set -e
+        # 1. Normal (with video module, no 16k)
+        bash "$0" --enable-cmake --enable-video-module --disable-16kb-page-size --publish || exit 1
+        # 2. Min (no video module, no 16k)
+        bash "$0" --enable-cmake --disable-video-module --disable-16kb-page-size --publish || exit 1
+        # 3. 16k (with video module, 16k)
+        bash "$0" --enable-cmake --enable-video-module --enable-16kb-page-size --publish || exit 1
+        # 4. 16k-min (no video module, 16k)
+        bash "$0" --enable-cmake --disable-video-module --enable-16kb-page-size --publish || exit 1
+
+        # --- Validate all artifacts ---
+        PUBLISH_VERSION=$(grep 'versionName' "$PROJECT_DIR/build.gradle" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+        LOCAL_REPO_DIR=$(grep '^localRepoDir=' "$PROJECT_DIR/local.properties" | cut -d'=' -f2)
+        ARTIFACT_BASE_DIR="$LOCAL_REPO_DIR/org/wysaid/gpuimage-plus"
+        ARTIFACT_ID="gpuimage-plus"
+
+        declare -a EXPECTED_VERSIONS=(
+            "$PUBLISH_VERSION"
+            "${PUBLISH_VERSION}-min"
+            "${PUBLISH_VERSION}-16k"
+            "${PUBLISH_VERSION}-16k-min"
+        )
+
+        echo ""
+        echo "=== Validating published artifacts (version: $PUBLISH_VERSION) ==="
+        VALIDATION_FAILED=0
+        for VER in "${EXPECTED_VERSIONS[@]}"; do
+            AAR_FILE="$ARTIFACT_BASE_DIR/$VER/${ARTIFACT_ID}-${VER}.aar"
+            POM_FILE="$ARTIFACT_BASE_DIR/$VER/${ARTIFACT_ID}-${VER}.pom"
+            if [[ -f "$AAR_FILE" ]] && [[ -f "$POM_FILE" ]]; then
+                AAR_SIZE=$(wc -c <"$AAR_FILE" | tr -d ' ')
+                echo "  [OK] $VER  (aar: ${AAR_SIZE} bytes)"
+            else
+                echo "  [MISSING] $VER"
+                [[ ! -f "$AAR_FILE" ]] && echo "       missing: $AAR_FILE"
+                [[ ! -f "$POM_FILE" ]] && echo "       missing: $POM_FILE"
+                VALIDATION_FAILED=1
+            fi
+        done
+
+        if [[ $VALIDATION_FAILED -ne 0 ]]; then
+            echo ""
+            echo "ERROR: Some artifacts are missing! See above for details." >&2
+            exit 1
+        fi
+
+        echo ""
+        echo "All 4 artifacts published and validated successfully."
+        shift
+        ;;
     *)
         echo "Invalid argument $PARSE_KEY..."
         exit 1
