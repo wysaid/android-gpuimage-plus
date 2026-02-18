@@ -42,7 +42,5 @@ Language-specific rules live in `.github/instructions/code-conventions.instructi
 ## Behavior Constraints
 
 - **Validation:** After native code changes, ALWAYS run `bash tasks.sh --enable-cmake --build`.
-- **Dual Build:** CMake uses `GLOB_RECURSE` (auto-discovers); `Android.mk` lists files **explicitly** — update both when adding native sources.
-- **Commit Policy:** Only commit to feature branches, never force-push to `master`.
+- **Commit Policy:** Only commit to feature branches, never force-push to `master`. Write commit messages in English.
 - **Completeness:** Implement fully or request clarification — no TODOs in committed code.
-- **Thread Safety:** Never call OpenGL ES functions outside the GL thread.
