@@ -94,11 +94,43 @@ public interface ICameraProvider {
     // ========== Preview ==========
 
     /**
+     * Callback notified when the actual preview size is known.
+     * For synchronous providers (Camera1) this may fire before startPreview returns;
+     * for async providers (CameraX) it fires once the Surface is bound.
+     */
+    interface PreviewSizeReadyCallback {
+        /** @param width  actual preview width  (sensor orientation, landscape)
+         *  @param height actual preview height (sensor orientation, landscape) */
+        void onPreviewSizeReady(int width, int height);
+    }
+
+    /**
      * Start preview, rendering frames to the given SurfaceTexture.
      *
      * @param texture The SurfaceTexture to receive camera frames (as an OES external texture).
      */
     void startPreview(SurfaceTexture texture);
+
+    /**
+     * Start preview with an optional callback to be notified once the actual
+     * preview resolution is determined (important for async backends like CameraX).
+     *
+     * <p>The default implementation calls {@link #startPreview(SurfaceTexture)} and then
+     * immediately fires the callback using the values from {@link #getPreviewWidth()} /
+     * {@link #getPreviewHeight()} — suitable for synchronous Camera1 backend.
+     *
+     * <p>Async backends (CameraX) should override this to fire the callback <em>after</em>
+     * the real resolution is available.
+     *
+     * @param texture  The SurfaceTexture to receive camera frames.
+     * @param callback Called (on any thread) once width/height are known; may be null.
+     */
+    default void startPreview(SurfaceTexture texture, PreviewSizeReadyCallback callback) {
+        startPreview(texture);
+        if (callback != null) {
+            callback.onPreviewSizeReady(getPreviewWidth(), getPreviewHeight());
+        }
+    }
 
     /**
      * Stop the current preview.
@@ -198,6 +230,21 @@ public interface ICameraProvider {
      */
     default void attachLifecycleOwner(LifecycleOwner lifecycleOwner) {
         // Default no-op for Camera1
+    }
+
+    /**
+     * Whether the rendering pipeline needs to apply a manual 90° rotation.
+     *
+     * <p>Camera1 sensors deliver frames in landscape orientation and rely on the app to
+     * rotate the render by PI/2. CameraX, by contrast, encodes the necessary rotation
+     * inside the transform matrix returned by {@link android.graphics.SurfaceTexture#getTransformMatrix},
+     * so an additional manual rotation would double-rotate the image.
+     *
+     * @return {@code true}  for Camera1 (manual rotation required),
+     *         {@code false} for CameraX (transform matrix already rotated).
+     */
+    default boolean needsManualRotation() {
+        return true; // Camera1 default
     }
 
     // ========== Utility ==========

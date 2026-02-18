@@ -2,6 +2,8 @@ package org.wysaid.camera;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
@@ -60,6 +62,7 @@ public class CameraXProvider implements ICameraProvider {
     private CameraFacing mFacing = CameraFacing.BACK;
     private boolean mIsPreviewing = false;
     private SurfaceTexture mSurfaceTexture;
+    private PreviewSizeReadyCallback mPreviewSizeReadyCallback;
 
     private int mPreviewWidth = 0;
     private int mPreviewHeight = 0;
@@ -96,11 +99,8 @@ public class CameraXProvider implements ICameraProvider {
                 mCameraProvider = future.get();
                 Log.i(LOG_TAG, "CameraX: ProcessCameraProvider obtained.");
 
-                // Bind camera if a SurfaceTexture was already set (startPreview called first)
-                if (mSurfaceTexture != null) {
-                    bindCamera();
-                }
-
+                // Camera is now ready. Fire the callback so the view can call startPreview.
+                // Do NOT call bindCamera here; the view controls when preview starts.
                 if (callback != null) {
                     callback.cameraReady();
                 }
@@ -110,6 +110,11 @@ public class CameraXProvider implements ICameraProvider {
         }, ContextCompat.getMainExecutor(mContext));
 
         return true;
+    }
+
+    @Override
+    public boolean needsManualRotation() {
+        return false; // CameraX encodes rotation in the SurfaceTexture transform matrix
     }
 
     @Override
@@ -130,11 +135,28 @@ public class CameraXProvider implements ICameraProvider {
 
     @Override
     public void startPreview(SurfaceTexture texture) {
+        startPreview(texture, null);
+    }
+
+    @Override
+    public void startPreview(SurfaceTexture texture, PreviewSizeReadyCallback callback) {
         mSurfaceTexture = texture;
-        if (mCameraProvider != null && mLifecycleOwner != null) {
-            bindCamera();
+        mPreviewSizeReadyCallback = callback;
+        // Ensure bindCamera always runs on the main thread.
+        // When called from cameraReady() callback (openCamera path), we are already on the
+        // main thread (MainExecutor). When called directly (resume path where mCameraProvider
+        // is already set), we may be on the GL thread — post to main to be safe.
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            if (mCameraProvider != null && mLifecycleOwner != null) {
+                bindCamera();
+            }
+        } else {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (mCameraProvider != null && mLifecycleOwner != null) {
+                    bindCamera();
+                }
+            });
         }
-        // If provider not ready yet, bindCamera will be called in openCamera callback.
     }
 
     @Override
@@ -361,6 +383,13 @@ public class CameraXProvider implements ICameraProvider {
                     surface.release();
                     Log.i(LOG_TAG, "CameraX: Surface released, result code: " + result.getResultCode());
                 });
+
+                // Notify the view now that the real preview size is known.
+                if (mPreviewSizeReadyCallback != null) {
+                    PreviewSizeReadyCallback cb = mPreviewSizeReadyCallback;
+                    mPreviewSizeReadyCallback = null;
+                    cb.onPreviewSizeReady(mPreviewWidth, mPreviewHeight);
+                }
             });
 
             // Build ImageCapture use case

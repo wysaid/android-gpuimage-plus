@@ -104,9 +104,18 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
             Log.e(LOG_TAG, "Frame Recorder init failed!");
         }
 
-        mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
-        mFrameRecorder.setSrcFlipScale(1.0f, -1.0f);
-        mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
+        if (getCameraProvider().needsManualRotation()) {
+            mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
+            mFrameRecorder.setSrcFlipScale(1.0f, -1.0f);
+            mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
+        } else {
+            // CameraX already encodes rotation in the SurfaceTexture transform matrix.
+            // No manual rotation needed; only keep the vertical flip that matches the
+            // OpenGL / screen coordinate system.
+            mFrameRecorder.setSrcRotation(0.0f);
+            mFrameRecorder.setSrcFlipScale(1.0f, -1.0f);
+            mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
+        }
 
         mTextureID = Common.genSurfaceTextureID();
         mSurfaceTexture = new SurfaceTexture(mTextureID);
@@ -151,23 +160,43 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
         }
 
         ICameraProvider provider = getCameraProvider();
+        ICameraProvider.CameraFacing facing = mIsCameraBackForward
+                ? ICameraProvider.CameraFacing.BACK
+                : ICameraProvider.CameraFacing.FRONT;
+
+        // Helper: start preview and handle async size notification.
+        // Extracted as a Runnable so it can be called from the camera-ready callback.
+        Runnable doStartPreview = () -> {
+            if (provider.isPreviewing()) return;
+            provider.startPreview(mSurfaceTexture, (pw, ph) -> {
+                // Fired once the real preview resolution is known.
+                // CameraX fires this asynchronously from the main thread;
+                // Camera1 fires it synchronously — queue to GL thread either way.
+                queueEvent(() -> {
+                    if (mFrameRecorder != null && pw > 0 && ph > 0) {
+                        mFrameRecorder.srcResize(ph, pw);
+                        requestRender();
+                    }
+                });
+            });
+            // For Camera1 (synchronous) the sizes are already set; grab them immediately.
+            int pw = provider.getPreviewWidth();
+            int ph = provider.getPreviewHeight();
+            if (pw > 0 && ph > 0) {
+                mFrameRecorder.srcResize(ph, pw);
+            }
+        };
 
         if (!provider.isCameraOpened()) {
-            ICameraProvider.CameraFacing facing = mIsCameraBackForward
-                    ? ICameraProvider.CameraFacing.BACK
-                    : ICameraProvider.CameraFacing.FRONT;
-
-            provider.openCamera(facing, new ICameraProvider.CameraOpenCallback() {
-                @Override
-                public void cameraReady() {
-                    Log.i(LOG_TAG, "openCamera OK...");
-                }
+            provider.openCamera(facing, () -> {
+                // Called once the camera backend is ready (async for CameraX).
+                // Now it is safe to start the preview.
+                Log.i(LOG_TAG, "openCamera OK, starting preview...");
+                doStartPreview.run();
             });
-        }
-
-        if (!provider.isPreviewing()) {
-            provider.startPreview(mSurfaceTexture);
-            mFrameRecorder.srcResize(provider.getPreviewHeight(), provider.getPreviewWidth());
+        } else {
+            // Camera already open (e.g. resume after background) — start preview directly.
+            doStartPreview.run();
         }
 
         requestRender();
