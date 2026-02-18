@@ -27,7 +27,7 @@ The [release workflow](../.github/workflows/release.yml) builds and publishes:
 | `gpuimage-plus-{version}-min.aar` | ❌ | 4KB |
 | `gpuimage-plus-{version}-16k-min.aar` | ❌ | 16KB |
 
-Plus demo APK with video module enabled.
+Plus one demo APK with video module enabled.
 
 ## Tag Format
 

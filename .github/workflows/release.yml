@@ -41,7 +41,7 @@ jobs:
         add-to-path: true
     
     - name: Install build tools
-      run: sudo apt-get update && sudo apt-get install -y ninja-build jq rsync
+      run: sudo apt-get update && sudo apt-get install -y ninja-build jq rsync binutils unzip
     
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -185,8 +185,8 @@ jobs:
     
     - name: Build demo APK with video module
       run: |
-        echo "🔨 Building demo APK with video module (default configuration)..."
-        ./tasks.sh --enable-cmake --release --enable-video-module --disable-16kb-page-size --build
+        echo "🔨 Building demo APK with video module..."
+        ./tasks.sh --enable-cmake --release --enable-video-module --enable-16kb-page-size --build
         
         # Find and copy the APK (look specifically for release build output)
         APK_PATH=$(find "cgeDemo/build/outputs/apk/release" \( -name "*-release.apk" -o -name "*-release-unsigned.apk" \) | head -1)
@@ -227,6 +227,48 @@ jobs:
         fi
         
         echo "✅ APK validation passed"
+
+    - name: Validate native libs max page size (16KB)
+      run: |
+        echo "🔍 Validating native library max page size in APK..."
+        APK_FILE=$(ls /tmp/release-artifacts/*.apk | head -1)
+        EXTRACT_DIR="/tmp/apk-native-check"
+
+        rm -rf "$EXTRACT_DIR"
+        mkdir -p "$EXTRACT_DIR"
+        unzip -q "$APK_FILE" "lib/*.so" -d "$EXTRACT_DIR"
+
+        SO_COUNT=$(find "$EXTRACT_DIR/lib" -type f -name "*.so" | wc -l | tr -d ' ')
+        if [ "$SO_COUNT" -eq 0 ]; then
+          echo "❌ No native libraries found in APK: $APK_FILE"
+          exit 1
+        fi
+
+        while IFS= read -r so_file; do
+          max_align=0
+
+          while IFS= read -r align_hex; do
+            align_hex=${align_hex#0x}
+            if [ -z "$align_hex" ]; then
+              continue
+            fi
+
+            align_dec=$((16#$align_hex))
+            if [ "$align_dec" -gt "$max_align" ]; then
+              max_align="$align_dec"
+            fi
+          done < <(readelf -l "$so_file" | awk '/LOAD/ {print $NF}')
+
+          if [ "$max_align" -lt 16384 ]; then
+            echo "❌ Invalid max page size in $(basename "$so_file"): ${max_align} bytes (< 16384)"
+            readelf -l "$so_file"
+            exit 1
+          fi
+
+          printf "  ✓ %s max LOAD align: %d bytes\n" "$(basename "$so_file")" "$max_align"
+        done < <(find "$EXTRACT_DIR/lib" -type f -name "*.so" | sort)
+
+        echo "✅ Native library max page size validation passed"
     
     - name: Package AAR artifacts
       run: |
@@ -522,7 +564,7 @@ jobs:
         fi
         
         echo "**Demo APK:**" >> $GITHUB_STEP_SUMMARY
-        echo "- cgeDemo-$VERSION.apk" >> $GITHUB_STEP_SUMMARY
+        echo "- cgeDemo-$VERSION.apk (video enabled)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**AAR Libraries:**" >> $GITHUB_STEP_SUMMARY
         echo "- gpuimage-plus-$VERSION.aar (4KB, with video)" >> $GITHUB_STEP_SUMMARY
