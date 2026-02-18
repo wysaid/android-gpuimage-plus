@@ -207,6 +207,34 @@
             "problemMatcher": "$gcc"
         },
         {
+            "label": "[TEST] Enable Gradle Libs Test",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "tasks.sh",
+                "--enable-gradle-libs-test"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "[TEST] Disable Gradle Libs Test",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "tasks.sh",
+                "--disable-gradle-libs-test"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
             "label": "Setup Gradle Project",
             "type": "shell",
             "command": "bash",

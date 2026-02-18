@@ -15,6 +15,10 @@ def enable16kPageSizes() {
     return gradle.ext != null && gradle.ext.has("enable16kPageSizes") && gradle.ext.enable16kPageSizes;
 }
 
+def testDemoWithGradleLibs() {
+    return gradle.ext != null && gradle.ext.has("testDemoWithGradleLibs") && gradle.ext.testDemoWithGradleLibs;
+}
+
 android {
     compileSdkVersion rootProject.ext.android.compileSdkVersion
     buildToolsVersion rootProject.ext.android.buildToolsVersion
@@ -50,7 +54,11 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':library')
+    if (testDemoWithGradleLibs()) {
+        implementation 'org.wysaid:gpuimage-plus:3.1.1'
+    } else {
+        implementation project(':library')
+    }
     implementation 'androidx.appcompat:appcompat:' + rootProject.ext.android.appcompatX
     implementation 'androidx.core:core-ktx:1.1.0'
 }

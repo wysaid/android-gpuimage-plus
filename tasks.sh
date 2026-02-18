@@ -190,6 +190,14 @@ while [[ $# > 0 ]]; do
         changeProperty "local.properties" '^enable16kPageSizes=' 's/enable16kPageSizes=.*/enable16kPageSizes=false/' 'enable16kPageSizes=false'
         shift # past argument
         ;;
+    --enable-gradle-libs-test)
+        changeProperty "local.properties" '^testDemoWithGradleLibs=' 's/testDemoWithGradleLibs=.*/testDemoWithGradleLibs=true/' 'testDemoWithGradleLibs=true'
+        shift # past argument
+        ;;
+    --disable-gradle-libs-test)
+        changeProperty "local.properties" '^testDemoWithGradleLibs=' 's/testDemoWithGradleLibs=.*/testDemoWithGradleLibs=false/' 'testDemoWithGradleLibs=false'
+        shift # past argument
+        ;;
     --publish)
         echo "publish"
         git clean -fdx library

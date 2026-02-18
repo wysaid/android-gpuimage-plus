@@ -9,25 +9,49 @@ if (pFile.exists()) {
 }
 
 if (properties.getProperty('usingCMakeCompile', null) == null) {
-    pFile.append('\nusingCMakeCompile=false\n')
+    pFile.append('\n# When set to true, CMake is used to compile the native (JNI) code.\n')
+    pFile.append('# When false, the prebuilt .so libraries shipped with the repo are used\n')
+    pFile.append('# and no NDK build step is required. Set to true for local native development.\n')
+    pFile.append('usingCMakeCompile=false\n')
 }
 
 if (properties.getProperty('usingCMakeCompileDebug', null) == null) {
-    pFile.append('\nusingCMakeCompileDebug=false\n')
+    pFile.append('\n# Only effective when usingCMakeCompile=true.\n')
+    pFile.append('# When set to true, the native code is compiled in Debug mode (unoptimized,\n')
+    pFile.append('# with debug symbols), making it easier to attach a native debugger.\n')
+    pFile.append('usingCMakeCompileDebug=false\n')
 }
 
 /// if disableVideoModule is true, the recording functions is disabled,
 /// and ffmpeg will not be used.
 if (properties.getProperty('disableVideoModule', null) == null) {
-    pFile.append('\ndisableVideoModule=false\n')
+    pFile.append('\n# When set to true, all video/recording functionality is disabled and\n')
+    pFile.append('# FFmpeg is excluded from the build. Use this to produce a smaller\n')
+    pFile.append('# library without video support (publishes as the "-min" AAR variant).\n')
+    pFile.append('disableVideoModule=false\n')
 }
 
 if (properties.getProperty('deployArtifacts', null) == null) {
-    pFile.append('\ndeployArtifacts=false\n')
+    pFile.append('\n# When set to true, the build publishes the AAR artifact to the local\n')
+    pFile.append('# Maven repository (see localRepoDir). This is intended for release\n')
+    pFile.append('# publishing only; keep false during normal development.\n')
+    pFile.append('deployArtifacts=false\n')
 }
 
 if (properties.getProperty('enable16kPageSizes', null) == null) {
-    pFile.append('\nenable16kPageSizes=false\n')
+    pFile.append('\n# When set to true, native libraries are built with 16KB page size\n')
+    pFile.append('# alignment, required for Android 15+ devices with 16KB page size support.\n')
+    pFile.append('# Enabling this forces targetSdkVersion=35 and produces the "-16k" AAR variant.\n')
+    pFile.append('# Keep false for normal development; only enable for publishing the 16k variant.\n')
+    pFile.append('enable16kPageSizes=false\n')
+}
+
+if (properties.getProperty('testDemoWithGradleLibs', null) == null) {
+    pFile.append('\n# [TEST ONLY] When set to true, the demo app will depend on the published\n')
+    pFile.append('# Maven artifact (org.wysaid:gpuimage-plus) instead of the local :library\n')
+    pFile.append('# project. Only enable this to verify a released AAR. Keep false for normal\n')
+    pFile.append('# development to avoid unexpected behavior.\n')
+    pFile.append('testDemoWithGradleLibs=false\n')
 }
 
 def homeDir = System.getenv('HOME')
@@ -53,3 +77,5 @@ gradle.ext.disableVideoModule = properties.getProperty("disableVideoModule", "")
 gradle.ext.deployArtifacts = properties.getProperty("deployArtifacts", "") == "true"
 gradle.ext.localRepoDir = properties.getProperty("localRepoDir", mavenLocalDir)
 gradle.ext.enable16kPageSizes = properties.getProperty("enable16kPageSizes", "") == "true"
+gradle.ext.testDemoWithGradleLibs = properties.getProperty("testDemoWithGradleLibs", "") == "true"
+

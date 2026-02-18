@@ -21,6 +21,13 @@ allprojects {
     repositories {
         mavenCentral()
         google()
+        if (gradle.ext != null && gradle.ext.has('testDemoWithGradleLibs') && gradle.ext.testDemoWithGradleLibs) {
+            maven {
+                // Used when testDemoWithGradleLibs=true in local.properties.
+                // Provides the published org.wysaid:gpuimage-plus AAR for demo integration testing.
+                url 'https://maven.wysaid.org/'
+            }
+        }
     }
 }
 
