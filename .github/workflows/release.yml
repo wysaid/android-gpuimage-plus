@@ -10,9 +10,14 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version number (e.g., 3.1.1 or 3.1.1-beta1, without leading v) - Manual trigger will NOT publish to Release page'
+        description: 'Version tag to build (e.g., v3.1.1 or v3.1.1-beta1). Must be an existing tag. Prerelease tags will be published to Release page.'
         required: true
         type: string
+      publish_release:
+        description: 'Publish to GitHub Release page (only effective for non-master branches / test purposes)'
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: release-${{ github.ref }}
@@ -69,10 +74,11 @@ jobs:
       env:
         EVENT_NAME: ${{ github.event_name }}
         INPUT_VERSION: ${{ github.event.inputs.version }}
+        INPUT_PUBLISH: ${{ github.event.inputs.publish_release }}
       run: |
         # Determine if this is a manual trigger or tag push
         if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-          # Manual trigger - sanitize and normalize input version
+          # Manual trigger - accept tag name (with or without leading v)
           RAW_VERSION="$INPUT_VERSION"
           RAW_VERSION="${RAW_VERSION#${RAW_VERSION%%[![:space:]]*}}"
           RAW_VERSION="${RAW_VERSION%${RAW_VERSION##*[![:space:]]}}"
@@ -82,24 +88,24 @@ jobs:
             exit 1
           fi
 
+          # Accept either "v3.1.1-beta1" or "3.1.1-beta1"
           VERSION="${RAW_VERSION#v}"
-          if [ "$VERSION" != "$RAW_VERSION" ]; then
-            echo "⚠️ Input starts with 'v'; auto-stripped to '$VERSION'"
-          fi
-
-          if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9\.]+)?$ ]]; then
-            echo "❌ Invalid version input: $RAW_VERSION"
-            echo "Expected format: {major}.{minor}.{patch}[-prerelease], e.g., 3.1.1 or 3.1.1-beta1"
-            exit 1
-          fi
-
           TAG_NAME="v$VERSION"
           IS_MANUAL="true"
-          echo "🔧 Manual trigger detected"
+
+          # Determine if we should publish to Release page
+          if [ "$INPUT_PUBLISH" = "true" ]; then
+            IS_PUBLISH="true"
+            echo "📢 Manual trigger with publish enabled"
+          else
+            IS_PUBLISH="false"
+            echo "🔧 Manual trigger detected (artifacts only, no Release page publish)"
+          fi
         else
           # Tag push - extract from ref
           TAG_NAME="${GITHUB_REF#refs/tags/}"
           IS_MANUAL="false"
+          IS_PUBLISH="true"
         fi
 
         # Extract and validate version numbers supporting prerelease tags
@@ -132,26 +138,33 @@ jobs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "base_version=$BASE_VERSION" >> $GITHUB_OUTPUT
         echo "is_manual=$IS_MANUAL" >> $GITHUB_OUTPUT
+        echo "is_publish=$IS_PUBLISH" >> $GITHUB_OUTPUT
         echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
-        echo "✅ Valid version: $VERSION (tag: $TAG_NAME, prerelease: $IS_PRERELEASE, manual: $IS_MANUAL)"
+        echo "✅ Valid version: $VERSION (tag: $TAG_NAME, prerelease: $IS_PRERELEASE, manual: $IS_MANUAL, publish: $IS_PUBLISH)"
     
     - name: Validate version matches project version
       run: |
         PROJECT_VERSION=$(grep -E 'versionName\s*:' build.gradle | sed -E 's/.*versionName\s*:\s*"([^"]+)".*/\1/')
         TAG_VERSION="${{ steps.tag_version.outputs.version }}"
+        BASE_VERSION="${{ steps.tag_version.outputs.base_version }}"
         
-        echo "Project version: $PROJECT_VERSION"
+        echo "Project version (build.gradle): $PROJECT_VERSION"
         echo "Tag full version: $TAG_VERSION"
+        echo "Tag base version: $BASE_VERSION"
         
-        # Tag version must exactly match versionName in build.gradle
-        if [ "$PROJECT_VERSION" != "$TAG_VERSION" ]; then
+        # For prerelease tags (e.g., v3.1.1-beta1), only the base version (3.1.1)
+        # needs to match build.gradle. This allows tagging prereleases without
+        # updating build.gradle every time.
+        if [ "$PROJECT_VERSION" = "$TAG_VERSION" ]; then
+          echo "✅ Exact version match: $TAG_VERSION"
+        elif [ "$PROJECT_VERSION" = "$BASE_VERSION" ] && [ "$TAG_VERSION" != "$BASE_VERSION" ]; then
+          echo "✅ Base version match for prerelease: build.gradle=$PROJECT_VERSION, tag=$TAG_VERSION"
+        else
           echo "❌ Version mismatch!"
-          echo "Tag version ($TAG_VERSION) does not match project version ($PROJECT_VERSION)"
-          echo "Please update the versionName in build.gradle to match the tag, or use the correct tag."
+          echo "build.gradle versionName ($PROJECT_VERSION) does not match tag version ($TAG_VERSION) or base version ($BASE_VERSION)"
+          echo "Please ensure build.gradle versionName matches the tag's base version."
           exit 1
         fi
-        
-        echo "✅ Version validation passed: $TAG_VERSION"
     
     - name: Setup local.properties for publishing
       run: |
@@ -320,7 +333,7 @@ jobs:
         echo "✅ Individual checksum files created"
 
     - name: Sync artifacts to maven repo and open PR
-      if: steps.tag_version.outputs.is_manual != 'true'
+      if: steps.tag_version.outputs.is_publish == 'true'
       id: sync_maven_repo
       env:
         ARTIFACT_REPO_TOKEN: ${{ secrets.ARTIFACT_REPO_TOKEN }}
@@ -487,7 +500,7 @@ jobs:
         echo "✅ Release notes generated"
     
     - name: Create GitHub Release
-      if: steps.tag_version.outputs.is_manual != 'true'
+      if: steps.tag_version.outputs.is_publish == 'true'
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ steps.tag_version.outputs.tag_name }}
@@ -505,49 +518,50 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Upload artifacts (Manual trigger)
-      if: steps.tag_version.outputs.is_manual == 'true'
+    - name: Upload artifacts (build-only mode)
+      if: steps.tag_version.outputs.is_publish != 'true'
       uses: actions/upload-artifact@v4
       with:
         name: release-artifacts-${{ steps.tag_version.outputs.version }}
         path: /tmp/release-artifacts/
         retention-days: 7
     
-    - name: Manual trigger success message
-      if: steps.tag_version.outputs.is_manual == 'true'
+    - name: Build-only mode success message
+      if: steps.tag_version.outputs.is_publish != 'true'
       run: |
         echo "🎉 ============================================" 
-        echo "🎉 Manual build completed successfully!"
+        echo "🎉 Build completed successfully (artifacts only)!"
         echo "🎉 ============================================"
         echo ""
         echo "📦 Version: ${{ steps.tag_version.outputs.version }}"
         echo "📦 Artifacts are available for download from the workflow run."
         echo ""
-        echo "⚠️  Note: This is a manual trigger build."
+        echo "⚠️  Note: publish_release was not set to true."
         echo "⚠️  Artifacts are NOT published to the Release page."
-        echo "⚠️  To create an official release, push a tag (e.g., git tag v${{ steps.tag_version.outputs.version }} && git push origin v${{ steps.tag_version.outputs.version }})"
+        echo "⚠️  To publish, re-run with publish_release=true or push a tag."
         echo ""
         echo "📦 Built artifacts:"
         ls -lh /tmp/release-artifacts/
     
     - name: Summary
       run: |
+        IS_PUBLISH="${{ steps.tag_version.outputs.is_publish }}"
         IS_MANUAL="${{ steps.tag_version.outputs.is_manual }}"
         VERSION="${{ steps.tag_version.outputs.version }}"
         TAG_NAME="${{ steps.tag_version.outputs.tag_name }}"
         
-        if [ "$IS_MANUAL" = "true" ]; then
-          echo "## 🔧 Manual Build Completed Successfully!" >> $GITHUB_STEP_SUMMARY
+        if [ "$IS_PUBLISH" != "true" ]; then
+          echo "## 🔧 Build-Only Mode Completed Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
-          echo "**Trigger**: Manual (workflow_dispatch)" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger**: Manual (workflow_dispatch, publish_release=false)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ⚠️ Note" >> $GITHUB_STEP_SUMMARY
-          echo "This is a **manual trigger build**. Artifacts are **NOT published** to the Release page." >> $GITHUB_STEP_SUMMARY
+          echo "Artifacts are **NOT published** to the Release page (publish_release was false)." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "To create an official release, push a tag:" >> $GITHUB_STEP_SUMMARY
+          echo "To publish to Release page, re-run with **publish_release=true**, or push a tag:" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "git tag v$VERSION && git push origin v$VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "git push origin $TAG_NAME" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Built Artifacts (available for download):" >> $GITHUB_STEP_SUMMARY
@@ -556,6 +570,9 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Release**: $TAG_NAME" >> $GITHUB_STEP_SUMMARY
           echo "**Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
+          if [ "$IS_MANUAL" = "true" ]; then
+            echo "**Trigger**: Manual (workflow_dispatch, publish_release=true)" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ✅ Version Validation" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Tag format validated: v\${major}.\${minor}.\${patch}" >> $GITHUB_STEP_SUMMARY
@@ -574,7 +591,7 @@ jobs:
         echo "- gpuimage-plus-$VERSION-16k-min.aar (16KB, image-only)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         
-        if [ "$IS_MANUAL" != "true" ]; then
+        if [ "$IS_PUBLISH" = "true" ]; then
           echo "Release page: ${{ github.server_url }}/${{ github.repository }}/releases/tag/$TAG_NAME" >> $GITHUB_STEP_SUMMARY
         fi
 
