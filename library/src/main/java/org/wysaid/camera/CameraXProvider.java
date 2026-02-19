@@ -117,8 +117,25 @@ public class CameraXProvider implements ICameraProvider {
         return false; // CameraX encodes rotation in the SurfaceTexture transform matrix
     }
 
+    /**
+     * Close the camera and release all CameraX use cases.
+     *
+     * <p><b>Must be called from the main thread.</b>
+     * {@link ProcessCameraProvider#unbindAll()} is a main-thread-only CameraX API.
+     * Callers on background threads (e.g., a GL thread) must dispatch to the main
+     * thread before calling this method, for example:
+     * <pre>
+     *   new Handler(Looper.getMainLooper()).post(() -> provider.closeCamera());
+     * </pre>
+     *
+     * @throws IllegalStateException if called from a non-main thread
+     */
     @Override
     public void closeCamera() {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            throw new IllegalStateException(
+                    "CameraXProvider.closeCamera() must be called on the main thread.");
+        }
         mIsPreviewing = false;
         if (mCameraProvider != null) {
             mCameraProvider.unbindAll();
@@ -159,8 +176,17 @@ public class CameraXProvider implements ICameraProvider {
         }
     }
 
+    /**
+     * Stop the camera preview. Same main-thread requirement as {@link #closeCamera()}.
+     *
+     * @throws IllegalStateException if called from a non-main thread
+     */
     @Override
     public void stopPreview() {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            throw new IllegalStateException(
+                    "CameraXProvider.stopPreview() must be called on the main thread.");
+        }
         mIsPreviewing = false;
         if (mCameraProvider != null) {
             mCameraProvider.unbindAll();

@@ -189,41 +189,35 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     }
 
     public void stopPreview() {
-        queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                getCameraProvider().stopPreview();
-            }
-        });
+        getCameraProvider().stopPreview();
     }
 
     protected void onSwitchCamera() {
 
     }
 
+    /**
+     * Switch between front and back camera.
+     *
+     * <p><b>Must be called from the main thread</b> — camera lifecycle operations
+     * ({@link ICameraProvider#closeCamera()}, {@link ICameraProvider#openCamera}) require it.
+     */
     public final void switchCamera() {
         mIsCameraBackForward = !mIsCameraBackForward;
 
-        queueEvent(new Runnable() {
+        final ICameraProvider.CameraFacing facing = mIsCameraBackForward
+                ? ICameraProvider.CameraFacing.BACK
+                : ICameraProvider.CameraFacing.FRONT;
+
+        getCameraProvider().closeCamera();
+        onSwitchCamera();
+        getCameraProvider().openCamera(facing, new ICameraProvider.CameraOpenCallback() {
             @Override
-            public void run() {
-
-                getCameraProvider().closeCamera();
-                onSwitchCamera();
-                ICameraProvider.CameraFacing facing = mIsCameraBackForward
-                        ? ICameraProvider.CameraFacing.BACK
-                        : ICameraProvider.CameraFacing.FRONT;
-
-                getCameraProvider().openCamera(facing, new ICameraProvider.CameraOpenCallback() {
-                    @Override
-                    public void cameraReady() {
-                        resumePreview();
-                    }
-                });
-
-                requestRender();
+            public void cameraReady() {
+                resumePreview();
             }
         });
+        requestRender();
     }
 
     //Attention， 'focusAtPoint' will change focus mode to 'FOCUS_MODE_AUTO'
