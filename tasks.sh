@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [[ $# -eq 0 ]]; then
-    echo "usage: [--debug|--release] [--clean] [--enable-cmake] [--setup-project] [--build] [--run]"
+    echo "usage: [--debug|--release] [--clean] [--enable-cmake] [--setup-project] [--build] [--run] [--test-instrumented]"
     exit 0
 fi
 
@@ -169,6 +169,11 @@ while [[ $# > 0 ]]; do
         echo "run android demo"
         runAndroidApp
         shift # past argument
+        ;;
+    --test-instrumented)
+        echo "run instrumented tests"
+        runGradleCommand -p library connectedDebugAndroidTest
+        shift
         ;;
     --enable-cmake)
         changeProperty "local.properties" '^usingCMakeCompile=' 's/usingCMakeCompile=.*/usingCMakeCompile=true/' 'usingCMakeCompile=true'

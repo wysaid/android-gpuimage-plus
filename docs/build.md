@@ -53,6 +53,9 @@ bash tasks.sh --enable-cmake --disable-video-module --build
 
 # Enable 16KB page size
 bash tasks.sh --enable-cmake --enable-16kb-page-size --build
+
+# Run library instrumented tests (device/emulator required)
+bash tasks.sh --test-instrumented
 ```
 
 Run `bash tasks.sh --help` for all available options.

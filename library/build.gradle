@@ -37,6 +37,7 @@ android {
     defaultConfig {
         minSdkVersion rootProject.ext.android.minSdkVersion
         targetSdkVersion rootProject.ext.android.targetSdkVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("boolean", "CGE_USE_VIDEO_MODULE", disableVideoModule() ? "false" : "true")
 
@@ -125,6 +126,9 @@ dependencies {
     implementation 'androidx.camera:camera-core:1.4.1'
     implementation 'androidx.camera:camera-camera2:1.4.1'
     implementation 'androidx.camera:camera-lifecycle:1.4.1'
+
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
 }
 
 if (deployArtifacts()) {

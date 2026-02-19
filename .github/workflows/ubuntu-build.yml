@@ -103,13 +103,13 @@ jobs:
           exit 1
         fi
         mkdir -p artifacts
-        cp "$APK_FILE" "artifacts/cgeDemo-${{ env.ARTIFACT_NAME }}.apk"
-        echo "APK saved as: artifacts/cgeDemo-${{ env.ARTIFACT_NAME }}.apk"
+        cp "$APK_FILE" "artifacts/cgeDemo-${ARTIFACT_NAME}.apk"
+        echo "APK saved as: artifacts/cgeDemo-${ARTIFACT_NAME}.apk"
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.ARTIFACT_NAME }}
+        name: ${{ matrix.os-name }}-${{ matrix.ndk }}-${{ matrix.build-system }}-${{ matrix.ffmpeg }}-${{ matrix.page-size }}
         path: artifacts/*.apk
         compression-level: 0
         retention-days: 15
@@ -136,3 +136,42 @@ jobs:
     
     - name: Run lint
       run: ./gradlew lint
+
+  instrumented-test:
+    name: Instrumented Test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    timeout-minutes: 30
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Grant execute permission for scripts
+      run: chmod +x gradlew tasks.sh
+
+    - name: Run instrumented tests on emulator
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 30
+        arch: x86_64
+        profile: Nexus 6
+        disable-animations: true
+        script: ./tasks.sh --enable-cmake --test-instrumented
+
+    - name: Upload instrumented test reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: instrumented-test-reports
+        path: |
+          library/build/reports/androidTests/**
+          library/build/outputs/androidTest-results/**
+        if-no-files-found: warn
