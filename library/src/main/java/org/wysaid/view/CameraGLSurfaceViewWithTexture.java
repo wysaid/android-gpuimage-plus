@@ -19,7 +19,7 @@ import android.opengl.GLES20;
 import android.util.AttributeSet;
 import android.util.Log;
 
-import org.wysaid.camera.CameraInstance;
+import org.wysaid.camera.Camera1Provider;
 import org.wysaid.camera.ICameraProvider;
 import org.wysaid.common.Common;
 import org.wysaid.common.FrameBufferObject;
@@ -345,8 +345,7 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
                 height = bmp.getHeight();
             }
 
-            // Determine if rotation is needed
-            boolean shouldRotate = (rotation == 90 || rotation == 270);
+            boolean shouldRotate = shouldRotateForCapture(provider, bmp, jpegData, rotation);
             boolean isBackCamera = (facing == ICameraProvider.CameraFacing.BACK);
             Bitmap bmp2;
 
@@ -401,6 +400,55 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
             photoCallback.takePictureOK(bmp2);
             provider.resumePreviewAfterCapture();
         });
+    }
+
+    private boolean shouldRotateForCapture(ICameraProvider provider, Bitmap bitmap, byte[] jpegData, int fallbackRotation) {
+        if (provider instanceof Camera1Provider) {
+            return shouldRotateForCamera1Legacy((Camera1Provider) provider, bitmap, jpegData, fallbackRotation);
+        }
+        return fallbackRotation == 90 || fallbackRotation == 270;
+    }
+
+    private boolean shouldRotateForCamera1Legacy(Camera1Provider provider, Bitmap bitmap, byte[] jpegData, int fallbackRotation) {
+        Camera.Parameters params = provider.getCameraInstance().getParams();
+        Camera.Size pictureSize = params != null ? params.getPictureSize() : null;
+
+        if (pictureSize != null && pictureSize.width != pictureSize.height) {
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+            return (pictureSize.width > pictureSize.height && width > height)
+                    || (pictureSize.width < pictureSize.height && width < height);
+        }
+
+        if (jpegData != null) {
+            Boolean shouldRotate = shouldRotateByExif(jpegData);
+            if (shouldRotate != null) {
+                return shouldRotate;
+            }
+        }
+
+        return fallbackRotation == 90 || fallbackRotation == 270;
+    }
+
+    private Boolean shouldRotateByExif(byte[] jpegData) {
+        String cacheDir = getContext().getExternalCacheDir() != null ? getContext().getExternalCacheDir().getAbsolutePath() : null;
+        if (cacheDir == null) {
+            return null;
+        }
+
+        String tmpFilename = cacheDir + "/picture_cache000.jpg";
+        try (FileOutputStream fileout = new FileOutputStream(tmpFilename);
+             BufferedOutputStream bufferOutStream = new BufferedOutputStream(fileout)) {
+            bufferOutStream.write(jpegData);
+            bufferOutStream.flush();
+
+            ExifInterface exifInterface = new ExifInterface(tmpFilename);
+            int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            return orientation == ExifInterface.ORIENTATION_ROTATE_90;
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Err when reading exif from cache image: " + e.toString());
+            return null;
+        }
     }
 
     /**
