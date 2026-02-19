@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Android 15 (API 35) enforces edge-to-edge by default when compileSdkVersion >= 35,
+         which causes system bars to overlay app content. Since this demo app uses a traditional
+         ActionBar layout and does not implement windowing insets handling, we opt out of the
+         forced edge-to-edge behaviour to restore the standard window fitting. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+    </style>
+
+</resources>
