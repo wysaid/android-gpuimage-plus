@@ -31,20 +31,76 @@ function setupProject() {
     fi
 }
 
-function runAndroidApp() {
+# Resolve the adb target device and store as an array in ADB_TARGET_ARGS.
+# Priority: ADB_SERIAL env var > physical device (USB/wireless) > emulator.
+# If only one device is connected, no -s flag is needed.
+# Usage: resolveAdbTarget && . "$ADB_COMMAND" "${ADB_TARGET_ARGS[@]}" shell ...
+function resolveAdbTarget() {
+    ADB_TARGET_ARGS=()
 
-    if . "$ADB_COMMAND" -d shell am start -n "$PACKAGE_NAME/$PACKAGE_NAME.$LAUNCH_ACTIVITY"; then
+    # Allow manual override via environment variable
+    if [[ -n "$ADB_SERIAL" ]]; then
+        ADB_TARGET_ARGS=(-s "$ADB_SERIAL")
+        echo "Using device specified by ADB_SERIAL: $ADB_SERIAL"
+        return 0
+    fi
+
+    # Parse connected devices (exclude header and empty lines, keep only "device" state)
+    local devices_output
+    devices_output=$(. "$ADB_COMMAND" devices 2>/dev/null | grep -v 'List of devices' | grep -v '^$' | grep $'\tdevice$')
+
+    local device_count=0
+    [[ -n "$devices_output" ]] && device_count=$(echo "$devices_output" | wc -l | tr -d ' ')
+
+    if [[ $device_count -eq 0 ]]; then
+        echo "No devices connected." >&2
+        return 1
+    fi
+
+    if [[ $device_count -eq 1 ]]; then
+        # Only one device: adb auto-selects, no -s needed
+        return 0
+    fi
+
+    # Multiple devices: prefer physical devices (non-emulator)
+    # Emulator serials always start with "emulator-"
+    local physical_serials
+    physical_serials=$(echo "$devices_output" | grep -v '^emulator-' | awk '{print $1}')
+    local physical_count=0
+    [[ -n "$physical_serials" ]] && physical_count=$(echo "$physical_serials" | wc -l | tr -d ' ')
+
+    local selected_serial
+    if [[ $physical_count -ge 1 ]]; then
+        selected_serial=$(echo "$physical_serials" | head -1)
+        if [[ $physical_count -gt 1 ]]; then
+            echo "Warning: Multiple physical devices found. Using: $selected_serial" >&2
+            echo "  Set ADB_SERIAL env var to override. All devices:" >&2
+            echo "$physical_serials" | sed 's/^/    /' >&2
+        fi
+    else
+        # No physical device, fall back to first emulator
+        selected_serial=$(echo "$devices_output" | awk '{print $1}' | head -1)
+        echo "No physical device found, using emulator: $selected_serial" >&2
+    fi
+
+    ADB_TARGET_ARGS=(-s "$selected_serial")
+}
+
+function runAndroidApp() {
+    resolveAdbTarget || return 1
+
+    if . "$ADB_COMMAND" "${ADB_TARGET_ARGS[@]}" shell am start -n "$PACKAGE_NAME/$PACKAGE_NAME.$LAUNCH_ACTIVITY"; then
         if [[ -z "$(ps -ef | grep -i adb | grep -v grep | grep logcat)" ]]; then
-            . "$ADB_COMMAND" -d logcat -c
+            . "$ADB_COMMAND" "${ADB_TARGET_ARGS[@]}" logcat -c
             if [[ $(uname -s) == "Linux" ]] || [[ $(uname -s) == "Darwin" ]]; then
-                APP_PROC_ID=$(. "$ADB_COMMAND" shell ps | grep org.wysaid.cgeDemo | tr -s ' ' | cut -d' ' -f2)
+                APP_PROC_ID=$(. "$ADB_COMMAND" "${ADB_TARGET_ARGS[@]}" shell ps | grep org.wysaid.cgeDemo | tr -s ' ' | cut -d' ' -f2)
                 if [[ -n "$APP_PROC_ID" ]]; then
-                    . "$ADB_COMMAND" -d logcat | grep -F "$APP_PROC_ID"
+                    . "$ADB_COMMAND" "${ADB_TARGET_ARGS[@]}" logcat | grep -F "$APP_PROC_ID"
                 else
                     echo "Can not find proc id of org.wysaid.cgeDemo"
                 fi
             else
-                . "$ADB_COMMAND" -d logcat | grep -iE "(cge|demo|wysaid| E |crash)"
+                . "$ADB_COMMAND" "${ADB_TARGET_ARGS[@]}" logcat | grep -iE "(cge|demo|wysaid| E |crash)"
             fi
         fi
     else
@@ -70,10 +126,11 @@ function buildProject() {
     GENERATED_APK_FILE=$(find "$THIS_DIR/cgeDemo/build" -iname "*.apk" | grep -i "${ANDROID_BUILD_TYPE/assemble/}")
     echo "apk generated at: $GENERATED_APK_FILE"
 
-    if [[ -n "$GRADLEW_RUN_TASK" ]] && [[ $(. "$ADB_COMMAND" -d devices | grep -v 'List' | grep -vE '^$' | wc -l | tr -d ' ') -ne 0 ]]; then
+    resolveAdbTarget
+    if [[ -n "$GRADLEW_RUN_TASK" ]] && [[ ${#ADB_TARGET_ARGS[@]} -gt 0 || $(. "$ADB_COMMAND" devices | grep -v 'List' | grep -vE '^$' | grep $'\tdevice$' | wc -l | tr -d ' ') -ne 0 ]]; then
         if [[ "$GRADLEW_RUN_TASK" == "installRelease" ]]; then
             # release can not be installed directly. do adb install.
-            . "$ADB_COMMAND" -d install "$GENERATED_APK_FILE"
+            . "$ADB_COMMAND" "${ADB_TARGET_ARGS[@]}" install "$GENERATED_APK_FILE"
         else
             if ! runGradleCommand -p cgeDemo "$GRADLEW_RUN_TASK"; then
                 echo "Install failed." >&2
