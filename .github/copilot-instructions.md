@@ -7,17 +7,7 @@ Android GPU filter library (C++ & Java). Prefer **small, safe, backward-compatib
 - **Never break public API**: `org.wysaid.nativePort.*` Java signatures, JNI method names, and filter rule string syntax are stable contracts.
 - Prefer **additive** changes over refactoring existing code.
 - FFmpeg/video code must remain **fully optional** — guard with `disableVideoModule` (Java/Gradle) / `CGE_USE_VIDEO_MODULE` (C++).
-
-## Project Layout
-
-| Path | Purpose |
-|------|---------|
-| `library/src/main/java/org/wysaid/nativePort/` | Public Java API (`CGENativeLibrary`, `CGEImageHandler`, etc.) |
-| `library/src/main/jni/cge/` | Core C++ engine |
-| `library/src/main/jni/interface/` | JNI bridge (Java ↔ C++) |
-| `library/src/main/jni/custom/` | Extension filters (`libCGEExt.so`) |
-| `library/src/main/jni/ffmpeg/`, `ffmpeg-16kb/` | Prebuilt FFmpeg variants |
-| `cgeDemo/` | Demo app — don't couple library APIs to demo-only code |
+- `cgeDemo/` is a demo app — never couple library APIs to demo-only code.
 
 ## Build
 
@@ -26,13 +16,6 @@ Use `tasks.sh` for all operations (`bash tasks.sh --help`). Key `local.propertie
 ## Code Conventions
 
 Language-specific rules live in `.github/instructions/code-conventions.instructions.md` and are auto-applied by file path.
-
-## Documentation
-
-- `docs/build.md` — Full build guide and configuration options
-- `README.md` — API usage, custom filters, and code samples
-- `.github/RELEASE.md` — Release process and versioning
-- `.github/CONTRIBUTING.md` — Contributing workflow and compatibility rules
 
 ## Skills
 
