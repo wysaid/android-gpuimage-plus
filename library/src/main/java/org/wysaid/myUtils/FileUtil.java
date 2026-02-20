@@ -20,27 +20,81 @@ public class FileUtil {
     public static String packageFilesDirectory = null;
     public static String storagePath = null;
     private static String mDefaultFolder = "libCGE";
+    private static Context sAppContext = null;
+
+    /**
+     * Initialize FileUtil with application context.
+     * Must be called once before using {@link #getPath()} without a context parameter.
+     * Recommended: call in {@code Activity.onCreate()} or {@code Application.onCreate()}.
+     *
+     * @param context Any context; the application context will be extracted automatically.
+     */
+    public static void init(Context context) {
+        if (context != null) {
+            sAppContext = context.getApplicationContext();
+        }
+    }
 
     public static void setDefaultFolder(String defaultFolder) {
         mDefaultFolder = defaultFolder;
     }
 
     public static String getPath() {
-        return getPath(null);
+        return getPath(sAppContext);
     }
 
+    /**
+     * Get the storage path for saving files.
+     *
+     * <p>Strategy (in order of preference):
+     * <ol>
+     *   <li>App-specific external storage ({@code context.getExternalFilesDir()}) — works on
+     *       all Android versions without extra runtime permissions, and native code can write
+     *       to it directly via file-system paths.</li>
+     *   <li>Legacy external storage ({@code /sdcard/libCGE}) — only attempted as a fallback
+     *       and only if the directory already exists or can be created.</li>
+     *   <li>App-internal storage ({@code context.getFilesDir()}) — last resort.</li>
+     * </ol>
+     *
+     * @param context A context used to resolve app-specific directories. May be null,
+     *                in which case only the cached path or legacy path is returned.
+     */
     public static String getPath(Context context) {
 
-        if(storagePath == null) {
-            storagePath = externalStorageDirectory.getAbsolutePath() + "/" + mDefaultFolder;
-            File file = new File(storagePath);
-            if(!file.exists()) {
-                if(!file.mkdirs()) {
-                    storagePath = getPathInPackage(context, true);
+        if (storagePath != null) {
+            return storagePath;
+        }
+
+        // 1. Prefer app-specific external storage (no permissions needed, native-writable)
+        if (context != null) {
+            File externalDir = context.getExternalFilesDir(null);
+            if (externalDir != null) {
+                String path = externalDir.getAbsolutePath() + "/" + mDefaultFolder;
+                File dir = new File(path);
+                if (dir.exists() || dir.mkdirs()) {
+                    storagePath = path;
+                    Log.i(LOG_TAG, "FileUtil: Using app-specific external storage: " + storagePath);
+                    return storagePath;
                 }
             }
         }
 
+        // 2. Fallback: legacy external storage (may fail on Android 10+ with scoped storage)
+        String legacyPath = externalStorageDirectory.getAbsolutePath() + "/" + mDefaultFolder;
+        File legacyDir = new File(legacyPath);
+        if (legacyDir.exists() || legacyDir.mkdirs()) {
+            storagePath = legacyPath;
+            Log.w(LOG_TAG, "FileUtil: Falling back to legacy external storage: " + storagePath);
+            return storagePath;
+        }
+
+        // 3. Last resort: app-internal storage
+        storagePath = getPathInPackage(context, true);
+        if (storagePath != null) {
+            Log.w(LOG_TAG, "FileUtil: Falling back to internal storage: " + storagePath);
+        } else {
+            Log.e(LOG_TAG, "FileUtil: All storage paths unavailable!");
+        }
         return storagePath;
     }
 

@@ -2,11 +2,15 @@ package org.wysaid.camera;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.hardware.camera2.CaptureRequest;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.util.Range;
 import android.util.Size;
 import android.view.Surface;
+
+import androidx.camera.camera2.interop.Camera2Interop;
 
 import androidx.annotation.NonNull;
 import androidx.camera.core.Camera;
@@ -389,6 +393,14 @@ public class CameraXProvider implements ICameraProvider {
             Preview.Builder previewBuilder = new Preview.Builder();
             previewBuilder.setTargetResolution(
                     new Size(mPreferredPreviewWidth, mPreferredPreviewHeight));
+
+            // Request high frame rate (up to 60fps) to match Camera1 behavior.
+            // Camera2Interop allows setting Camera2 capture-request options on CameraX use cases.
+            // Using Range(30, 60) so the camera picks the best rate it supports.
+            @SuppressWarnings("unchecked")
+            Camera2Interop.Extender<Preview> extender = new Camera2Interop.Extender<>(previewBuilder);
+            extender.setCaptureRequestOption(
+                    CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new Range<>(30, 60));
 
             mPreview = previewBuilder.build();
 

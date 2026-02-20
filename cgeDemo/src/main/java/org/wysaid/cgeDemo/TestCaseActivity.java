@@ -1,12 +1,16 @@
 package org.wysaid.cgeDemo;
 
-import android.content.Intent;
+import android.content.ContentValues;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
-
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -16,14 +20,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.wysaid.common.Common;
 import org.wysaid.common.SharedContext;
 import org.wysaid.myUtils.FileUtil;
-import org.wysaid.myUtils.ImageUtil;
 import org.wysaid.myUtils.MsgUtil;
 import org.wysaid.nativePort.CGEFFmpegNativeLibrary;
 import org.wysaid.nativePort.CGEImageHandler;
 import org.wysaid.nativePort.CGENativeLibrary;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 public class TestCaseActivity extends AppCompatActivity {
 
@@ -36,6 +41,7 @@ public class TestCaseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test_case);
+        FileUtil.init(this);
     }
 
     protected void threadSync() {
@@ -64,6 +70,158 @@ public class TestCaseActivity extends AppCompatActivity {
         });
     }
 
+    // ========== Gallery helpers ==========
+
+    /**
+     * Returns true on API 29+ devices where direct filesystem writes to public directories
+     * require the MediaStore IS_PENDING + fd approach.
+     */
+    private boolean needsScopedStorageWrite() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
+    }
+
+    /**
+     * Creates an output path for a video file in the public Movies/libCGE directory.
+     *
+     * <p>On API 29+, inserts a pending MediaStore entry and returns {@code /proc/self/fd/N}
+     * so native FFmpeg code can write directly without Scoped Storage restrictions.
+     * Call {@link #publishVideoToGallery(Uri, ParcelFileDescriptor)} when done.
+     *
+     * <p>On API &lt; 29, returns a direct filesystem path in the public Movies directory.
+     *
+     * @param outUri  receives the MediaStore URI (API 29+ only, else null)
+     * @param outPfd  receives the open ParcelFileDescriptor (API 29+ only, else null)
+     * @return path to pass to native code, or null on failure
+     */
+    private String createVideoOutputPath(String displayName,
+                                         Uri[] outUri,
+                                         ParcelFileDescriptor[] outPfd) {
+        if (needsScopedStorageWrite()) {
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Video.Media.DISPLAY_NAME, displayName);
+            values.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
+            values.put(MediaStore.Video.Media.RELATIVE_PATH,
+                    Environment.DIRECTORY_MOVIES + "/libCGE");
+            values.put(MediaStore.Video.Media.IS_PENDING, 1);
+
+            Uri collection = MediaStore.Video.Media.getContentUri(
+                    MediaStore.VOLUME_EXTERNAL_PRIMARY);
+            Uri uri = getContentResolver().insert(collection, values);
+            if (uri == null) {
+                Log.e(LOG_TAG, "createVideoOutputPath: MediaStore insert failed");
+                return null;
+            }
+            outUri[0] = uri;
+
+            try {
+                ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "rw");
+                if (pfd == null) {
+                    getContentResolver().delete(uri, null, null);
+                    return null;
+                }
+                outPfd[0] = pfd;
+                String path = "/proc/self/fd/" + pfd.getFd();
+                Log.i(LOG_TAG, "createVideoOutputPath: " + path + " -> " + displayName);
+                return path;
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "createVideoOutputPath: " + e);
+                getContentResolver().delete(uri, null, null);
+                outUri[0] = null;
+                return null;
+            }
+
+        } else {
+            outUri[0] = null;
+            outPfd[0] = null;
+            File dir = new File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES),
+                    "libCGE");
+            if (!dir.exists() && !dir.mkdirs()) {
+                Log.e(LOG_TAG, "createVideoOutputPath: mkdirs failed: " + dir);
+                return null;
+            }
+            return new File(dir, displayName).getAbsolutePath();
+        }
+    }
+
+    /** Finalises a video created by {@link #createVideoOutputPath}. */
+    private void publishVideoToGallery(Uri mediaUri, ParcelFileDescriptor pfd, String legacyPath) {
+        if (needsScopedStorageWrite() && mediaUri != null) {
+            if (pfd != null) {
+                try { pfd.close(); } catch (Exception ignored) {}
+            }
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Video.Media.IS_PENDING, 0);
+            getContentResolver().update(mediaUri, values, null, null);
+            Log.i(LOG_TAG, "publishVideoToGallery: cleared IS_PENDING for " + mediaUri);
+        } else if (legacyPath != null) {
+            MediaScannerConnection.scanFile(this,
+                    new String[]{legacyPath}, new String[]{"video/mp4"},
+                    (p, uri) -> Log.i(LOG_TAG, "publishVideoToGallery: scan done " + p));
+        }
+    }
+
+    /**
+     * Saves a Bitmap to the public Pictures/libCGE directory and notifies the gallery.
+     *
+     * @return the display name (filename) of the saved image, or null on failure.
+     */
+    private String saveBitmapToGallery(Bitmap bmp, String displayName) {
+        if (needsScopedStorageWrite()) {
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.Media.DISPLAY_NAME, displayName);
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+            values.put(MediaStore.Images.Media.RELATIVE_PATH,
+                    Environment.DIRECTORY_PICTURES + "/libCGE");
+            values.put(MediaStore.Images.Media.IS_PENDING, 1);
+
+            Uri collection = MediaStore.Images.Media.getContentUri(
+                    MediaStore.VOLUME_EXTERNAL_PRIMARY);
+            Uri uri = getContentResolver().insert(collection, values);
+            if (uri == null) {
+                Log.e(LOG_TAG, "saveBitmapToGallery: MediaStore insert failed");
+                return null;
+            }
+
+            try (OutputStream out = getContentResolver().openOutputStream(uri)) {
+                if (out == null) throw new IOException("openOutputStream returned null");
+                bmp.compress(Bitmap.CompressFormat.JPEG, 95, out);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "saveBitmapToGallery: write failed - " + e);
+                getContentResolver().delete(uri, null, null);
+                return null;
+            }
+
+            ContentValues pub = new ContentValues();
+            pub.put(MediaStore.Images.Media.IS_PENDING, 0);
+            getContentResolver().update(uri, pub, null, null);
+            Log.i(LOG_TAG, "saveBitmapToGallery: published " + displayName);
+            return displayName;
+
+        } else {
+            File dir = new File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                    "libCGE");
+            if (!dir.exists() && !dir.mkdirs()) {
+                Log.e(LOG_TAG, "saveBitmapToGallery: mkdirs failed: " + dir);
+                return null;
+            }
+            File file = new File(dir, displayName);
+            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
+                bmp.compress(Bitmap.CompressFormat.JPEG, 95, fos);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "saveBitmapToGallery: write failed - " + e);
+                return null;
+            }
+            MediaScannerConnection.scanFile(this,
+                    new String[]{file.getAbsolutePath()}, new String[]{"image/jpeg"},
+                    (p, uri) -> Log.i(LOG_TAG, "saveBitmapToGallery: scan done " + p));
+            return displayName;
+        }
+    }
+
+    // ========== Test cases ==========
+
     public void testCaseOffscreenVideoRendering(View view) {
 
         threadSync();
@@ -74,7 +232,6 @@ public class TestCaseActivity extends AppCompatActivity {
 
                 Log.i(LOG_TAG, "Test case 1 clicked!\n");
 
-                String outputFilename = FileUtil.getPath() + "/blendVideo.mp4";
                 String inputFileName = FileUtil.getTextContent(CameraDemoActivity.lastVideoPathFileName);
                 if (inputFileName == null) {
                     showMsg("No video is recorded, please record one in the 2nd case.");
@@ -82,27 +239,37 @@ public class TestCaseActivity extends AppCompatActivity {
                 }
 
                 Bitmap bmp;
-
                 try {
                     AssetManager am = getAssets();
-                    InputStream is;
-
-                    is = am.open("logo.png");
-
+                    InputStream is = am.open("logo.png");
                     bmp = BitmapFactory.decodeStream(is);
-
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "Can not open blend image file!");
                     bmp = null;
                 }
 
-                //bmp is used for watermark, (just pass null if you don't want that)
-                //and ususally the blend mode is CGE_BLEND_ADDREV for watermarks.
-                CGEFFmpegNativeLibrary.generateVideoWithFilter(outputFilename, inputFileName, "@adjust lut late_sunset.png", 1.0f, bmp, CGENativeLibrary.TextureBlendMode.CGE_BLEND_ADDREV, 1.0f, false);
+                String displayName = "blendVideo_" + System.currentTimeMillis() + ".mp4";
+                Uri[] outUri = {null};
+                ParcelFileDescriptor[] outPfd = {null};
+                String outputPath = createVideoOutputPath(displayName, outUri, outPfd);
 
-                showMsg("Done! The file is generated at: " + outputFilename);
-                Log.i(LOG_TAG, "Done! The file is generated at: " + outputFilename);
-                sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + outputFilename)));
+                if (outputPath == null) {
+                    showMsg("Failed to create output path!");
+                    return;
+                }
+
+                CGEFFmpegNativeLibrary.generateVideoWithFilter(
+                        outputPath, inputFileName,
+                        "@adjust lut late_sunset.png", 1.0f,
+                        bmp, CGENativeLibrary.TextureBlendMode.CGE_BLEND_ADDREV, 1.0f, false);
+
+                String publicPath = needsScopedStorageWrite()
+                        ? "Movies/libCGE/" + displayName
+                        : outputPath;
+                publishVideoToGallery(outUri[0], outPfd[0], outputPath);
+
+                showMsg("Done! Saved to: " + publicPath);
+                Log.i(LOG_TAG, "Done! Saved to: " + publicPath);
             }
         });
 
@@ -122,15 +289,13 @@ public class TestCaseActivity extends AppCompatActivity {
                 SharedContext glContext = SharedContext.create();
                 glContext.makeCurrent();
                 for (int i = 0; i != maxIndex && !mShouldStopThread; ++i) {
-                    //If a gl context is already binded, you should pass true for the last arg, or false otherwise.
-                    //It's better to create a gl context manually, so that the cpp layer will not create it each time when the function is called.
-                    //You can also use CGEImageHandler to do this. (Maybe faster)
                     Bitmap dst = CGENativeLibrary.cgeFilterImageWithCustomFilter(src, i, 1.0f, true, true);
-                    String s = ImageUtil.saveBitmap(dst);
+                    String name = "custom_filter_" + i + "_" + System.currentTimeMillis() + ".jpg";
+                    String saved = saveBitmapToGallery(dst, name);
                     dst.recycle();
-
-                    showMsg("The filter is applied! See it: /sdcard/libCGE/rec_*.jpg");
-                    sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + s)));
+                    showMsg(saved != null
+                            ? "Filter applied! Saved: Pictures/libCGE/" + saved
+                            : "Filter applied but save failed!");
                 }
 
                 glContext.release();
@@ -153,8 +318,6 @@ public class TestCaseActivity extends AppCompatActivity {
                 SharedContext glContext = SharedContext.create();
                 glContext.makeCurrent();
 
-                //You can also use "NativeLibrary.filterImage_MultipleEffects" like the function "testCaseCustomFilter".
-                //But when you use a CGEImageHandler, you can do the filter faster, because the handler will not be created for every filter.
                 CGEImageHandler handler = new CGEImageHandler();
                 handler.initWithBitmap(src);
 
@@ -164,19 +327,19 @@ public class TestCaseActivity extends AppCompatActivity {
                     handler.setFilterWithConfig(filterConfig);
                     handler.processFilters();
 
-                    //To accelerate this, you can add a Bitmap arg for "getResultBitmap",
-                    // and reuse the Bitmap instead of recycle it every time.
                     Bitmap dst = handler.getResultBitmap();
-                    if(dst == null) {
+                    if (dst == null) {
                         Log.e(LOG_TAG, "getResultBitmap returns null!");
                         continue;
                     }
 
-                    String s = ImageUtil.saveBitmap(dst);
-                    dst.recycle();  //Maybe reuse it will be better.
+                    String name = "config_filter_" + i + "_" + System.currentTimeMillis() + ".jpg";
+                    String saved = saveBitmapToGallery(dst, name);
+                    dst.recycle();
 
-                    showMsg("The config " + filterConfig + "is applied! See it: /sdcard/libCGE/rec_*.jpg");
-                    sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + s)));
+                    showMsg(saved != null
+                            ? "Config \"" + filterConfig + "\" applied! Saved: Pictures/libCGE/" + saved
+                            : "Config \"" + filterConfig + "\" applied but save failed!");
                 }
 
                 glContext.release();
