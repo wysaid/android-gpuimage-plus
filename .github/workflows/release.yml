@@ -356,9 +356,9 @@ jobs:
         TAG_NAME="${{ steps.tag_version.outputs.tag_name }}"
 
         if [[ -z "${ARTIFACT_REPO_TOKEN:-}" ]]; then
-          echo "::warning::ARTIFACT_REPO_TOKEN is not set; skipping Maven artifact sync."
-          echo "artifact_commit_url=" >> $GITHUB_OUTPUT
-          exit 0
+          echo "::error::ARTIFACT_REPO_TOKEN is not configured. This secret is required to publish artifacts to the Maven repository."
+          echo "Please add ARTIFACT_REPO_TOKEN to the repository secrets: Settings → Secrets and variables → Actions → New repository secret"
+          exit 1
         fi
 
         ARTIFACT_REPO="wysaid/android-gpuimage-plus-maven"
