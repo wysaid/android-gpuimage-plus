@@ -19,6 +19,10 @@ def testDemoWithGradleLibs() {
     return gradle.ext != null && gradle.ext.has("testDemoWithGradleLibs") && gradle.ext.testDemoWithGradleLibs;
 }
 
+def disableVideoModule() {
+    return gradle.ext != null && gradle.ext.has("disableVideoModule") && gradle.ext.disableVideoModule;
+}
+
 android {
     compileSdkVersion rootProject.ext.android.compileSdkVersion
     buildToolsVersion rootProject.ext.android.buildToolsVersion
@@ -55,7 +59,13 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     if (testDemoWithGradleLibs()) {
-        implementation 'org.wysaid:gpuimage-plus:3.1.1'
+        // Dynamically select the correct AAR variant based on local.properties flags.
+        // This allows testing specific published variants (e.g. 3.1.1-16k-min) from maven.
+        def baseVersion = rootProject.ext.android.versionName
+        def variant = ''
+        if (enable16kPageSizes()) variant += '-16k'
+        if (disableVideoModule()) variant += '-min'
+        implementation "org.wysaid:gpuimage-plus:${baseVersion}${variant}"
     } else {
         implementation project(':library')
     }

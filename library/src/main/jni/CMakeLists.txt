@@ -80,10 +80,11 @@ endif()
 
 target_compile_definitions(CGE PUBLIC ANDROID_NDK=1 CGE_LOG_TAG=\"libCGE\" CGE_TEXTURE_PREMULTIPLIED=1 _CGE_DISABLE_GLOBALCONTEXT_=1 _CGE_ONLY_FILTERS_=1)
 
-# 非 Debug 模式下添加 -O3
+# Add -O3 in non-Debug mode
 target_compile_options(CGE PRIVATE $<$<NOT:$<CONFIG:Debug>>:-O3>)
 
-target_link_options(CGE PUBLIC -fPIE -fPIC -pie -Wl,-z,relro,-z,now)
+# Note: -Wl,-z,relro,-z,now is intentionally omitted here, fixing issue: <https://github.com/wysaid/android-gpuimage-plus/issues/562>
+# Android API 23+ enforces full RELRO by default; no explicit linker hardening flags are needed.
 
 target_link_libraries(CGE PUBLIC
     GLESv2
