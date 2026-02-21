@@ -32,6 +32,9 @@ public class FileUtil {
     public static void init(Context context) {
         if (context != null) {
             sAppContext = context.getApplicationContext();
+            // Invalidate the cached path so the next getPath() call re-resolves
+            // using the updated context (e.g. after switching from internal to external storage).
+            storagePath = null;
         }
     }
 

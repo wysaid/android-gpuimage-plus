@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(final View v) {
 
-            if (mDemo.activityName == "FaceTrackingDemoActivity") {
+            if ("FaceTrackingDemoActivity".equals(mDemo.activityName)) {
                 MsgUtil.toastMsg(v.getContext(), "Error: Please checkout the branch 'face_features' for this demo!");
                 return;
             }
@@ -244,12 +244,11 @@ public class MainActivity extends AppCompatActivity {
                 if (cls != null) {
                     Intent intent = new Intent(MainActivity.this, cls);
 
-                    // Pass camera API selection only to explicitly supported activities
-                    if ("CameraDemoActivity".equals(mDemo.activityName)) {
-                        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-                        String api = prefs.getString(PREFS_KEY_CAMERA_API, CAMERA_API_CAMERA1);
-                        intent.putExtra(EXTRA_CAMERA_API, api);
-                    }
+                    // Pass camera API selection to all activities; those that don't use it
+                    // will simply ignore the extra.
+                    SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                    String api = prefs.getString(PREFS_KEY_CAMERA_API, CAMERA_API_CAMERA1);
+                    intent.putExtra(EXTRA_CAMERA_API, api);
 
                     startActivity(intent);
                 }

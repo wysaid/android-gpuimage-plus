@@ -252,8 +252,14 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
     @Override
     protected void onSwitchCamera() {
         super.onSwitchCamera();
-        if(mFrameRecorder != null) {
-            mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
+        if (mFrameRecorder != null) {
+            // Only apply Camera1-style manual rotation when the provider requires it.
+            // CameraX handles its own rotation internally; applying PI/2 there breaks orientation.
+            if (getCameraProvider().needsManualRotation()) {
+                mFrameRecorder.setSrcRotation((float) (Math.PI / 2.0));
+            } else {
+                mFrameRecorder.setSrcRotation(0.0f);
+            }
             mFrameRecorder.setRenderFlipScale(1.0f, -1.0f);
         }
     }

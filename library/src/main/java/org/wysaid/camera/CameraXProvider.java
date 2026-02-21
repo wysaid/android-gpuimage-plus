@@ -11,6 +11,7 @@ import android.util.Size;
 import android.view.Surface;
 
 import androidx.camera.camera2.interop.Camera2Interop;
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop;
 
 import androidx.annotation.NonNull;
 import androidx.camera.core.Camera;
@@ -24,6 +25,8 @@ import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.core.SurfaceRequest;
+import androidx.camera.core.resolutionselector.ResolutionSelector;
+import androidx.camera.core.resolutionselector.ResolutionStrategy;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
@@ -34,6 +37,8 @@ import org.wysaid.common.Common;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * CameraX implementation of {@link ICameraProvider}.
@@ -77,6 +82,9 @@ public class CameraXProvider implements ICameraProvider {
     private boolean mPictureSizeBigger = true;
     private FlashMode mFlashMode = FlashMode.OFF;
 
+    /** Single-thread executor used to process captured images off the main thread. */
+    private final ExecutorService mCaptureExecutor = Executors.newSingleThreadExecutor();
+
     public CameraXProvider(@NonNull Context context) {
         mContext = context.getApplicationContext();
     }
@@ -108,8 +116,11 @@ public class CameraXProvider implements ICameraProvider {
                 if (callback != null) {
                     callback.cameraReady();
                 }
-            } catch (ExecutionException | InterruptedException e) {
+            } catch (ExecutionException e) {
                 Log.e(LOG_TAG, "CameraX: Failed to get ProcessCameraProvider: " + e.toString());
+            } catch (InterruptedException e) {
+                Log.e(LOG_TAG, "CameraX: Failed to get ProcessCameraProvider: " + e.toString());
+                Thread.currentThread().interrupt();
             }
         }, ContextCompat.getMainExecutor(mContext));
 
@@ -346,11 +357,11 @@ public class CameraXProvider implements ICameraProvider {
             shutterCallback.onShutter();
         }
 
-        mImageCapture.takePicture(ContextCompat.getMainExecutor(mContext),
+        mImageCapture.takePicture(mCaptureExecutor,
                 new ImageCapture.OnImageCapturedCallback() {
                     @Override
                     public void onCaptureSuccess(@NonNull ImageProxy image) {
-                        // Convert ImageProxy to JPEG bytes
+                        // Convert ImageProxy to JPEG bytes on the background thread.
                         byte[] jpegData = imageProxyToJpeg(image);
                         int rotation = image.getImageInfo().getRotationDegrees();
                         image.close();
@@ -377,6 +388,7 @@ public class CameraXProvider implements ICameraProvider {
 
     // ========== Internal ==========
 
+    @androidx.annotation.OptIn(markerClass = ExperimentalCamera2Interop.class)
     private void bindCamera() {
         if (mCameraProvider == null || mLifecycleOwner == null || mSurfaceTexture == null) {
             return;
@@ -391,13 +403,16 @@ public class CameraXProvider implements ICameraProvider {
 
             // Build Preview use case with target resolution
             Preview.Builder previewBuilder = new Preview.Builder();
-            previewBuilder.setTargetResolution(
-                    new Size(mPreferredPreviewWidth, mPreferredPreviewHeight));
+            ResolutionSelector previewResolutionSelector = new ResolutionSelector.Builder()
+                    .setResolutionStrategy(new ResolutionStrategy(
+                            new Size(mPreferredPreviewWidth, mPreferredPreviewHeight),
+                            ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER))
+                    .build();
+            previewBuilder.setResolutionSelector(previewResolutionSelector);
 
             // Request high frame rate (up to 60fps) to match Camera1 behavior.
             // Camera2Interop allows setting Camera2 capture-request options on CameraX use cases.
             // Using Range(30, 60) so the camera picks the best rate it supports.
-            @SuppressWarnings("unchecked")
             Camera2Interop.Extender<Preview> extender = new Camera2Interop.Extender<>(previewBuilder);
             extender.setCaptureRequestOption(
                     CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new Range<>(30, 60));
@@ -432,7 +447,12 @@ public class CameraXProvider implements ICameraProvider {
 
             // Build ImageCapture use case
             ImageCapture.Builder captureBuilder = new ImageCapture.Builder();
-            captureBuilder.setTargetResolution(new Size(mPictureWidth, mPictureHeight));
+            ResolutionSelector captureResolutionSelector = new ResolutionSelector.Builder()
+                    .setResolutionStrategy(new ResolutionStrategy(
+                            new Size(mPictureWidth, mPictureHeight),
+                            ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER))
+                    .build();
+            captureBuilder.setResolutionSelector(captureResolutionSelector);
 
             // Apply current flash mode
             switch (mFlashMode) {
@@ -492,6 +512,10 @@ public class CameraXProvider implements ICameraProvider {
 
     /**
      * Convert ImageProxy (YUV_420_888) to YuvImage (NV21).
+     *
+     * <p>Correctly handles the case where a plane's {@code rowStride} is wider than the image
+     * width (padding rows), by copying exactly {@code width} bytes per row for the Y plane and
+     * using {@code rowStride}/{@code pixelStride} offsets for the chroma planes.
      */
     private android.graphics.YuvImage imageProxyToYuvImage(ImageProxy image) {
         if (image.getFormat() != android.graphics.ImageFormat.YUV_420_888) {
@@ -503,47 +527,42 @@ public class CameraXProvider implements ICameraProvider {
         int width = image.getWidth();
         int height = image.getHeight();
 
-        // Y plane
+        int yRowStride = planes[0].getRowStride();
+        int chromaRowStride = planes[1].getRowStride();
+        int chromaPixelStride = planes[1].getPixelStride();
+
         ByteBuffer yBuffer = planes[0].getBuffer();
-        // U plane
         ByteBuffer uBuffer = planes[1].getBuffer();
-        // V plane
         ByteBuffer vBuffer = planes[2].getBuffer();
 
-        int ySize = yBuffer.remaining();
-        int uSize = uBuffer.remaining();
+        byte[] nv21 = new byte[width * height * 3 / 2];
+
+        // Copy Y plane row-by-row to strip any row-stride padding.
+        for (int row = 0; row < height; row++) {
+            yBuffer.position(row * yRowStride);
+            yBuffer.get(nv21, row * width, width);
+        }
+
+        // Read the full V and U plane buffers (may contain padding).
         int vSize = vBuffer.remaining();
-
-        byte[] nv21 = new byte[ySize + width * height / 2];
-
-        // Copy Y
-        yBuffer.get(nv21, 0, ySize);
-
-        // Interleave V and U (NV21 = YYYYVUVU)
+        int uSize = uBuffer.remaining();
         byte[] vData = new byte[vSize];
         byte[] uData = new byte[uSize];
+        vBuffer.rewind();
         vBuffer.get(vData);
+        uBuffer.rewind();
         uBuffer.get(uData);
 
-        int uvIndex = ySize;
-        int pixelStride = planes[1].getPixelStride();
-
-        if (pixelStride == 2) {
-            // Already interleaved (common case)
-            // V plane in NV21 comes first, but the interleaved buffer from CameraX
-            // may already be in the right order if the V plane starts first
-            for (int i = 0; i < vSize && uvIndex < nv21.length; i += pixelStride) {
-                nv21[uvIndex++] = vData[i];
-                if (i < uSize && uvIndex < nv21.length) {
-                    nv21[uvIndex++] = uData[i];
+        // Interleave V then U into NV21, using per-pixel and per-row strides to skip padding.
+        int uvIndex = width * height;
+        for (int row = 0; row < height / 2; row++) {
+            for (int col = 0; col < width / 2; col++) {
+                int srcOffset = row * chromaRowStride + col * chromaPixelStride;
+                if (srcOffset < vSize && uvIndex < nv21.length) {
+                    nv21[uvIndex++] = vData[srcOffset];
                 }
-            }
-        } else {
-            // Pixel stride == 1, need to manually interleave
-            for (int i = 0; i < vSize && uvIndex < nv21.length; i++) {
-                nv21[uvIndex++] = vData[i];
-                if (i < uSize && uvIndex < nv21.length) {
-                    nv21[uvIndex++] = uData[i];
+                if (srcOffset < uSize && uvIndex < nv21.length) {
+                    nv21[uvIndex++] = uData[srcOffset];
                 }
             }
         }

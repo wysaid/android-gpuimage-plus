@@ -52,21 +52,26 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     protected int mRecordHeight = 640;
 
     /** The camera provider instance. Defaults to Camera1 for backward compatibility. */
-    protected ICameraProvider mCameraProvider;
+    protected volatile ICameraProvider mCameraProvider;
 
     /**
      * Set a custom camera provider (e.g., CameraX). Should be called before the surface is created.
      *
      * @param provider The camera provider to use.
      */
-    public void setCameraProvider(ICameraProvider provider) {
+    public synchronized void setCameraProvider(ICameraProvider provider) {
         mCameraProvider = provider;
+        if (provider != null) {
+            // Forward any previously configured recording size to the new provider
+            // so that presetRecordingSize() calls made before setCameraProvider() take effect.
+            provider.setPreferredPreviewSize(mRecordWidth, mRecordHeight);
+        }
     }
 
     /**
      * Get the current camera provider. Creates a default Camera1Provider if none was set.
      */
-    public ICameraProvider getCameraProvider() {
+    public synchronized ICameraProvider getCameraProvider() {
         if (mCameraProvider == null) {
             mCameraProvider = new Camera1Provider();
         }
@@ -84,7 +89,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
      * Set flash mode using {@link ICameraProvider.FlashMode} enum.
      * Preferred over {@link #setFlashLightMode(String)}.
      */
-    public boolean setFlashMode(ICameraProvider.FlashMode mode) {
+    public synchronized boolean setFlashMode(ICameraProvider.FlashMode mode) {
         if (!getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
             Log.e(LOG_TAG, "No flash light is supported by current device!");
             return false;
@@ -233,11 +238,20 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     /**
      * @deprecated Use {@link #focusAtPoint(float, float, ICameraProvider.AutoFocusCallback)} instead.
+     * Note: the legacy {@link Camera} argument passed to the callback may be null if the
+     * active provider does not expose a Camera1 device. Use
+     * {@link #focusAtPoint(float, float, ICameraProvider.AutoFocusCallback)} to avoid NPE
+     * and to call {@link ICameraProvider#resumePreviewAfterCapture()} explicitly.
      */
     @Deprecated
     public void focusAtPoint(float x, float y, Camera.AutoFocusCallback focusCallback) {
-        getCameraProvider().focusAtPoint(y, 1.0f - x, 0.2f,
-                focusCallback != null ? success -> focusCallback.onAutoFocus(success, null) : null);
+        final ICameraProvider provider = getCameraProvider();
+        // Retrieve the Camera1 device (null for CameraX) and pass to legacy callback.
+        final Camera legacyCamera = (provider instanceof Camera1Provider)
+                ? ((Camera1Provider) provider).getCameraInstance().getCameraDevice()
+                : null;
+        provider.focusAtPoint(y, 1.0f - x, 0.2f,
+                focusCallback != null ? success -> focusCallback.onAutoFocus(success, legacyCamera) : null);
     }
 
     @Override

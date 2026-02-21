@@ -115,6 +115,12 @@ public class CameraDemoActivity extends AppCompatActivity {
                 btn.setText("Recording");
                 Log.i(LOG_TAG, "Start recording...");
                 recordFilename = createVideoOutputPath();
+                if (recordFilename == null) {
+                    Log.e(LOG_TAG, "Failed to create video output path");
+                    showText("Failed to create output path");
+                    isValid = true;
+                    return;
+                }
                 mCameraView.startRecording(recordFilename, new CameraRecordGLSurfaceView.StartRecordingCallback() {
                     @Override
                     public void startRecordingOver(boolean success) {
@@ -531,7 +537,10 @@ public class CameraDemoActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        mCameraView.getCameraProvider().closeCamera();
+        ICameraProvider provider = mCameraView.getCameraProvider();
+        if (provider != null) {
+            provider.closeCamera();
+        }
         Log.i(LOG_TAG, "activity onPause...");
         mCameraView.release(null);
         mCameraView.onPause();

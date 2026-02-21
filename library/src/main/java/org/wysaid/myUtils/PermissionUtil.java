@@ -58,19 +58,22 @@ public class PermissionUtil {
     public static void verifyStoragePermissions(Activity activity) {
         try {
             String[] permissions = getRequiredPermissions();
+            java.util.List<String> missingPermissions = new java.util.ArrayList<>();
             StringBuilder toastText = null;
             for (int i = 0; i != permissions.length; ++i) {
                 int reqCode = ActivityCompat.checkSelfPermission(activity, permissions[i]);
                 if (reqCode != PackageManager.PERMISSION_GRANTED) {
+                    missingPermissions.add(permissions[i]);
                     if (toastText == null) {
                         toastText = new StringBuilder("Request permission");
                     }
                     toastText.append(" ").append(permissions[i]);
                 }
             }
-            if (toastText != null) {
+            if (toastText != null && !missingPermissions.isEmpty()) {
                 Toast.makeText(activity, toastText.toString(), Toast.LENGTH_LONG).show();
-                ActivityCompat.requestPermissions(activity, permissions, REQUEST_PERMISSION);
+                ActivityCompat.requestPermissions(activity,
+                        missingPermissions.toArray(new String[0]), REQUEST_PERMISSION);
             }
         } catch (Exception e) {
             Log.e(Common.LOG_TAG, "Error: " + e.getMessage());
