@@ -1,31 +1,33 @@
 ---
 name: pr-review
-description: Address review comments from GitHub PR using gh CLI and resolve feedback
+description: Address review comments and CI failures for the current branch's PR
 ---
-
-## When to use
-
-- Current branch has a PR with review comments requiring responses
-- Need to systematically evaluate and resolve reviewer feedback
 
 ## Constraints
 
-- **ALWAYS** set `PAGER=cat` before calling `gh` to avoid pagination issues
-- Use `gh pr view <PR_NUMBER> --comments` to fetch review comments
-- Use `gh pr list --head <CURRENT_BRANCH>` to find the PR number for the current branch
+- Prepend `GH_PAGER=` to every `gh` command (bash/zsh), or set `$env:GH_PAGER=""` in PowerShell — never modify global config
+- Key commands: `gh pr list --head <BRANCH>` · `gh pr view <PR> --comments` · `gh pr checks <PR>` · `gh run view <RUN_ID> --log-failed`
+- Workflow fixes **cannot be verified locally** — the fix is only confirmed once the remote CI re-runs and passes
 
 ## Procedure
 
-1. **Find Issues**: Use `gh` to locate the PR for current branch and retrieve all review comments
-2. **Evaluate**: Analyze each comment in project context:
-   - If valid: implement the necessary code improvements
-   - If invalid: document reasons and address any underlying real issues
-3. **Summarize**: Provide a summary covering:
-   - Valid points and how they were resolved
-   - Invalid points and reasons for rejection  
-   - Any additional issues discovered and fixed
-4. **Commit**: Generate commit message, then `git commit` and `git push`
+1. **Locate PR** — get PR number for current branch
+2. **Fix CI failures** — for each failing check:
+   - Fetch logs: `gh run view <RUN_ID> --log-failed`
+   - **Workflow issue** (wrong config, missing step, bad path):
+     1. Fix `.github/workflows/` directly
+     2. Commit & push the workflow change
+     3. Wait for the re-triggered run to complete: poll with `GH_PAGER= gh pr checks <PR>` (or `GH_PAGER= gh run watch <RUN_ID>`) until the affected check finishes
+     4. If it **passes** → continue to the next failing check
+     5. If it **still fails** → fetch new logs (`gh run view <NEW_RUN_ID> --log-failed`) and repeat from step i
+   - **Code issue, non-breaking**: fix source code directly
+   - **Code issue, breaking change required**: stop and report to developer for a decision
+3. **Address review comments** — implement valid feedback; document why invalid ones are rejected
+4. **Commit & push** — single commit covering all non-workflow fixes (workflow fixes are pushed incrementally during step 2)
+5. **Final verification** — once all fixes are applied, confirm every check is green: `GH_PAGER= gh pr checks <PR>`
 
 ## Output
 
-- Clear mapping between review comments and their resolutions
+- Per CI failure: root cause and resolution (or escalation reason)
+- Per review comment: resolution or rejection reason
+- After all fixes: summary of check statuses confirming all green
