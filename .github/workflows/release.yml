@@ -142,6 +142,31 @@ jobs:
         echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
         echo "✅ Valid version: $VERSION (tag: $TAG_NAME, prerelease: $IS_PRERELEASE, manual: $IS_MANUAL, publish: $IS_PUBLISH)"
     
+    - name: Validate tag is on master branch (official releases only)
+      if: steps.tag_version.outputs.is_prerelease == 'false'
+      run: |
+        TAG_NAME="${{ steps.tag_version.outputs.tag_name }}"
+
+        echo "🔍 Validating that $TAG_NAME points to a commit on the master branch..."
+
+        # Resolve the commit the tag points to (dereference annotated tags)
+        TAG_COMMIT=$(git rev-parse "${TAG_NAME}^{commit}")
+        echo "Tag commit: $TAG_COMMIT"
+
+        # Fetch latest master to ensure our ref is up to date
+        git fetch origin master --depth=100 2>/dev/null || true
+
+        # Check whether TAG_COMMIT is reachable from origin/master
+        if git merge-base --is-ancestor "$TAG_COMMIT" origin/master 2>/dev/null; then
+          echo "✅ $TAG_NAME is on the master branch"
+        else
+          echo "❌ $TAG_NAME is NOT on the master branch!"
+          echo "Official release tags must point to a commit that exists in master."
+          echo "Tag commit : $TAG_COMMIT"
+          echo "Please create the tag from the master branch and try again."
+          exit 1
+        fi
+
     - name: Validate version matches project version
       run: |
         PROJECT_VERSION=$(grep -E 'versionName\s*:' build.gradle | sed -E 's/.*versionName\s*:\s*"([^"]+)".*/\1/')
@@ -511,7 +536,7 @@ jobs:
           /tmp/release-artifacts/*.aar
           /tmp/release-artifacts/SHA256SUMS.txt
           /tmp/release-artifacts/*.sha256
-        draft: false
+        draft: true
         prerelease: ${{ steps.tag_version.outputs.is_prerelease == 'true' }}
         generate_release_notes: true
         make_latest: ${{ steps.tag_version.outputs.is_prerelease != 'true' }}
@@ -566,7 +591,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Built Artifacts (available for download):" >> $GITHUB_STEP_SUMMARY
         else
-          echo "## 🎉 Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "## 🎉 Release Draft Created Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Release**: $TAG_NAME" >> $GITHUB_STEP_SUMMARY
           echo "**Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
@@ -592,7 +617,9 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         
         if [ "$IS_PUBLISH" = "true" ]; then
-          echo "Release page: ${{ github.server_url }}/${{ github.repository }}/releases/tag/$TAG_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "Release draft (pending human review): ${{ github.server_url }}/${{ github.repository }}/releases/tag/$TAG_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**⚠️ Action required**: Go to the releases page, review the draft, then click *Publish release* to make it public." >> $GITHUB_STEP_SUMMARY
         fi
 
         ARTIFACT_PR_URL="${{ steps.sync_maven_repo.outputs.artifact_pr_url }}"
