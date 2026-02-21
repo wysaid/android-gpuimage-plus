@@ -1,6 +1,10 @@
 
 ====== Changelist =========
 
+# 2026-2 Version 3.1.2 #
+
+1. Fix UnsatisfiedLinkError crash on 16KB-page-size builds (Samsung S21+ / Android 14): remove redundant `-Wl,-z,relro,-z,now` linker flags from CMakeLists.txt. Android API 23+ enforces full RELRO by default; the explicit flags caused `PT_GNU_RELRO MemSiz` to exceed the mapped RW LOAD segment on 16KB-aligned builds, triggering an `mprotect()` failure with `ENOMEM`. (Fixes #562)
+
 # 2018-6 Version 2.5.0 #
 
 1. Add class `org.wysaid.view.CameraGLSurfaceViewWithBuffer` to do camera preview with buffer.
