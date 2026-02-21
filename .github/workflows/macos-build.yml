@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(github.event_name == 'pull_request' && '[{"os":"macos-latest","os-name":"macOS","ndk":"r27c","build-system":"ndk-build","ffmpeg":"no-ffmpeg","page-size":"4kb"}]' || '[{"os":"macos-latest","os-name":"macOS","ndk":"r26d","build-system":"cmake","ffmpeg":"with-ffmpeg","page-size":"4kb"},{"os":"macos-latest","os-name":"macOS","ndk":"r26d","build-system":"cmake","ffmpeg":"with-ffmpeg","page-size":"16kb"},{"os":"macos-latest","os-name":"macOS","ndk":"r26d","build-system":"cmake","ffmpeg":"no-ffmpeg","page-size":"4kb"},{"os":"macos-latest","os-name":"macOS","ndk":"r26d","build-system":"cmake","ffmpeg":"no-ffmpeg","page-size":"16kb"},{"os":"macos-latest","os-name":"macOS","ndk":"r27c","build-system":"cmake","ffmpeg":"with-ffmpeg","page-size":"4kb"},{"os":"macos-latest","os-name":"macOS","ndk":"r27c","build-system":"cmake","ffmpeg":"with-ffmpeg","page-size":"16kb"},{"os":"macos-latest","os-name":"macOS","ndk":"r27c","build-system":"cmake","ffmpeg":"no-ffmpeg","page-size":"4kb"},{"os":"macos-latest","os-name":"macOS","ndk":"r27c","build-system":"cmake","ffmpeg":"no-ffmpeg","page-size":"16kb"}]') }}
+        include: ${{ fromJson(github.event_name == 'pull_request' && '[{"os":"macos-latest","os-name":"macOS","ndk":"r29","build-system":"ndk-build","ffmpeg":"no-ffmpeg","page-size":"4kb"}]' || '[{"os":"macos-latest","os-name":"macOS","ndk":"r27c","build-system":"cmake","ffmpeg":"with-ffmpeg","page-size":"4kb"},{"os":"macos-latest","os-name":"macOS","ndk":"r27c","build-system":"cmake","ffmpeg":"with-ffmpeg","page-size":"16kb"},{"os":"macos-latest","os-name":"macOS","ndk":"r27c","build-system":"cmake","ffmpeg":"no-ffmpeg","page-size":"4kb"},{"os":"macos-latest","os-name":"macOS","ndk":"r27c","build-system":"cmake","ffmpeg":"no-ffmpeg","page-size":"16kb"},{"os":"macos-latest","os-name":"macOS","ndk":"r29","build-system":"cmake","ffmpeg":"with-ffmpeg","page-size":"4kb"},{"os":"macos-latest","os-name":"macOS","ndk":"r29","build-system":"cmake","ffmpeg":"with-ffmpeg","page-size":"16kb"},{"os":"macos-latest","os-name":"macOS","ndk":"r29","build-system":"cmake","ffmpeg":"no-ffmpeg","page-size":"4kb"},{"os":"macos-latest","os-name":"macOS","ndk":"r29","build-system":"cmake","ffmpeg":"no-ffmpeg","page-size":"16kb"}]') }}
     
     steps:
     - name: Checkout code
@@ -35,7 +35,7 @@ jobs:
         NDK_FLAVOR="${{ matrix.ndk }}"
         NDK_FLAVOR=$(printf "%s" "$NDK_FLAVOR" | tr -d '\r\n')
         case "$NDK_FLAVOR" in
-          r26d*) NDK_VERSION="26.2.11394342" ;;
+          r29*) NDK_VERSION="29.0.14206865" ;;
           r27c*) NDK_VERSION="27.2.12479018" ;;
           *)
             echo "Error: Unsupported NDK version $NDK_FLAVOR"

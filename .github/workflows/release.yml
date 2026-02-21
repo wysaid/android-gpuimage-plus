@@ -10,14 +10,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag to build (e.g., v3.1.1 or v3.1.1-beta1). Must be an existing tag. Prerelease tags will be published to Release page.'
+        description: 'Version number to build (e.g., v3.1.1 or v3.1.1-beta1). Tag does not need to exist — this is a dry-run: artifacts are saved in the workflow run only, nothing is published.'
         required: true
         type: string
-      publish_release:
-        description: 'Publish to GitHub Release page (only effective for non-master branches / test purposes)'
-        required: false
-        type: boolean
-        default: false
 
 concurrency:
   group: release-${{ github.ref }}
@@ -41,7 +36,7 @@ jobs:
       uses: nttld/setup-ndk@v1.4.2
       id: setup-ndk
       with:
-        ndk-version: r26d
+        ndk-version: r27c
         link-to-sdk: true
         add-to-path: true
     
@@ -74,7 +69,6 @@ jobs:
       env:
         EVENT_NAME: ${{ github.event_name }}
         INPUT_VERSION: ${{ github.event.inputs.version }}
-        INPUT_PUBLISH: ${{ github.event.inputs.publish_release }}
       run: |
         # Determine if this is a manual trigger or tag push
         if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
@@ -92,15 +86,8 @@ jobs:
           VERSION="${RAW_VERSION#v}"
           TAG_NAME="v$VERSION"
           IS_MANUAL="true"
-
-          # Determine if we should publish to Release page
-          if [ "$INPUT_PUBLISH" = "true" ]; then
-            IS_PUBLISH="true"
-            echo "📢 Manual trigger with publish enabled"
-          else
-            IS_PUBLISH="false"
-            echo "🔧 Manual trigger detected (artifacts only, no Release page publish)"
-          fi
+          IS_PUBLISH="false"
+          echo "🔧 Dry-run triggered manually (artifacts only, nothing published)"
         else
           # Tag push - extract from ref
           TAG_NAME="${GITHUB_REF#refs/tags/}"
@@ -142,6 +129,37 @@ jobs:
         echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
         echo "✅ Valid version: $VERSION (tag: $TAG_NAME, prerelease: $IS_PRERELEASE, manual: $IS_MANUAL, publish: $IS_PUBLISH)"
     
+    - name: Validate tag is on master branch (official releases only)
+      if: steps.tag_version.outputs.is_prerelease == 'false' && steps.tag_version.outputs.is_manual == 'false'
+      run: |
+        TAG_NAME="${{ steps.tag_version.outputs.tag_name }}"
+
+        echo "🔍 Validating that $TAG_NAME points to a commit on the master branch..."
+
+        # Resolve the commit the tag points to (dereference annotated tags)
+        if ! TAG_COMMIT=$(git rev-parse "${TAG_NAME}^{commit}" 2>/dev/null); then
+          echo "❌ Could not resolve tag commit for $TAG_NAME — does the tag exist in this repo?"
+          exit 1
+        fi
+        echo "Tag commit: $TAG_COMMIT"
+
+        # Fetch latest master to ensure our ref is up to date (full fetch, no shallow boundary)
+        if ! git fetch origin master; then
+          echo "❌ Failed to fetch origin/master. Cannot validate that $TAG_NAME is on the master branch."
+          exit 1
+        fi
+
+        # Check whether TAG_COMMIT is reachable from origin/master
+        if git merge-base --is-ancestor "$TAG_COMMIT" origin/master; then
+          echo "✅ $TAG_NAME is on the master branch"
+        else
+          echo "❌ $TAG_NAME is NOT on the master branch!"
+          echo "Official release tags must point to a commit that exists in master."
+          echo "Tag commit : $TAG_COMMIT"
+          echo "Please create the tag from the master branch and try again."
+          exit 1
+        fi
+
     - name: Validate version matches project version
       run: |
         PROJECT_VERSION=$(grep -E 'versionName\s*:' build.gradle | sed -E 's/.*versionName\s*:\s*"([^"]+)".*/\1/')
@@ -332,7 +350,7 @@ jobs:
         
         echo "✅ Individual checksum files created"
 
-    - name: Sync artifacts to maven repo and open PR
+    - name: Sync artifacts to maven repo
       if: steps.tag_version.outputs.is_publish == 'true'
       id: sync_maven_repo
       env:
@@ -344,15 +362,14 @@ jobs:
         TAG_NAME="${{ steps.tag_version.outputs.tag_name }}"
 
         if [[ -z "${ARTIFACT_REPO_TOKEN:-}" ]]; then
-          echo "::warning::ARTIFACT_REPO_TOKEN is not set; skipping Maven artifact sync."
-          echo "artifact_pr_url=" >> $GITHUB_OUTPUT
-          exit 0
+          echo "::error::ARTIFACT_REPO_TOKEN is not configured. This secret is required to publish artifacts to the Maven repository."
+          echo "Please add ARTIFACT_REPO_TOKEN to the repository secrets: Settings → Secrets and variables → Actions → New repository secret"
+          exit 1
         fi
 
         ARTIFACT_REPO="wysaid/android-gpuimage-plus-maven"
         WORKDIR="/tmp/maven-repo-target"
         SOURCE_REPO="/tmp/maven-repo"
-        BRANCH="sync/v${VERSION}"
 
         echo "🔄 Cloning artifact repo..."
         git clone --depth 1 "https://${ARTIFACT_REPO_TOKEN}@github.com/${ARTIFACT_REPO}.git" "$WORKDIR"
@@ -376,42 +393,34 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-        git checkout -b "$BRANCH"
         git add org/wysaid/gpuimage-plus || true
 
-        echo "artifact_pr_url=" >> $GITHUB_OUTPUT
+        echo "artifact_commit_url=" >> $GITHUB_OUTPUT
 
         if git diff --cached --quiet; then
-          echo "ℹ️ No changes to publish; skipping PR."
+          echo "ℹ️ No changes to publish; skipping commit."
+          popd
           exit 0
         fi
 
         git commit -m "Publish artifacts ${TAG_NAME}"
-        git push origin "$BRANCH"
 
-        echo "📝 Creating pull request..."
-        PR_BODY=$(printf "Automated artifact sync for %s.\n\nGenerated by main repo release workflow." "$TAG_NAME")
-        API_JSON=$(jq -n --arg title "Publish ${TAG_NAME} artifacts" \
-                        --arg head "$BRANCH" \
-                        --arg base "master" \
-                        --arg body "$PR_BODY" \
-                        '{title:$title, head:$head, base:$base, body:$body}')
+        # Retry push up to 3 times to handle transient non-fast-forward conflicts
+        PUSH_ATTEMPTS=0
+        until git push origin master; do
+          PUSH_ATTEMPTS=$((PUSH_ATTEMPTS + 1))
+          if [ "$PUSH_ATTEMPTS" -ge 3 ]; then
+            echo "::error::Maven artifact push failed after $PUSH_ATTEMPTS attempts (possible concurrent push). Re-run the sync step manually for tag $TAG_NAME."
+            exit 1
+          fi
+          echo "⚠️ Push attempt $PUSH_ATTEMPTS failed; retrying after fetch+rebase..."
+          git fetch origin master && git rebase origin/master
+        done
 
-        PR_RESPONSE=$(curl -sS -X POST \
-          -H "Authorization: token ${ARTIFACT_REPO_TOKEN}" \
-          -H "Accept: application/vnd.github+json" \
-          -d "$API_JSON" \
-          "https://api.github.com/repos/${ARTIFACT_REPO}/pulls")
-
-        echo "PR response: $PR_RESPONSE"
-        PR_URL=$(echo "$PR_RESPONSE" | jq -r '.html_url')
-        if [[ "$PR_URL" == "null" || -z "$PR_URL" ]]; then
-          echo "❌ Failed to create PR"
-          exit 1
-        fi
-
-        echo "✅ PR created: $PR_URL"
-        echo "artifact_pr_url=$PR_URL" >> $GITHUB_OUTPUT
+        COMMIT_SHA=$(git rev-parse HEAD)
+        COMMIT_URL="https://github.com/${ARTIFACT_REPO}/commit/${COMMIT_SHA}"
+        echo "✅ Artifacts pushed to maven repo: $COMMIT_URL"
+        echo "artifact_commit_url=$COMMIT_URL" >> $GITHUB_OUTPUT
         popd
     
     - name: Generate release notes
@@ -483,7 +492,7 @@ jobs:
         
         - **Minimum Android SDK**: API 21 (Android 5.0)
         - **Target Android SDK**: API 25
-        - **NDK Version**: r26d
+        - **NDK Version**: r27c
         - **Supported Architectures**: armeabi-v7a, arm64-v8a, x86, x86_64
         
         ### 📚 Documentation
@@ -511,7 +520,7 @@ jobs:
           /tmp/release-artifacts/*.aar
           /tmp/release-artifacts/SHA256SUMS.txt
           /tmp/release-artifacts/*.sha256
-        draft: false
+        draft: true
         prerelease: ${{ steps.tag_version.outputs.is_prerelease == 'true' }}
         generate_release_notes: true
         make_latest: ${{ steps.tag_version.outputs.is_prerelease != 'true' }}
@@ -536,9 +545,9 @@ jobs:
         echo "📦 Version: ${{ steps.tag_version.outputs.version }}"
         echo "📦 Artifacts are available for download from the workflow run."
         echo ""
-        echo "⚠️  Note: publish_release was not set to true."
-        echo "⚠️  Artifacts are NOT published to the Release page."
-        echo "⚠️  To publish, re-run with publish_release=true or push a tag."
+        echo "ℹ️  This was a manual dry-run — nothing was published."
+        echo "ℹ️  To make a real release, push the tag from master:"
+        echo "      git tag ${{ steps.tag_version.outputs.tag_name }} && git push origin ${{ steps.tag_version.outputs.tag_name }}"
         echo ""
         echo "📦 Built artifacts:"
         ls -lh /tmp/release-artifacts/
@@ -551,28 +560,26 @@ jobs:
         TAG_NAME="${{ steps.tag_version.outputs.tag_name }}"
         
         if [ "$IS_PUBLISH" != "true" ]; then
-          echo "## 🔧 Build-Only Mode Completed Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔧 Dry-Run Build Completed Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
-          echo "**Trigger**: Manual (workflow_dispatch, publish_release=false)" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger**: Manual dry-run (workflow_dispatch)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ⚠️ Note" >> $GITHUB_STEP_SUMMARY
-          echo "Artifacts are **NOT published** to the Release page (publish_release was false)." >> $GITHUB_STEP_SUMMARY
+          echo "### ℹ️ Nothing was published" >> $GITHUB_STEP_SUMMARY
+          echo "Artifacts are retained in this workflow run for **7 days**." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "To publish to Release page, re-run with **publish_release=true**, or push a tag:" >> $GITHUB_STEP_SUMMARY
+          echo "To make a real release, push the tag from master:" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "git push origin $TAG_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "git tag $TAG_NAME && git push origin $TAG_NAME" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Built Artifacts (available for download):" >> $GITHUB_STEP_SUMMARY
         else
-          echo "## 🎉 Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "## 🎉 Release Draft Created Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Release**: $TAG_NAME" >> $GITHUB_STEP_SUMMARY
           echo "**Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
-          if [ "$IS_MANUAL" = "true" ]; then
-            echo "**Trigger**: Manual (workflow_dispatch, publish_release=true)" >> $GITHUB_STEP_SUMMARY
-          fi
+          echo "**Trigger**: Tag push" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ✅ Version Validation" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Tag format validated: v\${major}.\${minor}.\${patch}" >> $GITHUB_STEP_SUMMARY
@@ -592,14 +599,18 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         
         if [ "$IS_PUBLISH" = "true" ]; then
-          echo "Release page: ${{ github.server_url }}/${{ github.repository }}/releases/tag/$TAG_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "Review and publish the draft release: ${{ github.server_url }}/${{ github.repository }}/releases" >> $GITHUB_STEP_SUMMARY
+          echo "(Draft tag: $TAG_NAME)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**⚠️ Action required**: Go to the releases page, review the draft, then click *Publish release* to make it public." >> $GITHUB_STEP_SUMMARY
         fi
 
-        ARTIFACT_PR_URL="${{ steps.sync_maven_repo.outputs.artifact_pr_url }}"
-        if [ -n "$ARTIFACT_PR_URL" ]; then
+        ARTIFACT_COMMIT_URL="${{ steps.sync_maven_repo.outputs.artifact_commit_url }}"
+        if [ -n "$ARTIFACT_COMMIT_URL" ]; then
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📮 Artifact Repository PR" >> $GITHUB_STEP_SUMMARY
-          echo "- $ARTIFACT_PR_URL" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Maven Artifact Repository" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: $ARTIFACT_COMMIT_URL" >> $GITHUB_STEP_SUMMARY
+          echo "- Browse: https://maven.wysaid.org/org/wysaid/gpuimage-plus/" >> $GITHUB_STEP_SUMMARY
         fi
         
         # Add build time if available
