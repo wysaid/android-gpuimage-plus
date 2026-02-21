@@ -10,14 +10,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag to build (e.g., v3.1.1 or v3.1.1-beta1). Must be an existing tag. Prerelease tags will be published to Release page.'
+        description: 'Version number to build (e.g., v3.1.1 or v3.1.1-beta1). Tag does not need to exist — this is a dry-run: artifacts are saved in the workflow run only, nothing is published.'
         required: true
         type: string
-      publish_release:
-        description: 'Publish to GitHub Release page (only effective for non-master branches / test purposes)'
-        required: false
-        type: boolean
-        default: false
 
 concurrency:
   group: release-${{ github.ref }}
@@ -74,7 +69,6 @@ jobs:
       env:
         EVENT_NAME: ${{ github.event_name }}
         INPUT_VERSION: ${{ github.event.inputs.version }}
-        INPUT_PUBLISH: ${{ github.event.inputs.publish_release }}
       run: |
         # Determine if this is a manual trigger or tag push
         if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
@@ -92,15 +86,8 @@ jobs:
           VERSION="${RAW_VERSION#v}"
           TAG_NAME="v$VERSION"
           IS_MANUAL="true"
-
-          # Determine if we should publish to Release page
-          if [ "$INPUT_PUBLISH" = "true" ]; then
-            IS_PUBLISH="true"
-            echo "📢 Manual trigger with publish enabled"
-          else
-            IS_PUBLISH="false"
-            echo "🔧 Manual trigger detected (artifacts only, no Release page publish)"
-          fi
+          IS_PUBLISH="false"
+          echo "🔧 Dry-run triggered manually (artifacts only, nothing published)"
         else
           # Tag push - extract from ref
           TAG_NAME="${GITHUB_REF#refs/tags/}"
@@ -143,7 +130,7 @@ jobs:
         echo "✅ Valid version: $VERSION (tag: $TAG_NAME, prerelease: $IS_PRERELEASE, manual: $IS_MANUAL, publish: $IS_PUBLISH)"
     
     - name: Validate tag is on master branch (official releases only)
-      if: steps.tag_version.outputs.is_prerelease == 'false'
+      if: steps.tag_version.outputs.is_prerelease == 'false' && steps.tag_version.outputs.is_manual == 'false'
       run: |
         TAG_NAME="${{ steps.tag_version.outputs.tag_name }}"
 
@@ -541,9 +528,9 @@ jobs:
         echo "📦 Version: ${{ steps.tag_version.outputs.version }}"
         echo "📦 Artifacts are available for download from the workflow run."
         echo ""
-        echo "⚠️  Note: publish_release was not set to true."
-        echo "⚠️  Artifacts are NOT published to the Release page."
-        echo "⚠️  To publish, re-run with publish_release=true or push a tag."
+        echo "ℹ️  This was a manual dry-run — nothing was published."
+        echo "ℹ️  To make a real release, push the tag from master:"
+        echo "      git tag ${{ steps.tag_version.outputs.tag_name }} && git push origin ${{ steps.tag_version.outputs.tag_name }}"
         echo ""
         echo "📦 Built artifacts:"
         ls -lh /tmp/release-artifacts/
@@ -556,17 +543,17 @@ jobs:
         TAG_NAME="${{ steps.tag_version.outputs.tag_name }}"
         
         if [ "$IS_PUBLISH" != "true" ]; then
-          echo "## 🔧 Build-Only Mode Completed Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔧 Dry-Run Build Completed Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
-          echo "**Trigger**: Manual (workflow_dispatch, publish_release=false)" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger**: Manual dry-run (workflow_dispatch)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ⚠️ Note" >> $GITHUB_STEP_SUMMARY
-          echo "Artifacts are **NOT published** to the Release page (publish_release was false)." >> $GITHUB_STEP_SUMMARY
+          echo "### ℹ️ Nothing was published" >> $GITHUB_STEP_SUMMARY
+          echo "Artifacts are retained in this workflow run for **7 days**." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "To publish to Release page, re-run with **publish_release=true**, or push a tag:" >> $GITHUB_STEP_SUMMARY
+          echo "To make a real release, push the tag from master:" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "git push origin $TAG_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "git tag $TAG_NAME && git push origin $TAG_NAME" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Built Artifacts (available for download):" >> $GITHUB_STEP_SUMMARY
@@ -576,7 +563,7 @@ jobs:
           echo "**Release**: $TAG_NAME" >> $GITHUB_STEP_SUMMARY
           echo "**Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
           if [ "$IS_MANUAL" = "true" ]; then
-            echo "**Trigger**: Manual (workflow_dispatch, publish_release=true)" >> $GITHUB_STEP_SUMMARY
+            echo "**Trigger**: Tag push" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ✅ Version Validation" >> $GITHUB_STEP_SUMMARY
