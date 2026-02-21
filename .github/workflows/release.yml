@@ -137,14 +137,20 @@ jobs:
         echo "🔍 Validating that $TAG_NAME points to a commit on the master branch..."
 
         # Resolve the commit the tag points to (dereference annotated tags)
-        TAG_COMMIT=$(git rev-parse "${TAG_NAME}^{commit}")
+        if ! TAG_COMMIT=$(git rev-parse "${TAG_NAME}^{commit}" 2>/dev/null); then
+          echo "❌ Could not resolve tag commit for $TAG_NAME — does the tag exist in this repo?"
+          exit 1
+        fi
         echo "Tag commit: $TAG_COMMIT"
 
-        # Fetch latest master to ensure our ref is up to date
-        git fetch origin master --depth=100 2>/dev/null || true
+        # Fetch latest master to ensure our ref is up to date (full fetch, no shallow boundary)
+        if ! git fetch origin master; then
+          echo "❌ Failed to fetch origin/master. Cannot validate that $TAG_NAME is on the master branch."
+          exit 1
+        fi
 
         # Check whether TAG_COMMIT is reachable from origin/master
-        if git merge-base --is-ancestor "$TAG_COMMIT" origin/master 2>/dev/null; then
+        if git merge-base --is-ancestor "$TAG_COMMIT" origin/master; then
           echo "✅ $TAG_NAME is on the master branch"
         else
           echo "❌ $TAG_NAME is NOT on the master branch!"
@@ -398,7 +404,18 @@ jobs:
         fi
 
         git commit -m "Publish artifacts ${TAG_NAME}"
-        git push origin master
+
+        # Retry push up to 3 times to handle transient non-fast-forward conflicts
+        PUSH_ATTEMPTS=0
+        until git push origin master; do
+          PUSH_ATTEMPTS=$((PUSH_ATTEMPTS + 1))
+          if [ "$PUSH_ATTEMPTS" -ge 3 ]; then
+            echo "::error::Maven artifact push failed after $PUSH_ATTEMPTS attempts (possible concurrent push). Re-run the sync step manually for tag $TAG_NAME."
+            exit 1
+          fi
+          echo "⚠️ Push attempt $PUSH_ATTEMPTS failed; retrying after fetch+rebase..."
+          git fetch origin master && git rebase origin/master
+        done
 
         COMMIT_SHA=$(git rev-parse HEAD)
         COMMIT_URL="https://github.com/${ARTIFACT_REPO}/commit/${COMMIT_SHA}"
@@ -562,9 +579,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Release**: $TAG_NAME" >> $GITHUB_STEP_SUMMARY
           echo "**Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
-          if [ "$IS_MANUAL" = "true" ]; then
-            echo "**Trigger**: Tag push" >> $GITHUB_STEP_SUMMARY
-          fi
+          echo "**Trigger**: Tag push" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ✅ Version Validation" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Tag format validated: v\${major}.\${minor}.\${patch}" >> $GITHUB_STEP_SUMMARY
@@ -584,7 +599,8 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         
         if [ "$IS_PUBLISH" = "true" ]; then
-          echo "Release draft (pending human review): ${{ github.server_url }}/${{ github.repository }}/releases/tag/$TAG_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "Review and publish the draft release: ${{ github.server_url }}/${{ github.repository }}/releases" >> $GITHUB_STEP_SUMMARY
+          echo "(Draft tag: $TAG_NAME)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**⚠️ Action required**: Go to the releases page, review the draft, then click *Publish release* to make it public." >> $GITHUB_STEP_SUMMARY
         fi
