@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.hardware.Camera;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -26,7 +25,6 @@ import android.widget.SeekBar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.wysaid.camera.CameraInstance;
 import org.wysaid.camera.CameraProviderFactory;
 import org.wysaid.camera.ICameraProvider;
 import org.wysaid.library.BuildConfig;
@@ -532,17 +530,18 @@ public class CameraDemoActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (mRecordingPfd != null) {
+            try { mRecordingPfd.close(); } catch (Exception ignored) {}
+            mRecordingPfd = null;
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        ICameraProvider provider = mCameraView.getCameraProvider();
-        if (provider != null) {
-            provider.closeCamera();
-        }
         Log.i(LOG_TAG, "activity onPause...");
         mCameraView.release(null);
+        // CameraGLSurfaceView.onPause() already calls closeCamera() internally.
         mCameraView.onPause();
     }
 

@@ -16,7 +16,6 @@ import androidx.camera.camera2.interop.ExperimentalCamera2Interop;
 import androidx.annotation.NonNull;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraControl;
-import androidx.camera.core.CameraInfo;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.FocusMeteringAction;
 import androidx.camera.core.FocusMeteringResult;
@@ -24,7 +23,6 @@ import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
-import androidx.camera.core.SurfaceRequest;
 import androidx.camera.core.resolutionselector.ResolutionSelector;
 import androidx.camera.core.resolutionselector.ResolutionStrategy;
 import androidx.camera.lifecycle.ProcessCameraProvider;
@@ -135,27 +133,24 @@ public class CameraXProvider implements ICameraProvider {
     /**
      * Close the camera and release all CameraX use cases.
      *
-     * <p><b>Must be called from the main thread.</b>
-     * {@link ProcessCameraProvider#unbindAll()} is a main-thread-only CameraX API.
-     * Callers on background threads (e.g., a GL thread) must dispatch to the main
-     * thread before calling this method, for example:
-     * <pre>
-     *   new Handler(Looper.getMainLooper()).post(() -> provider.closeCamera());
-     * </pre>
-     *
-     * @throws IllegalStateException if called from a non-main thread
+     * <p>If called from a non-main thread the work is automatically posted to
+     * the main thread, because {@link ProcessCameraProvider#unbindAll()} is a
+     * main-thread-only CameraX API.
      */
     @Override
     public void closeCamera() {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            throw new IllegalStateException(
-                    "CameraXProvider.closeCamera() must be called on the main thread.");
+            new Handler(Looper.getMainLooper()).post(this::closeCamera);
+            return;
         }
         mIsPreviewing = false;
         if (mCameraProvider != null) {
             mCameraProvider.unbindAll();
             mCamera = null;
+            mPreview = null;
+            mImageCapture = null;
         }
+        mCaptureExecutor.shutdown();
     }
 
     @Override
@@ -192,20 +187,23 @@ public class CameraXProvider implements ICameraProvider {
     }
 
     /**
-     * Stop the camera preview. Same main-thread requirement as {@link #closeCamera()}.
+     * Stop the camera preview.
      *
-     * @throws IllegalStateException if called from a non-main thread
+     * <p>If called from a non-main thread the work is automatically posted to
+     * the main thread.
      */
     @Override
     public void stopPreview() {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            throw new IllegalStateException(
-                    "CameraXProvider.stopPreview() must be called on the main thread.");
+            new Handler(Looper.getMainLooper()).post(this::stopPreview);
+            return;
         }
         mIsPreviewing = false;
         if (mCameraProvider != null) {
             mCameraProvider.unbindAll();
             mCamera = null;
+            mPreview = null;
+            mImageCapture = null;
         }
     }
 
@@ -247,12 +245,14 @@ public class CameraXProvider implements ICameraProvider {
 
         CameraControl control = mCamera.getCameraControl();
 
-        // Create a MeteringPointFactory from the Preview use case
-        // x, y here are normalized [0,1] coordinates
+        // Create a MeteringPointFactory from the Preview use case.
+        // The 3-arg constructor accepts the bound Preview so that screen
+        // coordinates are correctly mapped regardless of sensor orientation.
+        // x, y here are normalized [0,1] coordinates.
         try {
             androidx.camera.core.MeteringPointFactory factory =
                     new androidx.camera.core.SurfaceOrientedMeteringPointFactory(
-                            1.0f, 1.0f);
+                            1.0f, 1.0f, mPreview);
             androidx.camera.core.MeteringPoint point = factory.createPoint(x, y);
             FocusMeteringAction action = new FocusMeteringAction.Builder(point)
                     .build();
@@ -447,10 +447,13 @@ public class CameraXProvider implements ICameraProvider {
 
             // Build ImageCapture use case
             ImageCapture.Builder captureBuilder = new ImageCapture.Builder();
+            int captureFallbackRule = mPictureSizeBigger
+                    ? ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                    : ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER;
             ResolutionSelector captureResolutionSelector = new ResolutionSelector.Builder()
                     .setResolutionStrategy(new ResolutionStrategy(
                             new Size(mPictureWidth, mPictureHeight),
-                            ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER))
+                            captureFallbackRule))
                     .build();
             captureBuilder.setResolutionSelector(captureResolutionSelector);
 

@@ -346,7 +346,11 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
                 float scaling = Math.max(width / (float) mMaxTextureSize, height / (float) mMaxTextureSize);
                 Log.i(LOG_TAG, String.format("目标尺寸(%d x %d)超过当前设备OpenGL 能够处理的最大范围(%d x %d)， 现在将图片压缩至合理大小!",
                         width, height, mMaxTextureSize, mMaxTextureSize));
-                bmp = Bitmap.createScaledBitmap(bmp, (int) (width / scaling), (int) (height / scaling), false);
+                Bitmap scaled = Bitmap.createScaledBitmap(bmp, (int) (width / scaling), (int) (height / scaling), false);
+                if (scaled != bmp) {
+                    bmp.recycle();
+                }
+                bmp = scaled;
                 width = bmp.getWidth();
                 height = bmp.getHeight();
             }
@@ -396,6 +400,7 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
                         mat.postTranslate(width / 2.0f, height / 2.0f);
                     }
                     canvas.drawBitmap(bmp, mat, null);
+                    bmp.recycle();
                 }
             }
 

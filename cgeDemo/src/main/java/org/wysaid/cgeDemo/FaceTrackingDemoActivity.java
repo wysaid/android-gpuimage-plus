@@ -6,7 +6,6 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.wysaid.camera.CameraInstance;
 import org.wysaid.camera.CameraProviderFactory;
 import org.wysaid.camera.ICameraProvider;
 import org.wysaid.cgeDemo.demoUtils.FaceTrackingDemo;
