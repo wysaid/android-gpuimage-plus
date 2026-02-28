@@ -56,13 +56,17 @@ Before acting on any review comment or suggestion, classify it by importance:
 |-------|----------|--------|
 | **P1 — Must Fix** | Bug, security issue, broken behavior, API contract violation, CI failure | Fix immediately |
 | **P2 — Should Fix** | Correctness risk, meaningful maintainability improvement, clear code smell with real impact | Fix with brief justification |
-| **P3 — Optional** | Style preference, minor naming nitpick, debatable design choice, "could be cleaner" | **Do NOT auto-fix** — surface to user for decision |
+| **P3 — Conditional** | Style preference, minor naming, "could be cleaner" | Fix if it aligns with best practices **and** the change is safe + trivial; defer if complex or has any potential functional impact |
 | **P4 — Reject** | Contradicts project conventions, introduces unnecessary complexity, or is factually wrong | Reject with explanation |
 
 **Rules:**
-- **Do not implement P3 suggestions automatically.** Note them in the final summary and let the user decide.
+- For **P3**, apply this two-question test before touching the code:
+  1. **Best practice?** — Does the change follow language/framework conventions (e.g. prefer imports over FQNs, use existing imports, standard patterns)?
+  2. **Safe & trivial?** — Is the diff mechanical with zero risk of behavioral change and low effort?
+  - Both **yes** → fix it silently, mark thread resolved.
+  - Either **no** → do NOT modify code; record in the summary table and let the user decide.
 - **Do not add comments to code** unless the comment explains non-obvious logic that is truly necessary. Never add comments just to acknowledge a review suggestion was applied.
-- When in doubt about importance, prefer the lower severity (P3/P4) and defer to the user rather than making the change.
+- When the two-question test is ambiguous, prefer deferring rather than guessing.
 
 ## Procedure
 
@@ -80,7 +84,7 @@ Before acting on any review comment or suggestion, classify it by importance:
 3. **Address review comments** — apply the Review Restraint Policy to each comment:
    - P1/P2: implement the fix, then **immediately resolve the thread** using the GraphQL mutation above
    - Outdated threads: resolve them regardless of priority (no action needed, just mark resolved)
-   - P3: record in summary, do **not** modify code, ask user
+   - P3: apply the two-question test — fix + resolve if both answers are yes; otherwise record in summary and defer to user
    - P4: record rejection reason in summary
 4. **Commit & push** — single commit covering all non-workflow fixes (workflow fixes are pushed incrementally during step 2)
 5. **Final verification** — once all fixes are applied, confirm every check is green: `GH_PAGER= gh pr checks <PR>`
@@ -94,8 +98,9 @@ Before acting on any review comment or suggestion, classify it by importance:
 ```markdown
 | # | Source (comment / CI) | Issue description | Priority | Action taken | Reason if not fixed |
 |---|-----------------------|-------------------|----------|--------------|---------------------|
-| 1 | Reviewer @xxx         | e.g. rename foo() | P3       | Not fixed    | Style preference, no functional impact — deferred to user |
-| 2 | CI: lint              | e.g. null-check   | P1       | Fixed        | —                   |
+| 1 | Reviewer @xxx         | use import instead of FQN | P3  | Fixed        | Best practice + trivial mechanical change |
+| 2 | Reviewer @xxx         | rename internal var foo→bar | P3 | Not fixed  | Non-standard opinion, no best-practice backing — deferred to user |
+| 3 | CI: lint              | null-check missing | P1      | Fixed        | —                   |
 ```
 
 All P3/P4 items that were **not** fixed must appear in this table with a clear reason, so the user can make an informed decision.
