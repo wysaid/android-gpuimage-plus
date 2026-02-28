@@ -159,7 +159,9 @@ public class Camera1Provider implements ICameraProvider {
         Camera.Parameters params = CameraInstance.getInstance().getParams();
         if (params == null || !params.isZoomSupported()) return 1.0f;
         List<Integer> ratios = params.getZoomRatios();
-        return ratios.get(params.getMaxZoom()) / 100.0f;
+        if (ratios == null || ratios.isEmpty()) return 1.0f;
+        int maxIndex = Math.min(params.getMaxZoom(), ratios.size() - 1);
+        return ratios.get(maxIndex) / 100.0f;
     }
 
     @Override
@@ -167,14 +169,20 @@ public class Camera1Provider implements ICameraProvider {
         Camera.Parameters params = CameraInstance.getInstance().getParams();
         if (params == null || !params.isZoomSupported()) return;
 
+        if (!Float.isFinite(ratio) || ratio <= 0f) {
+            Log.e(LOG_TAG, "Camera1: invalid zoom ratio: " + ratio);
+            return;
+        }
+
         List<Integer> zoomRatios = params.getZoomRatios();
+        if (zoomRatios == null || zoomRatios.isEmpty()) return;
         int targetHundredths = Math.round(ratio * 100.0f);
 
         // Find the closest discrete zoom index for the requested ratio.
         int bestIndex = 0;
-        int bestDiff = Integer.MAX_VALUE;
+        long bestDiff = Long.MAX_VALUE;
         for (int i = 0; i < zoomRatios.size(); i++) {
-            int diff = Math.abs(zoomRatios.get(i) - targetHundredths);
+            long diff = Math.abs((long) zoomRatios.get(i) - targetHundredths);
             if (diff < bestDiff) {
                 bestDiff = diff;
                 bestIndex = i;
