@@ -105,7 +105,7 @@ public class Camera1Provider implements ICameraProvider {
 
     @Override
     public boolean setFlashMode(FlashMode mode) {
-        Camera.Parameters params = CameraInstance.getInstance().getParams();
+        Camera.Parameters params = getParams();
         if (params == null) return false;
 
         String camera1Mode = ICameraProvider.flashModeToCamera1(mode);
@@ -126,7 +126,7 @@ public class Camera1Provider implements ICameraProvider {
 
     @Override
     public FlashMode getFlashMode() {
-        Camera.Parameters params = CameraInstance.getInstance().getParams();
+        Camera.Parameters params = getParams();
         if (params == null) return null;
         return ICameraProvider.camera1ToFlashMode(params.getFlashMode());
     }
@@ -141,12 +141,30 @@ public class Camera1Provider implements ICameraProvider {
         CameraInstance.getInstance().setFocusMode(focusMode);
     }
 
+    // ========== Private helpers ==========
+
+    /**
+     * Shorthand for {@link CameraInstance#getParams()}.
+     * Returns {@code null} when the camera is closed.
+     */
+    private Camera.Parameters getParams() {
+        return CameraInstance.getInstance().getParams();
+    }
+
+    /**
+     * Returns camera parameters only when the camera is open <em>and</em> zoom is supported;
+     * returns {@code null} otherwise. Use this as the single guard in all zoom methods.
+     */
+    private Camera.Parameters getZoomParams() {
+        Camera.Parameters params = getParams();
+        return (params != null && params.isZoomSupported()) ? params : null;
+    }
+
     // ========== Zoom ==========
 
     @Override
     public boolean isZoomSupported() {
-        Camera.Parameters params = CameraInstance.getInstance().getParams();
-        return params != null && params.isZoomSupported();
+        return getZoomParams() != null;
     }
 
     @Override
@@ -156,8 +174,8 @@ public class Camera1Provider implements ICameraProvider {
 
     @Override
     public float getMaxZoomRatio() {
-        Camera.Parameters params = CameraInstance.getInstance().getParams();
-        if (params == null || !params.isZoomSupported()) return 1.0f;
+        Camera.Parameters params = getZoomParams();
+        if (params == null) return 1.0f;
         List<Integer> ratios = params.getZoomRatios();
         if (ratios == null || ratios.isEmpty()) return 1.0f;
         int maxIndex = Math.min(params.getMaxZoom(), ratios.size() - 1);
@@ -166,8 +184,8 @@ public class Camera1Provider implements ICameraProvider {
 
     @Override
     public void setZoomRatio(float ratio) {
-        Camera.Parameters params = CameraInstance.getInstance().getParams();
-        if (params == null || !params.isZoomSupported()) return;
+        Camera.Parameters params = getZoomParams();
+        if (params == null) return;
 
         if (!Float.isFinite(ratio) || ratio <= 0f) {
             Log.e(LOG_TAG, "Camera1: invalid zoom ratio: " + ratio);
@@ -248,7 +266,7 @@ public class Camera1Provider implements ICameraProvider {
         int jpegRotation = computeJpegRotation(camera1Facing);
 
         // Set rotation
-        Camera.Parameters params = CameraInstance.getInstance().getParams();
+        Camera.Parameters params = getParams();
         if (params != null) {
             try {
                 params.setRotation(jpegRotation);
