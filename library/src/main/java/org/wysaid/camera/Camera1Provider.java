@@ -139,6 +139,54 @@ public class Camera1Provider implements ICameraProvider {
         CameraInstance.getInstance().setFocusMode(focusMode);
     }
 
+    // ========== Zoom ==========
+
+    @Override
+    public boolean isZoomSupported() {
+        android.hardware.Camera.Parameters params = CameraInstance.getInstance().getParams();
+        return params != null && params.isZoomSupported();
+    }
+
+    @Override
+    public float getMinZoomRatio() {
+        return 1.0f; // Camera1 always starts at 1.0x (zoom index 0)
+    }
+
+    @Override
+    public float getMaxZoomRatio() {
+        android.hardware.Camera.Parameters params = CameraInstance.getInstance().getParams();
+        if (params == null || !params.isZoomSupported()) return 1.0f;
+        java.util.List<Integer> ratios = params.getZoomRatios();
+        return ratios.get(params.getMaxZoom()) / 100.0f;
+    }
+
+    @Override
+    public void setZoomRatio(float ratio) {
+        android.hardware.Camera.Parameters params = CameraInstance.getInstance().getParams();
+        if (params == null || !params.isZoomSupported()) return;
+
+        java.util.List<Integer> zoomRatios = params.getZoomRatios();
+        int targetHundredths = Math.round(ratio * 100.0f);
+
+        // Find the closest discrete zoom index for the requested ratio.
+        int bestIndex = 0;
+        int bestDiff = Integer.MAX_VALUE;
+        for (int i = 0; i < zoomRatios.size(); i++) {
+            int diff = Math.abs(zoomRatios.get(i) - targetHundredths);
+            if (diff < bestDiff) {
+                bestDiff = diff;
+                bestIndex = i;
+            }
+        }
+
+        try {
+            params.setZoom(bestIndex);
+            CameraInstance.getInstance().setParams(params);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Camera1: setZoomRatio failed: " + e.toString());
+        }
+    }
+
     // ========== Capture ==========
 
     /**

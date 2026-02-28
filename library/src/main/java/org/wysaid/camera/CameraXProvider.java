@@ -10,6 +10,8 @@ import android.util.Range;
 import android.util.Size;
 import android.view.Surface;
 
+import androidx.camera.core.ZoomState;
+
 import androidx.camera.camera2.interop.Camera2Interop;
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop;
 
@@ -338,6 +340,39 @@ public class CameraXProvider implements ICameraProvider {
         // CameraX handles focus modes automatically.
         // "continuous-video" is the default behavior in CameraX.
         Log.i(LOG_TAG, "CameraX: setFocusMode ignored (CameraX manages focus automatically): " + focusMode);
+    }
+
+    // ========== Zoom ==========
+
+    @Override
+    public boolean isZoomSupported() {
+        return true; // CameraX always supports zoom via ZoomControl
+    }
+
+    @Override
+    public float getMinZoomRatio() {
+        if (mCamera == null) return 1.0f;
+        ZoomState state = mCamera.getCameraInfo().getZoomState().getValue();
+        return state != null ? state.getMinZoomRatio() : 1.0f;
+    }
+
+    @Override
+    public float getMaxZoomRatio() {
+        if (mCamera == null) return 1.0f;
+        ZoomState state = mCamera.getCameraInfo().getZoomState().getValue();
+        return state != null ? state.getMaxZoomRatio() : 1.0f;
+    }
+
+    @Override
+    public void setZoomRatio(float ratio) {
+        if (mCamera == null) {
+            Log.w(LOG_TAG, "CameraX: setZoomRatio called but camera not bound.");
+            return;
+        }
+        mCamera.getCameraControl().setZoomRatio(ratio)
+                .addListener(() -> {
+                    // Zoom applied; nothing extra needed.
+                }, ContextCompat.getMainExecutor(mContext));
     }
 
     // ========== Capture ==========
