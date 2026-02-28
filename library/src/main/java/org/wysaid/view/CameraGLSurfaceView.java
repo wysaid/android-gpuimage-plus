@@ -206,6 +206,11 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
      *
      * <p><b>Must be called from the main thread</b> — camera lifecycle operations
      * ({@link ICameraProvider#closeCamera()}, {@link ICameraProvider#openCamera}) require it.
+     *
+     * <p>Camera open/close runs on the main thread (required by CameraX). FrameRecorder
+     * mutations ({@link #onSwitchCamera()}, {@link #resumePreview()}) are dispatched to
+     * the GL thread via {@link #queueEvent} so that OpenGL resources are always touched
+     * from the thread that owns the GL context.
      */
     public final void switchCamera() {
         mIsCameraBackForward = !mIsCameraBackForward;
@@ -215,11 +220,13 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 : ICameraProvider.CameraFacing.FRONT;
 
         getCameraProvider().closeCamera();
-        onSwitchCamera();
+        // onSwitchCamera() may touch FrameRecorder (OpenGL resource) — must run on GL thread.
+        queueEvent(this::onSwitchCamera);
         getCameraProvider().openCamera(facing, new ICameraProvider.CameraOpenCallback() {
             @Override
             public void cameraReady() {
-                resumePreview();
+                // resumePreview() touches FrameRecorder — dispatch to GL thread.
+                queueEvent(() -> resumePreview());
             }
         });
         requestRender();
