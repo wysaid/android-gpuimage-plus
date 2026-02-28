@@ -9,6 +9,45 @@ description: Address review comments and CI failures for the current branch's PR
 - Key commands: `gh pr list --head <BRANCH>` · `gh pr view <PR> --comments` · `gh pr checks <PR>` · `gh run view <RUN_ID> --log-failed`
 - Workflow fixes **cannot be verified locally** — the fix is only confirmed once the remote CI re-runs and passes
 
+### Resolving Review Threads
+
+After fixing a P1/P2 comment, mark its thread as resolved on GitHub using the GraphQL mutation:
+
+```bash
+GH_PAGER= gh api graphql -f query='mutation { resolveReviewThread(input: { threadId: "PRRT_xxxx" }) { thread { isResolved } } }'
+```
+
+To get thread IDs with their status and a brief description:
+
+```bash
+GH_PAGER= gh api graphql -f query='
+{
+  repository(owner: "OWNER", name: "REPO") {
+    pullRequest(number: PR_NUMBER) {
+      reviewThreads(first: 50) {
+        nodes {
+          id
+          isResolved
+          isOutdated
+          path
+          line
+          comments(first: 1) { nodes { body } }
+        }
+      }
+    }
+  }
+}' | python3 -c "
+import json,sys
+data = json.load(sys.stdin)
+for t in data['data']['repository']['pullRequest']['reviewThreads']['nodes']:
+    body = t['comments']['nodes'][0]['body'][:100].replace('\n',' ') if t['comments']['nodes'] else ''
+    print(f\"ID={t['id']}, resolved={t['isResolved']}, outdated={t['isOutdated']}, {t['path']}:{t['line']}\")
+    print(f\"  >> {body}\")
+"
+```
+
+Also resolve threads that are **outdated** (the underlying code they referenced has since changed), as they are no longer actionable.
+
 ### Review Restraint Policy
 
 Before acting on any review comment or suggestion, classify it by importance:
@@ -39,7 +78,8 @@ Before acting on any review comment or suggestion, classify it by importance:
    - **Code issue, non-breaking**: fix source code directly
    - **Code issue, breaking change required**: stop and report to developer for a decision
 3. **Address review comments** — apply the Review Restraint Policy to each comment:
-   - P1/P2: implement the fix
+   - P1/P2: implement the fix, then **immediately resolve the thread** using the GraphQL mutation above
+   - Outdated threads: resolve them regardless of priority (no action needed, just mark resolved)
    - P3: record in summary, do **not** modify code, ask user
    - P4: record rejection reason in summary
 4. **Commit & push** — single commit covering all non-workflow fixes (workflow fixes are pushed incrementally during step 2)
