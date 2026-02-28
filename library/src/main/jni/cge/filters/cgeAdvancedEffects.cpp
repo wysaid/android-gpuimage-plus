@@ -141,4 +141,9 @@ CGEWaveformFilter* createWaveformFilter()
 {
     COMMON_FUNC(CGEWaveformFilter);
 }
+
+CGEHistogramFilter* createHistogramFilter()
+{
+    COMMON_FUNC(CGEHistogramFilter);
+}
 } // namespace CGE
