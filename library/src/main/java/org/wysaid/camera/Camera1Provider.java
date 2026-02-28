@@ -4,6 +4,8 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.util.Log;
 
+import java.util.List;
+
 import org.wysaid.common.Common;
 
 /**
@@ -103,7 +105,7 @@ public class Camera1Provider implements ICameraProvider {
 
     @Override
     public boolean setFlashMode(FlashMode mode) {
-        Camera.Parameters params = CameraInstance.getInstance().getParams();
+        Camera.Parameters params = getParams();
         if (params == null) return false;
 
         String camera1Mode = ICameraProvider.flashModeToCamera1(mode);
@@ -124,7 +126,7 @@ public class Camera1Provider implements ICameraProvider {
 
     @Override
     public FlashMode getFlashMode() {
-        Camera.Parameters params = CameraInstance.getInstance().getParams();
+        Camera.Parameters params = getParams();
         if (params == null) return null;
         return ICameraProvider.camera1ToFlashMode(params.getFlashMode());
     }
@@ -137,6 +139,80 @@ public class Camera1Provider implements ICameraProvider {
     @Override
     public void setFocusMode(String focusMode) {
         CameraInstance.getInstance().setFocusMode(focusMode);
+    }
+
+    // ========== Private helpers ==========
+
+    /**
+     * Shorthand for {@link CameraInstance#getParams()}.
+     * Returns {@code null} when the camera is closed.
+     */
+    private Camera.Parameters getParams() {
+        return CameraInstance.getInstance().getParams();
+    }
+
+    /**
+     * Returns camera parameters only when the camera is open <em>and</em> zoom is supported;
+     * returns {@code null} otherwise. Use this as the single guard in all zoom methods.
+     */
+    private Camera.Parameters getZoomParams() {
+        Camera.Parameters params = getParams();
+        return (params != null && params.isZoomSupported()) ? params : null;
+    }
+
+    // ========== Zoom ==========
+
+    @Override
+    public boolean isZoomSupported() {
+        return getZoomParams() != null;
+    }
+
+    @Override
+    public float getMinZoomRatio() {
+        return 1.0f; // Camera1 always starts at 1.0x (zoom index 0)
+    }
+
+    @Override
+    public float getMaxZoomRatio() {
+        Camera.Parameters params = getZoomParams();
+        if (params == null) return 1.0f;
+        List<Integer> ratios = params.getZoomRatios();
+        if (ratios == null || ratios.isEmpty()) return 1.0f;
+        int maxIndex = Math.min(params.getMaxZoom(), ratios.size() - 1);
+        return ratios.get(maxIndex) / 100.0f;
+    }
+
+    @Override
+    public void setZoomRatio(float ratio) {
+        Camera.Parameters params = getZoomParams();
+        if (params == null) return;
+
+        if (!Float.isFinite(ratio) || ratio <= 0f) {
+            Log.e(LOG_TAG, "Camera1: invalid zoom ratio: " + ratio);
+            return;
+        }
+
+        List<Integer> zoomRatios = params.getZoomRatios();
+        if (zoomRatios == null || zoomRatios.isEmpty()) return;
+        int targetHundredths = Math.round(ratio * 100.0f);
+
+        // Find the closest discrete zoom index for the requested ratio.
+        int bestIndex = 0;
+        long bestDiff = Long.MAX_VALUE;
+        for (int i = 0; i < zoomRatios.size(); i++) {
+            long diff = Math.abs((long) zoomRatios.get(i) - targetHundredths);
+            if (diff < bestDiff) {
+                bestDiff = diff;
+                bestIndex = i;
+            }
+        }
+
+        try {
+            params.setZoom(bestIndex);
+            CameraInstance.getInstance().setParams(params);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Camera1: setZoomRatio failed: " + e.toString());
+        }
     }
 
     // ========== Capture ==========
@@ -190,7 +266,7 @@ public class Camera1Provider implements ICameraProvider {
         int jpegRotation = computeJpegRotation(camera1Facing);
 
         // Set rotation
-        Camera.Parameters params = CameraInstance.getInstance().getParams();
+        Camera.Parameters params = getParams();
         if (params != null) {
             try {
                 params.setRotation(jpegRotation);

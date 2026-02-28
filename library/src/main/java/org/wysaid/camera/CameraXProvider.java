@@ -10,6 +10,8 @@ import android.util.Range;
 import android.util.Size;
 import android.view.Surface;
 
+import androidx.camera.core.ZoomState;
+
 import androidx.camera.camera2.interop.Camera2Interop;
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop;
 
@@ -338,6 +340,67 @@ public class CameraXProvider implements ICameraProvider {
         // CameraX handles focus modes automatically.
         // "continuous-video" is the default behavior in CameraX.
         Log.i(LOG_TAG, "CameraX: setFocusMode ignored (CameraX manages focus automatically): " + focusMode);
+    }
+
+    // ========== Zoom ==========
+
+    @Override
+    public boolean isZoomSupported() {
+        if (mCamera == null) return false;
+        ZoomState state = mCamera.getCameraInfo().getZoomState().getValue();
+        return state != null && state.getMaxZoomRatio() > state.getMinZoomRatio();
+    }
+
+    @Override
+    public float getMinZoomRatio() {
+        if (mCamera == null) return 1.0f;
+        ZoomState state = mCamera.getCameraInfo().getZoomState().getValue();
+        return state != null ? state.getMinZoomRatio() : 1.0f;
+    }
+
+    @Override
+    public float getMaxZoomRatio() {
+        if (mCamera == null) return 1.0f;
+        ZoomState state = mCamera.getCameraInfo().getZoomState().getValue();
+        return state != null ? state.getMaxZoomRatio() : 1.0f;
+    }
+
+    @Override
+    public void setZoomRatio(float ratio) {
+        if (mCamera == null) {
+            Log.w(LOG_TAG, "CameraX: setZoomRatio called but camera not bound.");
+            return;
+        }
+
+        ZoomState zoomState = mCamera.getCameraInfo().getZoomState().getValue();
+        if (zoomState == null) {
+            Log.w(LOG_TAG, "CameraX: setZoomRatio called but ZoomState not yet available.");
+            return;
+        }
+
+        float minZoom = zoomState.getMinZoomRatio();
+        float maxZoom = zoomState.getMaxZoomRatio();
+        float clampedRatio = Math.max(minZoom, Math.min(ratio, maxZoom));
+
+        if (clampedRatio != ratio) {
+            Log.w(LOG_TAG, "CameraX: Requested zoom ratio " + ratio
+                    + " is out of range [" + minZoom + ", " + maxZoom + "], clamped to "
+                    + clampedRatio + ".");
+        }
+
+        final ListenableFuture<Void> future =
+                mCamera.getCameraControl().setZoomRatio(clampedRatio);
+        future.addListener(() -> {
+            try {
+                future.get();
+            } catch (ExecutionException e) {
+                Throwable cause = e.getCause();
+                Log.e(LOG_TAG, "CameraX: setZoomRatio failed: " + (cause != null ? cause : e));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                Log.e(LOG_TAG, "CameraX: setZoomRatio interrupted.", e);
+            }
+        }, ContextCompat.getMainExecutor(mContext));
     }
 
     // ========== Capture ==========

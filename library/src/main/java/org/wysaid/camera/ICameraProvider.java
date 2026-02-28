@@ -205,6 +205,56 @@ public interface ICameraProvider {
      */
     void setFocusMode(String focusMode);
 
+    // ========== Zoom ==========
+
+    /**
+     * Whether the camera hardware supports zoom.
+     *
+     * <p>CameraX always returns {@code true} (handled by the framework).
+     * Camera1 returns the result of {@link android.hardware.Camera.Parameters#isZoomSupported()}.
+     *
+     * @return {@code true} if zoom is supported, {@code false} otherwise.
+     */
+    default boolean isZoomSupported() {
+        return false;
+    }
+
+    /**
+     * Get the minimum zoom ratio supported by the camera hardware.
+     * Always 1.0 (no zoom, native field of view).
+     *
+     * @return minimum zoom ratio, typically 1.0f.
+     */
+    default float getMinZoomRatio() {
+        return 1.0f;
+    }
+
+    /**
+     * Get the maximum zoom ratio supported by the camera hardware.
+     *
+     * @return maximum zoom ratio (e.g. 10.0f); 1.0f when zoom is unsupported.
+     */
+    default float getMaxZoomRatio() {
+        return 1.0f;
+    }
+
+    /**
+     * Set the zoom ratio.
+     *
+     * <p>CameraX applies the ratio asynchronously via {@code CameraControl.setZoomRatio()}.
+     * Camera1 maps the float ratio to the closest supported integer zoom index
+     * ({@link android.hardware.Camera.Parameters#setZoom(int)}) — slight rounding may occur
+     * because Camera1 only exposes discrete steps.
+     *
+     * <p>Values are clamped to [{@link #getMinZoomRatio()}, {@link #getMaxZoomRatio()}].
+     * Calling this method when {@link #isZoomSupported()} returns {@code false} is a no-op.
+     *
+     * @param ratio The desired zoom ratio. 1.0f means no zoom.
+     */
+    default void setZoomRatio(float ratio) {
+        // Default no-op; implementations override.
+    }
+
     // ========== Capture ==========
 
     /**
