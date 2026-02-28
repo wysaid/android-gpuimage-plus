@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
             "",
             "@curve RGB(0,255)(255,0) @style cm mapping0.jpg 80 80 8 3", // ASCII art effect
             "@style waveform 0.01 0.01 0.4 0.4",
+            "@style hist 0.01 0.01 0.4 0.4",       // Luminance histogram overlay
+            "@style hist 0.01 0.01 0.4 0.4 @style waveform 0.45 0.01 0.4 0.4", // hist + waveform side by side
             "@beautify face 1 480 640", //Beautify
             "@adjust lut edgy_amber.png",
             "@adjust lut filmstock.png",
