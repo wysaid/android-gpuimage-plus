@@ -272,14 +272,23 @@ public class CameraInstance {
 
         List<Integer> frameRates = mParams.getSupportedPreviewFrameRates();
 
+        // Find the closest supported rate to the requested previewRate (prefer not exceeding it).
+        // Fall back to fpsMax only when no rate at or below previewRate is available.
         int fpsMax = 0;
+        int fpsBest = 0; // best candidate: highest rate that does not exceed previewRate
 
         for(Integer n : frameRates) {
             Log.i(LOG_TAG, "Supported frame rate: " + n);
             if(fpsMax < n) {
                 fpsMax = n;
             }
+            if(n <= previewRate && n > fpsBest) {
+                fpsBest = n;
+            }
         }
+
+        // Use the best candidate at or below previewRate; if none found, fall back to fpsMax.
+        int selectedFps = (fpsBest > 0) ? fpsBest : fpsMax;
 
         mParams.setPreviewSize(prevSz.width, prevSz.height);
         mParams.setPictureSize(picSz.width, picSz.height);
@@ -289,8 +298,7 @@ public class CameraInstance {
             mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
         }
 
-        previewRate = fpsMax;
-        mParams.setPreviewFrameRate(previewRate); //设置相机预览帧率
+        mParams.setPreviewFrameRate(selectedFps); //设置相机预览帧率
 //        mParams.setPreviewFpsRange(20, 60);
 
         try {

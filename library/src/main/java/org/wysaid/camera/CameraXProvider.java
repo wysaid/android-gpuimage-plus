@@ -410,12 +410,12 @@ public class CameraXProvider implements ICameraProvider {
                     .build();
             previewBuilder.setResolutionSelector(previewResolutionSelector);
 
-            // Request high frame rate (up to 60fps) to match Camera1 behavior.
+            // Target 30fps by default for consistent performance and battery efficiency.
             // Camera2Interop allows setting Camera2 capture-request options on CameraX use cases.
-            // Using Range(30, 60) so the camera picks the best rate it supports.
+            // Using Range(30, 30) to lock to 30fps; adjust both bounds to allow a higher cap if needed.
             Camera2Interop.Extender<Preview> extender = new Camera2Interop.Extender<>(previewBuilder);
             extender.setCaptureRequestOption(
-                    CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new Range<>(30, 60));
+                    CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new Range<>(30, 30));
 
             mPreview = previewBuilder.build();
 
