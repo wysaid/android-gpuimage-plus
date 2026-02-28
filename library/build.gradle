@@ -120,6 +120,12 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:' + rootProject.ext.android.appcompatX
+
+    // CameraX dependencies — compileOnly so consumers can opt-in at runtime.
+    // Apps that want CameraX must add these as 'implementation' in their own build.gradle.
+    compileOnly 'androidx.camera:camera-core:1.4.1'
+    compileOnly 'androidx.camera:camera-camera2:1.4.1'
+    compileOnly 'androidx.camera:camera-lifecycle:1.4.1'
 }
 
 if (deployArtifacts()) {

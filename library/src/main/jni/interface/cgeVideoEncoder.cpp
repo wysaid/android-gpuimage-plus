@@ -15,6 +15,8 @@
 #include "cgeUtilFunctions.h"
 
 #include <cassert>
+#include <cerrno>
+#include <unistd.h>
 
 static AVStream* addStream(AVFormatContext* oc, AVCodec** codec,
                            enum AVCodecID codec_id, int frameRate, int width = -1, int height = -1, int bitRate = 1650000, int audioSampleRate = 44100)
@@ -99,7 +101,8 @@ namespace CGE
 struct CGEEncoderContextMP4
 {
     CGEEncoderContextMP4() :
-        pOutputFmt(nullptr), pFormatCtx(nullptr), pVideoStream(nullptr), pAudioStream(nullptr), pVideoCodec(nullptr), pAudioCodec(nullptr), pVideoFrame(nullptr), pAudioFrame(nullptr), pSwsCtx(nullptr), pSwrCtx(nullptr), dstSampleData(nullptr), dstSamplesSize(0), dstSampleDataIndex(0)
+        pOutputFmt(nullptr), pFormatCtx(nullptr), pVideoStream(nullptr), pAudioStream(nullptr), pVideoCodec(nullptr), pAudioCodec(nullptr), pVideoFrame(nullptr), pAudioFrame(nullptr), pSwsCtx(nullptr), pSwrCtx(nullptr), dstSampleData(nullptr), dstSamplesSize(0), dstSampleDataIndex(0),
+        customFd(-1), usingCustomAVIO(false)
     {
         memset(&videoPacket, 0, sizeof(videoPacket));
         memset(&dstPicture, 0, sizeof(dstPicture));
@@ -148,7 +151,30 @@ struct CGEEncoderContextMP4
 
         if (pOutputFmt && pFormatCtx && !(pOutputFmt->flags & AVFMT_NOFILE))
         {
-            avio_close(pFormatCtx->pb);
+            if (usingCustomAVIO)
+            {
+                // Custom AVIO context backed by a pre-opened fd: flush and free manually
+                // rather than using avio_close, which would attempt to re-close through
+                // FFmpeg's internal file protocol.
+                if (pFormatCtx->pb)
+                {
+                    avio_flush(pFormatCtx->pb);
+                    av_free(pFormatCtx->pb->buffer);
+                    pFormatCtx->pb->buffer = nullptr;
+                    av_free(pFormatCtx->pb);
+                    pFormatCtx->pb = nullptr;
+                }
+                if (customFd >= 0)
+                {
+                    close(customFd);
+                    customFd = -1;
+                }
+                usingCustomAVIO = false;
+            }
+            else
+            {
+                avio_close(pFormatCtx->pb);
+            }
         }
 
         if (pFormatCtx)
@@ -198,6 +224,11 @@ struct CGEEncoderContextMP4
     int dstSamplesSize;
 
     int maxDstNbSamples;
+
+    // Android scoped storage: when filename is /proc/self/fd/N we dup the fd and
+    // wrap it in a custom AVIOContext so that FFmpeg does not call open() a second time.
+    int customFd;
+    bool usingCustomAVIO;
 };
 
 CGEVideoEncoderMP4::CGEVideoEncoderMP4() :
@@ -296,7 +327,69 @@ bool CGEVideoEncoderMP4::init(const char* filename, int fps, int width, int heig
 
     if (!(m_context->pOutputFmt->flags & AVFMT_NOFILE))
     {
-        if (0 > avio_open(&m_context->pFormatCtx->pb, filename, AVIO_FLAG_WRITE))
+        // Android API 29+ (scoped storage): the caller may pass a /proc/self/fd/N path
+        // that was obtained from ContentResolver.openFileDescriptor().  Calling avio_open
+        // on that symlink opens the underlying file a second time, which fails on API 34
+        // emulators.  Instead, dup() the fd and create a seekable custom AVIOContext so
+        // that FFmpeg writes directly through the already-open file descriptor.
+        const char* procFdPrefix = "/proc/self/fd/";
+        const size_t prefixLen = strlen(procFdPrefix);
+        if (strncmp(filename, procFdPrefix, prefixLen) == 0)
+        {
+            int srcFd = atoi(filename + prefixLen);
+            if (srcFd > 0)
+            {
+                int dupFd = dup(srcFd);
+                if (dupFd >= 0)
+                {
+                    // Seek to the beginning so the container header lands at offset 0.
+                    lseek64(dupFd, 0, SEEK_SET);
+
+                    const int kBufSize = 32 * 1024;
+                    unsigned char* ioBuf = (unsigned char*)av_malloc(kBufSize);
+
+                    // Capture fd as intptr_t inside opaque; lambdas with no capture
+                    // decay to plain function pointers.
+                    auto writePacket = [](void* opaque, uint8_t* buf, int size) -> int {
+                        int fd = static_cast<int>(reinterpret_cast<intptr_t>(opaque));
+                        ssize_t written = write(fd, buf, static_cast<size_t>(size));
+                        return (written < 0) ? AVERROR(errno) : static_cast<int>(written);
+                    };
+                    auto seekFunc = [](void* opaque, int64_t offset, int whence) -> int64_t {
+                        int fd = static_cast<int>(reinterpret_cast<intptr_t>(opaque));
+                        if (whence == AVSEEK_SIZE) return -1; // size unknown
+                        return lseek64(fd, static_cast<off64_t>(offset), whence);
+                    };
+
+                    m_context->pFormatCtx->pb = avio_alloc_context(
+                        ioBuf, kBufSize, 1,
+                        reinterpret_cast<void*>(static_cast<intptr_t>(dupFd)),
+                        nullptr, writePacket, seekFunc);
+
+                    if (m_context->pFormatCtx->pb)
+                    {
+                        m_context->customFd = dupFd;
+                        m_context->usingCustomAVIO = true;
+                        CGE_LOG_INFO("Using custom AVIO context for fd %d (src %d)", dupFd, srcFd);
+                    }
+                    else
+                    {
+                        av_free(ioBuf);
+                        close(dupFd);
+                        CGE_LOG_ERROR("avio_alloc_context failed for /proc/self/fd path.");
+                        return false;
+                    }
+                }
+                else
+                {
+                    CGE_LOG_ERROR("dup() failed for /proc/self/fd/%d: %s", srcFd, strerror(errno));
+                    // Fall through: let avio_open attempt the path.
+                }
+            }
+        }
+
+        if (!m_context->usingCustomAVIO &&
+            0 > avio_open(&m_context->pFormatCtx->pb, filename, AVIO_FLAG_WRITE))
         {
             CGE_LOG_ERROR("could not open file.");
             return false;

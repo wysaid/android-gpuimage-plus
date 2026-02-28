@@ -11,16 +11,22 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import org.wysaid.camera.Camera1Provider;
 import org.wysaid.camera.CameraInstance;
+import org.wysaid.camera.ICameraProvider;
 import org.wysaid.common.Common;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Created by wangyang on 15/7/17.
+ * Base class for camera GL views. Handles viewport calculation, flash control,
+ * camera switching, and provides the {@link ICameraProvider} abstraction.
+ *
+ * <p>By default uses Camera1 for backward compatibility.
+ * Call {@link #setCameraProvider(ICameraProvider)} before the surface is created
+ * to use a different backend (e.g., CameraX).
  */
-
 public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer {
 
     public CameraGLSurfaceView(Context context, AttributeSet attrs) {
@@ -45,11 +51,53 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     protected int mRecordWidth = 480;
     protected int mRecordHeight = 640;
 
+    /** The camera provider instance. Defaults to Camera1 for backward compatibility. */
+    protected volatile ICameraProvider mCameraProvider;
+
+    /**
+     * Set a custom camera provider (e.g., CameraX). Should be called before the surface is created.
+     *
+     * @param provider The camera provider to use.
+     */
+    public synchronized void setCameraProvider(ICameraProvider provider) {
+        mCameraProvider = provider;
+        if (provider != null) {
+            // Forward any previously configured recording size to the new provider
+            // so that presetRecordingSize() calls made before setCameraProvider() take effect.
+            provider.setPreferredPreviewSize(mRecordWidth, mRecordHeight);
+        }
+    }
+
+    /**
+     * Get the current camera provider. Creates a default Camera1Provider if none was set.
+     */
+    public synchronized ICameraProvider getCameraProvider() {
+        if (mCameraProvider == null) {
+            mCameraProvider = new Camera1Provider();
+        }
+        return mCameraProvider;
+    }
+
     //isBigger 为true 表示当宽高不满足时，取最近的较大值.
     // 若为 false 则取较小的
     public void setPictureSize(int width, int height, boolean isBigger) {
         //默认会旋转90度.
-        cameraInstance().setPictureSize(height, width, isBigger);
+        getCameraProvider().setPictureSize(height, width, isBigger);
+    }
+
+    /**
+     * Set flash mode using {@link ICameraProvider.FlashMode} enum.
+     * Preferred over {@link #setFlashLightMode(String)}.
+     */
+    public synchronized boolean setFlashMode(ICameraProvider.FlashMode mode) {
+        if (!getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
+            Log.e(LOG_TAG, "No flash light is supported by current device!");
+            return false;
+        }
+        if (!mIsCameraBackForward) {
+            return false;
+        }
+        return getCameraProvider().setFlashMode(mode);
     }
 
     // mode value should be:
@@ -58,6 +106,10 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     //    Camera.Parameters.FLASH_MODE_ON;
     //    Camera.Parameters.FLASH_MODE_RED_EYE
     //    Camera.Parameters.FLASH_MODE_TORCH 等
+    /**
+     * @deprecated Use {@link #setFlashMode(ICameraProvider.FlashMode)} instead.
+     */
+    @Deprecated
     public synchronized boolean setFlashLightMode(String mode) {
 
         if (!getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
@@ -69,26 +121,9 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
             return false;
         }
 
-        Camera.Parameters parameters = cameraInstance().getParams();
-
-        if (parameters == null)
-            return false;
-
-        try {
-
-            if (!parameters.getSupportedFlashModes().contains(mode)) {
-                Log.e(LOG_TAG, "Invalid Flash Light Mode!!!");
-                return false;
-            }
-
-            parameters.setFlashMode(mode);
-            cameraInstance().setParams(parameters);
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "Switch flash light failed, check if you're using front camera.");
-            return false;
-        }
-
-        return true;
+        // Delegate to the new enum-based API
+        ICameraProvider.FlashMode flashMode = ICameraProvider.camera1ToFlashMode(mode);
+        return getCameraProvider().setFlashMode(flashMode);
     }
 
     protected int mMaxPreviewWidth = 1920;
@@ -124,6 +159,10 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         return mIsCameraBackForward;
     }
 
+    /**
+     * @deprecated Use {@link #getCameraProvider()} instead.
+     */
+    @Deprecated
     public CameraInstance cameraInstance() {
         return CameraInstance.getInstance();
     }
@@ -147,7 +186,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
         mRecordWidth = width;
         mRecordHeight = height;
-        cameraInstance().setPreferPreviewSize(width, height);
+        getCameraProvider().setPreferredPreviewSize(width, height);
     }
 
     public void resumePreview() {
@@ -155,52 +194,77 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     }
 
     public void stopPreview() {
-        queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                cameraInstance().stopPreview();
-            }
-        });
+        getCameraProvider().stopPreview();
     }
 
     protected void onSwitchCamera() {
 
     }
 
+    /**
+     * Switch between front and back camera.
+     *
+     * <p><b>Must be called from the main thread</b> — camera lifecycle operations
+     * ({@link ICameraProvider#closeCamera()}, {@link ICameraProvider#openCamera}) require it.
+     *
+     * <p>Camera open/close runs on the main thread (required by CameraX). FrameRecorder
+     * mutations ({@link #onSwitchCamera()}, {@link #resumePreview()}) are dispatched to
+     * the GL thread via {@link #queueEvent} so that OpenGL resources are always touched
+     * from the thread that owns the GL context.
+     */
     public final void switchCamera() {
         mIsCameraBackForward = !mIsCameraBackForward;
 
-        queueEvent(new Runnable() {
+        final ICameraProvider.CameraFacing facing = mIsCameraBackForward
+                ? ICameraProvider.CameraFacing.BACK
+                : ICameraProvider.CameraFacing.FRONT;
+
+        getCameraProvider().closeCamera();
+        // onSwitchCamera() may touch FrameRecorder (OpenGL resource) — must run on GL thread.
+        queueEvent(this::onSwitchCamera);
+        getCameraProvider().openCamera(facing, new ICameraProvider.CameraOpenCallback() {
             @Override
-            public void run() {
-
-                cameraInstance().stopCamera();
-                onSwitchCamera();
-                int facing = mIsCameraBackForward ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
-
-                cameraInstance().tryOpenCamera(new CameraInstance.CameraOpenCallback() {
-                    @Override
-                    public void cameraReady() {
-                        resumePreview();
-                    }
-                }, facing);
-
-                requestRender();
+            public void cameraReady() {
+                // resumePreview() touches FrameRecorder — dispatch to GL thread.
+                queueEvent(() -> resumePreview());
             }
         });
+        requestRender();
     }
 
     //Attention， 'focusAtPoint' will change focus mode to 'FOCUS_MODE_AUTO'
     //If you want to keep the previous focus mode， please reset the focus mode after 'AutoFocusCallback'.
     //x,y should be: [0, 1]， stands for 'touchEventPosition / viewSize'.
+
+    /**
+     * Focus at a point using the new {@link ICameraProvider.AutoFocusCallback}.
+     */
+    public void focusAtPoint(float x, float y, ICameraProvider.AutoFocusCallback focusCallback) {
+        getCameraProvider().focusAtPoint(y, 1.0f - x, 0.2f, focusCallback);
+    }
+
+    /**
+     * @deprecated Use {@link #focusAtPoint(float, float, ICameraProvider.AutoFocusCallback)} instead.
+     * Note: the legacy {@link Camera} argument passed to the callback may be null if the
+     * active provider does not expose a Camera1 device. Use
+     * {@link #focusAtPoint(float, float, ICameraProvider.AutoFocusCallback)} to avoid NPE
+     * and to call {@link ICameraProvider#resumePreviewAfterCapture()} explicitly.
+     */
+    @Deprecated
     public void focusAtPoint(float x, float y, Camera.AutoFocusCallback focusCallback) {
-        cameraInstance().focusAtPoint(y, 1.0f - x, focusCallback);
+        final ICameraProvider provider = getCameraProvider();
+        // Retrieve the Camera1 device (null for CameraX) and pass to legacy callback.
+        final Camera legacyCamera = (provider instanceof Camera1Provider)
+                ? ((Camera1Provider) provider).getCameraInstance().getCameraDevice()
+                : null;
+        provider.focusAtPoint(y, 1.0f - x, 0.2f,
+                focusCallback != null ? success -> focusCallback.onAutoFocus(success, legacyCamera) : null);
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         super.surfaceDestroyed(holder);
-        cameraInstance().stopCamera();
+        getCameraProvider().closeCamera();
     }
 
     public interface OnCreateCallback {
@@ -259,7 +323,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     public void onPause() {
         Log.i(LOG_TAG, "glsurfaceview onPause in...");
 
-        cameraInstance().stopCamera();
+        getCameraProvider().closeCamera();
         super.onPause();
         Log.i(LOG_TAG, "glsurfaceview onPause out...");
     }

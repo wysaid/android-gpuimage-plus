@@ -8,14 +8,56 @@
                 android:paddingTop="@dimen/activity_vertical_margin"
                 tools:context=".MainActivity">
 
-    <LinearLayout
-        android:id="@+id/buttonLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:orientation="vertical"
-        >
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <!-- Camera API selector -->
+            <TextView
+                android:id="@+id/cameraApiLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Camera API:"
+                android:textSize="16sp"
+                android:layout_marginBottom="4dp" />
+
+            <RadioGroup
+                android:id="@+id/cameraApiRadioGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <RadioButton
+                    android:id="@+id/radioCamera1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Camera1"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/radioCameraX"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CameraX" />
+
+            </RadioGroup>
+
+            <LinearLayout
+                android:id="@+id/buttonLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </RelativeLayout>
