@@ -455,7 +455,8 @@ public class CameraGLSurfaceViewWithTexture extends CameraGLSurfaceView implemen
 
             ExifInterface exifInterface = new ExifInterface(tmpFilename);
             int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-            return orientation == ExifInterface.ORIENTATION_ROTATE_90;
+            return orientation == ExifInterface.ORIENTATION_ROTATE_90
+                    || orientation == ExifInterface.ORIENTATION_ROTATE_270;
         } catch (IOException e) {
             Log.e(LOG_TAG, "Err when reading exif from cache image: " + e.toString());
             return null;

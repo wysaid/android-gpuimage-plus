@@ -91,7 +91,7 @@ Before acting on any review comment or suggestion, classify it by importance:
 - After all fixes: summary of check statuses confirming all green
 - **Review summary table** — produced at the end of every review session:
 
-```
+```markdown
 | # | Source (comment / CI) | Issue description | Priority | Action taken | Reason if not fixed |
 |---|-----------------------|-------------------|----------|--------------|---------------------|
 | 1 | Reviewer @xxx         | e.g. rename foo() | P3       | Not fixed    | Style preference, no functional impact — deferred to user |
