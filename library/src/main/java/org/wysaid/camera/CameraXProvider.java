@@ -346,7 +346,9 @@ public class CameraXProvider implements ICameraProvider {
 
     @Override
     public boolean isZoomSupported() {
-        return true; // CameraX always supports zoom via ZoomControl
+        if (mCamera == null) return false;
+        ZoomState state = mCamera.getCameraInfo().getZoomState().getValue();
+        return state != null && state.getMaxZoomRatio() > state.getMinZoomRatio();
     }
 
     @Override
@@ -369,10 +371,36 @@ public class CameraXProvider implements ICameraProvider {
             Log.w(LOG_TAG, "CameraX: setZoomRatio called but camera not bound.");
             return;
         }
-        mCamera.getCameraControl().setZoomRatio(ratio)
-                .addListener(() -> {
-                    // Zoom applied; nothing extra needed.
-                }, ContextCompat.getMainExecutor(mContext));
+
+        ZoomState zoomState = mCamera.getCameraInfo().getZoomState().getValue();
+        if (zoomState == null) {
+            Log.w(LOG_TAG, "CameraX: setZoomRatio called but ZoomState not yet available.");
+            return;
+        }
+
+        float minZoom = zoomState.getMinZoomRatio();
+        float maxZoom = zoomState.getMaxZoomRatio();
+        float clampedRatio = Math.max(minZoom, Math.min(ratio, maxZoom));
+
+        if (clampedRatio != ratio) {
+            Log.w(LOG_TAG, "CameraX: Requested zoom ratio " + ratio
+                    + " is out of range [" + minZoom + ", " + maxZoom + "], clamped to "
+                    + clampedRatio + ".");
+        }
+
+        final ListenableFuture<Void> future =
+                mCamera.getCameraControl().setZoomRatio(clampedRatio);
+        future.addListener(() -> {
+            try {
+                future.get();
+            } catch (ExecutionException e) {
+                Throwable cause = e.getCause();
+                Log.e(LOG_TAG, "CameraX: setZoomRatio failed: " + (cause != null ? cause : e));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                Log.e(LOG_TAG, "CameraX: setZoomRatio interrupted.", e);
+            }
+        }, ContextCompat.getMainExecutor(mContext));
     }
 
     // ========== Capture ==========
