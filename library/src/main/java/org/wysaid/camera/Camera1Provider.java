@@ -4,6 +4,8 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.util.Log;
 
+import java.util.List;
+
 import org.wysaid.common.Common;
 
 /**
@@ -143,7 +145,7 @@ public class Camera1Provider implements ICameraProvider {
 
     @Override
     public boolean isZoomSupported() {
-        android.hardware.Camera.Parameters params = CameraInstance.getInstance().getParams();
+        Camera.Parameters params = CameraInstance.getInstance().getParams();
         return params != null && params.isZoomSupported();
     }
 
@@ -154,18 +156,18 @@ public class Camera1Provider implements ICameraProvider {
 
     @Override
     public float getMaxZoomRatio() {
-        android.hardware.Camera.Parameters params = CameraInstance.getInstance().getParams();
+        Camera.Parameters params = CameraInstance.getInstance().getParams();
         if (params == null || !params.isZoomSupported()) return 1.0f;
-        java.util.List<Integer> ratios = params.getZoomRatios();
+        List<Integer> ratios = params.getZoomRatios();
         return ratios.get(params.getMaxZoom()) / 100.0f;
     }
 
     @Override
     public void setZoomRatio(float ratio) {
-        android.hardware.Camera.Parameters params = CameraInstance.getInstance().getParams();
+        Camera.Parameters params = CameraInstance.getInstance().getParams();
         if (params == null || !params.isZoomSupported()) return;
 
-        java.util.List<Integer> zoomRatios = params.getZoomRatios();
+        List<Integer> zoomRatios = params.getZoomRatios();
         int targetHundredths = Math.round(ratio * 100.0f);
 
         // Find the closest discrete zoom index for the requested ratio.
