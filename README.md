@@ -4,24 +4,7 @@ A C++ & Java library for `Image`/`Camera`/`Video` filters. PRs are welcomed.
 
 ## New Features
 
-### Camera Zoom Control (v3.x)
-
-The `ICameraProvider` interface now exposes a unified zoom API:
-
-```java
-CameraRecordGLSurfaceView cameraView = ...;
-cameraView.getCameraProvider().setZoomRatio(2.0f); // 2× zoom
-```
-
-Works with both the legacy `Camera1Provider` and the new `CameraXProvider`.
-
-### CameraX Support (v3.x)
-
-A new `CameraXProvider` backend is available alongside the legacy Camera1 API.
-Selection is automatic at runtime based on device capability, ensuring
-backward compatibility on older devices.
-
-### Image Deform Demo
+v3.x adds CameraX support (`CameraXProvider`) and a unified zoom API (`ICameraProvider.setZoomRatio`).
 
 ![screenshots](screenshots/6.gif) ![screenshots](screenshots/5.gif)
 
@@ -191,15 +174,9 @@ glSurfaceView.queueEvent(() -> {
 
 ## Tool
 
-[CGE-Tools](https://github.com/wysaid/cge-tools) is the desktop companion for creating and previewing CGE filter rules.
-It is now **open source** and supports macOS, Linux, and Windows with Qt5/Qt6.
+[CGE-Tools](https://github.com/wysaid/cge-tools) — open-source desktop companion for creating and previewing CGE filter rules (macOS / Linux / Windows). Latest release: [v2.0.0](https://github.com/wysaid/cge-tools/releases/tag/v2.0.0).
 
-[![Release](https://github.com/wysaid/cge-tools/actions/workflows/release.yml/badge.svg)](https://github.com/wysaid/cge-tools/actions/workflows/release.yml)
-[![macOS Build](https://github.com/wysaid/cge-tools/actions/workflows/macos-build.yml/badge.svg)](https://github.com/wysaid/cge-tools/actions/workflows/macos-build.yml)
-[![Linux Build](https://github.com/wysaid/cge-tools/actions/workflows/linux-build.yml/badge.svg)](https://github.com/wysaid/cge-tools/actions/workflows/linux-build.yml)
-[![Windows Build](https://github.com/wysaid/cge-tools/actions/workflows/windows-build.yml/badge.svg)](https://github.com/wysaid/cge-tools/actions/workflows/windows-build.yml)
-
-[![Tool](https://raw.githubusercontent.com/wysaid/cge-tools/master/screenshots/0.jpg "cge-tool")](https://github.com/wysaid/cge-tools)
+[![Tool](https://raw.githubusercontent.com/wysaid/cge-tools/master/screenshots/0.jpg "cge-tool")](https://github.com/wysaid/cge-tools/releases/tag/v2.0.0)
 
 ## License
 
