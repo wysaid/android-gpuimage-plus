@@ -1,5 +1,8 @@
 # Android-GPUImage-Plus
 
+[![Contributors](https://img.shields.io/github/contributors/wysaid/android-gpuimage-plus?style=flat-square)](https://github.com/wysaid/android-gpuimage-plus/graphs/contributors)
+[![Pull Requests Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/wysaid/android-gpuimage-plus/pulls)
+
 A C++ & Java library for `Image`/`Camera`/`Video` filters. PRs are welcomed.
 
 ## New Features
@@ -177,6 +180,12 @@ glSurfaceView.queueEvent(() -> {
 [CGE-Tools](https://github.com/wysaid/cge-tools) — open-source desktop companion for creating and previewing CGE filter rules (macOS / Linux / Windows). Latest release: [v2.0.0](https://github.com/wysaid/cge-tools/releases/tag/v2.0.0).
 
 [![Tool](https://raw.githubusercontent.com/wysaid/cge-tools/master/screenshots/0.jpg "cge-tool")](https://github.com/wysaid/cge-tools/releases/tag/v2.0.0)
+
+## Contributors
+
+This project is built with help from the open-source community. Contributions of code, documentation, tests, bug reports, and reviews are all welcome.
+
+[![Contributors](https://contrib.rocks/image?repo=wysaid/android-gpuimage-plus)](https://github.com/wysaid/android-gpuimage-plus/graphs/contributors)
 
 ## License
 
