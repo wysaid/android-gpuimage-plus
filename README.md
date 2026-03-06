@@ -2,9 +2,26 @@
 
 A C++ & Java library for `Image`/`Camera`/`Video` filters. PRs are welcomed.
 
-## New Feature
+## New Features
 
-See the `image deform demo`.
+### Camera Zoom Control (v3.x)
+
+The `ICameraProvider` interface now exposes a unified zoom API:
+
+```java
+CameraRecordGLSurfaceView cameraView = ...;
+cameraView.getCameraProvider().setZoomRatio(2.0f); // 2× zoom
+```
+
+Works with both the legacy `Camera1Provider` and the new `CameraXProvider`.
+
+### CameraX Support (v3.x)
+
+A new `CameraXProvider` backend is available alongside the legacy Camera1 API.
+Selection is automatic at runtime based on device capability, ensuring
+backward compatibility on older devices.
+
+### Image Deform Demo
 
 ![screenshots](screenshots/6.gif) ![screenshots](screenshots/5.gif)
 
@@ -26,22 +43,22 @@ dependencies {
     // Page size: 4KB (default)
     // Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
     // Full-featured with FFmpeg bundled
-    implementation 'org.wysaid:gpuimage-plus:3.1.0'
+    implementation 'org.wysaid:gpuimage-plus:3.1.2'
 
     // Page size: 16KB
     // Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
     // Full-featured with FFmpeg bundled
-    implementation 'org.wysaid:gpuimage-plus:3.1.0-16k'
+    implementation 'org.wysaid:gpuimage-plus:3.1.2-16k'
 
     // Page size: 4KB (default)
     // Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
     // Image-only version (no video features or FFmpeg)
-    implementation 'org.wysaid:gpuimage-plus:3.1.0-min'
+    implementation 'org.wysaid:gpuimage-plus:3.1.2-min'
 
     // Page size: 16KB
     // Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
     // Image-only version (no video features or FFmpeg)
-    implementation 'org.wysaid:gpuimage-plus:3.1.0-16k-min'
+    implementation 'org.wysaid:gpuimage-plus:3.1.2-16k-min'
 }
 ```
 
@@ -174,7 +191,13 @@ glSurfaceView.queueEvent(() -> {
 
 ## Tool
 
-Some utils are available for creating filters: [https://github.com/wysaid/cge-tools](https://github.com/wysaid/cge-tools "http://wysaid.org")
+[CGE-Tools](https://github.com/wysaid/cge-tools) is the desktop companion for creating and previewing CGE filter rules.
+It is now **open source** and supports macOS, Linux, and Windows with Qt5/Qt6.
+
+[![Release](https://github.com/wysaid/cge-tools/actions/workflows/release.yml/badge.svg)](https://github.com/wysaid/cge-tools/actions/workflows/release.yml)
+[![macOS Build](https://github.com/wysaid/cge-tools/actions/workflows/macos-build.yml/badge.svg)](https://github.com/wysaid/cge-tools/actions/workflows/macos-build.yml)
+[![Linux Build](https://github.com/wysaid/cge-tools/actions/workflows/linux-build.yml/badge.svg)](https://github.com/wysaid/cge-tools/actions/workflows/linux-build.yml)
+[![Windows Build](https://github.com/wysaid/cge-tools/actions/workflows/windows-build.yml/badge.svg)](https://github.com/wysaid/cge-tools/actions/workflows/windows-build.yml)
 
 [![Tool](https://raw.githubusercontent.com/wysaid/cge-tools/master/screenshots/0.jpg "cge-tool")](https://github.com/wysaid/cge-tools)
 
