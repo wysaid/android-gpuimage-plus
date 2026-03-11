@@ -37,8 +37,8 @@ ext {
             buildToolsVersion: '34.0.0',
             minSdkVersion    : 21,
             targetSdkVersion : 25, // higher target version needs more storage permission request.
-            versionCode      : 2,
-            versionName      : "3.1.2",
+            versionCode      : 3,
+            versionName      : "3.2.0",
             applicationId    : "org.wysaid.cgeDemo",
             appcompatX       : "1.2.0",
             ndkVersion       : "27.2.12479018",

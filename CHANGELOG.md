@@ -8,6 +8,10 @@ Versions follow [Semantic Versioning](https://semver.org/). Entries are ordered 
 
 ## [Unreleased] — on `master`, pending next release
 
+---
+
+## [3.2.0] — 2026-03-12
+
 - **feat:** Add `setZoomRatio(float)` API to `ICameraProvider`, `CameraXProvider`, and `Camera1Provider` (#566)
 - **feat:** Add `CameraXProvider` — runtime-selectable camera backend with automatic Camera2 / CameraX fallback (#565)
 - **ci:** Release workflow overhaul — draft releases, master validation, direct Maven commit, NDK r27c/r29 (#564)
