@@ -126,7 +126,7 @@ function buildProject() {
     GENERATED_APK_FILE=$(find "$THIS_DIR/cgeDemo/build" -iname "*.apk" | grep -i "${ANDROID_BUILD_TYPE/assemble/}")
     echo "apk generated at: $GENERATED_APK_FILE"
 
-    resolveAdbTarget
+    resolveAdbTarget || true
     if [[ -n "$GRADLEW_RUN_TASK" ]] && [[ ${#ADB_TARGET_ARGS[@]} -gt 0 || $(. "$ADB_COMMAND" devices | grep -v 'List' | grep -vE '^$' | grep $'\tdevice$' | wc -l | tr -d ' ') -ne 0 ]]; then
         if [[ "$GRADLEW_RUN_TASK" == "installRelease" ]]; then
             # release can not be installed directly. do adb install.
