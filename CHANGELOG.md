@@ -14,13 +14,19 @@ Versions follow [Semantic Versioning](https://semver.org/). Entries are ordered 
 
 - **feat:** Add `setZoomRatio(float)` API to `ICameraProvider`, `CameraXProvider`, and `Camera1Provider` (#566)
 - **feat:** Add `CameraXProvider` — runtime-selectable camera backend with automatic Camera2 / CameraX fallback (#565)
+- **fix:** Rebuild 16KB artifacts with NDK r27c / LLD 18 so `.relro_padding` keeps
+  `PT_GNU_RELRO` inside its writable `PT_LOAD` mapping on 4KB-page-size devices,
+  fully resolving the remaining `dlopen` `ENOMEM` failure from #562.
 - **ci:** Release workflow overhaul — draft releases, master validation, direct Maven commit, NDK r27c/r29 (#564)
 
 ---
 
 ## [3.1.2] — 2026-02-21
 
-- **fix:** Remove redundant `-Wl,-z,relro,-z,now` linker flags from CMakeLists.txt to fix `UnsatisfiedLinkError` on 16KB-page-size builds (e.g. Samsung S21+ / Android 14). Android API 23+ enforces full RELRO by default; the explicit flags caused `PT_GNU_RELRO MemSiz` to exceed the mapped RW LOAD segment on 16KB-aligned builds, triggering an `mprotect()` failure with `ENOMEM`. (#563)
+- **fix attempt:** Remove redundant `-Wl,-z,relro,-z,now` linker flags from
+  CMakeLists.txt for #562. This did not fully resolve the issue because LLD 17
+  enables RELRO by default and could still emit a `PT_GNU_RELRO` range beyond
+  its writable `PT_LOAD` mapping when the runtime page size was 4KB.
 
 ---
 

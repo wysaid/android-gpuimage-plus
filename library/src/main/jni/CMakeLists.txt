@@ -83,8 +83,9 @@ target_compile_definitions(CGE PUBLIC ANDROID_NDK=1 CGE_LOG_TAG=\"libCGE\" CGE_T
 # Add -O3 in non-Debug mode
 target_compile_options(CGE PRIVATE $<$<NOT:$<CONFIG:Debug>>:-O3>)
 
-# Note: -Wl,-z,relro,-z,now is intentionally omitted here, fixing issue: <https://github.com/wysaid/android-gpuimage-plus/issues/562>
-# Android API 23+ enforces full RELRO by default; no explicit linker hardening flags are needed.
+# RELRO remains enabled by the Android NDK toolchain by default. NDK r27+ includes
+# LLD's .relro_padding support so 16KB-aligned binaries remain loadable on 4KB
+# page-size devices. See: <https://github.com/wysaid/android-gpuimage-plus/issues/562>
 
 target_link_libraries(CGE PUBLIC
     GLESv2

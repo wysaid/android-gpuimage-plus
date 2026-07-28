@@ -329,6 +329,10 @@ jobs:
         echo "✅ All AAR artifacts packaged ($AAR_COUNT files)"
         echo "📦 Final artifacts:"
         ls -lh "$ARTIFACTS_DIR/"
+
+    - name: Validate AAR native ELF layouts
+      run: |
+        python3 tools/validate_aar_elf.py /tmp/release-artifacts/*.aar
     
     - name: Generate artifact checksums
       run: |

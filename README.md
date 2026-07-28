@@ -29,24 +29,28 @@ dependencies {
     // Page size: 4KB (default)
     // Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
     // Full-featured with FFmpeg bundled
-    implementation 'org.wysaid:gpuimage-plus:3.1.2'
+    implementation 'org.wysaid:gpuimage-plus:3.2.0'
 
     // Page size: 16KB
     // Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
     // Full-featured with FFmpeg bundled
-    implementation 'org.wysaid:gpuimage-plus:3.1.2-16k'
+    implementation 'org.wysaid:gpuimage-plus:3.2.0-16k'
 
     // Page size: 4KB (default)
     // Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
     // Image-only version (no video features or FFmpeg)
-    implementation 'org.wysaid:gpuimage-plus:3.1.2-min'
+    implementation 'org.wysaid:gpuimage-plus:3.2.0-min'
 
     // Page size: 16KB
     // Architectures: armeabi-v7a, arm64-v8a, x86, x86_64
     // Image-only version (no video features or FFmpeg)
-    implementation 'org.wysaid:gpuimage-plus:3.1.2-16k-min'
+    implementation 'org.wysaid:gpuimage-plus:3.2.0-16k-min'
 }
 ```
+
+> **Important:** The `3.1.2-16k` variants were linked with LLD 17 and can fail to load on
+> 4KB-page-size devices with `can't enable GNU RELRO protection ... Out of memory`.
+> Use `3.2.0` or newer; its 16KB variants are compatible with both 4KB and 16KB devices.
 
 > To compile other versions of ffmpeg, see: <https://github.com/wysaid/FFmpeg-Android.git>
 
