@@ -115,6 +115,15 @@ android {
     }
 
     namespace = 'org.wysaid.library'
+
+    if (deployArtifacts()) {
+        publishing {
+            singleVariant('release') {
+                withSourcesJar()
+                withJavadocJar()
+            }
+        }
+    }
 }
 
 dependencies {
@@ -150,14 +159,10 @@ if (deployArtifacts()) {
             release(MavenPublication) {
                 artifactId = 'gpuimage-plus'
                 groupId = 'org.wysaid'
-                version = version
+                version = project.version.toString()
 
                 afterEvaluate {
-                    // Use the correct Android component
-                    from components.findByName('release') ?: components.findByName('default')
-                    
-                    // Ensure the AAR file is included and declare the correct dependencies
-                    artifact bundleReleaseAar
+                    from components.release
                 }
 
                 pom {
@@ -174,8 +179,8 @@ if (deployArtifacts()) {
                     }
 
                     scm {
-                        connection = gitUrl
-                        developerConnection = gitUrl
+                        connection = "scm:git:${gitUrl}"
+                        developerConnection = "scm:git:${gitUrl}"
                         url = siteUrl
                     }
 
@@ -192,33 +197,13 @@ if (deployArtifacts()) {
             maven {
                 name = "local_repo"
                 url = gradle.ext.localRepoDir
-//            credentials {
-//                username = gradle.ext.repoUsername
-//                password = gradle.ext.repoPassword
-//            }
             }
         }
     }
 
-    task sourcesJar(type: Jar) {
-        from android.sourceSets.main.java.srcDirs
-        archiveClassifier.set('sources')
+    // This single Android variant is fully represented by its Maven POM.
+    tasks.withType(GenerateModuleMetadata).configureEach {
+        enabled = false
     }
-
-    task javadoc(type: Javadoc) {
-        source = android.sourceSets.main.java.srcDirs
-        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    }
-
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-        archiveClassifier.set('javadoc')
-        from javadoc.destinationDir
-    }
-
-    artifacts {
-        archives javadocJar
-        archives sourcesJar
-    }
-
 }
 

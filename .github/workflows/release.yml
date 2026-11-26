@@ -333,6 +333,12 @@ jobs:
     - name: Validate AAR native ELF layouts
       run: |
         python3 tools/validate_aar_elf.py /tmp/release-artifacts/*.aar
+
+    - name: Package unsigned Maven Central bundle
+      if: steps.tag_version.outputs.is_prerelease == 'false'
+      env:
+        VERSION: ${{ steps.tag_version.outputs.version }}
+      run: python3 tools/central_bundle.py /tmp/maven-repo "$VERSION" "/tmp/maven-central-$VERSION-unsigned.zip"
     
     - name: Generate artifact checksums
       run: |
@@ -353,6 +359,15 @@ jobs:
         done
         
         echo "✅ Individual checksum files created"
+
+    - name: Upload unsigned Maven Central bundle
+      if: steps.tag_version.outputs.is_prerelease == 'false'
+      uses: actions/upload-artifact@v4
+      with:
+        name: maven-central-${{ steps.tag_version.outputs.version }}-unsigned
+        path: /tmp/maven-central-${{ steps.tag_version.outputs.version }}-unsigned.zip
+        if-no-files-found: error
+        retention-days: 7
 
     - name: Sync artifacts to maven repo
       if: steps.tag_version.outputs.is_publish == 'true'
@@ -601,6 +616,11 @@ jobs:
         echo "- gpuimage-plus-$VERSION-min.aar (4KB, image-only)" >> $GITHUB_STEP_SUMMARY
         echo "- gpuimage-plus-$VERSION-16k-min.aar (16KB, image-only)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
+
+        if [ "${{ steps.tag_version.outputs.is_prerelease }}" = "false" ]; then
+          echo "**Maven Central bundle:** \`maven-central-$VERSION-unsigned\` (available for 7 days)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+        fi
         
         if [ "$IS_PUBLISH" = "true" ]; then
           echo "Review and publish the draft release: ${{ github.server_url }}/${{ github.repository }}/releases" >> $GITHUB_STEP_SUMMARY

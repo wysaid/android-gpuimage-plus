@@ -14,6 +14,7 @@ from pathlib import Path
 
 PAGE_SIZE_4K = 4096
 PAGE_SIZE_16K = 16384
+EXPECTED_ABIS = {"arm64-v8a", "armeabi-v7a", "x86", "x86_64"}
 
 PROGRAM_HEADER_RE = re.compile(
     r"^\s*(LOAD|GNU_RELRO)\s+"
@@ -141,6 +142,13 @@ def validate_aar(aar: Path) -> list[str]:
         if not native_entries:
             return [f"{aar.name}: no native libraries found"]
 
+        abis = {entry.filename.split("/")[1] for entry in native_entries}
+        if abis != EXPECTED_ABIS:
+            errors.append(
+                f"{aar.name}: missing ABIs {sorted(EXPECTED_ABIS - abis)}, "
+                f"unexpected ABIs {sorted(abis - EXPECTED_ABIS)}"
+            )
+
         extraction_root = Path(temp_dir)
         for entry in native_entries:
             shared_library = Path(archive.extract(entry, extraction_root))
@@ -156,7 +164,7 @@ def validate_aar(aar: Path) -> list[str]:
             if require_16k
             else "4KB RELRO coverage"
         )
-        print(f"✓ {aar.name}: {alignment} valid")
+        print(f"✓ {aar.name}: all four ABIs and {alignment} valid")
     return errors
 
 
