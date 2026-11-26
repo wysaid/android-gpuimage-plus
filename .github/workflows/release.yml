@@ -200,6 +200,8 @@ jobs:
     
     - name: Build all artifact variants
       id: build_variants
+      env:
+        ORG_GRADLE_PROJECT_mavenPublicationVersion: ${{ steps.tag_version.outputs.version }}
       run: |
         BUILD_START=$(date +%s)
         echo "🔨 Building all 4 artifact variants..."
@@ -359,6 +361,7 @@ jobs:
       id: sync_maven_repo
       env:
         ARTIFACT_REPO_TOKEN: ${{ secrets.ARTIFACT_REPO_TOKEN }}
+        RELEASE_VERSION: ${{ steps.tag_version.outputs.version }}
       run: |
         set -euo pipefail
 
@@ -383,7 +386,7 @@ jobs:
         echo "artifact_commit_url=" >> $GITHUB_OUTPUT
 
         for attempt in 1 2 3; do
-          python3 tools/sync_maven_release.py "/tmp/maven-repo/$ARTIFACT_DIR" "$WORKDIR/$ARTIFACT_DIR"
+          python3 tools/sync_maven_release.py "/tmp/maven-repo/$ARTIFACT_DIR" "$WORKDIR/$ARTIFACT_DIR" "$RELEASE_VERSION"
           if [[ -z "$(git -C "$WORKDIR" status --porcelain -- "$ARTIFACT_DIR")" ]]; then
             echo "ℹ️ No changes to publish."
             exit 0

@@ -5,23 +5,28 @@ import argparse
 import hashlib
 import shutil
 import xml.etree.ElementTree as ET
+from datetime import datetime, timezone
 from pathlib import Path
 
 
-def sync_release(source: Path, target: Path) -> None:
+def sync_release(source: Path, target: Path, release_version: str) -> None:
     metadata_name = "maven-metadata.xml"
     metadata = ET.parse(source / metadata_name)
     artifact_id = metadata.findtext("artifactId")
-    incoming_versions = metadata.findall("versioning/versions/version")
-    if not artifact_id or not incoming_versions:
-        raise ValueError("The staged Maven metadata has no artifact ID or versions")
+    versioning = metadata.find("versioning")
+    versions = metadata.find("versioning/versions")
+    if not artifact_id or versioning is None or versions is None:
+        raise ValueError("The staged Maven metadata has no artifact ID or version list")
+
+    incoming_versions = [entry.text for entry in versions.findall("version")]
+    expected_versions = {release_version + suffix for suffix in ("", "-min", "-16k", "-16k-min")}
+    if len(incoming_versions) != len(expected_versions) or set(incoming_versions) != expected_versions:
+        raise ValueError(
+            f"Staged Maven versions do not match {release_version}: {incoming_versions}"
+        )
 
     new_versions = []
-    for entry in incoming_versions:
-        version = entry.text
-        if not version:
-            raise ValueError("The staged Maven metadata contains an empty version")
-
+    for version in incoming_versions:
         source_version = source / version
         target_version = target / version
         already_published = target_version.exists()
@@ -46,13 +51,20 @@ def sync_release(source: Path, target: Path) -> None:
         return
 
     target_metadata = target / metadata_name
-    versions = metadata.find("versioning/versions")
+    updated_at = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     if target_metadata.is_file():
-        published = ET.parse(target_metadata).findall("versioning/versions/version")
-        all_versions = dict.fromkeys(entry.text for entry in published + incoming_versions)
+        published = ET.parse(target_metadata)
+        published_versions = published.findall("versioning/versions/version")
+        all_versions = dict.fromkeys([entry.text for entry in published_versions] + incoming_versions)
         versions.clear()
         for version in all_versions:
             ET.SubElement(versions, "version").text = version
+        updated_at = max(updated_at, published.findtext("versioning/lastUpdated", default=""))
+
+    last_updated = versioning.find("lastUpdated")
+    if last_updated is None:
+        last_updated = ET.SubElement(versioning, "lastUpdated")
+    last_updated.text = updated_at
 
     target.mkdir(parents=True, exist_ok=True)
     for version in new_versions:
@@ -70,8 +82,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path, help="Gradle publication directory for this artifact")
     parser.add_argument("target", type=Path, help="Published Maven directory for this artifact")
+    parser.add_argument("release_version", help="Expected Maven version from the release tag")
     args = parser.parse_args()
     try:
-        sync_release(args.source, args.target)
+        sync_release(args.source, args.target, args.release_version)
     except (OSError, ET.ParseError, ValueError) as error:
         parser.exit(1, f"{error}\n")

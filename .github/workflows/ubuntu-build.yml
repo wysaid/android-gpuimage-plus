@@ -136,3 +136,6 @@ jobs:
     
     - name: Run lint
       run: ./gradlew lint
+
+    - name: Test Maven publication sync
+      run: python3 -m unittest discover -s tools -p test_sync_maven_release.py
