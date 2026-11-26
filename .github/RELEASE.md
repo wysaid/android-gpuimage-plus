@@ -16,6 +16,10 @@ Automated release triggered by version tags (`v*.*.*`).
 
 **Important**: Tag version must exactly match `versionName` in `build.gradle`.
 
+Choose a version that is still unused in the Maven repository. For the release
+after the Maven-only `3.2.1` recorded in the [changelog](../CHANGELOG.md), use
+`v3.2.2` or a later unused tag.
+
 ## Automated Workflow
 
 The [release workflow](../.github/workflows/release.yml) builds and publishes:
