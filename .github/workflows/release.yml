@@ -336,26 +336,6 @@ jobs:
       run: |
         python3 tools/validate_aar_elf.py /tmp/release-artifacts/*.aar
     
-    - name: Generate artifact checksums
-      run: |
-        echo "🔐 Generating SHA256 checksums for all artifacts..."
-        cd /tmp/release-artifacts
-        
-        # Generate checksums for all files
-        sha256sum *.apk *.aar > SHA256SUMS.txt 2>/dev/null || shasum -a 256 *.apk *.aar > SHA256SUMS.txt
-        
-        echo "✅ Checksums generated:"
-        cat SHA256SUMS.txt
-        
-        # Also create individual checksum files for convenience
-        for file in *.apk *.aar; do
-          if [ -f "$file" ]; then
-            sha256sum "$file" > "${file}.sha256" 2>/dev/null || shasum -a 256 "$file" > "${file}.sha256"
-          fi
-        done
-        
-        echo "✅ Individual checksum files created"
-
     - name: Sync artifacts to maven repo
       if: steps.tag_version.outputs.is_publish == 'true'
       id: sync_maven_repo
@@ -376,6 +356,7 @@ jobs:
         ARTIFACT_REPO="wysaid/android-gpuimage-plus-maven"
         WORKDIR="/tmp/maven-repo-target"
         ARTIFACT_DIR="org/wysaid/gpuimage-plus"
+        SOURCE_COMMIT=$(git rev-parse HEAD)
 
         echo "🔄 Cloning artifact repo..."
         git clone --branch master --depth 1 "https://${ARTIFACT_REPO_TOKEN}@github.com/${ARTIFACT_REPO}.git" "$WORKDIR"
@@ -386,9 +367,13 @@ jobs:
         echo "artifact_commit_url=" >> $GITHUB_OUTPUT
 
         for attempt in 1 2 3; do
-          python3 tools/sync_maven_release.py "/tmp/maven-repo/$ARTIFACT_DIR" "$WORKDIR/$ARTIFACT_DIR" "$RELEASE_VERSION"
+          python3 tools/sync_maven_release.py "/tmp/maven-repo/$ARTIFACT_DIR" "$WORKDIR/$ARTIFACT_DIR" "$RELEASE_VERSION" "$SOURCE_COMMIT"
           if [[ -z "$(git -C "$WORKDIR" status --porcelain -- "$ARTIFACT_DIR")" ]]; then
-            echo "ℹ️ No changes to publish."
+            echo "ℹ️ Using the published Maven AARs for the GitHub Release."
+            for suffix in "" -min -16k -16k-min; do
+              variant="$RELEASE_VERSION$suffix"
+              cp "$WORKDIR/$ARTIFACT_DIR/$variant/gpuimage-plus-$variant.aar" /tmp/release-artifacts/
+            done
             exit 0
           fi
 
@@ -413,6 +398,26 @@ jobs:
 
         echo "::error::Maven artifact push failed after 3 attempts for $TAG_NAME."
         exit 1
+
+    - name: Generate artifact checksums
+      run: |
+        echo "🔐 Generating SHA256 checksums for all artifacts..."
+        cd /tmp/release-artifacts
+
+        # Generate checksums for all files
+        sha256sum *.apk *.aar > SHA256SUMS.txt 2>/dev/null || shasum -a 256 *.apk *.aar > SHA256SUMS.txt
+
+        echo "✅ Checksums generated:"
+        cat SHA256SUMS.txt
+
+        # Also create individual checksum files for convenience
+        for file in *.apk *.aar; do
+          if [ -f "$file" ]; then
+            sha256sum "$file" > "${file}.sha256" 2>/dev/null || shasum -a 256 "$file" > "${file}.sha256"
+          fi
+        done
+
+        echo "✅ Individual checksum files created"
     
     - name: Generate release notes
       id: release_notes

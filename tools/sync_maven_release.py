@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-def sync_release(source: Path, target: Path, release_version: str) -> None:
+def sync_release(source: Path, target: Path, release_version: str, source_commit: str) -> None:
     metadata_name = "maven-metadata.xml"
     metadata = ET.parse(source / metadata_name)
     artifact_id = metadata.findtext("artifactId")
@@ -25,6 +25,11 @@ def sync_release(source: Path, target: Path, release_version: str) -> None:
             f"Staged Maven versions do not match {release_version}: {incoming_versions}"
         )
 
+    source_commit_file = target / release_version / "source-commit.txt"
+    reuse_published = source_commit_file.is_file()
+    if reuse_published and source_commit_file.read_text(encoding="ascii").strip() != source_commit:
+        raise ValueError(f"Maven release {release_version} was published from a different commit")
+
     new_versions = []
     for version in incoming_versions:
         source_version = source / version
@@ -39,7 +44,7 @@ def sync_release(source: Path, target: Path, release_version: str) -> None:
                 published_file = target_version / filename
                 if (
                     not published_file.is_file()
-                    or published_file.read_bytes() != staged_file.read_bytes()
+                    or (not reuse_published and published_file.read_bytes() != staged_file.read_bytes())
                 ):
                     raise ValueError(
                         f"Maven version {version} is already published with different artifacts"
@@ -49,6 +54,10 @@ def sync_release(source: Path, target: Path, release_version: str) -> None:
 
     if not new_versions:
         return
+    if reuse_published:
+        raise ValueError(
+            f"Maven release {release_version} is missing published variants: {new_versions}"
+        )
 
     target_metadata = target / metadata_name
     updated_at = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
@@ -69,6 +78,7 @@ def sync_release(source: Path, target: Path, release_version: str) -> None:
     target.mkdir(parents=True, exist_ok=True)
     for version in new_versions:
         shutil.copytree(source / version, target / version)
+    source_commit_file.write_text(source_commit + "\n", encoding="ascii")
 
     ET.indent(metadata, space="  ")
     payload = ET.tostring(metadata.getroot(), encoding="UTF-8", xml_declaration=True) + b"\n"
@@ -83,8 +93,9 @@ if __name__ == "__main__":
     parser.add_argument("source", type=Path, help="Gradle publication directory for this artifact")
     parser.add_argument("target", type=Path, help="Published Maven directory for this artifact")
     parser.add_argument("release_version", help="Expected Maven version from the release tag")
+    parser.add_argument("source_commit", help="Source commit used to build the release tag")
     args = parser.parse_args()
     try:
-        sync_release(args.source, args.target, args.release_version)
+        sync_release(args.source, args.target, args.release_version, args.source_commit)
     except (OSError, ET.ParseError, ValueError) as error:
         parser.exit(1, f"{error}\n")
