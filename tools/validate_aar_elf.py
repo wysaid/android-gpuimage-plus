@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate page alignment and GNU RELRO coverage in native AAR libraries."""
+"""Validate required AAR libraries, page alignment and GNU RELRO coverage."""
 
 from __future__ import annotations
 
@@ -124,6 +124,9 @@ def validate_shared_library(
 
 def validate_aar(aar: Path) -> list[str]:
     require_16k = "-16k" in aar.stem
+    required_libraries = {"libCGE.so", "libCGEExt.so"}
+    if not aar.stem.endswith("-min"):
+        required_libraries.add("libffmpeg.so")
     errors: list[str] = []
 
     if not aar.is_file():
@@ -149,6 +152,17 @@ def validate_aar(aar: Path) -> list[str]:
                 f"unexpected ABIs {sorted(abis - EXPECTED_ABIS)}"
             )
 
+        native_paths = {entry.filename for entry in native_entries}
+        required_paths = {
+            f"jni/{abi}/{library}"
+            for abi in EXPECTED_ABIS
+            for library in required_libraries
+        }
+        errors.extend(
+            f"{aar.name}: missing required native library {path}"
+            for path in sorted(required_paths - native_paths)
+        )
+
         extraction_root = Path(temp_dir)
         for entry in native_entries:
             shared_library = Path(archive.extract(entry, extraction_root))
@@ -164,7 +178,7 @@ def validate_aar(aar: Path) -> list[str]:
             if require_16k
             else "4KB RELRO coverage"
         )
-        print(f"✓ {aar.name}: all four ABIs and {alignment} valid")
+        print(f"✓ {aar.name}: required libraries for all four ABIs and {alignment} valid")
     return errors
 
 
