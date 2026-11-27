@@ -41,7 +41,7 @@ jobs:
         add-to-path: true
     
     - name: Install build tools
-      run: sudo apt-get update && sudo apt-get install -y ninja-build jq rsync binutils unzip
+      run: sudo apt-get update && sudo apt-get install -y ninja-build jq binutils unzip
     
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -200,6 +200,8 @@ jobs:
     
     - name: Build all artifact variants
       id: build_variants
+      env:
+        ORG_GRADLE_PROJECT_mavenPublicationVersion: ${{ steps.tag_version.outputs.version }}
       run: |
         BUILD_START=$(date +%s)
         echo "🔨 Building all 4 artifact variants..."
@@ -334,35 +336,15 @@ jobs:
       run: |
         python3 tools/validate_aar_elf.py /tmp/release-artifacts/*.aar
     
-    - name: Generate artifact checksums
-      run: |
-        echo "🔐 Generating SHA256 checksums for all artifacts..."
-        cd /tmp/release-artifacts
-        
-        # Generate checksums for all files
-        sha256sum *.apk *.aar > SHA256SUMS.txt 2>/dev/null || shasum -a 256 *.apk *.aar > SHA256SUMS.txt
-        
-        echo "✅ Checksums generated:"
-        cat SHA256SUMS.txt
-        
-        # Also create individual checksum files for convenience
-        for file in *.apk *.aar; do
-          if [ -f "$file" ]; then
-            sha256sum "$file" > "${file}.sha256" 2>/dev/null || shasum -a 256 "$file" > "${file}.sha256"
-          fi
-        done
-        
-        echo "✅ Individual checksum files created"
-
     - name: Sync artifacts to maven repo
       if: steps.tag_version.outputs.is_publish == 'true'
       id: sync_maven_repo
       env:
         ARTIFACT_REPO_TOKEN: ${{ secrets.ARTIFACT_REPO_TOKEN }}
+        RELEASE_VERSION: ${{ steps.tag_version.outputs.version }}
       run: |
         set -euo pipefail
 
-        VERSION="${{ steps.tag_version.outputs.version }}"
         TAG_NAME="${{ steps.tag_version.outputs.tag_name }}"
 
         if [[ -z "${ARTIFACT_REPO_TOKEN:-}" ]]; then
@@ -373,59 +355,69 @@ jobs:
 
         ARTIFACT_REPO="wysaid/android-gpuimage-plus-maven"
         WORKDIR="/tmp/maven-repo-target"
-        SOURCE_REPO="/tmp/maven-repo"
+        ARTIFACT_DIR="org/wysaid/gpuimage-plus"
+        SOURCE_COMMIT=$(git rev-parse HEAD)
 
         echo "🔄 Cloning artifact repo..."
-        git clone --depth 1 "https://${ARTIFACT_REPO_TOKEN}@github.com/${ARTIFACT_REPO}.git" "$WORKDIR"
+        git clone --branch master --depth 1 "https://${ARTIFACT_REPO_TOKEN}@github.com/${ARTIFACT_REPO}.git" "$WORKDIR"
 
-        echo "🚚 Syncing generated Maven artifacts..."
-        mkdir -p "$WORKDIR/org/wysaid/gpuimage-plus"
-
-        if [ ! -d "${SOURCE_REPO}/org/wysaid/gpuimage-plus" ]; then
-          echo "❌ Source artifacts not found: ${SOURCE_REPO}/org/wysaid/gpuimage-plus"
-          exit 1
-        fi
-
-        # Additive sync: keep previously published versions in artifact repo.
-        rsync -av "${SOURCE_REPO}/org/wysaid/gpuimage-plus/" "$WORKDIR/org/wysaid/gpuimage-plus/"
-
-        echo "🧭 Regenerating index pages"
-        pushd "$WORKDIR"
-        chmod +x genSites.sh
-        ./genSites.sh
-
-        git config user.name "github-actions[bot]"
-        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-        git add org/wysaid/gpuimage-plus || true
+        git -C "$WORKDIR" config user.name "github-actions[bot]"
+        git -C "$WORKDIR" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
         echo "artifact_commit_url=" >> $GITHUB_OUTPUT
 
-        if git diff --cached --quiet; then
-          echo "ℹ️ No changes to publish; skipping commit."
-          popd
-          exit 0
-        fi
-
-        git commit -m "Publish artifacts ${TAG_NAME}"
-
-        # Retry push up to 3 times to handle transient non-fast-forward conflicts
-        PUSH_ATTEMPTS=0
-        until git push origin master; do
-          PUSH_ATTEMPTS=$((PUSH_ATTEMPTS + 1))
-          if [ "$PUSH_ATTEMPTS" -ge 3 ]; then
-            echo "::error::Maven artifact push failed after $PUSH_ATTEMPTS attempts (possible concurrent push). Re-run the sync step manually for tag $TAG_NAME."
-            exit 1
+        for attempt in 1 2 3; do
+          python3 tools/sync_maven_release.py "/tmp/maven-repo/$ARTIFACT_DIR" "$WORKDIR/$ARTIFACT_DIR" "$RELEASE_VERSION" "$SOURCE_COMMIT"
+          if [[ -z "$(git -C "$WORKDIR" status --porcelain -- "$ARTIFACT_DIR")" ]]; then
+            echo "ℹ️ Using the published Maven AARs for the GitHub Release."
+            for suffix in "" -min -16k -16k-min; do
+              variant="$RELEASE_VERSION$suffix"
+              cp "$WORKDIR/$ARTIFACT_DIR/$variant/gpuimage-plus-$variant.aar" /tmp/release-artifacts/
+            done
+            exit 0
           fi
-          echo "⚠️ Push attempt $PUSH_ATTEMPTS failed; retrying after fetch+rebase..."
-          git fetch origin master && git rebase origin/master
+
+          bash "$WORKDIR/genSites.sh"
+          git -C "$WORKDIR" add -- "$ARTIFACT_DIR"
+          git -C "$WORKDIR" commit -m "Publish artifacts ${TAG_NAME}"
+
+          if git -C "$WORKDIR" push origin HEAD:master; then
+            COMMIT_SHA=$(git -C "$WORKDIR" rev-parse HEAD)
+            COMMIT_URL="https://github.com/${ARTIFACT_REPO}/commit/${COMMIT_SHA}"
+            echo "✅ Artifacts pushed to Maven repo: $COMMIT_URL"
+            echo "artifact_commit_url=$COMMIT_URL" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if [[ "$attempt" -lt 3 ]]; then
+            echo "⚠️ Push attempt $attempt failed; checking the latest Maven state before retrying."
+            git -C "$WORKDIR" fetch origin master
+            git -C "$WORKDIR" switch --detach FETCH_HEAD
+          fi
         done
 
-        COMMIT_SHA=$(git rev-parse HEAD)
-        COMMIT_URL="https://github.com/${ARTIFACT_REPO}/commit/${COMMIT_SHA}"
-        echo "✅ Artifacts pushed to maven repo: $COMMIT_URL"
-        echo "artifact_commit_url=$COMMIT_URL" >> $GITHUB_OUTPUT
-        popd
+        echo "::error::Maven artifact push failed after 3 attempts for $TAG_NAME."
+        exit 1
+
+    - name: Generate artifact checksums
+      run: |
+        echo "🔐 Generating SHA256 checksums for all artifacts..."
+        cd /tmp/release-artifacts
+
+        # Generate checksums for all files
+        sha256sum *.apk *.aar > SHA256SUMS.txt 2>/dev/null || shasum -a 256 *.apk *.aar > SHA256SUMS.txt
+
+        echo "✅ Checksums generated:"
+        cat SHA256SUMS.txt
+
+        # Also create individual checksum files for convenience
+        for file in *.apk *.aar; do
+          if [ -f "$file" ]; then
+            sha256sum "$file" > "${file}.sha256" 2>/dev/null || shasum -a 256 "$file" > "${file}.sha256"
+          fi
+        done
+
+        echo "✅ Individual checksum files created"
     
     - name: Generate release notes
       id: release_notes

@@ -28,6 +28,8 @@ jobs:
     
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
+      with:
+        packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
 
     - name: Install NDK
       shell: bash
@@ -50,8 +52,10 @@ jobs:
           echo "Error: sdkmanager failed with status $SDKMANAGER_STATUS"
           exit "$SDKMANAGER_STATUS"
         fi
-        echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/${NDK_VERSION}" >> "$GITHUB_ENV"
-        echo "$ANDROID_SDK_ROOT/ndk/${NDK_VERSION}" >> "$GITHUB_PATH"
+        NDK_DIR="$ANDROID_SDK_ROOT/ndk/${NDK_VERSION}"
+        echo "ANDROID_NDK_HOME=$NDK_DIR" >> "$GITHUB_ENV"
+        echo "NDK=$NDK_DIR" >> "$GITHUB_ENV"
+        echo "$NDK_DIR" >> "$GITHUB_PATH"
 
     - name: Install build tools
       run: brew install ninja
@@ -81,6 +85,7 @@ jobs:
           echo "FFMPEG_FLAG=--enable-video-module" >> $GITHUB_ENV
         else
           echo "FFMPEG_FLAG=--disable-video-module" >> $GITHUB_ENV
+          echo "CGE_NO_VIDEO_MODULE=1" >> $GITHUB_ENV
         fi
         
         # Set page size flag
