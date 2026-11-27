@@ -10,6 +10,14 @@ Versions follow [Semantic Versioning](https://semver.org/). Entries are ordered 
 
 ---
 
+## [3.2.1] — 2026-11-27 (Maven only)
+
+- Published the four `3.2.0` variants with the verification resource required by
+  Google Play SDK Console. Existing Java classes and native libraries are
+  identical to `3.2.0`.
+
+---
+
 ## [3.2.0] — 2026-03-12
 
 - **feat:** Add `setZoomRatio(float)` API to `ICameraProvider`, `CameraXProvider`, and `Camera1Provider` (#566)

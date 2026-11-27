@@ -14,7 +14,13 @@ Automated release triggered by version tags (`v*.*.*`).
    git push && git push origin v3.1.1
    ```
 
-**Important**: Tag version must exactly match `versionName` in `build.gradle`.
+The tag's numeric version must match `versionName` in `build.gradle`. For a
+pre-release tag such as `v3.1.1-beta1`, keep `versionName` at `3.1.1`. The
+workflow uses the full tag version `3.1.1-beta1` for the Maven publication.
+
+Choose a version that is still unused in the Maven repository. For the release
+after the Maven-only `3.2.1` recorded in the [changelog](../CHANGELOG.md), use
+`v3.2.2` or a later unused tag.
 
 ## Automated Workflow
 
