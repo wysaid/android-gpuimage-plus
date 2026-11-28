@@ -22,6 +22,8 @@ jobs:
   validate-and-release:
     name: Validate Version and Build Release
     runs-on: ubuntu-latest
+    env:
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8"'
     
     permissions:
       contents: write  # Required for creating releases and uploading artifacts
@@ -335,6 +337,12 @@ jobs:
     - name: Validate AAR native ELF layouts
       run: |
         python3 tools/validate_aar_elf.py /tmp/release-artifacts/*.aar
+
+    - name: Package unsigned Maven Central bundle
+      if: steps.tag_version.outputs.is_prerelease == 'false'
+      env:
+        VERSION: ${{ steps.tag_version.outputs.version }}
+      run: python3 tools/central_bundle.py /tmp/maven-repo "$VERSION" "/tmp/maven-central-$VERSION-unsigned.zip"
     
     - name: Sync artifacts to maven repo
       if: steps.tag_version.outputs.is_publish == 'true'
@@ -398,6 +406,21 @@ jobs:
 
         echo "::error::Maven artifact push failed after 3 attempts for $TAG_NAME."
         exit 1
+
+    - name: Package published Maven Central bundle
+      if: steps.tag_version.outputs.is_publish == 'true' && steps.tag_version.outputs.is_prerelease == 'false'
+      env:
+        VERSION: ${{ steps.tag_version.outputs.version }}
+      run: python3 tools/central_bundle.py /tmp/maven-repo-target "$VERSION" "/tmp/maven-central-$VERSION-unsigned.zip"
+
+    - name: Upload unsigned Maven Central bundle
+      if: steps.tag_version.outputs.is_prerelease == 'false'
+      uses: actions/upload-artifact@v4
+      with:
+        name: maven-central-${{ steps.tag_version.outputs.version }}-unsigned
+        path: /tmp/maven-central-${{ steps.tag_version.outputs.version }}-unsigned.zip
+        if-no-files-found: error
+        retention-days: 7
 
     - name: Generate artifact checksums
       run: |
@@ -593,6 +616,11 @@ jobs:
         echo "- gpuimage-plus-$VERSION-min.aar (4KB, image-only)" >> $GITHUB_STEP_SUMMARY
         echo "- gpuimage-plus-$VERSION-16k-min.aar (16KB, image-only)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
+
+        if [ "${{ steps.tag_version.outputs.is_prerelease }}" = "false" ]; then
+          echo "**Maven Central bundle:** \`maven-central-$VERSION-unsigned\` (available for 7 days)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+        fi
         
         if [ "$IS_PUBLISH" = "true" ]; then
           echo "Review and publish the draft release: ${{ github.server_url }}/${{ github.repository }}/releases" >> $GITHUB_STEP_SUMMARY
